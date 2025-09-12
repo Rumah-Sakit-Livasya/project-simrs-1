@@ -46,6 +46,8 @@ use App\Http\Controllers\SIMRS\GrupSuplier\GrupSuplierController;
 use App\Http\Controllers\SIMRS\GrupTindakanMedisController;
 use App\Http\Controllers\SIMRS\HargaJual\MarginHargaJualController;
 use App\Http\Controllers\SIMRS\IGD\IGDController;
+use App\Http\Controllers\SIMRS\Icd10Controller;
+use App\Http\Controllers\SIMRS\Icd9Controller;
 use App\Http\Controllers\SIMRS\JadwalDokter\JadwalDokterController;
 use App\Http\Controllers\SIMRS\KategoriRadiologiController;
 use App\Http\Controllers\SIMRS\KelasRawatController;
@@ -86,6 +88,7 @@ use App\Http\Controllers\SIMRS\Setup\BiayaMateraiController;
 use App\Http\Controllers\SIMRS\Setup\TarifRegistrasiController;
 use App\Http\Controllers\SIMRS\TarifKelasRawatController;
 use App\Http\Controllers\SIMRS\TindakanMedisController;
+use App\Http\Controllers\SIMRS\WhoIcdController;
 use App\Http\Controllers\TarifOperasiController;
 use App\Http\Controllers\WarehouseBarangFarmasiController;
 use App\Http\Controllers\WarehouseBarangNonFarmasiController;
@@ -586,10 +589,10 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
         Route::get('/plasma-status/{id}', [PlasmaDisplayRawatJalanController::class, 'getStatus']);
 
         // Upload Dokumen
-        Route::get('/simrs/erm/dokumen/data/{registration}', [ERMController::class, 'getUploadedDocuments'])->name('erm.dokumen.data');
-        Route::post('/simrs/erm/dokumen/store', [ERMController::class, 'storeUploadedDocument'])->name('erm.dokumen.store');
-        Route::get('/simrs/erm/dokumen/view/{document}', [ERMController::class, 'viewUploadedDocument'])->name('erm.dokumen.view');
-        Route::delete('/simrs/erm/dokumen/destroy/{document}', [ERMController::class, 'destroyUploadedDocument'])->name('erm.dokumen.destroy');
+        Route::get('/dokumen/data/{registration}', [ERMController::class, 'getUploadedDocuments'])->name('erm.dokumen.data');
+        Route::post('/dokumen/store', [ERMController::class, 'storeUploadedDocument'])->name('erm.dokumen.store');
+        Route::get('/dokumen/view/{document}', [ERMController::class, 'viewUploadedDocument'])->name('erm.dokumen.view');
+        Route::delete('/dokumen/destroy/{document}', [ERMController::class, 'destroyUploadedDocument'])->name('erm.dokumen.destroy');
 
         // ==========================================================
         // DATA UMUM & PENDUKUNG
@@ -637,6 +640,10 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
         // ==========================================================
         Route::post('/dokter-resume-medis/store', [ResumeMedisRajalController::class, 'store'])->name('resume-medis.dokter-rajal.store');
         Route::get('/dokter-resume-medis-rajal/{type}/{registration_number}/get', [ResumeMedisRajalController::class, 'getResumeMedis'])->name('resume-medis.dokter-rajal.get');
+
+        // ICD
+        Route::get('/icd10/search', [Icd10Controller::class, 'search'])->name('api.local.icd10.search');
+        Route::get('/icd9/search', [Icd9Controller::class, 'search'])->name('api.local.icd9.search');
     });
 
     Route::prefix('master-data')->group(function () {

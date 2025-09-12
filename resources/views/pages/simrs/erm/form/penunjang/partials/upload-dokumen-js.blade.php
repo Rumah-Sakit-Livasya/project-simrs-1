@@ -1,6 +1,6 @@
 <script>
     $(document).ready(function() {
-         if (typeof Dropzone !== 'undefined') {
+        if (typeof Dropzone !== 'undefined') {
             Dropzone.autoDiscover = false;
         }
 
@@ -38,7 +38,7 @@
             );
         };
 
-// Inisialisasi Select2
+        // Inisialisasi Select2
         $('.select2').select2();
 
         // 1. Inisialisasi Datatables (TETAP SAMA)
@@ -46,14 +46,39 @@
             processing: true,
             serverSide: true,
             ajax: "{{ route('erm.dokumen.data', ['registration' => $registration->id]) }}",
-            columns: [
-                { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
-                { data: 'created_at', name: 'created_at' },
-                { data: 'category_name', name: 'category.name' },
-                { data: 'original_filename', name: 'original_filename' },
-                { data: 'description', name: 'description' },
-                { data: 'user_name', name: 'user.name' },
-                { data: 'action', name: 'action', orderable: false, searchable: false, className: 'text-center' }
+            columns: [{
+                    data: 'DT_RowIndex',
+                    name: 'DT_RowIndex',
+                    orderable: false,
+                    searchable: false
+                },
+                {
+                    data: 'created_at',
+                    name: 'created_at'
+                },
+                {
+                    data: 'category_name',
+                    name: 'category.name'
+                },
+                {
+                    data: 'original_filename',
+                    name: 'original_filename'
+                },
+                {
+                    data: 'description',
+                    name: 'description'
+                },
+                {
+                    data: 'user_name',
+                    name: 'user.name'
+                },
+                {
+                    data: 'action',
+                    name: 'action',
+                    orderable: false,
+                    searchable: false,
+                    className: 'text-center'
+                }
             ]
         });
 
@@ -84,7 +109,9 @@
             formData.append('file', fileInput.files[0]);
 
             // Disable tombol saat proses
-            btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Mengunggah...');
+            btn.prop('disabled', true).html(
+                '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Mengunggah...'
+                );
 
             $.ajax({
                 url: "{{ route('erm.dokumen.store') }}",
@@ -104,14 +131,16 @@
                     let errorMessage = "Gagal mengunggah file. Silakan coba lagi.";
                     // Menangani error validasi dari Laravel (Status 422)
                     if (xhr.status === 422 && xhr.responseJSON.errors) {
-                        errorMessage = Object.values(xhr.responseJSON.errors).flat().join('<br>');
+                        errorMessage = Object.values(xhr.responseJSON.errors).flat().join(
+                            '<br>');
                     } else if (xhr.responseJSON && xhr.responseJSON.message) {
                         errorMessage = xhr.responseJSON.message;
                     }
                     Swal.fire('Gagal!', errorMessage, 'error');
                 },
                 complete: function() {
-                    btn.prop('disabled', false).html('<i class="fas fa-paper-plane"></i> Unggah Sekarang');
+                    btn.prop('disabled', false).html(
+                        '<i class="fas fa-paper-plane"></i> Unggah Sekarang');
                 }
             });
         });
@@ -120,7 +149,7 @@
         $(document).on('click', '.btn-delete-document', function() {
             // ... (kode hapus tetap sama seperti di versi Dropzone sebelumnya) ...
             var docId = $(this).data('id');
-            var url = "{{ url('simrs/erm/dokumen/destroy') }}/" + docId;
+            var url = "{{ url('api/simrs/erm/dokumen/destroy') }}/" + docId;
 
             Swal.fire({
                 title: 'Anda Yakin?',
@@ -136,13 +165,17 @@
                     $.ajax({
                         url: url,
                         type: 'DELETE',
-                        data: { "_token": "{{ csrf_token() }}" },
+                        data: {
+                            "_token": "{{ csrf_token() }}"
+                        },
                         success: function(response) {
                             Swal.fire('Dihapus!', response.success, 'success');
                             table.ajax.reload();
                         },
                         error: function(xhr) {
-                            Swal.fire('Gagal!', 'Terjadi kesalahan saat menghapus file.', 'error');
+                            Swal.fire('Gagal!',
+                                'Terjadi kesalahan saat menghapus file.',
+                                'error');
                         }
                     });
                 }
