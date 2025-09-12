@@ -33,7 +33,7 @@ class ProsedurOperasi extends Model
 
     public function tindakanOperasi()
     {
-        return $this->belongsTo(TindakanOperasi::class, 'tindakan_id');
+        return $this->belongsTo(TindakanOperasi::class, 'tindakan_operasi_id');
     }
 
     // Tim Operasi Relations

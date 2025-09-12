@@ -11,10 +11,10 @@
             }
 
             /*
-                                                ====================================================================
-                                                CSS BARU UNTUK DETAILS CONTROL (Disamakan dengan Pertanggung Jawaban)
-                                                ====================================================================
-                                            */
+                                                    ====================================================================
+                                                    CSS BARU UNTUK DETAILS CONTROL (Disamakan dengan Pertanggung Jawaban)
+                                                    ====================================================================
+                                                */
             .details-control {
                 cursor: pointer;
                 text-align: center;

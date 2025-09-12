@@ -38,4 +38,9 @@ class TindakanOperasi extends Model
     {
         return $this->nama_operasi . ' (' . $this->kode_operasi . ')';
     }
+
+    public function tarif()
+    {
+        return $this->hasMany(TarifOperasi::class, 'tindakan_operasi_id');
+    }
 }

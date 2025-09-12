@@ -10,6 +10,10 @@ use App\Http\Controllers\Keuangan\GroupChartOfAccountController;
 use App\Http\Controllers\Keuangan\HutangController;
 use App\Http\Controllers\Keuangan\KeuanganController;
 use App\Http\Controllers\Keuangan\KonfirmasiAsuransiController;
+use App\Http\Controllers\Keuangan\LaporanOkController;
+use App\Http\Controllers\Keuangan\LaporanTindakanPasienController;
+use App\Http\Controllers\Keuangan\LaporanUmumController;
+use App\Http\Controllers\Keuangan\LaporanVkController;
 use App\Http\Controllers\Keuangan\PiutangController;
 use App\Http\Controllers\Keuangan\TransaksiController;
 use App\Http\Controllers\Keuangan\LPembayaranAsuransiController;
@@ -171,6 +175,39 @@ Route::group(['middleware' => ['auth']], function () {
             Route::put('/transaksi-rutin/{id}', [TransaksiRutinController::class, 'update'])->name('transaksi-rutin.update');
             Route::delete('/transaksi-rutin', [TransaksiRutinController::class, 'destroy'])->name('transaksi-rutin.destroy');
         });
+
+
+        // =======================
+        // Laporan Pendukung
+        // =======================
+        Route::prefix('laporan-pendukung')->group(function () {
+
+            // Laporan OK D
+            Route::get('/ok', [LaporanOkController::class, 'index'])
+                ->name('laporan-pendukung.ok.index')
+                ->middleware('can:view laporan ok ');
+            Route::get('/ok/export', [LaporanOkController::class, 'export'])
+                ->name('laporan-pendukung.ok.export')
+                ->middleware('can:view laporan ok ');
+            Route::get('/ok/print', [LaporanOkController::class, 'print'])
+                ->name('laporan-pendukung.ok.print')
+                ->middleware('can:view laporan ok ');
+            // Laporan VK
+            Route::get('/vk', [LaporanVkController::class, 'index'])
+                ->name('laporan-pendukung.vk.index')
+                ->middleware('can:view laporan vk');
+
+            // Laporan (umum)
+            Route::get('/', [LaporanUmumController::class, 'index'])
+                ->name('laporan-pendukung.index')
+                ->middleware('can:view laporan');
+
+            // Laporan Tindakan Pasien
+            Route::get('/tindakan-pasien', [LaporanTindakanPasienController::class, 'index'])
+                ->name('laporan-pendukung.tindakan-pasien.index')
+                ->middleware('can:view laporan tindakan pasien');
+        });
+
 
 
         Route::prefix('konfirmasi-asuransi')->middleware(['can:view account receivable konfirmasi asuransi'])->group(function () {
