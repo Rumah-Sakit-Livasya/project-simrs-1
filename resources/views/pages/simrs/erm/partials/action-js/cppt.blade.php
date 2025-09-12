@@ -263,7 +263,7 @@
             const cpptId = $(this).data('id');
             if (!cpptId) return;
 
-            $.get(`{{ url('cppt') }}/${cpptId}/edit`)
+            $.get(`{{ url('api/simrs/erm/cppt') }}/${cpptId}/edit`)
                 .done(function(data) {
                     // Hapus method spoofing lama jika ada
                     mainForm.find('input[name="_method"]').remove();

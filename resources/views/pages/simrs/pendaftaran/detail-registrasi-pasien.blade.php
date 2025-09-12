@@ -176,6 +176,15 @@
                                             </div>
                                         </div>
 
+                                        <div class="mt-4 d-flex align-items-center">
+                                            <a href="{{ route('edit.pendaftaran.pasien', $patient->id) }}"
+                                                class="btn btn-sm btn-outline-primary d-flex align-items-center"
+                                                title="Edit Data Pasien">
+                                                <i class="fas fa-edit mr-2"></i>
+                                                Edit Data Pasien
+                                            </a>
+                                        </div>
+
                                         <div class="tab-pane fade" id="kunjungan" role="tabpanel"
                                             aria-labelledby="kunjungan">
                                             <div class="card-body tab-content">
