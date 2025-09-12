@@ -23,6 +23,7 @@ use App\Models\SIMRS\Doctor;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -524,5 +525,69 @@ class EmployeeController extends Controller
         $employee->save();
 
         return response()->json(['success' => true]);
+    }
+
+    /**
+     * Menyimpan tanda tangan pegawai.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function storeSignature(Request $request)
+    {
+        $request->validate([
+            'employee_id' => 'required|exists:employees,id',
+            'signature' => 'required',
+        ]);
+
+        try {
+            $employee = Employee::findOrFail($request->employee_id);
+
+            // Hapus file ttd lama jika ada
+            if ($employee->ttd && Storage::disk('public')->exists($employee->ttd)) {
+                Storage::disk('public')->delete($employee->ttd);
+            }
+
+            // Proses data Base64
+            $signatureData = $request->signature;
+            // Menghapus prefix data:image/png;base64,
+            list($type, $data) = explode(';', $signatureData);
+            list(, $data)      = explode(',', $data);
+            $decodedSignature = base64_decode($data);
+
+            // Buat nama file yang unik
+            $fileName = 'signatures/ttd_' . $employee->id . '_' . time() . '.png';
+
+            // Simpan file ke storage/app/public/signatures
+            Storage::disk('public')->put($fileName, $decodedSignature);
+
+            // Update kolom 'ttd' di database
+            $employee->ttd = $fileName;
+            $employee->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Tanda tangan berhasil disimpan.',
+                'path' => Storage::url($fileName) // Mengembalikan URL publik dari file
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menyimpan tanda tangan: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Menampilkan halaman popup untuk tanda tangan.
+     *
+     * @param  \App\Models\Employee  $employee
+     * @return \Illuminate\View\View
+     */
+    public function showSignaturePadPage(Employee $employee)
+    {
+        // Method ini akan me-render view yang diminta
+        // dan mengirimkan data pegawai yang bersangkutan
+        return view('pages.simrs.erm.partials.signature-pad', compact('employee'));
     }
 }

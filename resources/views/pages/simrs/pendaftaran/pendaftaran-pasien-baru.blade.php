@@ -33,7 +33,7 @@
                                                 </div>
                                                 <div class="col-sm-8">
                                                     <input type="text"
-                                                        class="@error('name') is-invalid @enderror form-control"
+                                                        class="@error('name') is-invalid @enderror form-control" required
                                                         id="name" name="name" placeholder="Nama Lengkap Pasien"
                                                         value="{{ old('name') }}">
                                                     @error('name')
@@ -70,7 +70,7 @@
                                                 </div>
                                                 <div class="col-sm-8">
                                                     <select class="@error('title') is-invalid @enderror form-control w-100"
-                                                        id="title" name="title">
+                                                        required id="title" name="title">
                                                         <option value="" disabled selected></option>
                                                         <option value="Tn."
                                                             {{ old('title') === 'Tn.' ? 'selected' : '' }}>
@@ -115,7 +115,7 @@
                                                     <div class="custom-control custom-radio d-inline mr-2">
                                                         <input type="radio"
                                                             class="@error('gender') is-invalid @enderror custom-control-input"
-                                                            value="Laki-laki" id="laki-laki" name="gender"
+                                                            required value="Laki-laki" id="laki-laki" name="gender"
                                                             {{ old('gender') == 'Laki-laki' ? 'checked' : '' }}>
                                                         <label class="custom-control-label"
                                                             for="laki-laki">Laki-Laki</label>
@@ -146,7 +146,7 @@
                                                             <input type="text"
                                                                 class="@error('place') is-invalid @enderror form-control"
                                                                 id="place" placeholder="Tempat" name="place"
-                                                                value="{{ old('place') }}">
+                                                                required value="{{ old('place') }}">
                                                             @error('place')
                                                                 <p class="invalid-feedback">{{ $message }}</p>
                                                             @enderror
@@ -156,8 +156,19 @@
                                                                 <input type="text"
                                                                     class="form-control @error('date_of_birth') is-invalid @enderror"
                                                                     placeholder="dd-mm-yyyy" id="date_of_birth"
-                                                                    name="date_of_birth"
-                                                                    value="{{ old('date_of_birth') }}">
+                                                                    name="date_of_birth" required
+                                                                    value="{{ old('date_of_birth') }}" maxlength="10"
+                                                                    autocomplete="off"
+                                                                    oninput="
+                                                                        let v = this.value.replace(/[^0-9]/g, '').slice(0,8);
+                                                                        if(v.length >= 5){
+                                                                            this.value = v.slice(0,2)+'-'+v.slice(2,4)+'-'+v.slice(4,8);
+                                                                        }else if(v.length >= 3){
+                                                                            this.value = v.slice(0,2)+'-'+v.slice(2,4)+(v.length > 4 ? '-'+v.slice(4,8) : '');
+                                                                        }else{
+                                                                            this.value = v;
+                                                                        }
+                                                                    ">
                                                                 <div class="input-group-append">
                                                                     <span class="input-group-text fs-xl">
                                                                         <i class="fal fa-calendar-alt"></i>
@@ -183,7 +194,7 @@
                                                 <div class="col-sm-8">
                                                     <select
                                                         class="@error('religion') is-invalid @enderror form-control w-100"
-                                                        id="religion" name="religion">
+                                                        required id="religion" name="religion">
                                                         <option value="" disabled selected></option>
                                                         <option value="Islam"
                                                             {{ old('religion') === 'Islam' ? 'selected' : '' }}>
@@ -328,7 +339,7 @@
                                                 <div class="col-sm-8">
                                                     <input type="text"
                                                         class="@error('language') is-invalid @enderror form-control"
-                                                        id="language" placeholder="Pasien Menggunakan Bahasa"
+                                                        id="language" placeholder="Pasien Menggunakan Bahasa" required
                                                         value="{{ old('language', 'Indonesia') }}" name="language">
                                                     @error('language')
                                                         <p class="invalid-feedback">{{ $message }}</p>
@@ -383,7 +394,7 @@
                                                     <input type="text"
                                                         class="@error('address') is-invalid @enderror form-control"
                                                         id="address" placeholder="Alamat Pasien" name="address"
-                                                        value="{{ old('address') }}">
+                                                        required value="{{ old('address') }}">
                                                     @error('address')
                                                         <p class="invalid-feedback">{{ $message }}</p>
                                                     @enderror
@@ -400,7 +411,7 @@
                                                     {{-- Diisi oleh AJAX --}}
                                                     <select disabled
                                                         class="@error('province') is-invalid @enderror form-control w-100"
-                                                        id="province" name="province">
+                                                        required id="province" name="province">
                                                         <option value="" selected></option>
                                                     </select>
                                                     @error('province')
@@ -420,7 +431,7 @@
                                                     {{-- Diisi oleh AJAX --}}
                                                     <select disabled
                                                         class="@error('regency') is-invalid @enderror form-control w-100"
-                                                        id="regency" name="regency">
+                                                        required id="regency" name="regency">
                                                         <option value="" disabled selected></option>
                                                     </select>
                                                     @error('regency')
@@ -480,7 +491,7 @@
                                                     <input type="text"
                                                         class="@error('mobile_phone_number') is-invalid @enderror form-control"
                                                         id="mobile_phone_number" placeholder="No. HP / Telp Pasien"
-                                                        name="mobile_phone_number"
+                                                        name="mobile_phone_number" required
                                                         value="{{ old('mobile_phone_number') }}">
                                                     @error('mobile_phone_number')
                                                         <p class="invalid-feedback">{{ $message }}</p>
@@ -517,7 +528,7 @@
 
                                                     <select
                                                         class="@error('last_education') is-invalid @enderror form-control w-100"
-                                                        id="last_education" name="last_education">
+                                                        required id="last_education" name="last_education">
                                                         <option value="" disabled selected></option>
                                                         <option value="Tidak Sekolah"
                                                             {{ old('last_education') === 'Tidak Sekolah' ? 'selected' : '' }}>
@@ -565,7 +576,7 @@
                                                 <div class="col-sm-8">
                                                     <select
                                                         class="@error('ethnic') is-invalid @enderror form-control w-100"
-                                                        id="ethnic" name="ethnic">
+                                                        required id="ethnic" name="ethnic">
                                                         <option value="" selected disabled></option>
                                                         @foreach ($ethnics as $ethnic)
                                                             {{-- PERBAIKAN: sintaks 'selected' dipisah dari 'value' --}}
@@ -591,7 +602,7 @@
                                                 </div>
                                                 <div class="col-sm-8">
                                                     <select class="@error('job') is-invalid @enderror form-control w-100"
-                                                        id="job" name="job">
+                                                        required id="job" name="job">
                                                         <option value="" disabled selected></option>
                                                         <option value="Belum Bekerja"
                                                             {{ old('job') === 'Belum Bekerja' ? 'selected' : '' }}>

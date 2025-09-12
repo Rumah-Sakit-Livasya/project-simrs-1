@@ -38,7 +38,7 @@
                                                     <input type="text"
                                                         class="@error('name') is-invalid @enderror form-control"
                                                         id="name" name="name" placeholder="Nama Lengkap Pasien"
-                                                        value="{{ old('name', $patient->name) }}">
+                                                        required value="{{ old('name', $patient->name) }}">
                                                     @error('name')
                                                         <p class="invalid-feedback">{{ $message }}</p>
                                                     @enderror
@@ -71,7 +71,7 @@
                                                 </div>
                                                 <div class="col-sm-8">
                                                     <select class="@error('title') is-invalid @enderror form-control w-100"
-                                                        id="title" name="title">
+                                                        required id="title" name="title">
                                                         <option value="" disabled></option>
                                                         <option value="Tn."
                                                             {{ old('title', $patient->title) === 'Tn.' ? 'selected' : '' }}>
@@ -113,7 +113,7 @@
                                                 </div>
                                                 <div class="col-sm-8 pl-3">
                                                     <div class="custom-control custom-radio d-inline mr-2">
-                                                        <input type="radio"
+                                                        <input type="radio" required
                                                             class="@error('gender') is-invalid @enderror custom-control-input"
                                                             value="Laki-laki" id="laki-laki" name="gender"
                                                             {{ old('gender', $patient->gender) == 'Laki-laki' ? 'checked' : '' }}>
@@ -144,7 +144,8 @@
                                                         <div class="col-lg-6">
                                                             <input type="text"
                                                                 class="@error('place') is-invalid @enderror form-control"
-                                                                id="place" placeholder="Tempat" name="place"
+                                                                required id="place" placeholder="Tempat"
+                                                                name="place"
                                                                 value="{{ old('place', $patient->place) }}">
                                                             @error('place')
                                                                 <p class="invalid-feedback">{{ $message }}</p>
@@ -155,8 +156,19 @@
                                                                 <input type="text"
                                                                     class="form-control @error('date_of_birth') is-invalid @enderror"
                                                                     placeholder="dd-mm-yyyy" id="date_of_birth"
-                                                                    name="date_of_birth"
-                                                                    value="{{ old('date_of_birth') }}">
+                                                                    name="date_of_birth" required
+                                                                    value="{{ old('date_of_birth') }}" maxlength="10"
+                                                                    autocomplete="off"
+                                                                    oninput="
+                                                                        let v = this.value.replace(/[^0-9]/g, '').slice(0,8);
+                                                                        if(v.length >= 5){
+                                                                            this.value = v.slice(0,2)+'-'+v.slice(2,4)+'-'+v.slice(4,8);
+                                                                        }else if(v.length >= 3){
+                                                                            this.value = v.slice(0,2)+'-'+v.slice(2,4)+(v.length > 4 ? '-'+v.slice(4,8) : '');
+                                                                        }else{
+                                                                            this.value = v;
+                                                                        }
+                                                                    ">
                                                                 <div class="input-group-append">
                                                                     <span class="input-group-text fs-xl">
                                                                         <i class="fal fa-calendar-alt"></i>
@@ -181,7 +193,7 @@
                                                 <div class="col-sm-8">
                                                     <select
                                                         class="@error('religion') is-invalid @enderror form-control w-100"
-                                                        id="religion" name="religion">
+                                                        required id="religion" name="religion">
                                                         <option value="" disabled></option>
                                                         <option value="Islam"
                                                             {{ old('religion', $patient->religion) === 'Islam' ? 'selected' : '' }}>
@@ -322,7 +334,7 @@
                                                 <div class="col-sm-8">
                                                     <input type="text"
                                                         class="@error('language') is-invalid @enderror form-control"
-                                                        id="language" placeholder="Pasien Menggunakan Bahasa"
+                                                        id="language" placeholder="Pasien Menggunakan Bahasa" required
                                                         value="{{ old('language', $patient->language ?? 'Indonesia') }}"
                                                         name="language">
                                                     @error('language')
@@ -339,7 +351,7 @@
                                                 <div class="col-sm-8">
                                                     <input type="text"
                                                         class="@error('citizenship') is-invalid @enderror form-control"
-                                                        id="citizenship" placeholder="Kewarganegaraan Pasien"
+                                                        id="citizenship" placeholder="Kewarganegaraan Pasien" required
                                                         value="{{ old('citizenship', $patient->citizenship ?? 'Indonesia') }}"
                                                         name="citizenship">
                                                     @error('citizenship')
@@ -353,12 +365,12 @@
                                         <div class="form-group">
                                             <div class="row align-items-center">
                                                 <div class="col-sm-4" style="text-align: right">
-                                                    <label for="id_card" class="form-label">No. KTP/SIM/Paspor</label>
+                                                    <label for="id_card" class="form-label">No. KTP/SIM/Paspor *</label>
                                                 </div>
                                                 <div class="col-sm-8">
                                                     <input type="text"
                                                         class="@error('id_card') is-invalid @enderror form-control"
-                                                        id="id_card" placeholder="No. KTP/SIM/Paspor Pasien"
+                                                        id="id_card" placeholder="No. KTP/SIM/Paspor Pasien" required
                                                         name="id_card" value="{{ old('id_card', $patient->id_card) }}">
                                                     @error('id_card')
                                                         <p class="invalid-feedback">{{ $message }}</p>
@@ -375,7 +387,7 @@
                                                     <input type="text"
                                                         class="@error('address') is-invalid @enderror form-control"
                                                         id="address" placeholder="Alamat Pasien" name="address"
-                                                        value="{{ old('address', $patient->address) }}">
+                                                        required value="{{ old('address', $patient->address) }}">
                                                     @error('address')
                                                         <p class="invalid-feedback">{{ $message }}</p>
                                                     @enderror
@@ -468,7 +480,7 @@
                                                     <input type="text"
                                                         class="@error('mobile_phone_number') is-invalid @enderror form-control"
                                                         id="mobile_phone_number" placeholder="No. HP / Telp Pasien"
-                                                        name="mobile_phone_number"
+                                                        required name="mobile_phone_number"
                                                         value="{{ old('mobile_phone_number', $patient->mobile_phone_number) }}">
                                                     @error('mobile_phone_number')
                                                         <p class="invalid-feedback">{{ $message }}</p>
@@ -503,7 +515,7 @@
 
                                                     <select
                                                         class="@error('last_education') is-invalid @enderror form-control w-100"
-                                                        id="last_education" name="last_education">
+                                                        required id="last_education" name="last_education">
                                                         <option value="" disabled selected></option>
                                                         <option value="Tidak Sekolah"
                                                             {{ old('last_education', $patient->last_education) === 'Tidak Sekolah' ? 'selected' : '' }}>
@@ -550,7 +562,7 @@
                                                 <div class="col-sm-8">
                                                     <select
                                                         class="@error('ethnic') is-invalid @enderror form-control w-100"
-                                                        id="ethnic" name="ethnic">
+                                                        required id="ethnic" name="ethnic">
                                                         <option value="" selected disabled></option>
                                                         @foreach ($ethnics as $ethnic)
                                                             <option value="{{ $ethnic->id }}"
@@ -573,7 +585,7 @@
                                                 </div>
                                                 <div class="col-sm-8">
                                                     <select class="@error('job') is-invalid @enderror form-control w-100"
-                                                        id="job" name="job">
+                                                        required id="job" name="job">
                                                         <option value="" disabled selected></option>
                                                         <option value="Belum Bekerja"
                                                             {{ old('job', $patient->job) === 'Belum Bekerja' ? 'selected' : '' }}>

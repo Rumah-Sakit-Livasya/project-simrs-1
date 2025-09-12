@@ -252,8 +252,8 @@ Pemeriksaan Penunjang: {{ $assesment->pemeriksaan_penunjang ?? '' }}
                                                                         </div>
                                                                         <div class="card-body p-0">
                                                                             <textarea class="form-control border-0 rounded-0" id="assesment" name="assesment" rows="4"
-                                                                                placeholder="Diagnosa Keperawatan">Diagnosa Kerja: {{ $assesment?->awal_diagnosa_kerja ?? '' }}
-Diagnosa Banding: {{ $assesment?->awal_diagnosa_banding ?? '' }}</textarea>
+                                                                                placeholder="Diagnosa Keperawatan">Diagnosa Kerja: {{ $assesment?->diagnosa_kerja ?? '' }}
+Diagnosa Banding: {{ $assesment?->diagnosa_banding ?? '' }}</textarea>
                                                                         </div>
                                                                     </div>
                                                                 </div>
@@ -272,7 +272,7 @@ Diagnosa Banding: {{ $assesment?->awal_diagnosa_banding ?? '' }}</textarea>
                                                                         </div>
                                                                         <div class="card-body p-0">
                                                                             <textarea class="form-control border-0 rounded-0" id="planning" name="planning" rows="4"
-                                                                                placeholder="Rencana Tindak Lanjut">Terapi / Tindakan : {{ $assesment?->awal_terapi_tindakan ?? '' }}</textarea>
+                                                                                placeholder="Rencana Tindak Lanjut">Terapi / Tindakan : {{ $assesment?->terapi_tindakan ?? '' }}</textarea>
                                                                         </div>
                                                                     </div>
                                                                 </div>
