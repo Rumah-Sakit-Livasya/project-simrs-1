@@ -30,8 +30,8 @@ class TarifOperasi extends Model
     /**
      * Get the persalinan that owns the tarif.
      */
-    public function operasi()
+    public function tindakanOperasi()
     {
-        return $this->belongsTo(TindakanOperasi::class, 'operasi_id');
+        return $this->belongsTo(TindakanOperasi::class, 'tindakan_operasi_id');
     }
 }

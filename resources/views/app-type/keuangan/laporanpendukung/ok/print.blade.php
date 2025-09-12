@@ -1,0 +1,408 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+    <title>Print Laporan OK</title>
+    <meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
+    <style>
+        /* CSS Lengkap dari file print.css Anda ditempelkan di sini */
+        @charset "utf-8";
+
+        html,
+        body,
+        div,
+        span,
+        applet,
+        object,
+        iframe,
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6,
+        p,
+        blockquote,
+        pre,
+        a,
+        abbr,
+        acronym,
+        address,
+        big,
+        cite,
+        code,
+        del,
+        dfn,
+        em,
+        font,
+        img,
+        ins,
+        kbd,
+        q,
+        s,
+        samp,
+        small,
+        strike,
+        strong,
+        sub,
+        sup,
+        tt,
+        var,
+        b,
+        u,
+        i,
+        center,
+        dl,
+        dt,
+        dd,
+        ol,
+        ul,
+        li,
+        fieldset,
+        form,
+        label,
+        legend,
+        table,
+        caption,
+        tfoot,
+        thead,
+        th {
+            margin: 0;
+            padding: 0;
+            border: 0;
+            outline: 0;
+            font-size: 100%;
+            vertical-align: baseline;
+            background: transparent;
+        }
+
+        body {
+            line-height: 1;
+        }
+
+        ol,
+        ul {
+            list-style: none;
+        }
+
+        blockquote,
+        q {
+            quotes: none;
+        }
+
+        blockquote:before,
+        blockquote:after,
+        q:before,
+        q:after {
+            content: '';
+            content: none;
+        }
+
+        :focus {
+            outline: 0;
+        }
+
+        ins {
+            text-decoration: none;
+        }
+
+        del {
+            text-decoration: line-through;
+        }
+
+        table {
+            border-collapse: collapse;
+            border-spacing: 0;
+        }
+
+        @font-face {
+            font-family: 'Open Sans';
+            src: url('opensans.ttf');
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Open Sans', Arial, Helvetica, sans-serif;
+            font-size: .75em;
+        }
+
+        h1,
+        h2,
+        h3 {
+            margin: 5px 0;
+            padding: 5px 0;
+            font-weight: normal;
+            clear: both;
+            overflow: hidden;
+        }
+
+        h1.bdr,
+        h2.bdr,
+        h3.bdr {
+            border-bottom: 2px solid #CCCCCC;
+        }
+
+        h1 span,
+        h2 span,
+        h3 span {
+            display: block;
+            margin: 5px 0;
+        }
+
+        h1 span.rgt,
+        h2 span.rgt,
+        h3 span.rgt {
+            border: 1px solid #CCCCCC;
+            float: right;
+        }
+
+        h1 span.rgt span,
+        h2 span.rgt span,
+        h3 span.rgt span {
+            font-size: 1em !important;
+            display: inline-block;
+            margin: 0;
+            padding: 8px 10px;
+        }
+
+        h1 span.rgt span.til,
+        h2 span.rgt span.til,
+        h3 span.rgt span.til {
+            background: #CCCCCC;
+        }
+
+        h1.ctr,
+        h2.ctr,
+        h3.ctr {
+            text-align: center;
+        }
+
+        h1.nul,
+        h2.nul,
+        h3.nul {
+            padding: 0;
+            margin: 0;
+        }
+
+        h1 {
+            font-size: 3em;
+        }
+
+        h1 span {
+            font-size: .4em;
+        }
+
+        h2 {
+            font-size: 2em;
+        }
+
+        h2 span {
+            font-size: .5em;
+        }
+
+        h3 {
+            font-size: 1.5em;
+        }
+
+        h3 span {
+            font-size: .6em;
+        }
+
+        #functions {
+            background: #EDEDED;
+            border-bottom: 1px solid #CCCCCC;
+            box-shadow: 0 0 2px rgba(0, 0, 0, .5);
+            padding: 10px 5px;
+            position: relative;
+            overflow: hidden;
+            top: 0;
+            width: 100%;
+        }
+
+        #functions ul li {
+            display: inline-block;
+            margin: 2px 5px 2px 0;
+        }
+
+        #functions ul li a {
+            background: #FFFFFF;
+            text-decoration: none;
+            padding: 5px 10px;
+            border: 1px solid #CCCCCC;
+            box-shadow: 0 0 2px rgba(0, 0, 0, .2);
+            color: #000000;
+        }
+
+        #previews {
+            margin: 20px;
+            padding: 0;
+            overflow: hidden;
+            clear: both;
+        }
+
+        #previews.bdr {
+            border: 1px solid #CCCCCC;
+        }
+
+        table {
+            margin: 0;
+            padding: 0;
+            border-collapse: collapse;
+        }
+
+        table table {
+            font-size: 1em !important;
+        }
+
+        table.bdr4 {
+            border: none !important;
+        }
+
+        table.bdr4 tbody {
+            border-top: 1px solid #CCCCCC !important;
+        }
+
+        table.bdr4 tr:last-child {
+            border-bottom: 1px solid #CCCCCC !important;
+        }
+
+        table.bdr4 th {
+            border: none !important;
+            border: 1px solid #CCCCCC !important;
+        }
+
+        table.bdr4 th:first-child {
+            border-left: none !important;
+        }
+
+        table.bdr4 th:last-child {
+            border-right: none !important;
+        }
+
+        table.bdr4 td {
+            border: none !important;
+            border-right: 1px solid #CCCCCC !important;
+            border-bottom: 1px solid #CCCCCC !important;
+        }
+
+        table.bdr4 td:first-child {
+            border-left: none !important;
+        }
+
+        table.bdr4 td:last-child {
+            border-right: none !important;
+        }
+
+        table.pad th {
+            padding: 8px;
+        }
+
+        table.pad td {
+            padding: 4px;
+        }
+
+        th {
+            background: #D9D9D9;
+            padding: 0;
+            vertical-align: middle;
+        }
+
+        td {
+            padding: 0;
+            vertical-align: text-top;
+            line-height: 1.2em;
+        }
+
+        td span {
+            color: #414141;
+            display: block;
+            font-size: .8em;
+        }
+
+        @media print {
+            #functions {
+                display: none;
+            }
+
+            #previews {
+                margin: 0;
+                /* Hapus margin saat print */
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="functions">
+        <ul>
+            <li><a href="#" onClick="window.print();">Print</a></li>
+            <li><a href="#" onClick="window.close();">Close</a></li>
+        </ul>
+    </div>
+
+    <div id="previews">
+        <h2 class="bdr ctr">
+            LAPORAN OK
+        </h2>
+
+        <table width="100%" class="bdr4 pad">
+            <tr>
+                <td style="width: 15%; font-weight: bold;">PERIODE TGL. ORDER :</td>
+                <td>{{ $tanggal_awal }} s.d. {{ $tanggal_akhir }}</td>
+            </tr>
+            <tr>
+                <td style="font-weight: bold;">KELAS RAWAT :</td>
+                <td>{{ $kelas_rawat_name }}</td>
+            </tr>
+        </table>
+
+        <table width="100%" class="bdr4 pad">
+            <thead>
+                <tr>
+                    <th width="10%">TANGGAL</th>
+                    <th width="5%">NO RM</th>
+                    <th>NAMA PASIEN</th>
+                    <th width="10%">KELAS</th>
+                    <th width="20%">TINDAKAN</th>
+                    <th width="15%">KRU OK</th>
+                    <th width="7%">HARGA</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($printData as $procedure)
+                    @foreach ($procedure->crew as $crewMember)
+                        <tr>
+                            @if ($loop->first)
+                                {{-- Baris pertama untuk setiap operasi diisi lengkap --}}
+                                <td align="center">{{ $procedure->tgl_operasi }}</td>
+                                <td align="center">{{ $procedure->no_rm }}</td>
+                                <td>{{ $procedure->nama_pasien }}</td>
+                                <td align="center">{{ $procedure->kelas }}</td>
+                                <td>{{ $procedure->tindakan }}</td>
+                            @else
+                                {{-- Baris selanjutnya untuk kru yang sama, kolom depan dikosongkan --}}
+                                <td align="center"></td>
+                                <td align="center"></td>
+                                <td></td>
+                                <td align="center"></td>
+                                <td></td>
+                            @endif
+
+                            {{-- Kolom kru dan harga diisi untuk setiap baris --}}
+                            <td>{{ $crewMember['name'] }}</td>
+                            <td align="right">{{ number_format($crewMember['price'], 0, ',', '.') }}</td>
+                        </tr>
+                    @endforeach
+                @empty
+                    <tr>
+                        <td colspan="7" align="center" style="padding: 20px;">Tidak ada data untuk periode yang
+                            dipilih.</td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+</body>
+
+</html>
