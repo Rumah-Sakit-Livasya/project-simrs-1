@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\SIMRS\Persalinan;
 
 use App\Http\Controllers\Controller;
+use App\Models\SIMRS\Bilingan;
+use App\Models\SIMRS\BilinganTagihanPasien;
 use App\Models\SIMRS\Doctor;
 use App\Models\SIMRS\Persalinan\OrderPersalinan;
 use App\Models\SIMRS\Persalinan\Persalinan;
@@ -10,11 +12,14 @@ use App\Models\SIMRS\Persalinan\KategoriPersalinan;
 use App\Models\SIMRS\Persalinan\TipePersalinan;
 use App\Models\SIMRS\KelasRawat;
 use App\Models\SIMRS\Penjamin;
+use App\Models\SIMRS\Persalinan\TarifPersalinan;
 use App\Models\SIMRS\Registration;
+use App\Models\SIMRS\TagihanPasien;
 use Carbon\Carbon;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -85,11 +90,58 @@ class PersalinanController extends Controller
     /**
      * Store a newly created resource in storage
      */
+    // public function store(Request $request)
+    // {
+    //     try {
+    //         // Validasi ini sudah benar untuk logika baru
+    //         $request->validate([
+    //             'registration_id' => 'required|exists:registrations,id',
+    //             'tgl_persalinan' => 'required|date',
+    //             'kelas_rawat_id' => 'required|exists:kelas_rawat,id',
+    //             'kategori_id' => 'required|exists:kategori_persalinan,id',
+    //             'tipe_penggunaan_id' => 'required|exists:tipe_persalinan,id',
+    //             'dokter_bidan_operator_id' => 'required|exists:doctors,id',
+    //             'melahirkan_bayi' => 'required|boolean',
+    //             'tindakan_id' => 'required|exists:persalinan,id', // Kunci perbaikan ada di sini
+    //         ]);
+
+    //         DB::transaction(function () use ($request) {
+    //             $orderId = $request->input('order_vk_id');
+
+    //             $orderData = [
+    //                 'registration_id' => $request->registration_id,
+    //                 'tgl_persalinan' => $request->tgl_persalinan,
+    //                 'kelas_rawat_id' => $request->kelas_rawat_id,
+    //                 'kategori_id' => $request->kategori_id,
+    //                 'tipe_penggunaan_id' => $request->tipe_penggunaan_id,
+    //                 'dokter_bidan_operator_id' => $request->dokter_bidan_operator_id,
+    //                 'dokter_resusitator_id' => $request->dokter_resusitator_id,
+    //                 'dokter_anestesi_id' => $request->dokter_anestesi_id,
+    //                 'dokter_umum_id' => $request->dokter_umum_id,
+    //                 'asisten_operator_id' => $request->asisten_operator_id,
+    //                 'asisten_anestesi_id' => $request->asisten_anestesi_id,
+    //                 'melahirkan_bayi' => $request->melahirkan_bayi,
+    //                 'user_entry_id' => Auth::id(),
+    //                 // [PERBAIKAN] Menyimpan ID langsung ke kolom persalinan_id
+    //                 'persalinan_id' => $request->tindakan_id,
+    //             ];
+
+    //             OrderPersalinan::updateOrCreate(['id' => $orderId], $orderData);
+    //         });
+
+    //         return response()->json(['message' => 'Order persalinan berhasil disimpan']);
+    //     } catch (ValidationException $e) {
+    //         return response()->json(['message' => 'Data tidak valid.', 'errors' => $e->errors()], 422);
+    //     } catch (\Exception $e) {
+    //         Log::error('Error in store: ' . $e->getMessage());
+    //         return response()->json(['message' => 'Terjadi kesalahan server.'], 500);
+    //     }
+    // }
+
     public function store(Request $request)
     {
         try {
-            // Validasi ini sudah benar untuk logika baru
-            $request->validate([
+            $validated = $request->validate([
                 'registration_id' => 'required|exists:registrations,id',
                 'tgl_persalinan' => 'required|date',
                 'kelas_rawat_id' => 'required|exists:kelas_rawat,id',
@@ -97,10 +149,11 @@ class PersalinanController extends Controller
                 'tipe_penggunaan_id' => 'required|exists:tipe_persalinan,id',
                 'dokter_bidan_operator_id' => 'required|exists:doctors,id',
                 'melahirkan_bayi' => 'required|boolean',
-                'tindakan_id' => 'required|exists:persalinan,id', // Kunci perbaikan ada di sini
+                'tindakan_id' => 'required|exists:persalinan,id',
             ]);
 
-            DB::transaction(function () use ($request) {
+            $order = null;
+            DB::transaction(function () use ($request, &$order) {
                 $orderId = $request->input('order_vk_id');
 
                 $orderData = [
@@ -117,20 +170,152 @@ class PersalinanController extends Controller
                     'asisten_anestesi_id' => $request->asisten_anestesi_id,
                     'melahirkan_bayi' => $request->melahirkan_bayi,
                     'user_entry_id' => Auth::id(),
-                    // [PERBAIKAN] Menyimpan ID langsung ke kolom persalinan_id
                     'persalinan_id' => $request->tindakan_id,
                 ];
 
-                OrderPersalinan::updateOrCreate(['id' => $orderId], $orderData);
+                $order = OrderPersalinan::updateOrCreate(['id' => $orderId], $orderData);
+
+                // =========================================================
+                // [INTEGRASI BILLING] Panggil method untuk membuat tagihan
+                // =========================================================
+                $this->createPersalinanBilling($order);
             });
 
-            return response()->json(['message' => 'Order persalinan berhasil disimpan']);
+            return response()->json(['message' => 'Order persalinan berhasil disimpan dan tagihan telah dibuat.']);
         } catch (ValidationException $e) {
             return response()->json(['message' => 'Data tidak valid.', 'errors' => $e->errors()], 422);
         } catch (\Exception $e) {
-            Log::error('Error in store: ' . $e->getMessage());
-            return response()->json(['message' => 'Terjadi kesalahan server.'], 500);
+            Log::error('Error in PersalinanController@store: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            return response()->json(['message' => 'Terjadi kesalahan server: ' . $e->getMessage()], 500);
         }
+    }
+
+
+    // =========================================================================
+    // [METHOD BARU] Method Private untuk Membuat Tagihan Persalinan
+    // Diadaptasi dari OperasiController
+    // =========================================================================
+
+    private function createPersalinanBilling(OrderPersalinan $order)
+    {
+        Log::info("============== START PERSALINAN BILLING ==============");
+        Log::info("Processing Order Persalinan ID: {$order->id}");
+
+        if (Cache::has('processing_persalinan_' . $order->id)) {
+            Log::warning("Order Persalinan {$order->id} is already being processed");
+            return ['success' => false, 'message' => 'Order sedang diproses'];
+        }
+        Cache::put('processing_persalinan_' . $order->id, true, now()->addMinutes(5));
+
+        DB::beginTransaction();
+        try {
+            $order->load([
+                'registration.patient',
+                'registration.penjamin.group_penjamin',
+                'kelasRawat',
+                'persalinan.tarif', // <-- MEMUAT TARIF DARI TINDAKAN
+                'dokterBidan.employee:id,fullname',
+                'asistenOperator.employee:id,fullname',
+                'dokterAnestesi.employee:id,fullname',
+                'asistenAnestesi.employee:id,fullname',
+                'dokterResusitator.employee:id,fullname',
+                'dokterUmum.employee:id,fullname'
+            ]);
+
+            $registration = $order->registration;
+            if (!$registration || !$registration->penjamin || !$registration->penjamin->group_penjamin_id) {
+                throw new \Exception("Data registrasi/asuransi pasien tidak lengkap.");
+            }
+
+            // Clean up existing billing items for this order
+            $existingBillingItems = TagihanPasien::where('deskripsi_sistem', 'like', 'order_persalinan_' . $order->id . '%')->get();
+            if ($existingBillingItems->isNotEmpty()) {
+                BilinganTagihanPasien::whereIn('tagihan_pasien_id', $existingBillingItems->pluck('id'))->delete();
+                TagihanPasien::whereIn('id', $existingBillingItems->pluck('id'))->delete();
+            }
+
+            $billing = Bilingan::firstOrCreate(
+                ['registration_id' => $registration->id],
+                ['patient_id' => $registration->patient_id, 'status' => 'belum final', 'wajib_bayar' => 0]
+            );
+
+            // Find the correct tariff
+            $tarif = TarifPersalinan::where([
+                'persalinan_id' => $order->persalinan_id,
+                'kelas_rawat_id' => $order->kelas_rawat_id,
+                'group_penjamin_id' => $registration->penjamin->group_penjamin_id
+            ])->firstOrFail(); // Akan error jika tarif tidak ditemukan, ini bagus untuk debugging.
+
+            $tindakanName = $order->persalinan->nama_persalinan ?? 'Tindakan Persalinan';
+            $tagihanItems = [];
+            $totalAmount = 0;
+
+            $addBillingItem = function ($description, $amount, $role = null)
+            use (&$tagihanItems, &$totalAmount, $registration, $order, $billing) {
+                if ($amount <= 0) return;
+                $descriptor = 'order_persalinan_' . $order->id . ($role ? '_' . $role : '');
+                $tagihanItems[] = [
+                    'bilingan_id' => $billing->id,
+                    'user_id' => auth()->id(),
+                    'registration_id' => $registration->id,
+                    'date' => now()->toDateString(),
+                    'tagihan' => $description,
+                    'deskripsi_sistem' => $descriptor,
+                    'quantity' => 1,
+                    'nominal' => $amount,
+                    'nominal_awal' => $amount,
+                    'wajib_bayar' => $amount,
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ];
+                $totalAmount += $amount;
+            };
+
+            // Add Doctor & Other Fees based on tarif_persalinan table
+            $this->addFee($addBillingItem, $order->dokterBidan, $tindakanName, 'operator', $tarif->operator_dokter, 'operator');
+            $this->addFee($addBillingItem, $order->asistenOperator, $tindakanName, 'ass operator', $tarif->ass_operator_dokter, 'ass_op');
+            $this->addFee($addBillingItem, $order->dokterAnestesi, $tindakanName, 'anastesi', $tarif->anastesi_dokter, 'anestesi');
+            $this->addFee($addBillingItem, $order->asistenAnestesi, $tindakanName, 'ass anastesi', $tarif->ass_anastesi_dokter, 'ass_anes');
+            $this->addFee($addBillingItem, $order->dokterResusitator, $tindakanName, 'resusitator', $tarif->resusitator_dokter, 'resusitator');
+            $this->addFee($addBillingItem, $order->dokterUmum, $tindakanName, 'dokter umum', $tarif->umum_dokter, 'umum');
+
+            // Add RS & Prasarana Fees
+            $addBillingItem("[Biaya Persalinan] Jasa RS, " . $tindakanName, $tarif->operator_rs, 'rs_op');
+            $addBillingItem("[Biaya Persalinan] Jasa Prasarana, " . $tindakanName, $tarif->operator_prasarana, 'prasarana');
+            $addBillingItem("[Biaya Persalinan] RUANGAN PERSALINAN", $tarif->ruang, 'ruang');
+
+            if (empty($tagihanItems)) {
+                throw new \Exception("Tidak ada item tagihan yang dihasilkan dari tarif.");
+            }
+
+            TagihanPasien::insert($tagihanItems);
+            $billing->increment('wajib_bayar', $totalAmount);
+
+            DB::commit();
+            Cache::forget('processing_persalinan_' . $order->id);
+            Log::info("BILLING PERSALINAN SUCCESSFUL - Order ID: {$order->id}, Total: {$totalAmount}");
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Cache::forget('processing_persalinan_' . $order->id);
+            Log::error("BILLING PERSALINAN FAILED: " . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            // Re-throw exception agar ditangkap oleh controller utama dan menampilkan pesan error
+            throw $e;
+        } finally {
+            Log::info("============== END PERSALINAN BILLING ==============");
+        }
+    }
+
+    /**
+     * Helper method to add doctor/assistant fees for persalinan.
+     */
+    private function addFee($callback, $doctor, $procedureName, $role, $amount, $roleKey)
+    {
+        if (!$doctor || !$doctor->employee || $amount <= 0) {
+            return;
+        }
+        $doctorName = $doctor->employee->fullname;
+        $description = "[Biaya Persalinan] {$procedureName}, {$role} [{$doctorName}]";
+        $callback($description, $amount, $roleKey);
     }
 
     /**
