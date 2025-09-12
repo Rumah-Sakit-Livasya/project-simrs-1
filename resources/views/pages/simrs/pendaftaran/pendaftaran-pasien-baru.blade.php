@@ -374,7 +374,7 @@
                                                     <label for="id_card" class="form-label">No. KTP/SIM/Paspor</label>
                                                 </div>
                                                 <div class="col-sm-8">
-                                                    <input type="text"
+                                                    <input type="number"
                                                         class="@error('id_card') is-invalid @enderror form-control"
                                                         id="id_card" placeholder="No. KTP/SIM/Paspor Pasien"
                                                         name="id_card" value="{{ old('id_card') }}">

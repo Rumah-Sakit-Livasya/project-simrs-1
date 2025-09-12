@@ -60,7 +60,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             // NursingDiagnosisSeeder::class,
             // InterventionSeeder::class, // <-- TAMBAHKAN INI
-            DocumentCategorySeeder::class, // <-- TAMBAHKAN INI
+            // DocumentCategorySeeder::class, // <-- TAMBAHKAN INI
             // Anda bisa menambahkan seeder lain di sini
         ]);
 
@@ -102,16 +102,19 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             // 1. Seeder untuk tabel pendukung
-            KategoriPersalinanSeeder::class,
-            TipePersalinanSeeder::class,
+            // KategoriPersalinanSeeder::class,
+            // TipePersalinanSeeder::class,
             // KelasRawatSeeder::class,
             // GroupPenjaminSeeder::class,
 
             // 2. Seeder untuk data persalinan
-            PersalinanCompleteSeeder::class,
+            // PersalinanCompleteSeeder::class,
 
             // 3. Seeder untuk tarif (opsional - bisa dijalankan terpisah karena data besar)
             // CompleteTarifPersalinanSeeder::class,
+            // Icd10Seeder::class,
+            Icd9Seeder::class,
+
         ]);
     }
 }
