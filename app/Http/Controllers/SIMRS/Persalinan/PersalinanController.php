@@ -213,7 +213,7 @@ class PersalinanController extends Controller
                 'registration.patient',
                 'registration.penjamin.group_penjamin',
                 'kelasRawat',
-                'persalinan.tarif', // <-- MEMUAT TARIF DARI TINDAKAN
+                'persalinan', // Cukup load persalinan, tarif dicari manual
                 'dokterBidan.employee:id,fullname',
                 'asistenOperator.employee:id,fullname',
                 'dokterAnestesi.employee:id,fullname',
@@ -239,12 +239,21 @@ class PersalinanController extends Controller
                 ['patient_id' => $registration->patient_id, 'status' => 'belum final', 'wajib_bayar' => 0]
             );
 
-            // Find the correct tariff
+            // [PERBAIKAN] Ganti firstOrFail() dengan first() dan tambahkan pengecekan
             $tarif = TarifPersalinan::where([
                 'persalinan_id' => $order->persalinan_id,
                 'kelas_rawat_id' => $order->kelas_rawat_id,
                 'group_penjamin_id' => $registration->penjamin->group_penjamin_id
-            ])->firstOrFail(); // Akan error jika tarif tidak ditemukan, ini bagus untuk debugging.
+            ])->first(); // Gunakan first()
+
+            // Jika tarif tidak ditemukan, lempar exception dengan pesan yang jelas
+            if (!$tarif) {
+                $tindakanName = $order->persalinan->nama_persalinan ?? "ID: {$order->persalinan_id}";
+                $kelasName = $order->kelasRawat->kelas ?? "ID: {$order->kelas_rawat_id}";
+                $penjaminName = $registration->penjamin->group_penjamin->nama_grup ?? "ID: {$registration->penjamin->group_penjamin_id}";
+
+                throw new \Exception("Tarif persalinan tidak ditemukan untuk kombinasi: Tindakan '{$tindakanName}', Kelas '{$kelasName}', dan Penjamin '{$penjaminName}'. Harap hubungi administrator.");
+            }
 
             $tindakanName = $order->persalinan->nama_persalinan ?? 'Tindakan Persalinan';
             $tagihanItems = [];
@@ -285,11 +294,12 @@ class PersalinanController extends Controller
             $addBillingItem("[Biaya Persalinan] RUANGAN PERSALINAN", $tarif->ruang, 'ruang');
 
             if (empty($tagihanItems)) {
-                throw new \Exception("Tidak ada item tagihan yang dihasilkan dari tarif.");
+                // Ini bisa terjadi jika semua nilai di tarif adalah 0
+                Log::warning("Tidak ada item tagihan yang dihasilkan dari tarif meskipun tarif ditemukan.", ['tarif_id' => $tarif->id]);
+            } else {
+                TagihanPasien::insert($tagihanItems);
+                $billing->increment('wajib_bayar', $totalAmount);
             }
-
-            TagihanPasien::insert($tagihanItems);
-            $billing->increment('wajib_bayar', $totalAmount);
 
             DB::commit();
             Cache::forget('processing_persalinan_' . $order->id);
@@ -298,7 +308,6 @@ class PersalinanController extends Controller
             DB::rollBack();
             Cache::forget('processing_persalinan_' . $order->id);
             Log::error("BILLING PERSALINAN FAILED: " . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
-            // Re-throw exception agar ditangkap oleh controller utama dan menampilkan pesan error
             throw $e;
         } finally {
             Log::info("============== END PERSALINAN BILLING ==============");
