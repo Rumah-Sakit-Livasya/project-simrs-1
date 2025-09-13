@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Keuangan;
 
 use App\Http\Controllers\Controller;
 use App\Models\Employee;
-use App\Models\keuangan\JasaDokter; // <-- Pastikan ini model JasaDokter Anda
+use App\Models\Keuangan\JasaDokter; // <-- Pastikan ini model JasaDokter Anda
 use App\Models\SIMRS\Doctor;
 use App\Models\SIMRS\Registration;
 use App\Models\SIMRS\Bilingan;

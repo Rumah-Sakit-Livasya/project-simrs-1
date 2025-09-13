@@ -85,7 +85,7 @@ class TagihanPasien extends Model implements AuditableContract
 
     public function jasaDokterWithTrashed()
     {
-        return $this->hasOne(\App\Models\keuangan\JasaDokter::class, 'tagihan_pasien_id')->withTrashed();
+        return $this->hasOne(\App\Models\Keuangan\JasaDokter::class, 'tagihan_pasien_id')->withTrashed();
     }
 
     public function patient()

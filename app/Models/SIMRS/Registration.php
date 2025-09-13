@@ -6,7 +6,7 @@ use App\Models\DietGizi;
 use App\Models\OrderGizi;
 use App\Models\SIMRS\BatalRegister;
 use App\Models\Employee;
-use App\Models\keuangan\JasaDokter;
+use App\Models\Keuangan\JasaDokter;
 use App\Models\Keuangan\KonfirmasiAsuransi;
 use App\Models\OrderRadiologi;
 use App\Models\SIMRS\CPPT\CPPT;

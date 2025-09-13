@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Models\keuangan\ApSupplierDetail;
+use App\Models\Keuangan\ApSupplierDetail;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Auditable;

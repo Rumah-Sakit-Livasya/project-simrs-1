@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\keuangan;
 
 use App\Http\Controllers\Controller;
-use App\Models\keuangan\ApSupplierHeader;
+use App\Models\Keuangan\ApSupplierHeader;
 use App\Models\WarehouseSupplier;
 use Carbon\Carbon;
 use Illuminate\Http\Request;

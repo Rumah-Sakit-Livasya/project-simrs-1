@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Keuangan;
 
 use App\Http\Controllers\Controller;
-use App\Models\keuangan\ApSupplierHeader;
-use App\Models\keuangan\ApSupplierDetail;
-use App\Models\keuangan\PenerimaanBarangHeader;
+use App\Models\Keuangan\ApSupplierHeader;
+use App\Models\Keuangan\ApSupplierDetail;
+use App\Models\Keuangan\PenerimaanBarangHeader;
 use App\Models\WarehousePenerimaanBarangFarmasi;
 use App\Models\WarehousePenerimaanBarangNonFarmasi;
 use App\Models\WarehouseReturBarang;

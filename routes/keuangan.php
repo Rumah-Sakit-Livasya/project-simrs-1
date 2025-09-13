@@ -1,8 +1,8 @@
 <?php
 
 use App\Http\Controllers\Keuangan\APNonGRNController;
-use App\Http\Controllers\keuangan\APSupplierController;
-use App\Http\Controllers\keuangan\JasaDokterController;
+use App\Http\Controllers\Keuangan\APSupplierController;
+use App\Http\Controllers\Keuangan\JasaDokterController;
 use App\Http\Controllers\Keuangan\BankController;
 use App\Http\Controllers\Keuangan\CategoryController;
 use App\Http\Controllers\Keuangan\ChartOfAccountController;
@@ -17,18 +17,18 @@ use App\Http\Controllers\Keuangan\LaporanVkController;
 use App\Http\Controllers\Keuangan\PiutangController;
 use App\Http\Controllers\Keuangan\TransaksiController;
 use App\Http\Controllers\Keuangan\LPembayaranAsuransiController;
-use App\Http\Controllers\keuangan\PembayaranAPSupplierController;
+use App\Http\Controllers\Keuangan\PembayaranAPSupplierController;
 use App\Http\Controllers\Keuangan\PembayaranAsuransiController;
 use App\Http\Controllers\Keuangan\PembayaranJasaDokterController;
-use App\Http\Controllers\keuangan\PencairanController;
-use App\Http\Controllers\keuangan\PengajuanController;
+use App\Http\Controllers\Keuangan\PencairanController;
+use App\Http\Controllers\Keuangan\PengajuanController;
 use App\Http\Controllers\Keuangan\PertanggungJawabanController;
 use App\Http\Controllers\Keuangan\PettyCashController;
-use App\Http\Controllers\keuangan\ReportAPDokterController;
-use App\Http\Controllers\keuangan\ReportAPSupplierController;
+use App\Http\Controllers\Keuangan\ReportAPDokterController;
+use App\Http\Controllers\Keuangan\ReportAPSupplierController;
 use App\Http\Controllers\Keuangan\RncCenterController;
 use App\Http\Controllers\Keuangan\TransaksiRutinController;
-use App\Models\keuangan\Pencairan;
+use App\Models\Keuangan\Pencairan;
 use App\Models\Keuangan\Pertanggungjawaban;
 use Illuminate\Support\Facades\Route;
 
@@ -261,7 +261,7 @@ Route::group(['middleware' => ['auth']], function () {
             Route::get('rekap-pembayaran-asuransi', [LPembayaranAsuransiController::class, 'rekapPembayaranAsuransi'])->name('laporan.rekap_pembayaran_asuransi');
             Route::get('rekap-laporan-piutang-penjamin', [LPembayaranAsuransiController::class, 'rekapLaporanPiutangPenjamin'])->name('laporan.rekap_laporan_piutang_penjamin');
 
-            // print 
+            // print
             Route::get('laporan-belum-proses-invoice/print', [LPembayaranAsuransiController::class, 'printBelumProsesInvoice'])->name('laporan.l-belum-proses-invoice.print');
             Route::get('laporan-proses-invoice/print', [LPembayaranAsuransiController::class, 'printProsesInvoice'])->name('laporan.l-proses-invoice.print');
             Route::get('/laporan/print-umur-piutang-penjamin', [LPembayaranAsuransiController::class, 'printUmurPiutangPenjamin'])->name('laporan.l-umur-piutang-penjamin.print');

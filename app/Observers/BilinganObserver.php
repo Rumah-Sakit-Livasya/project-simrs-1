@@ -4,7 +4,7 @@ namespace App\Observers\SIMRS; // Make sure this namespace is correct for your p
 
 use App\Models\SIMRS\Bilingan;
 use App\Models\SIMRS\TagihanPasien; // Import TagihanPasien model
-use App\Models\keuangan\JasaDokter; // Import JasaDokter model
+use App\Models\Keuangan\JasaDokter; // Import JasaDokter model
 use Illuminate\Support\Facades\DB; // Import DB facade
 use Illuminate\Support\Facades\Log; // Import Log facade
 use Carbon\Carbon; // Import Carbon for date handling
