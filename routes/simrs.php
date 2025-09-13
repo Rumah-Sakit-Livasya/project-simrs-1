@@ -32,6 +32,11 @@ use App\Http\Controllers\ProcurementPurchaseOrderPharmacyController;
 use App\Http\Controllers\ProcurementPurchaseRequestNonPharmacyController;
 use App\Http\Controllers\ProcurementPurchaseRequestPharmacyController;
 use App\Http\Controllers\ProcurementSetupSupplier;
+use App\Http\Controllers\SatuSehat\DashboardSatuSehatController;
+use App\Http\Controllers\SatuSehat\DepartmentLocationController;
+use App\Http\Controllers\SatuSehat\GeolocationController;
+use App\Http\Controllers\SatuSehat\PractitionerController;
+use App\Http\Controllers\SatuSehat\SatuSehatOrganizationController;
 use App\Http\Controllers\SIMRS\BedController;
 use App\Http\Controllers\SIMRS\ControlPanelController;
 use App\Http\Controllers\SIMRS\BPJS\BridgingVclaimController;
@@ -1279,6 +1284,47 @@ Route::group(['middleware' => ['auth']], function () {
                     ->name('bpjs.bridging-vclaim.detail-sep');
             });
         });
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Satu Sehat Routes
+        |--------------------------------------------------------------------------
+        |
+        | Group of routes for the "BPJS" section of the SIMRS application.
+        | Includes bridging Vclaim, registration, and claim management.
+        |
+        */
+
+        // Rute untuk Fitur Geolocation Satu Sehat
+        Route::prefix('satu-sehat')->name('satu-sehat.')->group(function () {
+            // Menampilkan halaman geolocation
+            Route::get('/geolocation', [GeolocationController::class, 'index'])->name('geolocation');
+
+            // Menangani request mapping lokasi RS (untuk AJAX)
+            Route::post('/mapping-lokasi-rs', [GeolocationController::class, 'mapLocation'])->name('mapping-lokasi');
+
+            // Ganti {organization} menjadi {departement} agar cocok dengan model
+            Route::get('/departments/{category?}', [SatuSehatOrganizationController::class, 'index'])->name('departments');
+            Route::post('/departments/{departement}/map', [SatuSehatOrganizationController::class, 'map'])->name('departments.map');
+
+            // Rute untuk Mapping Department ke Location
+            Route::get('/department-locations/{category?}', [DepartmentLocationController::class, 'index'])->name('department-locations');
+            Route::post('/department-locations/{departement}/map', [DepartmentLocationController::class, 'map'])->name('department-locations.map');
+
+            // Rute untuk Halaman Tenaga Medis (Practitioner)
+            Route::get('/practitioners/{category?}', [PractitionerController::class, 'index'])->name('practitioners');
+            Route::post('/practitioners/{employee}/map', [PractitionerController::class, 'map'])->name('practitioners.map');
+
+            // Rute untuk Dashboard - MENGGUNAKAN CONTROLLER BARU
+            Route::get('/dashboard', [DashboardSatuSehatController::class, 'index'])->name('dashboard');
+
+            // Rute API untuk mengambil data dinamis - MENGGUNAKAN CONTROLLER BARU
+            Route::post('/dashboard/summary-cards', [DashboardSatuSehatController::class, 'getSummaryCards'])->name('dashboard.summary-cards');
+            Route::post('/dashboard/encounter-chart', [DashboardSatuSehatController::class, 'getEncounterChart'])->name('dashboard.encounter-chart');
+            Route::post('/dashboard/master-data-chart', [DashboardSatuSehatController::class, 'getMasterDataChart'])->name('dashboard.master-data-chart');
+        });
+
 
         // Route::prefix('kasir')->group(function() {
         //     Route::get('tagihan-pasien', [KasirController::class, 'index'])->name('laboratorium.list-order');
