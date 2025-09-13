@@ -219,29 +219,127 @@ class TagihanPasienController extends Controller
         }
     }
 
+    // public function updateDisc($id)
+    // {
+    //     try {
+    //         $tipeDiskon = request()->input('tipe_diskon');
+    //         $tagihan = TagihanPasien::findOrFail($id);
+
+    //         // Simpan nominal awal jika belum ada
+    //         if (is_null($tagihan->nominal_awal)) {
+    //             $tagihan->nominal_awal = $tagihan->nominal;
+    //             $tagihan->save();
+    //         }
+
+    //         $tindakan = $tagihan->tindakan_medis;
+    //         $group_penjamin_id = $tagihan->registration->penjamin->group_penjamin_id;
+    //         $kelas_id = $tagihan->registration->kelas_rawat_id;
+
+    //         $tarif = $tindakan->tarifTindakanMedis($group_penjamin_id, $kelas_id);
+
+    //         $disc = [
+    //             'share_rs' => (int) str_replace('.', '', $tarif['share_rs']),
+    //             'share_dr' => (int) str_replace('.', '', $tarif['share_dr']),
+    //             'total'    => (int) str_replace('.', '', $tarif['total']),
+    //         ];
+
+    //         $diskon = 0;
+    //         if ($tipeDiskon === 'Dokter') {
+    //             $diskon = $disc['share_dr'] * $tagihan->quantity;
+    //         } elseif ($tipeDiskon === 'Rumah Sakit') {
+    //             $diskon = $disc['share_rs'] * $tagihan->quantity;
+    //         } elseif ($tipeDiskon === 'All') {
+    //             $diskon = $disc['total'] * $tagihan->quantity;
+    //         }
+
+    //         $totalNominal = $tagihan->nominal_awal * $tagihan->quantity;
+
+    //         // Tambahan diskon dari input user (%)
+    //         $diskonPersen = ($tagihan->disc ?? 0) / 100 * $totalNominal;
+
+    //         // Tambahan jaminan dari input user (%)
+    //         $jaminanPersen = ($tagihan->jamin ?? 0) / 100 * $totalNominal;
+
+    //         // Total diskon dan jaminan
+    //         $totalDiskon = $diskon + $diskonPersen;
+    //         $totalJaminan = ($tagihan->jaminan_rp ?? 0) + $jaminanPersen;
+
+    //         // Hitung wajib bayar akhir
+    //         $wajibBayar = $totalNominal - $totalDiskon - $totalJaminan;
+    //         $wajibBayar = max(0, $wajibBayar);
+
+    //         // Update data tagihan
+    //         $tagihan->update([
+    //             'tipe_diskon' => $tipeDiskon,
+    //             'diskon' => $diskon,
+    //             'diskon_rp' => $diskon,
+    //             'wajib_bayar' => $wajibBayar,
+    //         ]);
+
+    //         // Hitung ulang total wajib_bayar untuk Bilingan
+    //         $totalWajibBayar = TagihanPasien::where('registration_id', $tagihan->registration_id)
+    //             ->where('bilingan_id', $tagihan->bilingan_id)
+    //             ->sum('wajib_bayar');
+
+    //         // Update ke model Bilingan
+    //         $bilingan = Bilingan::find($tagihan->bilingan_id);
+    //         if ($bilingan) {
+    //             $bilingan->wajib_bayar = $totalWajibBayar;
+    //             $bilingan->save();
+    //         }
+
+    //         return response()->json([
+    //             'success' => true,
+    //             'diskon' => $diskon,
+    //             'wajib_bayar' => $wajibBayar,
+    //             'total_nominal' => $totalNominal
+    //         ]);
+    //     } catch (\Exception $e) {
+    //         \Log::error('Error updating discount: ' . $e->getMessage());
+    //         return response()->json([
+    //             'success' => false,
+    //             'error' => $e->getMessage()
+    //         ], 500);
+    //     }
+    // }
     public function updateDisc($id)
     {
         try {
             $tipeDiskon = request()->input('tipe_diskon');
             $tagihan = TagihanPasien::findOrFail($id);
 
-            // Simpan nominal awal jika belum ada
             if (is_null($tagihan->nominal_awal)) {
                 $tagihan->nominal_awal = $tagihan->nominal;
                 $tagihan->save();
             }
 
             $tindakan = $tagihan->tindakan_medis;
+
+            if (!$tindakan) {
+                $tagihan->update(['tipe_diskon' => 'None', 'diskon' => 0, 'diskon_rp' => 0]);
+                $this->recalculateAndUpdateBilling($tagihan);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Tipe diskon hanya berlaku untuk tindakan medis.',
+                    'wajib_bayar' => $tagihan->fresh()->wajib_bayar,
+                ]);
+            }
+
             $group_penjamin_id = $tagihan->registration->penjamin->group_penjamin_id;
             $kelas_id = $tagihan->registration->kelas_rawat_id;
 
-            $tarif = $tindakan->tarifTindakanMedis($group_penjamin_id, $kelas_id);
+            // Memanggil method getTarif() yang benar
+            $tarif = $tindakan->getTarif($group_penjamin_id, $kelas_id);
 
-            $disc = [
-                'share_rs' => (int) str_replace('.', '', $tarif['share_rs']),
-                'share_dr' => (int) str_replace('.', '', $tarif['share_dr']),
-                'total'    => (int) str_replace('.', '', $tarif['total']),
-            ];
+            $disc = ['share_rs' => 0.00, 'share_dr' => 0.00, 'total' => 0.00];
+            if ($tarif) {
+                $disc['share_rs'] = (float) $tarif->share_rs;
+                $disc['share_dr'] = (float) $tarif->share_dr;
+                $disc['total']    = (float) $tarif->total;
+            } else {
+                \Log::warning("Tarif tidak ditemukan untuk Tindakan ID: {$tindakan->id}, Group Penjamin: {$group_penjamin_id}, Kelas: {$kelas_id}");
+                $tipeDiskon = 'None';
+            }
 
             $diskon = 0;
             if ($tipeDiskon === 'Dokter') {
@@ -252,57 +350,68 @@ class TagihanPasienController extends Controller
                 $diskon = $disc['total'] * $tagihan->quantity;
             }
 
-            $totalNominal = $tagihan->nominal_awal * $tagihan->quantity;
-
-            // Tambahan diskon dari input user (%)
-            $diskonPersen = ($tagihan->disc ?? 0) / 100 * $totalNominal;
-
-            // Tambahan jaminan dari input user (%)
-            $jaminanPersen = ($tagihan->jamin ?? 0) / 100 * $totalNominal;
-
-            // Total diskon dan jaminan
-            $totalDiskon = $diskon + $diskonPersen;
-            $totalJaminan = ($tagihan->jaminan_rp ?? 0) + $jaminanPersen;
-
-            // Hitung wajib bayar akhir
-            $wajibBayar = $totalNominal - $totalDiskon - $totalJaminan;
-            $wajibBayar = max(0, $wajibBayar);
-
-            // Update data tagihan
-            $tagihan->update([
-                'tipe_diskon' => $tipeDiskon,
-                'diskon' => $diskon,
-                'diskon_rp' => $diskon,
-                'wajib_bayar' => $wajibBayar,
-            ]);
-
-            // Hitung ulang total wajib_bayar untuk Bilingan
-            $totalWajibBayar = TagihanPasien::where('registration_id', $tagihan->registration_id)
-                ->where('bilingan_id', $tagihan->bilingan_id)
-                ->sum('wajib_bayar');
-
-            // Update ke model Bilingan
-            $bilingan = Bilingan::find($tagihan->bilingan_id);
-            if ($bilingan) {
-                $bilingan->wajib_bayar = $totalWajibBayar;
-                $bilingan->save();
+            // Cek jika diskon yang dihasilkan adalah 0, mungkin karena data tarifnya 0
+            if ($diskon == 0 && $tipeDiskon !== 'None') {
+                \Log::info("Diskon otomatis untuk '{$tipeDiskon}' adalah 0. Kemungkinan data tarif share-nya 0.");
             }
 
+            $tagihan->update([
+                'tipe_diskon' => $tipeDiskon,
+                'diskon'      => $diskon,
+                'diskon_rp'   => $diskon,
+            ]);
+
+            $this->recalculateAndUpdateBilling($tagihan);
+
             return response()->json([
-                'success' => true,
-                'diskon' => $diskon,
-                'wajib_bayar' => $wajibBayar,
-                'total_nominal' => $totalNominal
+                'success'     => true,
+                'diskon'      => $diskon,
+                'wajib_bayar'   => $tagihan->fresh()->wajib_bayar,
             ]);
         } catch (\Exception $e) {
-            \Log::error('Error updating discount: ' . $e->getMessage());
+            \Log::error('Error updating discount: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
             return response()->json([
                 'success' => false,
-                'error' => $e->getMessage()
+                'error' => 'Terjadi kesalahan pada server: ' . $e->getMessage()
             ], 500);
         }
     }
 
+    private function recalculateAndUpdateBilling(TagihanPasien $tagihan)
+    {
+        // Reload tagihan untuk memastikan kita bekerja dengan data terbaru
+        $tagihan->refresh();
+
+        $totalNominal = $tagihan->nominal_awal * $tagihan->quantity;
+
+        // Diskon dari input persentase (%)
+        $diskonPersen = ($tagihan->disc ?? 0) / 100 * $totalNominal;
+
+        // Jaminan dari input persentase (%)
+        $jaminanPersen = ($tagihan->jamin ?? 0) / 100 * $totalNominal;
+
+        // Total semua diskon (otomatis + manual)
+        $totalDiskon = ($tagihan->diskon_rp ?? 0) + $diskonPersen;
+
+        // Total semua jaminan (manual)
+        $totalJaminan = ($tagihan->jaminan_rp ?? 0) + $jaminanPersen;
+
+        // Hitung wajib bayar akhir untuk item ini
+        $wajibBayar = $totalNominal - $totalDiskon - $totalJaminan;
+        $wajibBayar = max(0, $wajibBayar); // Pastikan tidak negatif
+
+        $tagihan->update(['wajib_bayar' => $wajibBayar]);
+
+        // Hitung ulang total wajib_bayar untuk seluruh Bilingan
+        $totalWajibBayarBilingan = TagihanPasien::where('bilingan_id', $tagihan->bilingan_id)->sum('wajib_bayar');
+
+        // Update ke model Bilingan
+        $bilingan = Bilingan::find($tagihan->bilingan_id);
+        if ($bilingan) {
+            $bilingan->wajib_bayar = $totalWajibBayarBilingan;
+            $bilingan->save();
+        }
+    }
 
     public function getTarifShare($id)
     {
