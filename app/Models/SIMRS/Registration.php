@@ -2,16 +2,13 @@
 
 namespace App\Models\SIMRS;
 
+use App\Models\BpjsSep;
 use App\Models\DietGizi;
 use App\Models\OrderGizi;
 use App\Models\SIMRS\BatalRegister;
 use App\Models\Employee;
-<<<<<<< HEAD
 use App\Models\FhirLog;
-use App\Models\keuangan\JasaDokter;
-=======
 use App\Models\Keuangan\JasaDokter;
->>>>>>> 02daf3e53b19dd204d81f412dd529ecad225b1c9
 use App\Models\Keuangan\KonfirmasiAsuransi;
 use App\Models\OrderRadiologi;
 use App\Models\SIMRS\CPPT\CPPT;
@@ -29,6 +26,7 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Auditable;
 use OwenIt\Auditing\Contracts\Auditable as AuditableContract;
@@ -218,5 +216,35 @@ class Registration extends Model
     public function fhirLogs()
     {
         return $this->hasMany(FhirLog::class, 'registration_id');
+    }
+
+    /**
+     * Sebuah registrasi memiliki satu data SEP.
+     */
+    public function sep(): HasOne
+    {
+        // CATATAN: Ganti App\Models\BpjsSep dengan model SEP Anda yang sebenarnya
+        return $this->hasOne(BpjsSep::class);
+    }
+
+    public function rujukan(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(\App\Models\BPJS\BpjsRujukan::class);
+    }
+
+    /**
+     * Sebuah registrasi bisa memiliki satu data LPK.
+     */
+    public function lpk(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(\App\Models\BPJS\BpjsLpk::class);
+    }
+
+    /**
+     * Sebuah registrasi bisa memiliki satu data Rencana Kontrol.
+     */
+    public function rencanaKontrol(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(\App\Models\BPJS\BpjsRencanaKontrol::class);
     }
 }

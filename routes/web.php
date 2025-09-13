@@ -559,6 +559,7 @@ Route::get('/test-layout', function () {
 
 
 require __DIR__ . '/auth.php';
+require __DIR__ . '/bpjs.php';
 require __DIR__ . '/simrs.php';
 require __DIR__ . '/inventaris.php';
 require __DIR__ . '/kepustakaan.php';
