@@ -37,6 +37,6 @@ class TarifPersalinan extends Model
      */
     public function persalinan()
     {
-        return $this->belongsTo(DaftarPersalinan::class, 'persalinan_id');
+        return $this->belongsTo(Persalinan::class, 'persalinan_id');
     }
 }
