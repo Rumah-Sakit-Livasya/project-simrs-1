@@ -12,7 +12,7 @@
                     <div class="panel-container show">
                         <div class="panel-content">
                             <form id="store-form">
-                                <input type="hidden" name="kelas_rawat_ids[]"
+                                <input type="hidden" name="kelas_rawat_ids"
                                     value="{{ implode(',', $kelas_rawat->pluck('id')->toArray()) }}">
                                 <div class="mb-3">
                                     <label for="grup-penjamin-id">Grup Penjamin</label>
