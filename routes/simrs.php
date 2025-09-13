@@ -35,6 +35,7 @@ use App\Http\Controllers\ProcurementSetupSupplier;
 use App\Http\Controllers\SatuSehat\DashboardSatuSehatController;
 use App\Http\Controllers\SatuSehat\DepartmentLocationController;
 use App\Http\Controllers\SatuSehat\GeolocationController;
+use App\Http\Controllers\SatuSehat\LaporanSummaryController;
 use App\Http\Controllers\SatuSehat\PractitionerController;
 use App\Http\Controllers\SatuSehat\SatuSehatOrganizationController;
 use App\Http\Controllers\SIMRS\BedController;
@@ -1316,13 +1317,20 @@ Route::group(['middleware' => ['auth']], function () {
             Route::get('/practitioners/{category?}', [PractitionerController::class, 'index'])->name('practitioners');
             Route::post('/practitioners/{employee}/map', [PractitionerController::class, 'map'])->name('practitioners.map');
 
-            // Rute untuk Dashboard - MENGGUNAKAN CONTROLLER BARU
+            // Rute untuk Dashboard
             Route::get('/dashboard', [DashboardSatuSehatController::class, 'index'])->name('dashboard');
 
-            // Rute API untuk mengambil data dinamis - MENGGUNAKAN CONTROLLER BARU
+            // Rute API untuk data dinamis dashboard
             Route::post('/dashboard/summary-cards', [DashboardSatuSehatController::class, 'getSummaryCards'])->name('dashboard.summary-cards');
             Route::post('/dashboard/encounter-chart', [DashboardSatuSehatController::class, 'getEncounterChart'])->name('dashboard.encounter-chart');
+            Route::post('/dashboard/fhir-summary', [DashboardSatuSehatController::class, 'getFhirResourceSummary'])->name('dashboard.fhir-summary');
             Route::post('/dashboard/master-data-chart', [DashboardSatuSehatController::class, 'getMasterDataChart'])->name('dashboard.master-data-chart');
+            Route::post('/dashboard/mapping-log-table', [DashboardSatuSehatController::class, 'getMappingLogTable'])->name('dashboard.mapping-log-table');
+
+            // Rute untuk Halaman Laporan Summary
+            Route::get('/laporan-summary', [LaporanSummaryController::class, 'index'])->name('laporan.summary');
+            Route::post('/laporan-summary/data', [LaporanSummaryController::class, 'getData'])->name('laporan.summary.data');
+            Route::post('/laporan-summary/{registration}/resend', [LaporanSummaryController::class, 'resendEncounter'])->name('laporan.summary.resend');
         });
 
 

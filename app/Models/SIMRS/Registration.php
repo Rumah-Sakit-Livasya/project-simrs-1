@@ -6,6 +6,7 @@ use App\Models\DietGizi;
 use App\Models\OrderGizi;
 use App\Models\SIMRS\BatalRegister;
 use App\Models\Employee;
+use App\Models\FhirLog;
 use App\Models\keuangan\JasaDokter;
 use App\Models\Keuangan\KonfirmasiAsuransi;
 use App\Models\OrderRadiologi;
@@ -208,5 +209,10 @@ class Registration extends Model
     {
         // Ganti Poli::class dengan nama model yang benar jika berbeda
         return $this->belongsTo(Departement::class, 'departement_id');
+    }
+
+    public function fhirLogs()
+    {
+        return $this->hasMany(FhirLog::class, 'registration_id');
     }
 }
