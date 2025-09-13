@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\BilinganController;
+use App\Http\Controllers\SIMRS\BPJS\WsBPJSController;
 use App\Http\Controllers\FarmasiPlasma;
 use App\Http\Controllers\FarmasiReportDispensing;
 use App\Http\Controllers\FarmasiReportEmbalase;
@@ -39,8 +40,11 @@ use App\Http\Controllers\SatuSehat\LaporanSummaryController;
 use App\Http\Controllers\SatuSehat\PractitionerController;
 use App\Http\Controllers\SatuSehat\SatuSehatOrganizationController;
 use App\Http\Controllers\SIMRS\BedController;
+use App\Http\Controllers\SIMRS\BPJS\BridgingEclaimController;
 use App\Http\Controllers\SIMRS\ControlPanelController;
 use App\Http\Controllers\SIMRS\BPJS\BridgingVclaimController;
+use App\Http\Controllers\SIMRS\BPJS\LaporanController;
+use App\Http\Controllers\SIMRS\BPJS\SettingController;
 use App\Http\Controllers\SIMRS\DepartementController;
 use App\Http\Controllers\SIMRS\Depo\StokRequestController;
 use App\Http\Controllers\SIMRS\Depo\UnitCostController as DepoUnitCostController;
@@ -1283,6 +1287,47 @@ Route::group(['middleware' => ['auth']], function () {
 
                 Route::get('detail-sep', [BridgingVclaimController::class, 'detailSEP'])
                     ->name('bpjs.bridging-vclaim.detail-sep');
+            });
+
+            Route::prefix('ws-bpjs')->name('ws-bpjs.')->group(function () {
+                // Referensi
+                Route::get('/referensi-poli',        [WsBPJSController::class, 'referensiPoli'])->name('referensi-poli');
+                Route::get('/referensi-dokter',      [WsBpjsController::class, 'referensiDokter'])->name('referensi-dokter');
+
+                // Monitoring & Dashboard
+                Route::get('/monitoring-antrian',    [WsBpjsController::class, 'monitoringAntrian'])->name('monitoring-antrian');
+                Route::get('/dashboard-pertanggal',  [WsBpjsController::class, 'dashboardPertanggal'])->name('dashboard-pertanggal');
+                Route::get('/dashboard-perbulan',    [WsBpjsController::class, 'dashboardPerbulan'])->name('dashboard-perbulan');
+
+                // Antrian
+                Route::get('/antrian-pertanggal',    [WsBpjsController::class, 'antrianPertanggal'])->name('antrian-pertanggal');
+                Route::get('/antrian-belum-dilayani', [WsBpjsController::class, 'antrianBelumDilayani'])->name('antrian-belum-dilayani');
+            });
+            Route::prefix('bridging-eclaim')->name('bridging-eclaim.')->group(function () {
+                Route::get('/setup-jaminan',    [BridgingEclaimController::class, 'setupJaminan'])->name('setup-jaminan');
+                Route::get('/setup-tarif',      [BridgingEclaimController::class, 'setupTarif'])->name('setup-tarif');
+                Route::get('/setup-cob',        [BridgingEclaimController::class, 'setupCob'])->name('setup-cob');
+                Route::get('/update-data-pasien', [BridgingEclaimController::class, 'updateDataPasien'])->name('update-data-pasien');
+                Route::get('/grouping-eclaim',  [BridgingEclaimController::class, 'groupingEclaim'])->name('grouping-eclaim');
+            });
+
+            Route::prefix('setting')->name('setting.')->group(function () {
+                Route::get('/konfigurasi-sistem', [SettingController::class, 'konfigurasiSistem'])
+                    ->name('konfigurasi-sistem');
+            });
+
+            Route::prefix('laporan')->group(function () {
+                Route::get('/hapus-sep', [LaporanController::class, 'hapusSep'])
+                    ->name('laporan.hapus-sep');
+
+                Route::get('/akses-icare', [LaporanController::class, 'aksesICare'])
+                    ->name('laporan.akses-icare');
+
+                Route::get('/print/hapus-sep', [LaporanController::class, 'printHapusSep'])
+                    ->name('laporan.print.hapus-sep');
+
+                Route::get('/print/akses-icare', [LaporanController::class, 'printAksesICare'])
+                    ->name('laporan.print.akses-icare');
             });
         });
 

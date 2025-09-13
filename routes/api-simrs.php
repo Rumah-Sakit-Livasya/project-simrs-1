@@ -34,6 +34,7 @@ use App\Http\Controllers\ProcurementPurchaseRequestPharmacyController;
 use App\Http\Controllers\ProcurementSetupSupplier;
 use App\Http\Controllers\SIMRS\AssesmentGadarController;
 use App\Http\Controllers\SIMRS\BedController;
+use App\Http\Controllers\SIMRS\BPJS\WsBPJSController;
 use App\Http\Controllers\SIMRS\CPPT\CPPTController;
 use App\Http\Controllers\SIMRS\DepartementController;
 use App\Http\Controllers\SIMRS\ERMController;
