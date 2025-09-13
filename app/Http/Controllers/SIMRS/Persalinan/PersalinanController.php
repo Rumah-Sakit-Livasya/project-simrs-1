@@ -198,22 +198,24 @@ class PersalinanController extends Controller
 
     private function createPersalinanBilling(OrderPersalinan $order)
     {
-        Log::info("============== START PERSALINAN BILLING ==============");
+        Log::info("============== START PERSALINAN BILLING (FINAL VERSION) ==============");
         Log::info("Processing Order Persalinan ID: {$order->id}");
 
+        // 1. Mencegah proses ganda untuk order yang sama
         if (Cache::has('processing_persalinan_' . $order->id)) {
-            Log::warning("Order Persalinan {$order->id} is already being processed");
+            Log::warning("Order Persalinan {$order->id} is already being processed.");
             return ['success' => false, 'message' => 'Order sedang diproses'];
         }
         Cache::put('processing_persalinan_' . $order->id, true, now()->addMinutes(5));
 
         DB::beginTransaction();
         try {
+            // 2. Memuat semua relasi yang dibutuhkan dalam satu query
             $order->load([
                 'registration.patient',
                 'registration.penjamin.group_penjamin',
                 'kelasRawat',
-                'persalinan', // Cukup load persalinan, tarif dicari manual
+                'persalinan',
                 'dokterBidan.employee:id,fullname',
                 'asistenOperator.employee:id,fullname',
                 'dokterAnestesi.employee:id,fullname',
@@ -224,48 +226,48 @@ class PersalinanController extends Controller
 
             $registration = $order->registration;
             if (!$registration || !$registration->penjamin || !$registration->penjamin->group_penjamin_id) {
-                throw new \Exception("Data registrasi/asuransi pasien tidak lengkap.");
+                throw new \Exception("Data registrasi atau asuransi pasien tidak lengkap untuk Order ID: {$order->id}");
             }
 
-            // Clean up existing billing items for this order
+            // 3. Membersihkan tagihan lama yang terkait dengan order ini untuk menghindari duplikasi
             $existingBillingItems = TagihanPasien::where('deskripsi_sistem', 'like', 'order_persalinan_' . $order->id . '%')->get();
             if ($existingBillingItems->isNotEmpty()) {
                 BilinganTagihanPasien::whereIn('tagihan_pasien_id', $existingBillingItems->pluck('id'))->delete();
                 TagihanPasien::whereIn('id', $existingBillingItems->pluck('id'))->delete();
             }
 
+            // 4. Memastikan record bilingan utama untuk registrasi ini ada
             $billing = Bilingan::firstOrCreate(
                 ['registration_id' => $registration->id],
                 ['patient_id' => $registration->patient_id, 'status' => 'belum final', 'wajib_bayar' => 0]
             );
 
-            // [PERBAIKAN] Ganti firstOrFail() dengan first() dan tambahkan pengecekan
+            // 5. Mencari tarif yang sesuai
             $tarif = TarifPersalinan::where([
                 'persalinan_id' => $order->persalinan_id,
                 'kelas_rawat_id' => $order->kelas_rawat_id,
                 'group_penjamin_id' => $registration->penjamin->group_penjamin_id
-            ])->first(); // Gunakan first()
+            ])->first();
 
-            // Jika tarif tidak ditemukan, lempar exception dengan pesan yang jelas
             if (!$tarif) {
-                $tindakanName = $order->persalinan->nama_persalinan ?? "ID: {$order->persalinan_id}";
-                $kelasName = $order->kelasRawat->kelas ?? "ID: {$order->kelas_rawat_id}";
-                $penjaminName = $registration->penjamin->group_penjamin->nama_grup ?? "ID: {$registration->penjamin->group_penjamin_id}";
-
-                throw new \Exception("Tarif persalinan tidak ditemukan untuk kombinasi: Tindakan '{$tindakanName}', Kelas '{$kelasName}', dan Penjamin '{$penjaminName}'. Harap hubungi administrator.");
+                $tindakanName = $order->persalinan->nama_persalinan ?? "ID:{$order->persalinan_id}";
+                $kelasName = $order->kelasRawat->kelas ?? "ID:{$order->kelas_rawat_id}";
+                $penjaminName = $registration->penjamin->group_penjamin->nama_grup ?? "ID:{$registration->penjamin->group_penjamin_id}";
+                throw new \Exception("Tarif persalinan tidak ditemukan untuk kombinasi: '{$tindakanName}', Kelas '{$kelasName}', Penjamin '{$penjaminName}'.");
             }
 
+            // 6. Inisialisasi variabel untuk proses billing
             $tindakanName = $order->persalinan->nama_persalinan ?? 'Tindakan Persalinan';
+            $kelasName = $order->kelasRawat->kelas ?? '';
             $tagihanItems = [];
             $totalAmount = 0;
+            $systemUserId = auth()->id() ?? 1; // Fallback ke user ID 1 jika dijalankan dari job/console
 
-            $addBillingItem = function ($description, $amount, $role = null)
-            use (&$tagihanItems, &$totalAmount, $registration, $order, $billing) {
-                if ($amount <= 0) return;
-                $descriptor = 'order_persalinan_' . $order->id . ($role ? '_' . $role : '');
-                $tagihanItems[] = [
+            // 7. [HELPER] Membuat fungsi kecil untuk memastikan semua item tagihan memiliki struktur yang sama
+            $createItem = function ($description, $amount, $descriptor) use ($billing, $registration, $systemUserId) {
+                return [
                     'bilingan_id' => $billing->id,
-                    'user_id' => auth()->id(),
+                    'user_id' => $systemUserId,
                     'registration_id' => $registration->id,
                     'date' => now()->toDateString(),
                     'tagihan' => $description,
@@ -277,43 +279,65 @@ class PersalinanController extends Controller
                     'created_at' => now(),
                     'updated_at' => now()
                 ];
-                $totalAmount += $amount;
             };
 
-            // Add Doctor & Other Fees based on tarif_persalinan table
-            $this->addFee($addBillingItem, $order->dokterBidan, $tindakanName, 'operator', $tarif->operator_dokter, 'operator');
-            $this->addFee($addBillingItem, $order->asistenOperator, $tindakanName, 'ass operator', $tarif->ass_operator_dokter, 'ass_op');
-            $this->addFee($addBillingItem, $order->dokterAnestesi, $tindakanName, 'anastesi', $tarif->anastesi_dokter, 'anestesi');
-            $this->addFee($addBillingItem, $order->asistenAnestesi, $tindakanName, 'ass anastesi', $tarif->ass_anastesi_dokter, 'ass_anes');
-            $this->addFee($addBillingItem, $order->dokterResusitator, $tindakanName, 'resusitator', $tarif->resusitator_dokter, 'resusitator');
-            $this->addFee($addBillingItem, $order->dokterUmum, $tindakanName, 'dokter umum', $tarif->umum_dokter, 'umum');
+            // 8. [LOGIKA INTI] Mendefinisikan peta "Peran" dan "Komponen Biaya"-nya
+            $rolesAndComponents = [
+                'operator' => ['name' => 'operator', 'petugas' => $order->dokterBidan, 'components' => ['operator_dokter', 'operator_rs', 'operator_prasarana']],
+                'ass_operator' => ['name' => 'asisten operator', 'petugas' => $order->asistenOperator, 'components' => ['ass_operator_dokter', 'ass_operator_rs']],
+                'anastesi' => ['name' => 'anastesi', 'petugas' => $order->dokterAnestesi, 'components' => ['anastesi_dokter', 'anastesi_rs']],
+                'ass_anastesi' => ['name' => 'asisten anastesi', 'petugas' => $order->asistenAnestesi, 'components' => ['ass_anastesi_dokter', 'ass_anastesi_rs']],
+                'resusitator' => ['name' => 'resusitator', 'petugas' => $order->dokterResusitator, 'components' => ['resusitator_dokter', 'resusitator_rs']],
+                'umum' => ['name' => 'umum', 'petugas' => $order->dokterUmum, 'components' => ['umum_dokter', 'umum_rs']]
+            ];
 
-            // Add RS & Prasarana Fees
-            $addBillingItem("[Biaya Persalinan] Jasa RS, " . $tindakanName, $tarif->operator_rs, 'rs_op');
-            $addBillingItem("[Biaya Persalinan] Jasa Prasarana, " . $tindakanName, $tarif->operator_prasarana, 'prasarana');
-            $addBillingItem("[Biaya Persalinan] RUANGAN PERSALINAN", $tarif->ruang, 'ruang');
+            // 9. Melakukan loop berdasarkan PERAN untuk mengagregasi biaya
+            foreach ($rolesAndComponents as $roleKey => $roleData) {
+                if (!$roleData['petugas']) continue;
 
-            if (empty($tagihanItems)) {
-                // Ini bisa terjadi jika semua nilai di tarif adalah 0
-                Log::warning("Tidak ada item tagihan yang dihasilkan dari tarif meskipun tarif ditemukan.", ['tarif_id' => $tarif->id]);
-            } else {
+                $totalAmountForRole = collect($roleData['components'])->sum(fn($component) => $tarif->{$component} ?? 0);
+
+                if ($totalAmountForRole <= 0) continue;
+
+                $petugasName = $roleData['petugas']?->employee?->fullname ?? 'Petugas Tidak Ditentukan';
+                $description = "[Biaya Persalinan] {$tindakanName}, {$roleData['name']} [{$kelasName}] [{$petugasName}]";
+                $descriptor = 'order_persalinan_' . $order->id . '_' . $roleKey;
+
+                // Menggunakan helper untuk membuat item tagihan
+                $tagihanItems[] = $createItem($description, $totalAmountForRole, $descriptor);
+                $totalAmount += $totalAmountForRole;
+            }
+
+            // 10. Menambahkan biaya tunggal yang tidak memiliki peran (seperti Ruang)
+            if ($tarif->ruang > 0) {
+                $description = "[Biaya Persalinan] RUANGAN PERSALINAN";
+                $descriptor = 'order_persalinan_' . $order->id . '_ruang';
+
+                // Menggunakan helper yang sama untuk konsistensi
+                $tagihanItems[] = $createItem($description, $tarif->ruang, $descriptor);
+                $totalAmount += $tarif->ruang;
+            }
+
+            // 11. Menyimpan semua item tagihan yang telah dibuat ke database
+            if (!empty($tagihanItems)) {
                 TagihanPasien::insert($tagihanItems);
                 $billing->increment('wajib_bayar', $totalAmount);
+            } else {
+                Log::warning("Tidak ada item tagihan yang dihasilkan dari tarif.", ['tarif_id' => $tarif->id, 'order_id' => $order->id]);
             }
 
             DB::commit();
             Cache::forget('processing_persalinan_' . $order->id);
-            Log::info("BILLING PERSALINAN SUCCESSFUL - Order ID: {$order->id}, Total: {$totalAmount}");
+            Log::info("BILLING PERSALINAN SUCCESSFUL (FINAL VERSION) - Order ID: {$order->id}, Total: {$totalAmount}");
         } catch (\Exception $e) {
             DB::rollBack();
             Cache::forget('processing_persalinan_' . $order->id);
-            Log::error("BILLING PERSALINAN FAILED: " . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
-            throw $e;
+            Log::error("BILLING PERSALINAN FAILED (FINAL VERSION): " . $e->getMessage(), ['order_id' => $order->id, 'trace' => $e->getTraceAsString()]);
+            throw $e; // Lempar kembali error agar bisa ditangani di level yang lebih tinggi
         } finally {
-            Log::info("============== END PERSALINAN BILLING ==============");
+            Log::info("============== END PERSALINAN BILLING (FINAL VERSION) ==============");
         }
     }
-
     /**
      * Helper method to add doctor/assistant fees for persalinan.
      */
