@@ -85,11 +85,17 @@ class RegistrationController extends Controller
 
     public function index(Request $request)
     {
-        $query = Registration::query()->with('patient');
+        $query = Registration::query()
+            ->with('patient');
 
-        // Apply filters based on form inputs
         $regFilters = ['medical_record_number', 'status', 'departement_id', 'registration_type'];
         $filterApplied = false;
+
+        // Default: tampilkan registrasi hari ini jika tidak ada filter
+        if (!$request->filled('registration_date') && !$request->filled('name') && !$request->filled('address') && !$request->filled('date_of_birth')) {
+            $today = Carbon::today()->format('Y-m-d');
+            $query->whereDate('registration_date', $today);
+        }
 
         // Filter by date range
         if ($request->filled('registration_date')) {
@@ -108,8 +114,6 @@ class RegistrationController extends Controller
                 $filterApplied = true;
             }
         }
-
-        $registrations = $query->orderBy('registration_date', 'asc')->get();
 
         // Filter by patient's name
         if ($request->filled('name')) {
@@ -135,14 +139,7 @@ class RegistrationController extends Controller
             $filterApplied = true;
         }
 
-
-        // Get the filtered results if any filter is applied
-        if ($filterApplied) {
-            $registrations = $query->orderBy('registration_date', 'asc')->get();
-        } else {
-            // Return an empty collection if no filters are applied
-            $registrations = collect();
-        }
+        $registrations = $query->orderBy('registration_date', 'asc')->get();
 
         return view('pages.simrs.pendaftaran.daftar-registrasi-pasien', [
             'registrations' => $registrations->where('status', 'aktif'),
