@@ -23,7 +23,7 @@
                         // Jika path poliklinik (rawat jalan), hanya tampilkan yang tanggalnya hari ini
                         // Jika path lain, hanya tampilkan yang statusnya aktif
                         if ($path === 'igd') {
-                            if ($registrationDate !== $today) {
+                            if ($registration->status !== 'aktif') {
                                 continue;
                             }
                         } elseif ($path === 'poliklinik') {

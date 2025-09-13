@@ -18,7 +18,7 @@
                                     href="{{ route('rawat-inap.daftar-pasien', ['menu' => 'pengkajian_perawat', 'registration' => $registration->registration_number]) }}">
                                 @elseif($registration->registration_type == 'igd')
                                     <a
-                                        href="{{ route('igd.daftar-pasien', ['menu' => 'pengkajian_perawat', 'registration' => $registration->registration_number]) }}">
+                                        href="{{ route('igd.catatan-medis', ['menu' => 'pengkajian_perawat', 'registration' => $registration->registration_number]) }}">
                         @endif
                         <center>
                             <div class="circle-menu waves-effect pink accent-2" data-layanan="pengkajian-nurse-rajal">

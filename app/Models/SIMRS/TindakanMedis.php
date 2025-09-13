@@ -33,6 +33,25 @@ class TindakanMedis extends Model
         return $this->hasMany(TarifTindakanMedis::class, 'tindakan_medis_id');
     }
 
+    public function semuaTarif()
+    {
+        return $this->hasMany(TarifTindakanMedis::class, 'tindakan_medis_id');
+    }
+
+    /**
+     * INI ADALAH METHOD UNTUK MENGAMBIL SATU TARIF SPESIFIK.
+     * Method ini akan kita panggil dari controller.
+     * Ia menggunakan relasi 'semuaTarif' sebagai dasarnya.
+     */
+    // public function getTarif($groupPenjaminId, $kelasRawatId)
+    // {
+    //     // Memulai query dari relasi, lalu menambahkan filter
+    //     return $this->semuaTarif()
+    //         ->where('group_penjamin_id', $groupPenjaminId)
+    //         ->where('kelas_rawat_id', $kelasRawatId)
+    //         ->first();
+    // }
+
     // public function getTotalTarif($groupPenjaminId, $kelasRawatId)
     // {
     //     // Cari tarif yang sesuai dengan filter

@@ -43,7 +43,7 @@ class LaporanOkController extends Controller
             'orderOperasi.kelasRawat',
             'tindakanOperasi', // Asumsi relasi ini ada dan benar
             'dokterOperator.employee',
-            'dokterAnestesi.employee',
+            'dokterAnastesi.employee',
             'assDokterOperator.employee'
         ])
             ->whereHas('orderOperasi', function ($q) use ($request) {
@@ -67,7 +67,7 @@ class LaporanOkController extends Controller
                 'Kelas Rawat' => $prosedur->orderOperasi->kelasRawat->kelas ?? 'N/A',
                 'Nama Tindakan' => $prosedur->tindakanOperasi->nama_operasi ?? 'N/A', // Asumsi nama_operasi ada
                 'Dokter Operator' => $prosedur->dokterOperator->employee->fullname ?? 'N/A',
-                'Dokter Anestesi' => $prosedur->dokterAnestesi->employee->fullname ?? 'N/A',
+                'Dokter Anastesi' => $prosedur->dokterAnastesi->employee->fullname ?? 'N/A',
                 'Asisten Operator' => $prosedur->assDokterOperator->employee->fullname ?? 'N/A',
             ];
         });
@@ -93,8 +93,8 @@ class LaporanOkController extends Controller
             'tindakanOperasi.tarif', // <-- MEMUAT SEMUA TARIF UNTUK TINDAKAN INI
             'dokterOperator.employee',
             'assDokterOperator.employee',
-            'dokterAnestesi.employee',
-            'assDokterAnestesi.employee',
+            'dokterAnastesi.employee',
+            'assDokterAnastesi.employee',
             'dokterResusitator.employee',
             'dokterTambahan.employee',
         ])
@@ -136,8 +136,8 @@ class LaporanOkController extends Controller
             // PERUBAHAN: Ambil harga dari $tarifForKelas sesuai peran dokter
             $addCrew($proc->dokterOperator, 'Operator', $tarifForKelas->operator_dokter ?? null);
             $addCrew($proc->assDokterOperator, 'Asisten Operator', $tarifForKelas->asisten_operator_1_dokter ?? null);
-            $addCrew($proc->dokterAnestesi, 'Anestesi', $tarifForKelas->operator_anastesi_dokter ?? null);
-            $addCrew($proc->assDokterAnestesi, 'Asisten Anestesi', $tarifForKelas->asisten_anastesi_1_dokter ?? null);
+            $addCrew($proc->dokterAnastesi, 'Anastesi', $tarifForKelas->operator_anastesi_dokter ?? null);
+            $addCrew($proc->assDokterAnastesi, 'Asisten Anastesi', $tarifForKelas->asisten_anastesi_1_dokter ?? null);
             $addCrew($proc->dokterResusitator, 'Resusitator', $tarifForKelas->operator_resusitator_dokter ?? null);
             $addCrew($proc->dokterTambahan, 'Dokter Tambahan', $tarifForKelas->dokter_tambahan_1_dokter ?? null);
 
