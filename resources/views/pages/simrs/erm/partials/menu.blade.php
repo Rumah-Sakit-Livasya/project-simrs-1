@@ -51,7 +51,7 @@
                         href="{{ route($path . '.catatan-medis', ['registration' => $registration->registration_number, 'menu' => 'ews_obstetri']) }}"
                         role="tab">Early Warning Scoring System (Obstetri)</a>
                     <a class="dropdown-item"
-                        href="{{ route($path . '.catatan-medis', ['registration' => $registration->registration_number, 'menu' => 'pengkajian_dokter']) }}">Pengkajian</a>
+                        href="{{ route($path . '.catatan-medis', ['registration' => $registration->registration_number, 'menu' => 'pengkajian_dokter_igd']) }}">Pengkajian</a>
                     <a class="dropdown-item"
                         href="{{ route($path . '.catatan-medis', ['registration' => $registration->registration_number, 'menu' => 'cppt_dokter']) }}">CPPT</a>
                     <a class="dropdown-item"

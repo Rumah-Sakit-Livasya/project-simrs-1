@@ -210,6 +210,12 @@ Route::group(['middleware' => ['auth']], function () {
             ->name('print.identitas.pasien');
         Route::get('/{patient:id}/print-kartu', [PatientController::class, 'print_kartu_pasien'])
             ->name('print.kartu.pasien');
+        Route::get('/{patient:id}/label-rm-pdf', [PatientController::class, 'print_label_rm_pdf'])
+            ->name('print.label.rm.pdf');
+        Route::get('/{patient:id}/label-rm', [PatientController::class, 'print_label_rm'])
+            ->name('print.label.rm');
+        Route::get('/{patient:id}/label-gelang-anak', [PatientController::class, 'print_label_gelang_anak'])
+            ->name('print.label.gelang.anak');
 
         // View patient visit history
         Route::get('/{patient:id}/history', [PatientController::class, 'history_kunjungan_pasien'])

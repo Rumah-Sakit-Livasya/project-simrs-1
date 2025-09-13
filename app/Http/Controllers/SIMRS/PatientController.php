@@ -285,6 +285,45 @@ class PatientController extends Controller
         // return $pdf->download('kartu-pasien.pdf'); // Untuk mengunduh file
     }
 
+    public function print_label_rm(Patient $patient)
+    {
+        // Ambil data pasien berdasarkan ID
+        $patient = Patient::findOrFail($patient->id);
+
+        // Render view ke PDF
+        $pdf = Pdf::loadView('pages.simrs.pendaftaran.print-label-rm', compact('patient'));
+
+        // Unduh atau tampilkan PDF
+        return $pdf->stream('label-rm.pdf'); // Untuk menampilkan di browser
+        // return $pdf->download('kartu-pasien.pdf'); // Untuk mengunduh file
+    }
+
+    public function print_label_rm_pdf(Patient $patient)
+    {
+        // Ambil data pasien berdasarkan ID
+        $patient = Patient::findOrFail($patient->id);
+
+        // Render view ke PDF
+        $pdf = Pdf::loadView('pages.simrs.pendaftaran.print-label-rm-pdf', compact('patient'));
+
+        // Unduh atau tampilkan PDF
+        return $pdf->stream('label-rm-pdf.pdf'); // Untuk menampilkan di browser
+        // return $pdf->download('kartu-pasien.pdf'); // Untuk mengunduh file
+    }
+
+    public function print_label_gelang_anak(Patient $patient)
+    {
+        // Ambil data pasien berdasarkan ID
+        $patient = Patient::findOrFail($patient->id);
+
+        // Render view ke PDF
+        $pdf = Pdf::loadView('pages.simrs.pendaftaran.print-label-gelang-anak', compact('patient'));
+
+        // Unduh atau tampilkan PDF
+        return $pdf->stream('label-gelang-anak.pdf'); // Untuk menampilkan di browser
+        // return $pdf->download('kartu-pasien.pdf'); // Untuk mengunduh file
+    }
+
     public function history_kunjungan_pasien(Patient $patient)
     {
         $birthdate = $patient->date_of_birth;

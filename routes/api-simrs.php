@@ -69,6 +69,7 @@ use App\Http\Controllers\SIMRS\ParameterRadiologiController;
 use App\Http\Controllers\SIMRS\Pengkajian\FormBuilderController;
 use App\Http\Controllers\SIMRS\Pengkajian\PengkajianController;
 use App\Http\Controllers\SIMRS\Pengkajian\PengkajianDokterRajalController;
+use App\Http\Controllers\SIMRS\PengkajianDokterIgdController;
 use App\Http\Controllers\SIMRS\Penjamin\GroupPenjaminController;
 use App\Http\Controllers\SIMRS\Penjamin\PenjaminController;
 use App\Http\Controllers\SIMRS\Peralatan\PeralatanController;
@@ -495,6 +496,7 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
             });
             Route::prefix('dokter')->group(function () {
                 Route::post('/store', [PengkajianDokterRajalController::class, 'store'])->name('pengkajian.dokter-rajal.store');
+                Route::post('/igd/store', [PengkajianDokterIgdController::class, 'store'])->name('pengkajian.dokter-igd.store');
             });
         });
 
