@@ -16,8 +16,8 @@ window.Pusher = Pusher;
 // ==========================================================
 window.Echo = new Echo({
     broadcaster: "pusher",
-    key: "GANTI_DENGAN_KEY_ANDA", // Contoh: 'ab123cdef456ghi789'
-    cluster: "GANTI_DENGAN_CLUSTER_ANDA", // Contoh: 'ap1'
+    key: "a84c07f76285956db9ca", // Contoh: 'ab123cdef456ghi789'
+    cluster: "mt1", // Contoh: 'ap1'
     forceTLS: true,
 });
 

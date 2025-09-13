@@ -124,7 +124,33 @@
                                     <div class="card mt-3">
                                         <div class="card-header bg-info text-white">Anamnesa</div>
                                         <div class="card-body p-0">
-                                            <textarea class="form-control border-0 rounded-0" id="anamnesa" name="anamnesa" rows="4">{{ $pengkajian?->anamnesa ?? 'Masukkan anamnesa di sini...' }}</textarea>
+                                            <textarea class="form-control border-0 rounded-0" id="anamnesa" name="anamnesa" rows="11">
+@if (empty($pengkajian))
+@if ($registration->registration_type === 'rawat-jalan' && $assesment)
+@php
+    $tanda_vital_raw = $assesment->tanda_vital ?? '';
+    if (is_array($tanda_vital_raw)) {
+        $tanda_vital = $tanda_vital_raw;
+    } else {
+        $tanda_vital = json_decode($tanda_vital_raw, true) ?? [];
+    }
+@endphp
+        Nadi (PR): {{ $tanda_vital['pr'] ?? '' }}
+        Respirasi (RR): {{ $tanda_vital['rr'] ?? '' }}
+        Tensi (BP): {{ $tanda_vital['bp'] ?? '' }}
+        Suhu (T): {{ $tanda_vital['temperatur'] ?? '' }}
+        Tinggi Badan: {{ $tanda_vital['height_badan'] ?? '' }}
+        Berat Badan: {{ $tanda_vital['weight_badan'] ?? '' }}
+        BMI: {{ $tanda_vital['bmi'] ?? '' }}{{ isset($tanda_vital['kat_bmi']) ? ' (' . $tanda_vital['kat_bmi'] . ')' : '' }}
+        SpO2: {{ $tanda_vital['spo2'] ?? '' }}
+        Lingkar Kepala:
+        Pemeriksaan Fisik: {{ $assesment->pemeriksaan_fisik ?? '' }}
+        Pemeriksaan Penunjang: {{ $assesment->pemeriksaan_penunjang ?? '' }}
+@endif
+@else
+{{ $pengkajian->anamnesa ?? '' }}
+@endif
+</textarea>
                                         </div>
                                     </div>
                                 </td>
@@ -144,12 +170,12 @@
                                                         <textarea class="form-control" id="diagnosa_utama" name="diagnosa_utama" rows="4" required>{{ $pengkajian?->diagnosa_utama ?? '' }}</textarea>
                                                     </div>
                                                 </td>
-                                                <td style="width: 25%">
+                                                <td style="width: 30%">
                                                     <div class="form-group">
                                                         <label for="cari_icd" class="form-label">Cari ICD 10</label>
-                                                        <input type="text" name="cari_icd" id="cari_icd"
-                                                            class="form-control" placeholder="Cari ICD 10"
-                                                            autocomplete="off">
+                                                        {{-- UBAH BAGIAN INI --}}
+                                                        <select class="form-control" id="cari_icd"
+                                                            name="cari_icd"></select>
                                                     </div>
                                                 </td>
                                             </tr>
@@ -165,9 +191,9 @@
                                                     <div class="form-group">
                                                         <label for="cari_icd_tambahan" class="form-label">Cari ICD
                                                             10</label>
-                                                        <input type="text" name="cari_icd_tambahan"
-                                                            id="cari_icd_tambahan" class="form-control"
-                                                            placeholder="Cari ICD 10" autocomplete="off">
+                                                        {{-- UBAH BAGIAN INI --}}
+                                                        <select class="form-control" id="cari_icd_tambahan"
+                                                            name="cari_icd_tambahan"></select>
                                                     </div>
                                                 </td>
                                             </tr>
@@ -193,9 +219,9 @@
                                                 <td style="width: 25%">
                                                     <div class="form-group">
                                                         <label for="cari_icd2" class="form-label">Cari ICD 9</label>
-                                                        <input type="text" name="cari_icd2" id="cari_icd2"
-                                                            class="form-control" placeholder="Cari ICD 9"
-                                                            autocomplete="off">
+                                                        {{-- UBAH BAGIAN INI --}}
+                                                        <select class="form-control" id="cari_icd2"
+                                                            name="cari_icd2"></select>
                                                     </div>
                                                 </td>
                                             </tr>
@@ -211,9 +237,9 @@
                                                     <div class="form-group">
                                                         <label for="cari_icd2_tambahan" class="form-label">Cari ICD
                                                             9</label>
-                                                        <input type="text" name="cari_icd2_tambahan"
-                                                            id="cari_icd2_tambahan" class="form-control"
-                                                            placeholder="Cari ICD 9" autocomplete="off">
+                                                        {{-- UBAH BAGIAN INI --}}
+                                                        <select class="form-control" id="cari_icd2_tambahan"
+                                                            name="cari_icd2_tambahan"></select>
                                                     </div>
                                                 </td>
                                             </tr>
@@ -278,12 +304,51 @@
     <script>
         $(document).ready(function() {
             $('body').addClass('layout-composed');
-            $('.select2').select2({
-                placeholder: 'Pilih Item'
-            });
-            $('#departement_id').select2({
-                placeholder: 'Pilih Klinik'
-            });
+
+            // Fungsi helper untuk inisialisasi Select2 dengan AJAX
+            function initializeIcdSelect2(selectElementId, targetTextareaId, apiUrl, placeholderText) {
+                $(selectElementId).select2({
+                    placeholder: placeholderText,
+                    minimumInputLength: 3, // Mulai mencari setelah 3 karakter
+                    ajax: {
+                        url: apiUrl,
+                        dataType: 'json',
+                        delay: 250,
+                        data: function(params) {
+                            return {
+                                q: params.term
+                            }; // Kirim query pencarian
+                        },
+                        processResults: function(data) {
+                            return {
+                                results: data
+                            }; // Tampilkan hasil dari API
+                        },
+                        cache: true
+                    }
+                }).on('select2:select', function(e) {
+                    // Event handler saat item dipilih
+                    var data = e.params.data;
+                    var currentText = $(targetTextareaId).val();
+                    var newText = data.text;
+
+                    // Tambahkan teks ke textarea
+                    $(targetTextareaId).val(currentText ? currentText + '\n' + newText : newText);
+
+                    // Kosongkan Select2
+                    $(this).val(null).trigger('change');
+                });
+            }
+
+            // Inisialisasi untuk ICD-10 (Diagnosa) menggunakan API Lokal
+            const icd10Url = "{{ route('api.local.icd10.search') }}";
+            initializeIcdSelect2('#cari_icd', '#diagnosa_utama', icd10Url, 'Cari Diagnosa ICD 10...');
+            initializeIcdSelect2('#cari_icd_tambahan', '#diagnosa_tambahan', icd10Url, 'Cari Diagnosa ICD 10...');
+
+            // Inisialisasi untuk ICD-9 (Tindakan) menggunakan API Lokal
+            const icd9Url = "{{ route('api.local.icd9.search') }}";
+            initializeIcdSelect2('#cari_icd2', '#tindakan_utama', icd9Url, 'Cari Tindakan ICD 9...');
+            initializeIcdSelect2('#cari_icd2_tambahan', '#tindakan_tambahan', icd9Url, 'Cari Tindakan ICD 9...');
         });
     </script>
 @endsection

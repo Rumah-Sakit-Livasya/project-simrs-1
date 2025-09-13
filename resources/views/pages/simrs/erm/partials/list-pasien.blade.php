@@ -89,9 +89,15 @@
                         </a>
                     @elseif ($path === 'poliklinik')
                         <a href="{{ url('simrs/poliklinik/daftar-pasien') . '?' . $query }}">
+                            @php
+                                $genderBg =
+                                    $registration->patient->gender == 'M'
+                                        ? 'background: #007bff;'
+                                        : 'background: #ff69b4;';
+                            @endphp
                             <li style="background: #f5f5f5; border-radius: 11px; padding: 18px;">
-                                <div class="number mr-4 p-2 text-center bg-primary text-white"
-                                    style="border-radius: 11px; width: 65px; height: 65px; line-height: 50px;">
+                                <div class="number mr-4 p-2 text-center text-white"
+                                    style="border-radius: 11px; width: 65px; height: 65px; line-height: 50px; {{ $genderBg }}">
                                     {{ str_pad($registration->no_urut, 3, '0', STR_PAD_LEFT) }}
                                 </div>
 
@@ -104,7 +110,7 @@
                                     ({{ \Carbon\Carbon::parse($registration->patient->date_of_birth)->age }}
                                     Thn)
                                     <i
-                                        class="mdi mdi-gender-{{ $registration->gender == 'M' ? 'male' : 'female' }}"></i>
+                                        class="mdi mdi-gender-{{ $registration->patient->gender == 'M' ? 'male' : 'female' }}"></i>
                                     <i class="fa fa-check green-text d-none"
                                         style="float: right; margin-right: 10px;"></i>
                                     <i class="fa fa-check blue-text d-none"

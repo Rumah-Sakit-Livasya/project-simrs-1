@@ -246,6 +246,10 @@ Route::middleware(['web', 'auth'])->prefix('dashboard')->group(function () {
         Route::post('/deduction/import', [EmployeeController::class, 'importDeduction'])->name('deduction.import');
         Route::get('/getByOrganization', [EmployeeController::class, 'getEmployeesByOrganization'])->name('getEmployeesByOrganization');
         Route::post('/toggle-management/{id}', [EmployeeController::class, 'toggleManagement'])->name('toggleManagement');
+
+        // Post Tandatangan
+        Route::post('/signature/store', [EmployeeController::class, 'storeSignature'])->name('employee.signature.store');
+        Route::get('/signature-pad', [EmployeeController::class, 'showSignaturePadPage'])->name('signature.pad');
     });
 
     Route::prefix('attendances')->group(function () {

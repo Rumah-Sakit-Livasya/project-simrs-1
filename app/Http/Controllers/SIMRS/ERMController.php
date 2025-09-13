@@ -1472,8 +1472,17 @@ class ERMController extends Controller
             case 'resume_medis':
                 $dokter = Employee::where('is_doctor', 1)->get();
                 $pengkajian = ResumeMedisRajal::firstWhere('registration_id', $registration->id);
+                if ($registration->registration_type == 'rawat-jalan') {
+                    $assesment = DoctorInitialAssessment::firstWhere('registration_id', $registration->id);
+                }
 
-                return view('pages.simrs.erm.form.dokter.resume_medis', compact('registration', 'registrations', 'pengkajian', 'menu', 'departements', 'jadwal_dokter', 'dokter', 'path'));
+                // Flag untuk menampilkan SweetAlert2 jika assesment belum ada
+                $showSwal = false;
+                if (!$assesment || !$assesment->exists) {
+                    $showSwal = true;
+                }
+
+                return view('pages.simrs.erm.form.dokter.resume_medis', compact('registration', 'registrations', 'pengkajian', 'assesment', 'menu', 'departements', 'jadwal_dokter', 'dokter', 'path'));
 
             case 'rekonsiliasi_obat':
                 $dokter = Employee::where('is_doctor', 1)->get();
@@ -1515,8 +1524,10 @@ class ERMController extends Controller
 
             case 'transfer_pasien_perawat':
                 $pengkajian = TransferPasienAntarRuangan::firstWhere('registration_id', $registration->id);
+                $cppt = CPPT::firstWhere(['registration_id' => $registration->id, 'tipe_cppt' => 'dokter']);
+                // dd($cppt);
 
-                return view('pages.simrs.erm.form.perawat.transfer_pasien_perawat', compact('registration', 'pengkajian', 'registrations', 'menu', 'departements', 'jadwal_dokter', 'path'));
+                return view('pages.simrs.erm.form.perawat.transfer_pasien_perawat', compact('registration', 'pengkajian', 'cppt', 'registrations', 'menu', 'departements', 'jadwal_dokter', 'path'));
 
             case 'ews_anak':
                 $pengkajian = EWSAnak::firstWhere('registration_id', $registration->id);
