@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Keuangan;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\keuangan\PembayaranJasaDokter;
+use App\Models\Keuangan\PembayaranJasaDokter;
 use App\Models\SIMRS\Doctor;
 use App\Models\Bank;
 

@@ -3,7 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use App\Models\keuangan\PenerimaanBarangHeader;
+use App\Models\Keuangan\PenerimaanBarangHeader;
 use App\Models\ProcurementPurchaseOrderPharmacy;
 
 class PenerimaanBarangSeeder extends Seeder

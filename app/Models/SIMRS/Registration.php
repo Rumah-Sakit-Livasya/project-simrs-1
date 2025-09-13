@@ -6,8 +6,12 @@ use App\Models\DietGizi;
 use App\Models\OrderGizi;
 use App\Models\SIMRS\BatalRegister;
 use App\Models\Employee;
+<<<<<<< HEAD
 use App\Models\FhirLog;
 use App\Models\keuangan\JasaDokter;
+=======
+use App\Models\Keuangan\JasaDokter;
+>>>>>>> 02daf3e53b19dd204d81f412dd529ecad225b1c9
 use App\Models\Keuangan\KonfirmasiAsuransi;
 use App\Models\OrderRadiologi;
 use App\Models\SIMRS\CPPT\CPPT;
