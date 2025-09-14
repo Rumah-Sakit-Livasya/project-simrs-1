@@ -1490,6 +1490,8 @@ class ERMController extends Controller
                 $pengkajian = ResumeMedisRajal::firstWhere('registration_id', $registration->id);
                 if ($registration->registration_type == 'rawat-jalan') {
                     $assesment = DoctorInitialAssessment::firstWhere('registration_id', $registration->id);
+                } else {
+                    $assesment = PengkajianDokterIGD::firstWhere('registration_id', $registration->id);
                 }
 
                 // Flag untuk menampilkan SweetAlert2 jika assesment belum ada
