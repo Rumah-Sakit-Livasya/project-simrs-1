@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AppController\SettingController;
+use App\Http\Controllers\SIMRS\BPJS\AplicareController;
 use App\Http\Controllers\SIMRS\BPJS\BridgingEclaimController;
 use App\Http\Controllers\SIMRS\BPJS\BridgingVclaimController;
 use App\Http\Controllers\SIMRS\BPJS\LaporanController;
@@ -39,6 +40,16 @@ Route::group(['middleware' => ['auth']], function () {
 
             Route::post('list-pasien-baru', [MjknController::class, 'listPasienBaru'])
                 ->name('list-pasien-baru');
+        });
+
+        Route::prefix('aplicares')->name('aplicares.')->group(function () {
+            Route::get('/', [AplicareController::class, 'index'])->name('index');
+            Route::get('/data', [AplicareController::class, 'getData'])->name('data');
+
+            // Rute untuk aksi API
+            Route::post('/update/{roomId}', [AplicareController::class, 'updateRoom'])->name('update');
+            Route::post('/insert/{roomId}', [AplicareController::class, 'insertRoom'])->name('insert');
+            Route::delete('/delete/{roomId}', [AplicareController::class, 'deleteRoom'])->name('delete');
         });
 
         Route::prefix('bridging-vclaim')->group(function () {
