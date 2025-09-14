@@ -12,5 +12,13 @@ class Persalinan extends Model
     protected $table = 'persalinan';
     protected $fillable = ['tipe', 'kode', 'nama_persalinan', 'nama_billing'];
 
-    public function orderPersalinan() {}
+    public function orderPersalinan()
+    {
+        return $this->hasMany(OrderPersalinan::class, 'persalinan_id');
+    }
+
+    public function tarif()
+    {
+        return $this->hasMany(TarifPersalinan::class, 'persalinan_id');
+    }
 }

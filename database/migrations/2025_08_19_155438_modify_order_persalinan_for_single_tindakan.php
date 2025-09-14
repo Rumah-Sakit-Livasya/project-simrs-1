@@ -14,7 +14,6 @@ return new class extends Migration
     public function up()
     {
         // First, drop the old pivot table as it's no longer needed.
-        Schema::dropIfExists('order_persalinan_detail');
 
         // Next, add the foreign key directly to the main order table.
         Schema::table('order_persalinan', function (Blueprint $table) {
@@ -34,12 +33,6 @@ return new class extends Migration
     public function down()
     {
         // Recreate the pivot table if we roll back the migration.
-        Schema::create('order_persalinan_detail', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('order_persalinan_id')->constrained('order_persalinan')->onDelete('cascade');
-            $table->foreignId('persalinan_id')->constrained('persalinan')->onDelete('cascade');
-            $table->timestamps();
-        });
 
         // Drop the foreign key and the column from the main table.
         Schema::table('order_persalinan', function (Blueprint $table) {

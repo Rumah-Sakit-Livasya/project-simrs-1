@@ -1,4 +1,4 @@
-{{-- filepath: d:\IT\App\simrs-laravel\resources\views\pages\simrs\keuangan\kasir\partials\add-tagihan-modal.blade.php --}}
+{{-- filepath: d:\IT\App\simrs-laravel\resources\views\pages\simrs\Keuangan\kasir\partials\add-tagihan-modal.blade.php --}}
 <div class="modal fade" id="add-tagihan-modal" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-xl" role="document">
         <div class="modal-content">

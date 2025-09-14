@@ -1,19 +1,24 @@
 <div class="card-actionbar-row " id="group-print-pasien">
     <button class="btn btn-primary pull-left waves-effect" style="margin: 2px"
-        onclick="popupwindow('http://192.168.1.253/real/regprint/print_kartu_pdf/53432/180789','p_card', 400,400,'no'); return false"><i
-            class="mdi mdi-printer"></i> Kartu pasien</button>
+        onclick="window.open('{{ route('print.kartu.pasien', ['patient' => $registration->patient_id ?? ($registration->patient->id ?? ($patient->id ?? ($patient ?? '')))]) }}', '_blank', 'width=400,height=400'); return false;">
+        <i class="mdi mdi-printer"></i> Kartu pasien
+    </button>
     <button class="btn btn-primary pull-left waves-effect" style="margin: 2px"
-        onclick="popupwindow('http://192.168.1.253/real/regprint/print_identitas/53432/180789','p_card', 400,400,'yes'); return false"><i
-            class="mdi mdi-printer"></i> Identitas Pasien</button>
+        onclick="window.open('{{ route('print.identitas.pasien', ['patient' => $registration->patient_id ?? ($registration->patient->id ?? ($patient->id ?? ($patient ?? ''))), 'regId' => $registration->id ?? ($regId ?? '')]) }}','p_card', 400,400,'yes'); return false;">
+        <i class="mdi mdi-printer"></i> Identitas Pasien
+    </button>
     <button class="btn btn-primary pull-left waves-effect" style="margin: 2px"
-        onclick="popupwindow('http://192.168.1.253/real/regprint/label_rm_pdf/53432/180789','p_card', 400,400,'no'); return false;"><i
-            class="mdi mdi-printer"></i> Label RM (PDF)</button>
+        onclick="window.open('{{ route('print.label.rm.pdf', ['patient' => $registration->patient_id ?? ($registration->patient->id ?? ($patient->id ?? ($patient ?? '')))]) }}', '_blank', 'width=400,height=400'); return false;">
+        <i class="mdi mdi-printer"></i> Label RM (PDF)
+    </button>
     <button class="btn btn-primary pull-left waves-effect" style="margin: 2px"
-        onclick="popupwindow('http://192.168.1.253/real/regprint/label_rm_new/53432/180789','p_card', 400,400,'no'); return false;"><i
-            class="mdi mdi-printer"></i> Label RM</button>
+        onclick="window.open('{{ route('print.label.rm', ['patient' => $registration->patient_id ?? ($registration->patient->id ?? ($patient->id ?? ($patient ?? '')))]) }}', '_blank', 'width=400,height=400'); return false;">
+        <i class="mdi mdi-printer"></i> Label RM
+    </button>
     <button class="btn btn-primary pull-left waves-effect" style="margin: 2px"
-        onclick="popupwindow('http://192.168.1.253/real/regprint/label_gelang_anak_pdf/53432/180789','p_card', 400,400,'no'); return false;"><i
-            class="mdi mdi-printer"></i> Label Gelang Anak</button>
+        onclick="window.open('{{ route('print.label.gelang.anak', ['patient' => $registration->patient_id ?? ($registration->patient->id ?? ($patient->id ?? ($patient ?? '')))]) }}', '_blank', 'width=400,height=400'); return false;">
+        <i class="mdi mdi-printer"></i> Label Gelang Anak
+    </button>
     <button class="btn btn-primary pull-left waves-effect" style="margin: 2px"
         onclick="popupwindow('http://192.168.1.253/real/regprint/label_gelang_dewasa_pdf/53432/180789','p_card', 400,400,'no'); return false;"><i
             class="mdi mdi-printer"></i> Label Gelang Dewasa</button>

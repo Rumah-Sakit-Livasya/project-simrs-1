@@ -2,7 +2,7 @@
 
 namespace App\Models\keuangan;
 
-use App\Models\keuangan\PembayaranJasaDokter;
+use App\Models\Keuangan\PembayaranJasaDokter;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 

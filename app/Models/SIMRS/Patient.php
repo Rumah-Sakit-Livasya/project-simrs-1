@@ -11,9 +11,9 @@ class Patient extends Model
 {
     protected $guarded = ['id'];
 
-    protected $casts = [
-        'date_of_birth' => 'date',
-    ];
+    // protected $casts = [
+    //     'date_of_birth' => 'date',
+    // ];
 
     use HasFactory, SoftDeletes;
 
