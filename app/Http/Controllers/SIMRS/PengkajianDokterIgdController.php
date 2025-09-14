@@ -114,8 +114,8 @@ class PengkajianDokterIgdController extends Controller
         // 4. Gunakan updateOrCreate untuk menyimpan atau memperbarui data
         try {
             $pengkajian = PengkajianDokterIGD::updateOrCreate(
-                ['registration_id' => $request->registration_id],
-                $dataToSave
+                ['registration_id' => $request->registration_id], // Kunci untuk mencari
+                $dataToSave // Data untuk disimpan/diperbarui
             );
 
             // Set audit trails (created_by dan updated_by)
