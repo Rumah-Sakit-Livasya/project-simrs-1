@@ -115,8 +115,8 @@ class DatabaseSeeder extends Seeder
             // CompleteTarifPersalinanSeeder::class,
             // Icd10Seeder::class,
             // Icd9Seeder::class,
-            // GeoLocationSeeder::class,
-            // UpdateDepartementsCategorySeeder::class,
+            GeoLocationSeeder::class,
+            UpdateDepartementsCategorySeeder::class,
             DepartementSeeder::class, // <-- CUKUP PANGGIL INI
         ]);
     }
