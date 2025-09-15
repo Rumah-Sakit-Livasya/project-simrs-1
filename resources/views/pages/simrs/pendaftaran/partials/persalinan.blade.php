@@ -162,6 +162,10 @@
         transform: scale(1.2);
     }
 
+    .panel {
+        padding: 8px;
+    }
+
     .tindakan-item label {
         margin: 0;
         cursor: pointer;
