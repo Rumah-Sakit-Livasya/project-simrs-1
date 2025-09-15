@@ -7,6 +7,7 @@ use App\Models\SIMRS\AssesmentKeperawatanGadar;
 use App\Models\SIMRS\Registration;
 use Illuminate\Http\Request;
 use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\Storage;
 
 class AssesmentGadarController extends Controller
 {
@@ -148,38 +149,27 @@ class AssesmentGadarController extends Controller
 
             $gadar = AssesmentKeperawatanGadar::updateOrCreate($search, $dataToSave);
 
-            // SIGNATURE
-            if ($request->filled('signature_image')) {
-                $imageData = $request->input('signature_image');
-                $pic = $request->input('pic');
-                $role = $request->input('role');
-                $image = str_replace('data:image/png;base64,', '', $imageData);
-                $image = str_replace(' ', '+', $image);
-                $imageName = 'ttd_' . time() . '.png';
-                $path = 'signatures/' . $imageName;
+            if ($request->has('signatures')) {
+                foreach ($request->input('signatures', []) as $role => $signatureData) {
+                    if (! empty($signatureData['signature_image']) && str_starts_with($signatureData['signature_image'], 'data:image')) {
 
-                // Cek apakah sudah ada tanda tangan lama
-                $existingSignature = $gadar->signature;
+                        $oldPath = optional($gadar->signatures()->where('role', $role)->first())->signature;
 
-                if ($existingSignature && \Storage::disk('public')->exists($existingSignature->signature)) {
-                    \Storage::disk('public')->delete($existingSignature->signature);
+                        $newPath = $this->saveSignatureFile($signatureData['signature_image'], "asesmen_awal_kebidanan_{$gadar->id}_{$role}");
+
+                        $gadar->signatures()->updateOrCreate(
+                            ['role' => $role], // Kunci unik
+                            [
+                                'pic' => $signatureData['pic'], // Data baru
+                                'signature' => $newPath,         // Data baru
+                            ]
+                        );
+
+                        if ($oldPath && Storage::disk('public')->exists($oldPath)) {
+                            Storage::disk('public')->delete($oldPath);
+                        }
+                    }
                 }
-
-                // Simpan file baru ke storage
-                \Storage::disk('public')->put($path, base64_decode($image));
-
-                // Simpan ke tabel `signatures` via relasi
-                $gadar->signature()->updateOrCreate(
-                    [
-                        'signable_id' => $gadar->id,
-                        'signable_type' => get_class($gadar),
-                    ],
-                    [
-                        'signature' => $path,
-                        'pic' => $pic,
-                        'role' => $role,
-                    ]
-                );
             }
 
             return response()->json(['message' => 'Data berhasil disimpan'], 201);
@@ -208,5 +198,20 @@ class AssesmentGadarController extends Controller
             'message' => 'Data ditemukan.',
             'data' => $data
         ], 200);
+    }
+
+    /**
+     * Helper function untuk menyimpan file tanda tangan dari data base64.
+     * (Pastikan fungsi ini sudah ada di dalam ERMController)
+     */
+    private function saveSignatureFile(string $base64Image, string $fileNamePrefix): string
+    {
+        $imageData = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $base64Image));
+        $fileName = $fileNamePrefix . '_' . time() . '.png';
+        $path = 'signatures/' . $fileName;
+
+        Storage::disk('public')->put($path, $imageData);
+
+        return $path;
     }
 }
