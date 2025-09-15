@@ -226,6 +226,16 @@ Route::group(['middleware' => ['auth']], function () {
             ->name('print.label.rm');
         Route::get('/{patient:id}/label-gelang-anak', [PatientController::class, 'print_label_gelang_anak'])
             ->name('print.label.gelang.anak');
+        Route::get('/{patient:id}/label-gelang-dewasa', [PatientController::class, 'print_label_gelang_dewasa'])
+            ->name('print.label.gelang.dewasa');
+        Route::get('/{patient:id}/tracer/{registration?}', [PatientController::class, 'print_tracer'])
+            ->name('print.tracer');
+        Route::get('/{patient:id}/charges-slip/{registration?}', [PatientController::class, 'print_charges_slip'])
+            ->name('print.charges.slip');
+        Route::get('/{patient:id}/surat-keterangan-lahir/{registration?}', [PatientController::class, 'print_surat_keterangan_lahir'])
+            ->name('print.surat.keterangan.lahir');
+        Route::get('/{patient:id}/general-consent/{registration?}', [PatientController::class, 'print_general_consent'])
+            ->name('print.general.consent');
 
         // View patient visit history
         Route::get('/{patient:id}/history', [PatientController::class, 'history_kunjungan_pasien'])

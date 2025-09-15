@@ -324,6 +324,47 @@ class PatientController extends Controller
         // return $pdf->download('kartu-pasien.pdf'); // Untuk mengunduh file
     }
 
+    public function print_label_gelang_dewasa(Patient $patient)
+    {
+        // Ambil data pasien berdasarkan ID
+        $patient = Patient::findOrFail($patient->id);
+
+        // Render view ke PDF
+        $pdf = Pdf::loadView('pages.simrs.pendaftaran.print-label-gelang-dewasa', compact('patient'));
+
+        // Unduh atau tampilkan PDF
+        return $pdf->stream('label-gelang-dewasa.pdf'); // Untuk menampilkan di browser
+        // return $pdf->download('kartu-pasien.pdf'); // Untuk mengunduh file
+    }
+
+    public function print_tracer(Patient $patient, ?Registration $registration = null)
+    {
+        $patient = Patient::findOrFail($patient->id);
+
+        return view('pages.simrs.pendaftaran.print-tracer', compact('patient', 'registration'));
+    }
+
+    public function print_charges_slip(Patient $patient, ?Registration $registration = null)
+    {
+        $patient = Patient::findOrFail($patient->id);
+
+        return view('pages.simrs.pendaftaran.print-charges-slip', compact('patient', 'registration'));
+    }
+
+    public function print_surat_keterangan_lahir(Patient $patient, ?Registration $registration = null)
+    {
+        $patient = Patient::findOrFail($patient->id);
+
+        return view('pages.simrs.pendaftaran.print-surat-keterangan-lahir', compact('patient', 'registration'));
+    }
+
+    public function print_general_consent(Patient $patient, ?Registration $registration = null)
+    {
+        $patient = Patient::findOrFail($patient->id);
+
+        return view('pages.simrs.pendaftaran.print-general-consent', compact('patient', 'registration'));
+    }
+
     public function history_kunjungan_pasien(Patient $patient)
     {
         $birthdate = $patient->date_of_birth;
