@@ -140,6 +140,12 @@ Alergi makan :
 Reaksi alergi makan :
 Alergi lainya :
 Reaksi alergi lainya :
+@elseif ($registration->registration_type === 'igd' && $assesment)
+Alergi : {{ $assesment['riwayat_alergi'] ?? '-' }}
+Reaksi alergi obat : {{ $assesment['riwayat_alergi_text'] ?? '-' }}
+Keluhan Utama : {{ $assesment['keluhan_utama'] ?? '-' }}
+Riwayat Penyakit Sekarang : {{ $assesment['riwayat_penyakit_sekarang'] ?? '-' }}
+Riwayat Penyakit Dahulu : {{ $assesment['riwayat_penyakit_dahulu'] ?? '-' }}
 @else
 Alergi obat : {{ $assesment?->awal_riwayat_alergi_obat === 1 ? 'Ya' : 'Tidak' }}
 Reaksi alergi obat : {{ $assesment?->awal_riwayat_alergi_obat_lain ?? '' }}
@@ -188,6 +194,46 @@ SpO2: {{ $tanda_vital['spo2'] ?? '' }}
 Lingkar Kepala:
 Pemeriksaan Fisik: {{ $assesment->pemeriksaan_fisik ?? '' }}
 Pemeriksaan Penunjang: {{ $assesment->pemeriksaan_penunjang ?? '' }}
+@elseif ($registration->registration_type === 'igd' && $assesment)
+Nadi (PR): {{ $assesment['pr_triage'] ?? '' }}
+Respirasi (RR): {{ $assesment['rr_triage'] ?? '' }}
+Tensi (BP): {{ $assesment['bp_triage'] ?? '' }}
+Suhu (T): {{ $assesment['sb_triage'] ?? '' }}
+Tinggi Badan: {{ $assesment['tb_triage'] ?? '' }}
+Berat Badan: {{ $assesment['bb_triage'] ?? '' }}
+SpO2: {{ $assesment['dokterSPO2'] ?? '' }}
+Lingkar Kepala:
+Pemeriksaan Fisik: {{ $assesment->pemeriksaan_fisik ?? '' }}
+@php
+    $pemeriksaanPenunjang = $assesment->pemeriksaan_penunjang ?? '';
+    $penunjang = [];
+    if (is_string($pemeriksaanPenunjang) && str_starts_with(trim($pemeriksaanPenunjang), '{')) {
+        $penunjang = json_decode($pemeriksaanPenunjang, true) ?? [];
+    }
+@endphp
+Pemeriksaan Penunjang:
+@if (!empty($penunjang))
+@php
+    $labels = [
+        'laboratorium' => 'Laboratorium',
+        'ekg' => 'EKG',
+        'radiologi' => 'Radiologi',
+        'pemeriksaan_lainnya' => 'Pemeriksaan Lainnya',
+        'rapid_antigen' => 'Rapid Antigen',
+        'rapid_antibody' => 'Rapid Antibody',
+    ];
+    $output = [];
+    foreach ($labels as $key => $label) {
+        if (!empty($penunjang[$key]['checked'])) {
+            $text = $penunjang[$key]['text'] ?? '';
+            $output[] = $label . ($text ? ': ' . $text : '');
+        }
+    }
+@endphp
+    {{ count($output) ? implode('; ', $output) : '-' }}
+@else
+{{ $pemeriksaanPenunjang !== '' ? $pemeriksaanPenunjang : '-' }}
+@endif
 @else
 {{ 'Nadi (PR): ' .
     ($assesment?->pr ?? '') .
@@ -721,7 +767,9 @@ Diagnosa Banding: {{ $assesment?->diagnosa_banding ?? '' }}</textarea>
                             window.location.href = @json(
                                 $registration->registration_type == 'rawat-inap'
                                     ? '?menu=pengkajian_dokter&registration=' . $registration->registration_number
-                                    : '?menu=asesmen_awal_dokter&registration=' . $registration->registration_number);
+                                    : ($registration->registration_type == 'igd'
+                                        ? '?menu=pengkajian_dokter_igd&registration=' . $registration->registration_number
+                                        : '?menu=asesmen_awal_dokter&registration=' . $registration->registration_number));
                         }
                     });
                 });

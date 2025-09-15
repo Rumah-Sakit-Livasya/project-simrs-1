@@ -20,8 +20,8 @@ class AssesmentKeperawatanGadar extends Model
         return $this->belongsTo(Registration::class); // Hubungan dengan model Registration
     }
 
-    public function signature()
+    public function signatures()
     {
-        return $this->morphOne(Signature::class, 'signable');
+        return $this->morphMany(Signature::class, 'signable');
     }
 }

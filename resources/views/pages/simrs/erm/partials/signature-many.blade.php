@@ -1,7 +1,7 @@
 {{-- resources/views/pages/simrs/erm/partials/signature-many.blade.php --}}
 @props(['judul', 'name_prefix', 'index', 'pic' => '', 'signature_model' => null])
 
-<div class="text-center">
+<div class="text-center mt-3">
     <span>{{ $judul }}</span>
 
     @php
