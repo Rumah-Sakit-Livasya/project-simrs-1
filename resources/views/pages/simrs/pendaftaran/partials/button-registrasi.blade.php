@@ -20,23 +20,37 @@
         <i class="mdi mdi-printer"></i> Label Gelang Anak
     </button>
     <button class="btn btn-primary pull-left waves-effect" style="margin: 2px"
-        onclick="popupwindow('http://192.168.1.253/real/regprint/label_gelang_dewasa_pdf/53432/180789','p_card', 400,400,'no'); return false;"><i
-            class="mdi mdi-printer"></i> Label Gelang Dewasa</button>
+        onclick="window.open('{{ route('print.label.gelang.dewasa', ['patient' => $registration->patient_id ?? ($registration->patient->id ?? ($patient->id ?? ($patient ?? '')))]) }}', '_blank', 'width=400,height=400'); return false;">
+        <i class="mdi mdi-printer"></i> Label Gelang Dewasa
+    </button>
     <button class="btn btn-primary pull-left waves-effect" style="margin: 2px"
-        onclick="popupwindow('http://192.168.1.253/real/regprint/tracer_new/53432/180789','p_tracer_new', 800,500,'no'); return false;"><i
-            class="mdi mdi-printer"></i> Tracer</button>
+        onclick="window.open('{{ route('print.tracer', [
+            'patient' => $registration->patient_id ?? ($registration->patient->id ?? ($patient->id ?? ($patient ?? ''))),
+            'registration' => $registration->id ?? ($registration ?? ''),
+        ]) }}', '_blank', 'toolbar=0,location=0,menubar=0,scrollbars=1,resizable=1,status=0,width=' + screen.width + ',height=' + screen.height + ',top=0,left=0'); return false;">
+        <i class="mdi mdi-printer"></i> Tracer
+    </button>
     <button class="btn btn-primary pull-left waves-effect" style="margin: 2px"
-        onclick="popupwindow('http://192.168.1.253/real/regprint/slip_dokter/53432/180789','p_card', 400,400,'no'); return false;"><i
-            class="mdi mdi-printer"></i> Charges Slip</button>
+        onclick="window.open('{{ route('print.charges.slip', [
+            'patient' => $registration->patient_id ?? ($registration->patient->id ?? ($patient->id ?? ($patient ?? ''))),
+            'registration' => $registration->id ?? ($registration ?? ''),
+        ]) }}', '_blank', 'width=400,height=400'); return false;">
+        <i class="mdi mdi-printer"></i> Charges Slip
+    </button>
     <button class="btn btn-primary pull-left waves-effect" style="margin: 2px"
-        onclick="popupwindow('http://192.168.1.253/real/persalinan/skl/180789/modul_pasien','p_card', 400,400,'no'); return false;"><i
-            class="mdi mdi-printer"></i> Surat Keterangan Lahir</button>
-    <button class="btn btn-primary pull-left waves-effect" style="margin: 2px" style="display: none"
-        onclick="popupwindow('http://192.168.1.253/real/regprint/print_surat_ket_mati/53432/180789','p_card', 2000,2000,'no'); return false;"><i
-            class="mdi mdi-printer"></i> Surat Keterangan Kematian</button>
+        onclick="window.open('{{ route('print.surat.keterangan.lahir', [
+            'patient' => $registration->patient_id ?? ($registration->patient->id ?? ($patient->id ?? ($patient ?? ''))),
+            'registration' => $registration->id ?? ($registration ?? ''),
+        ]) }}', '_blank', 'toolbar=0,location=0,menubar=0,scrollbars=1,resizable=1,status=0,width=' + screen.width + ',height=' + screen.height + ',top=0,left=0'); return false;">
+        <i class="mdi mdi-printer"></i> Surat Keterangan Lahir
+    </button>
     <button class="btn btn-primary pull-left waves-effect" style="margin: 2px"
-        onclick="popupwindow('http://192.168.1.253/real/pengkajian/general_consent?pregid=180789','p_card', 1000,900,'yes'); return false;"><i
-            class="mdi mdi-printer"></i> General Consent</button>
+        onclick="window.open('{{ route('print.general.consent', [
+            'patient' => $registration->patient_id ?? ($registration->patient->id ?? ($patient->id ?? ($patient ?? ''))),
+            'registration' => $registration->id ?? ($registration ?? ''),
+        ]) }}', '_blank', 'toolbar=0,location=0,menubar=0,scrollbars=1,resizable=1,status=0,width=' + screen.width + ',height=' + screen.height + ',top=0,left=0'); return false;">
+        <i class="mdi mdi-printer"></i> General Consent
+    </button>
     <div class="col-sm-12"></div>
     <button class="btn btn-danger pull-left waves-effect" style="margin: 2px"
         onclick="popupFull('http://192.168.1.253/real/vclaim/print_sep_pdf/180789'); return false;"><i
