@@ -35,6 +35,7 @@ class LaboratoriumTarifExport implements FromCollection, WithHeadings, WithMappi
         return ParameterLaboratorium::with([
             'grup_parameter_laboratorium',
             'kategori_laboratorium',
+            'tipe_laboratorium',
             'tarif_parameter_laboratorium' => function ($query) {
                 // Filter tarif hanya untuk grup penjamin yang dipilih
                 $query->where('group_penjamin_id', $this->grupPenjaminId);
@@ -54,8 +55,8 @@ class LaboratoriumTarifExport implements FromCollection, WithHeadings, WithMappi
         $headerRow2 = [$grupPenjamin->id ?? '', $grupPenjamin->name ?? ''];
 
         // Baris 4-5: Header Tabel
-        $headerRow4 = ['ID#', 'Group', 'Tindakan', 'Kode'];
-        $headerRow5 = ['', '', '', ''];
+        $headerRow4 = ['ID#', 'Group', 'Tipe', 'Parameter', 'Kategori'];
+        $headerRow5 = ['', '', '', '', ''];
 
         // Loop untuk setiap kelas rawat, masing-masing 3 kolom
         foreach ($this->kelasRawat->sortBy('urutan') as $kelas) {
@@ -83,6 +84,7 @@ class LaboratoriumTarifExport implements FromCollection, WithHeadings, WithMappi
         $row = [
             $parameter->id,
             $parameter->grup_tindakan_medis?->nama_grup,
+            $parameter->tipeLaboratorium?->nama_tipe,
             $parameter->parameter,
             $parameter->kategori_laboratorium?->nama_kategori,
         ];

@@ -6,6 +6,7 @@ use App\Models\SIMRS\Laboratorium\GrupParameterLaboratorium;
 use App\Models\SIMRS\Laboratorium\KategoriLaboratorium;
 use App\Models\SIMRS\Laboratorium\ParameterLaboratorium;
 use App\Models\SIMRS\Laboratorium\TarifParameterLaboratorium;
+use App\Models\SIMRS\Laboratorium\TipeLaboratorium;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log; // <-- INI SUDAH DI POSISI YANG BENAR
@@ -61,7 +62,7 @@ class LaboratoriumTarifImport implements ToCollection, WithStartRow, WithEvents
     public function collection(Collection $rows)
     {
         $lastParameter = ParameterLaboratorium::withTrashed()
-            ->where('kode', 'LIKE', 'RAD%')
+            ->where('kode', 'LIKE', 'LAB%')
             ->orderBy('id', 'desc')
             ->first();
 
@@ -81,11 +82,19 @@ class LaboratoriumTarifImport implements ToCollection, WithStartRow, WithEvents
 
                 $idFromCell   = $row[0];
                 $groupName    = $row[1];
-                $parameterName = $row[2];
-                $kategoriName = $row[3];
+                $tipeName = $row[2];
+                $parameterName = $row[3];
+                $kategoriName = $row[4];
 
-                $grup = GrupParameterLaboratorium::firstOrCreate(['nama_grup' => $groupName], ['no_urut' => 0]);
+                $grup = GrupParameterLaboratorium::firstOrCreate(
+                    ['nama_grup' => $groupName],
+                    [
+                        'kode_order' => $groupName,
+                        'no_urut' => $rowIndex + 1
+                    ]
+                );
                 $kategori = KategoriLaboratorium::firstOrCreate(['nama_kategori' => $kategoriName], ['status' => 1]);
+                $tipe = TipeLaboratorium::firstOrCreate(['nama_tipe' => $tipeName], ['status' => 1]);
 
                 $parameter = null;
 
@@ -105,6 +114,7 @@ class LaboratoriumTarifImport implements ToCollection, WithStartRow, WithEvents
                         $parameter->update([
                             'grup_parameter_laboratorium_id' => $grup->id,
                             'kategori_laboratorium_id' => $kategori->id,
+                            'tipe_laboratorium_id' => $tipe->id,
                             'parameter' => $parameterName,
                         ]);
                     } else {
@@ -115,7 +125,7 @@ class LaboratoriumTarifImport implements ToCollection, WithStartRow, WithEvents
                 } else {
                     // KASUS 2: ID KOSONG -> HANYA CREATE DATA BARU
                     $lastCodeNumber++;
-                    $newCode = 'RAD' . str_pad($lastCodeNumber, 3, '0', STR_PAD_LEFT);
+                    $newCode = 'LAB' . str_pad($lastCodeNumber, 3, '0', STR_PAD_LEFT);
                     Log::info("--- [ BARIS #" . ($rowIndex + 6) . " ] --- ID kosong. Membuat parameter baru '{$parameterName}' dengan kode: {$newCode}");
 
                     // Gunakan firstOrCreate untuk mencegah duplikat dalam file yang sama
@@ -124,6 +134,7 @@ class LaboratoriumTarifImport implements ToCollection, WithStartRow, WithEvents
                         [
                             'kode' => $newCode, // Kode baru yang di-generate
                             'kategori_laboratorium_id' => $kategori->id,
+                            'tipe_laboratorium_id' => $tipe->id,
                         ]
                     );
                 }
