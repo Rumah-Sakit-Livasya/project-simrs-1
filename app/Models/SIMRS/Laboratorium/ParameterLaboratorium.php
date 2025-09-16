@@ -32,6 +32,11 @@ class ParameterLaboratorium extends Model
         return $this->belongsTo(KategoriLaboratorium::class);
     }
 
+    public function tipe_laboratorium(): BelongsTo
+    {
+        return $this->belongsTo(TipeLaboratorium::class);
+    }
+
     /**
      * Get the sub-parameters for this main parameter.
      */
