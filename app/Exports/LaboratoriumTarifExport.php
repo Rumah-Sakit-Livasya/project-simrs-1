@@ -63,8 +63,10 @@ class LaboratoriumTarifExport implements FromCollection, WithHeadings, WithMappi
             $headerRow4[] = strtoupper($kelas->kelas) . ':' . $kelas->id;
             $headerRow4[] = ''; // Sel kosong untuk merge
             $headerRow4[] = ''; // Sel kosong untuk merge
+            $headerRow4[] = ''; // Sel kosong untuk merge
+            $headerRow4[] = ''; // Sel kosong untuk merge
 
-            array_push($headerRow5, 'Share Dokter', 'Share RS', 'TARIF');
+            array_push($headerRow5, 'Share DR', 'Share RS', 'prasarana', 'bhp', 'TARIF');
         }
 
         return [
@@ -83,8 +85,8 @@ class LaboratoriumTarifExport implements FromCollection, WithHeadings, WithMappi
     {
         $row = [
             $parameter->id,
-            $parameter->grup_tindakan_medis?->nama_grup,
-            $parameter->tipeLaboratorium?->nama_tipe,
+            $parameter->grup_parameter_laboratorium?->nama_grup,
+            $parameter->tipe_laboratorium?->nama_tipe,
             $parameter->parameter,
             $parameter->kategori_laboratorium?->nama_kategori,
         ];
@@ -94,6 +96,8 @@ class LaboratoriumTarifExport implements FromCollection, WithHeadings, WithMappi
 
             $row[] = $tarif?->share_dr ?? '0.00';
             $row[] = $tarif?->share_rs ?? '0.00';
+            $row[] = $tarif?->prasarana ?? '0.00';
+            $row[] = $tarif?->bhp ?? '0.00';
             $row[] = $tarif?->total ?? '0.00';
         }
 
