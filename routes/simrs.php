@@ -314,15 +314,23 @@ Route::group(['middleware' => ['auth']], function () {
         })->name('dashboard.simrs');
 
         Route::prefix('/control-panel')->group(function () {
+            Route::prefix('/laboratorium')->group(function () {
+                Route::get('/migrasi', [ControlPanelController::class, 'laboratorium'])->name('laboratorium.index');
+                Route::post('/export', [LaboratoriumController::class, 'export'])->name('laboratorium.export');
+                Route::post('/import', [LaboratoriumController::class, 'import'])->name('laboratorium.import');
+            });
+
+
+            Route::prefix('/radiologi')->group(function () {
+                Route::get('/migrasi', [ControlPanelController::class, 'radiologi'])->name('radiologi.index');
+                Route::post('/export', [RadiologiController::class, 'export'])->name('radiologi.export');
+                Route::post('/import', [RadiologiController::class, 'import'])->name('radiologi.import');
+            });
+
             Route::get('/tindakan-rajal', [ControlPanelController::class, 'tindakan_rajal'])->name('control-panel.tindakan-rajal');
 
-            // Rute untuk menampilkan halaman migrasi
             Route::get('/migrasi-tindakan', [TindakanMedisController::class, 'index'])->name('tindakan.migrasi');
-
-            // Rute untuk proses download template
             Route::post('/migrasi-tindakan/download', [TindakanMedisController::class, 'export'])->name('tindakan.export');
-
-            // Rute untuk proses upload file
             Route::post('/migrasi-tindakan/upload', [TindakanMedisController::class, 'import'])->name('tindakan.import');
         });
 

@@ -203,10 +203,10 @@ class RegistrationController extends Controller
             $doctor = $jadwal->doctor;
 
             // Pastikan relasi department ada dan bukan 'UGD'
-            if ($doctor->department_from_doctors && $doctor->department_from_doctors->name !== 'UGD') {
-                $deptName = $doctor->department_from_doctors->name;
-                $groupedDoctors[$deptName][] = $doctor;
-            }
+            // if ($doctor->department_from_doctors && $doctor->department_from_doctors->name !== 'UGD') {
+            //     $deptName = $doctor->department_from_doctors->name;
+            //     $groupedDoctors[$deptName][] = $doctor;
+            // }
         }
 
         $doctorsIGD = Doctor::with('employee', 'department_from_doctors')->whereHas('department_from_doctors', function ($query) {
