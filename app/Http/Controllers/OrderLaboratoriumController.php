@@ -96,7 +96,7 @@ class OrderLaboratoriumController extends Controller
         $count = OrderLaboratorium::withTrashed()->whereDate('created_at', $date->toDateString())->count() + 1;
         $count = str_pad($count, 4, '0', STR_PAD_LEFT);
 
-        return 'LAB'.$year.$month.$day.$count;
+        return 'LAB' . $year . $month . $day . $count;
     }
 
     public function generate_otc_registration_number()
@@ -109,7 +109,7 @@ class OrderLaboratoriumController extends Controller
         $count = RegistrationOTC::withTrashed()->whereDate('created_at', $date->toDateString())->count() + 1;
         $count = str_pad($count, 4, '0', STR_PAD_LEFT);
 
-        return 'OTC'.$year.$month.$day.$count;
+        return 'OTC' . $year . $month . $day . $count;
     }
 
     /**
@@ -138,6 +138,17 @@ class OrderLaboratoriumController extends Controller
             ], 422);
         }
 
+        // Konversi tipe_pasien sesuai instruksi
+        // rajal => 1, ranap => 2, otc => 3
+        $tipePasienMap = [
+            'rajal' => 1,
+            'ranap' => 2,
+            'otc'   => 3,
+        ];
+
+        $registrationType = strtolower($validatedData['registration_type']);
+        $tipePasienValue = $tipePasienMap[$registrationType] ?? $validatedData['registration_type'];
+
         $no_order = $this->generate_order_number();
 
         if ($request->filled('is_otc')) {
@@ -157,7 +168,7 @@ class OrderLaboratoriumController extends Controller
                     'employee_id' => $validatedData['employee_id'],
                     'penjamin_id' => $validatedData['penjamin_id'],
                     'departement_id' => $validatedData['departement_id'],
-                    'tipe_pasien' => $validatedData['registration_type'],
+                    'tipe_pasien' => 3,
                     'nama_pasien' => $request->get('nama_pasien'),
                     'date_of_birth' => $request->get('date_of_birth'),
                     'no_telp' => $request->get('no_telp'),
@@ -180,7 +191,7 @@ class OrderLaboratoriumController extends Controller
                     'order_date' => Carbon::now(),
                     'no_order' => $no_order,
                     'tipe_order' => $validatedData['order_type'],
-                    'tipe_pasien' => $validatedData['registration_type'],
+                    'tipe_pasien' => 3,
                     'diagnosa_klinis' => $validatedData['diagnosa_awal'],
                     'status_isi_hasil' => 0,
                     'status_billed' => 0,
@@ -200,7 +211,7 @@ class OrderLaboratoriumController extends Controller
                     'order_date' => Carbon::now(),
                     'no_order' => $no_order,
                     'tipe_order' => $validatedData['order_type'],
-                    'tipe_pasien' => $validatedData['registration_type'],
+                    'tipe_pasien' => $tipePasienValue,
                     'diagnosa_klinis' => $validatedData['diagnosa_awal'],
                     'status_isi_hasil' => 0,
                     'status_billed' => 0,
@@ -280,7 +291,7 @@ class OrderLaboratoriumController extends Controller
                     'bilingan_id' => $billing->id,
                     'registration_id' => $order->registration_id,
                     'date' => Carbon::now(),
-                    'tagihan' => '[Biaya Laboratorium] '.$parameter->parameter_laboratorium->parameter,
+                    'tagihan' => '[Biaya Laboratorium] ' . $parameter->parameter_laboratorium->parameter,
                     'quantity' => 1,
                     'nominal' => $parameter->nominal_rupiah,
                     'harga' => $parameter->nominal_rupiah,
@@ -329,16 +340,16 @@ class OrderLaboratoriumController extends Controller
 
             foreach ($order->order_parameter_laboratorium as $parameter) {
                 $id = $parameter->id;
-                if ($request->get('catatan_'.$id)) {
+                if ($request->get('catatan_' . $id)) {
                     OrderParameterLaboratorium::find($id)
                         ->update([
-                            'catatan' => $request->get('catatan_'.$id),
+                            'catatan' => $request->get('catatan_' . $id),
                         ]);
                 }
-                if ($request->get('hasil_'.$id)) {
+                if ($request->get('hasil_' . $id)) {
                     OrderParameterLaboratorium::find($id)
                         ->update([
-                            'hasil' => $request->get('hasil_'.$id),
+                            'hasil' => $request->get('hasil_' . $id),
                         ]);
                 }
             }

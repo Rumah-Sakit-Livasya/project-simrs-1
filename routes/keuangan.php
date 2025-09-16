@@ -29,7 +29,7 @@ use App\Http\Controllers\Keuangan\ReportAPDokterController;
 use App\Http\Controllers\Keuangan\ReportAPSupplierController;
 use App\Http\Controllers\Keuangan\RncCenterController;
 use App\Http\Controllers\Keuangan\TransaksiRutinController;
-use App\Models\keuangan\Pencairan;
+use App\Models\Keuangan\Pencairan;
 use App\Models\Keuangan\Pertanggungjawaban;
 use Illuminate\Support\Facades\Route;
 
@@ -270,7 +270,7 @@ Route::group(['middleware' => ['auth']], function () {
             Route::get('rekap-pembayaran-asuransi', [LPembayaranAsuransiController::class, 'rekapPembayaranAsuransi'])->name('laporan.rekap_pembayaran_asuransi');
             Route::get('rekap-laporan-piutang-penjamin', [LPembayaranAsuransiController::class, 'rekapLaporanPiutangPenjamin'])->name('laporan.rekap_laporan_piutang_penjamin');
 
-            // print 
+            // print
             Route::get('laporan-belum-proses-invoice/print', [LPembayaranAsuransiController::class, 'printBelumProsesInvoice'])->name('laporan.l-belum-proses-invoice.print');
             Route::get('laporan-proses-invoice/print', [LPembayaranAsuransiController::class, 'printProsesInvoice'])->name('laporan.l-proses-invoice.print');
             Route::get('/laporan/print-umur-piutang-penjamin', [LPembayaranAsuransiController::class, 'printUmurPiutangPenjamin'])->name('laporan.l-umur-piutang-penjamin.print');

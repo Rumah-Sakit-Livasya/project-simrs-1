@@ -203,10 +203,10 @@ class RegistrationController extends Controller
             $doctor = $jadwal->doctor;
 
             // Pastikan relasi department ada dan bukan 'UGD'
-            if ($doctor->department_from_doctors && $doctor->department_from_doctors->name !== 'UGD') {
-                $deptName = $doctor->department_from_doctors->name;
-                $groupedDoctors[$deptName][] = $doctor;
-            }
+            // if ($doctor->department_from_doctors && $doctor->department_from_doctors->name !== 'UGD') {
+            //     $deptName = $doctor->department_from_doctors->name;
+            //     $groupedDoctors[$deptName][] = $doctor;
+            // }
         }
 
         $doctorsIGD = Doctor::with('employee', 'department_from_doctors')->whereHas('department_from_doctors', function ($query) {
@@ -214,7 +214,7 @@ class RegistrationController extends Controller
         })->get();
 
         $doctorsLAB = Doctor::with('employee', 'departements')->whereHas('department_from_doctors', function ($query) {
-            $query->where('name', 'like', '%LABORATORIUM%');
+            $query->where('name', 'like', '%lab%');
         })->get();
 
         $penjamins = Penjamin::all();
@@ -741,7 +741,7 @@ class RegistrationController extends Controller
         }
 
         $laboratoriumDoctors = Doctor::whereHas('department_from_doctors', function ($query) {
-            $query->where('name', 'like', '%laboratorium%');
+            $query->where('name', 'like', '%lab%');
         })->get();
 
         $laboratoriumOrders = [];

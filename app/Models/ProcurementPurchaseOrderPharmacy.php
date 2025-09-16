@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Models\keuangan\PenerimaanBarangHeader;
+use App\Models\Keuangan\PenerimaanBarangHeader;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Auditable;
@@ -30,7 +30,8 @@ class ProcurementPurchaseOrderPharmacy extends Model implements AuditableContrac
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    public function pb(){
+    public function pb()
+    {
         return $this->hasMany(WarehousePenerimaanBarangFarmasi::class, 'po_id');
     }
 }

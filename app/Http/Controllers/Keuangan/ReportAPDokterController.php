@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\keuangan;
 
 use App\Http\Controllers\Controller;
-use App\Models\keuangan\JasaDokter;
+use App\Models\Keuangan\JasaDokter;
 use App\Models\SIMRS\Doctor;
 use Illuminate\Http\Request;
 

@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\GeoLocation;
 use App\Models\Keuangan\Type;
 use App\Models\Target;
 use Illuminate\Database\Seeder;
@@ -113,8 +114,10 @@ class DatabaseSeeder extends Seeder
             // 3. Seeder untuk tarif (opsional - bisa dijalankan terpisah karena data besar)
             // CompleteTarifPersalinanSeeder::class,
             // Icd10Seeder::class,
-            Icd9Seeder::class,
-
+            // Icd9Seeder::class,
+            GeoLocationSeeder::class,
+            UpdateDepartementsCategorySeeder::class,
+            DepartementSeeder::class, // <-- CUKUP PANGGIL INI
         ]);
     }
 }

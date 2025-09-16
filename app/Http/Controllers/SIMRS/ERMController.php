@@ -41,6 +41,7 @@ use App\Models\SIMRS\Pengkajian\PengkajianDokterRajal;
 use App\Models\SIMRS\Pengkajian\PengkajianLanjutan;
 use App\Models\SIMRS\Pengkajian\PengkajianNurseRajal;
 use App\Models\SIMRS\Pengkajian\TransferPasienAntarRuangan;
+use App\Models\SIMRS\PengkajianDokterIGD;
 use App\Models\SIMRS\Peralatan\OrderAlatMedis;
 use App\Models\SIMRS\Peralatan\Peralatan;
 use App\Models\SIMRS\Radiologi\TarifParameterRadiologi;
@@ -1344,6 +1345,21 @@ class ERMController extends Controller
 
                 return view('pages.simrs.erm.form.dokter.pengkajian-dokter', compact('registration', 'registrations', 'menu', 'departements', 'jadwal_dokter', 'pengkajian', 'triage', 'path', 'data'));
 
+            case 'pengkajian_dokter_igd':
+                $triage = Triage::firstWhere('registration_id', $registration->id);
+                $pengkajian = PengkajianDokterIGD::firstWhere('registration_id', $registration->id);
+                // dd($triage);
+                return view('pages.simrs.erm.form.dokter.pengkajian-dokter-igd', compact(
+                    'registration',
+                    'registrations',
+                    'menu',
+                    'departements',
+                    'jadwal_dokter',
+                    'pengkajian',
+                    'triage',
+                    'path',
+                ));
+
             case 'pengkajian_resep':
                 $pengkajian = PengkajianNurseRajal::firstWhere('registration_id', $registration->id);
 
@@ -1444,12 +1460,15 @@ class ERMController extends Controller
                 if ($registration->registration_type == 'rawat-jalan') {
                     $assesment = DoctorInitialAssessment::firstWhere('registration_id', $registration->id);
                 }
+                if ($registration->registration_type == 'igd') {
+                    $assesment = PengkajianDokterIGD::firstWhere('registration_id', $registration->id);
+                }
 
                 // dd($assesment);
 
                 // Flag untuk menampilkan SweetAlert2 jika assesment belum ada
                 $showSwal = false;
-                if (! $assesment || ! $assesment->exists) {
+                if (!$assesment || !$assesment->exists) {
                     $showSwal = true;
                 }
 
@@ -1474,6 +1493,8 @@ class ERMController extends Controller
                 $pengkajian = ResumeMedisRajal::firstWhere('registration_id', $registration->id);
                 if ($registration->registration_type == 'rawat-jalan') {
                     $assesment = DoctorInitialAssessment::firstWhere('registration_id', $registration->id);
+                } else {
+                    $assesment = PengkajianDokterIGD::firstWhere('registration_id', $registration->id);
                 }
 
                 // Flag untuk menampilkan SweetAlert2 jika assesment belum ada

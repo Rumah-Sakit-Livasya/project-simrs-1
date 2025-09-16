@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\SIMRS\Radiologi;
 
+use App\Exports\RadiologiTarifExport;
 use App\Http\Controllers\Controller;
+use App\Imports\RadiologiTarifImport;
 use App\Models\Employee;
 use App\Models\OrderParameterRadiologi;
 use App\Models\OrderRadiologi;
@@ -17,6 +19,7 @@ use App\Models\SIMRS\Radiologi\TarifParameterRadiologi;
 use App\Models\SIMRS\Registration;
 use App\Models\TemplateHasilRadiologi;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 
 class RadiologiController extends Controller
 {
@@ -342,5 +345,25 @@ class RadiologiController extends Controller
         }
 
         return view('pages.simrs.radiologi.partials.popup-pilih-pasien', compact("registrations", "poli"));
+    }
+
+    public function export(Request $request)
+    {
+        $request->validate(['grup_penjamin_id' => 'required|integer']);
+        $grupPenjaminId = $request->grup_penjamin_id;
+
+        return Excel::download(new RadiologiTarifExport($grupPenjaminId), 'Template-Tarif-Radiologi.xlsx');
+    }
+
+    public function import(Request $request)
+    {
+        $request->validate(['file' => 'required|mimes:xls,xlsx,csv']);
+
+        try {
+            Excel::import(new RadiologiTarifImport, $request->file('file'));
+            return back()->with('success', 'Tarif radiologi berhasil diimpor!');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
     }
 }

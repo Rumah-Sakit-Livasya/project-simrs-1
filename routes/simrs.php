@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\BilinganController;
+use App\Http\Controllers\SIMRS\BPJS\WsBPJSController;
 use App\Http\Controllers\FarmasiPlasma;
 use App\Http\Controllers\FarmasiReportDispensing;
 use App\Http\Controllers\FarmasiReportEmbalase;
@@ -32,9 +33,18 @@ use App\Http\Controllers\ProcurementPurchaseOrderPharmacyController;
 use App\Http\Controllers\ProcurementPurchaseRequestNonPharmacyController;
 use App\Http\Controllers\ProcurementPurchaseRequestPharmacyController;
 use App\Http\Controllers\ProcurementSetupSupplier;
+use App\Http\Controllers\SatuSehat\DashboardSatuSehatController;
+use App\Http\Controllers\SatuSehat\DepartmentLocationController;
+use App\Http\Controllers\SatuSehat\GeolocationController;
+use App\Http\Controllers\SatuSehat\LaporanSummaryController;
+use App\Http\Controllers\SatuSehat\PractitionerController;
+use App\Http\Controllers\SatuSehat\SatuSehatOrganizationController;
 use App\Http\Controllers\SIMRS\BedController;
+use App\Http\Controllers\SIMRS\BPJS\BridgingEclaimController;
 use App\Http\Controllers\SIMRS\ControlPanelController;
 use App\Http\Controllers\SIMRS\BPJS\BridgingVclaimController;
+use App\Http\Controllers\SIMRS\BPJS\LaporanController;
+use App\Http\Controllers\SIMRS\BPJS\SettingController;
 use App\Http\Controllers\SIMRS\DepartementController;
 use App\Http\Controllers\SIMRS\Depo\StokRequestController;
 use App\Http\Controllers\SIMRS\Depo\UnitCostController as DepoUnitCostController;
@@ -210,6 +220,22 @@ Route::group(['middleware' => ['auth']], function () {
             ->name('print.identitas.pasien');
         Route::get('/{patient:id}/print-kartu', [PatientController::class, 'print_kartu_pasien'])
             ->name('print.kartu.pasien');
+        Route::get('/{patient:id}/label-rm-pdf', [PatientController::class, 'print_label_rm_pdf'])
+            ->name('print.label.rm.pdf');
+        Route::get('/{patient:id}/label-rm', [PatientController::class, 'print_label_rm'])
+            ->name('print.label.rm');
+        Route::get('/{patient:id}/label-gelang-anak', [PatientController::class, 'print_label_gelang_anak'])
+            ->name('print.label.gelang.anak');
+        Route::get('/{patient:id}/label-gelang-dewasa', [PatientController::class, 'print_label_gelang_dewasa'])
+            ->name('print.label.gelang.dewasa');
+        Route::get('/{patient:id}/tracer/{registration?}', [PatientController::class, 'print_tracer'])
+            ->name('print.tracer');
+        Route::get('/{patient:id}/charges-slip/{registration?}', [PatientController::class, 'print_charges_slip'])
+            ->name('print.charges.slip');
+        Route::get('/{patient:id}/surat-keterangan-lahir/{registration?}', [PatientController::class, 'print_surat_keterangan_lahir'])
+            ->name('print.surat.keterangan.lahir');
+        Route::get('/{patient:id}/general-consent/{registration?}', [PatientController::class, 'print_general_consent'])
+            ->name('print.general.consent');
 
         // View patient visit history
         Route::get('/{patient:id}/history', [PatientController::class, 'history_kunjungan_pasien'])
@@ -288,15 +314,23 @@ Route::group(['middleware' => ['auth']], function () {
         })->name('dashboard.simrs');
 
         Route::prefix('/control-panel')->group(function () {
+            Route::prefix('/laboratorium')->group(function () {
+                Route::get('/migrasi', [ControlPanelController::class, 'laboratorium'])->name('laboratorium.index');
+                Route::post('/export', [LaboratoriumController::class, 'export'])->name('laboratorium.export');
+                Route::post('/import', [LaboratoriumController::class, 'import'])->name('laboratorium.import');
+            });
+
+
+            Route::prefix('/radiologi')->group(function () {
+                Route::get('/migrasi', [ControlPanelController::class, 'radiologi'])->name('radiologi.index');
+                Route::post('/export', [RadiologiController::class, 'export'])->name('radiologi.export');
+                Route::post('/import', [RadiologiController::class, 'import'])->name('radiologi.import');
+            });
+
             Route::get('/tindakan-rajal', [ControlPanelController::class, 'tindakan_rajal'])->name('control-panel.tindakan-rajal');
 
-            // Rute untuk menampilkan halaman migrasi
             Route::get('/migrasi-tindakan', [TindakanMedisController::class, 'index'])->name('tindakan.migrasi');
-
-            // Rute untuk proses download template
             Route::post('/migrasi-tindakan/download', [TindakanMedisController::class, 'export'])->name('tindakan.export');
-
-            // Rute untuk proses upload file
             Route::post('/migrasi-tindakan/upload', [TindakanMedisController::class, 'import'])->name('tindakan.import');
         });
 
@@ -1245,34 +1279,50 @@ Route::group(['middleware' => ['auth']], function () {
 
         /*
         |--------------------------------------------------------------------------
-        | BPJS Routes
+        | Satu Sehat Routes
         |--------------------------------------------------------------------------
         |
         | Group of routes for the "BPJS" section of the SIMRS application.
         | Includes bridging Vclaim, registration, and claim management.
         |
         */
-        Route::prefix('bpjs')->group(function () {
-            Route::prefix('bridging-vclaim')->group(function () {
-                Route::get('list-registrasi-sep', [BridgingVclaimController::class, 'listRegistrasiSEP'])
-                    ->name('bpjs.bridging-vclaim.list-registrasi-sep');
 
-                Route::get('persetujuan-sep', [BridgingVclaimController::class, 'persetujuanSEP'])
-                    ->name('bpjs.bridging-vclaim.persetujuan-sep');
+        // Rute untuk Fitur Geolocation Satu Sehat
+        Route::prefix('satu-sehat')->name('satu-sehat.')->group(function () {
+            // Menampilkan halaman geolocation
+            Route::get('/geolocation', [GeolocationController::class, 'index'])->name('geolocation');
 
-                Route::get('rujukan', [BridgingVclaimController::class, 'rujukan'])
-                    ->name('bpjs.bridging-vclaim.rujukan');
+            // Menangani request mapping lokasi RS (untuk AJAX)
+            Route::post('/mapping-lokasi-rs', [GeolocationController::class, 'mapLocation'])->name('mapping-lokasi');
 
-                Route::get('lembar-pengajuan-klaim', [BridgingVclaimController::class, 'lembarPengajuanKlaim'])
-                    ->name('bpjs.bridging-vclaim.lembar-pengajuan-klaim');
+            // Ganti {organization} menjadi {departement} agar cocok dengan model
+            Route::get('/departments/{category?}', [SatuSehatOrganizationController::class, 'index'])->name('departments');
+            Route::post('/departments/{departement}/map', [SatuSehatOrganizationController::class, 'map'])->name('departments.map');
 
-                Route::get('detail-sep', [BridgingVclaimController::class, 'detailSEP'])
-                    ->name('bpjs.bridging-vclaim.detail-sep');
+            // Rute untuk Mapping Department ke Location
+            Route::get('/department-locations/{category?}', [DepartmentLocationController::class, 'index'])->name('department-locations');
+            Route::post('/department-locations/{departement}/map', [DepartmentLocationController::class, 'map'])->name('department-locations.map');
 
-                Route::get('detail-sep', [BridgingVclaimController::class, 'detailSEP'])
-                    ->name('bpjs.bridging-vclaim.detail-sep');
-            });
+            // Rute untuk Halaman Tenaga Medis (Practitioner)
+            Route::get('/practitioners/{category?}', [PractitionerController::class, 'index'])->name('practitioners');
+            Route::post('/practitioners/{employee}/map', [PractitionerController::class, 'map'])->name('practitioners.map');
+
+            // Rute untuk Dashboard
+            Route::get('/dashboard', [DashboardSatuSehatController::class, 'index'])->name('dashboard');
+
+            // Rute API untuk data dinamis dashboard
+            Route::post('/dashboard/summary-cards', [DashboardSatuSehatController::class, 'getSummaryCards'])->name('dashboard.summary-cards');
+            Route::post('/dashboard/encounter-chart', [DashboardSatuSehatController::class, 'getEncounterChart'])->name('dashboard.encounter-chart');
+            Route::post('/dashboard/fhir-summary', [DashboardSatuSehatController::class, 'getFhirResourceSummary'])->name('dashboard.fhir-summary');
+            Route::post('/dashboard/master-data-chart', [DashboardSatuSehatController::class, 'getMasterDataChart'])->name('dashboard.master-data-chart');
+            Route::post('/dashboard/mapping-log-table', [DashboardSatuSehatController::class, 'getMappingLogTable'])->name('dashboard.mapping-log-table');
+
+            // Rute untuk Halaman Laporan Summary
+            Route::get('/laporan-summary', [LaporanSummaryController::class, 'index'])->name('laporan.summary');
+            Route::post('/laporan-summary/data', [LaporanSummaryController::class, 'getData'])->name('laporan.summary.data');
+            Route::post('/laporan-summary/{registration}/resend', [LaporanSummaryController::class, 'resendEncounter'])->name('laporan.summary.resend');
         });
+
 
         // Route::prefix('kasir')->group(function() {
         //     Route::get('tagihan-pasien', [KasirController::class, 'index'])->name('laboratorium.list-order');

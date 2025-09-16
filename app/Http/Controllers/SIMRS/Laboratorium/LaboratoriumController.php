@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\SIMRS\Laboratorium;
 
+use App\Exports\LaboratoriumTarifExport;
 use App\Http\Controllers\Controller;
+use App\Imports\LaboratoriumTarifImport;
 use App\Models\Employee;
 use App\Models\OrderParameterLaboratorium;
 use App\Models\SIMRS\Doctor;
@@ -16,13 +18,14 @@ use App\Models\SIMRS\Laboratorium\TarifParameterLaboratorium;
 use App\Models\SIMRS\Penjamin;
 use App\Models\SIMRS\Registration;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 
 class LaboratoriumController extends Controller
 {
     public function order()
     {
         $laboratoriumDoctors = Doctor::whereHas('department_from_doctors', function ($query) {
-            $query->where('name', 'like', '%laboratorium%');
+            $query->where('name', 'like', '%lab%');
         })->get();
         return view('pages.simrs.laboratorium.order', [
             'laboratoriumDoctors' => $laboratoriumDoctors,
@@ -320,5 +323,29 @@ class LaboratoriumController extends Controller
             'parameters' => $parameters,
             'penjamins' => $penjamin
         ]);
+    }
+
+    public function export(Request $request)
+    {
+        $request->validate([
+            'grup_penjamin_id' => 'required|integer',
+            'departement_id' => 'required|integer',
+        ]);
+        $grupPenjaminId = $request->grup_penjamin_id;
+        $departementId = $request->departement_id;
+
+        return Excel::download(new LaboratoriumTarifExport($grupPenjaminId, $departementId), 'Template-Tarif-Laboratorium.xlsx');
+    }
+
+    public function import(Request $request)
+    {
+        $request->validate(['file' => 'required|mimes:xls,xlsx,csv']);
+
+        try {
+            Excel::import(new LaboratoriumTarifImport, $request->file('file'));
+            return back()->with('success', 'Tarif laboratorium berhasil diimpor!');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
     }
 }
