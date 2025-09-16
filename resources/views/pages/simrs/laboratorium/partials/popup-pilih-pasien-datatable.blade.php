@@ -95,13 +95,73 @@
 </script>
 
 <script>
-    function pilihPasien(registration) {
-        if(window.opener){
-            window.opener.postMessage({data: registration}, "*")
-        } else{
-            alert("window.opener is not defined");
+    // === FUNGSI UTAMA UNTUK MENGIRIM DATA ===
+    function pilihPasien(registrationData) {
+        if (window.opener) {
+            // **PERBAIKAN KUNCI ADA DI SINI**
+            // Kirim objek dengan format yang sama seperti yang diharapkan listener di halaman order
+            window.opener.postMessage({
+                type: 'pasien_selected', // Tipe pesan
+                data: registrationData // Data pasien
+            }, "*"); // Target origin '*' untuk development, bisa diperketat di produksi
+        } else {
+            alert("Tidak dapat menemukan halaman pembuka (opener).");
         }
-        // console.log(registration);
-        window.close();        
+        window.close();
+    }
+
+    $(document).ready(function() {
+        // Inisialisasi DataTable
+        $('#dt-popup-pasien').DataTable({
+            responsive: true,
+            "order": [
+                [0, "desc"]
+            ] // Urutkan berdasarkan kolom pertama (tanggal) secara descending
+        });
+
+        // Tambahkan event listener untuk setiap baris di tabel
+        $('#dt-popup-pasien tbody').on('click', 'tr', function() {
+            // Ambil data JSON dari atribut data-pasien
+            const encodedData = $(this).data('pasien');
+            if (encodedData) {
+                const decodedJson = atob(encodedData); // Decode dari Base64
+                const registrationObject = JSON.parse(decodedJson); // Parse menjadi objek
+
+                // Panggil fungsi untuk mengirim data
+                pilihPasien(registrationObject);
+            }
+        });
+
+        // Inisialisasi Date Range Picker
+        $('#registration_date_filter').daterangepicker({
+            opens: 'left',
+            autoUpdateInput: false, // Penting: jangan update input secara otomatis
+            locale: {
+                format: 'YYYY-MM-DD',
+                cancelLabel: 'Clear'
+            }
+        });
+
+        // Event saat tanggal dipilih
+        $('#registration_date_filter').on('apply.daterangepicker', function(ev, picker) {
+            $(this).val(picker.startDate.format('YYYY-MM-DD') + ' to ' + picker.endDate.format(
+                'YYYY-MM-DD'));
+        });
+
+        // Event saat tombol 'Clear' di picker diklik
+        $('#registration_date_filter').on('cancel.daterangepicker', function(ev, picker) {
+            $(this).val('');
+        });
+    });
+
+    // Helper untuk format input No. RM
+    function formatAngka(input) {
+        let value = input.value.replace(/\D/g, '');
+        if (value.length > 6) value = value.substr(0, 6);
+        if (value.length > 0) {
+            input.value = value.match(/.{1,2}/g).join('-');
+        } else {
+            input.value = '';
+        }
     }
 </script>
