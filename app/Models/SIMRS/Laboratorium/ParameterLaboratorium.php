@@ -22,7 +22,8 @@ class ParameterLaboratorium extends Model
         return $this->hasMany(ParameterLaboratorium::class, 'parameter_laboratorium_id', 'id');
     }
 
-    public function grup_parameter_laboratorium(){
+    public function grup_parameter_laboratorium()
+    {
         return $this->belongsTo(GrupParameterLaboratorium::class);
     }
 
@@ -45,5 +46,10 @@ class ParameterLaboratorium extends Model
     public function mainParameters(): BelongsToMany
     {
         return $this->belongsToMany(ParameterLaboratorium::class, 'relasi_parameter_laboratorium', 'sub_parameter_id', 'main_parameter_id');
+    }
+
+    public function tarif_parameter_laboratorium()
+    {
+        return $this->hasMany(TarifParameterLaboratorium::class, 'parameter_laboratorium_id');
     }
 }

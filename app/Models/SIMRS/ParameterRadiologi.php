@@ -15,7 +15,7 @@ class ParameterRadiologi extends Model
     protected $table = 'parameter_radiologi';
     protected $fillable = ['grup_parameter_radiologi_id', 'kategori_radiologi_id', 'is_reverse', 'is_kontras', 'kode', 'parameter'];
 
-    public function group_parameter_radiologi()
+    public function grup_parameter_radiologi()
     {
         return $this->belongsTo(GrupParameterRadiologi::class);
     }
