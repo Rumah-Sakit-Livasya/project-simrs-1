@@ -101,25 +101,20 @@ class Bilingan extends Model implements AuditableContract
             if ($bilingan->isDirty('status') && strtolower($bilingan->status) === 'final') {
                 \Log::info('Processing final bilingan', ['id' => $bilingan->id]);
 
-                // Menggunakan nama variabel yang berbeda untuk koleksi dan item individu
-                // $tagihanPasienItems = $bilingan->tagihanPasien()
-                //     ->where('tagihan', 'LIKE', '[Tindakan Medis]%')
-                //     ->get();
-
+                // UBAH BAGIAN INI
+                // Tidak lagi memfilter 'Tindakan Medis', tapi mengecualikan 'Biaya Administrasi'
                 $tagihanPasienItems = $bilingan->tagihanPasien()
                     ->where('tagihan', 'NOT LIKE', 'Biaya Administrasi%')
                     ->get();
+                // --- AKHIR PERUBAHAN ---
 
-
-                \Log::info('Found tagihan', ['count' => $tagihanPasienItems->count()]);
+                \Log::info('Found tagihan to process for Jasa Dokter', ['count' => $tagihanPasienItems->count()]);
 
                 foreach ($tagihanPasienItems as $tagihan) {
-                    \Log::info('Processing tagihan', ['id' => $tagihan->id]);
+                    \Log::info('Processing tagihan', ['id' => $tagihan->id, 'description' => $tagihan->tagihan]);
 
                     if (!$tagihan->jasaDokter()->exists()) {
                         \Log::info('Creating jasa dokter for tagihan', ['id' => $tagihan->id]);
-                        // Panggil method pada instance $bilingan
-                        // dan karena $bilingan sudah $this di dalam createJasaDokter, kita hanya perlu $tagihan
                         $bilingan->createJasaDokter($tagihan);
                     } else {
                         \Log::info('Jasa dokter already exists for tagihan', ['id' => $tagihan->id]);
@@ -129,11 +124,10 @@ class Bilingan extends Model implements AuditableContract
         });
     }
 
-    // Method createJasaDokter, parameter $bilingan dihilangkan karena kita bisa pakai $this
     protected function createJasaDokter(TagihanPasien $tagihan)
     {
         try {
-            $registration = $this->registration; // Mengambil relasi registrasi dari bilingan ini
+            $registration = $this->registration;
 
             if (!$registration) {
                 \Log::error('Missing registration relation for bilingan', [
@@ -143,12 +137,9 @@ class Bilingan extends Model implements AuditableContract
                 return;
             }
 
-            // PERUBAHAN UTAMA: Menghitung jasa dokter sebagai 60% dari wajib_bayar
-            $persentaseJasaDokter = 0.60; // 60%
+            $persentaseJasaDokter = 0.60;
             $wajibBayar = $tagihan->wajib_bayar;
             $nilaiJasaDokter = $wajibBayar * $persentaseJasaDokter;
-
-            // Contoh: jika wajib_bayar = 135.000, maka nilaiJasaDokter = 135.000 * 0.60 = 81.000
 
             \Log::info('Calculating Jasa Dokter', [
                 'wajib_bayar' => $wajibBayar,
@@ -161,17 +152,17 @@ class Bilingan extends Model implements AuditableContract
                 'registration_id'   => $registration->id,
                 'bilingan_id'       => $this->id,
                 'dokter_id'         => $registration->doctor_id,
-                'ap_number'         => null,                     // Akan diisi nanti saat proses "Save AP Dokter"
-                'ap_date'           => null,                     // Akan diisi nanti
-                'bill_date'         => $this->updated_at,        // Menggunakan tanggal bilingan difinalisasi
-                'nama_tindakan'     => $tagihan->tagihan,        // Mengambil dari kolom 'tagihan' di TagihanPasien
+                'ap_number'         => null,
+                'ap_date'           => null,
+                'bill_date'         => $this->updated_at,
+                'nama_tindakan'     => $tagihan->tagihan,
                 'nominal'           => $tagihan->nominal,
-                'diskon'            => 0,                        // Default diskon
-                'ppn_persen'        => 0,                        // Default PPN
-                'jkp'               => $wajibBayar,              // JKP adalah nilai 'wajib_bayar' dari tagihan
-                'jasa_dokter'       => $nilaiJasaDokter,         // Diisi dengan hasil perhitungan 60%
-                'share_dokter'      => $nilaiJasaDokter,         // Diisi dengan hasil perhitungan 60%
-                'status'            => 'draft',                  // Status awal adalah draft
+                'diskon'            => 0,
+                'ppn_persen'        => 0,
+                'jkp'               => $wajibBayar,
+                'jasa_dokter'       => $nilaiJasaDokter,
+                'share_dokter'      => $nilaiJasaDokter,
+                'status'            => 'draft',
             ]);
 
             \Log::info('JasaDokter (draft) created successfully', ['tagihan_id' => $tagihan->id, 'bilingan_id' => $this->id, 'calculated_share' => $nilaiJasaDokter]);

@@ -11,6 +11,7 @@ use App\Http\Controllers\Keuangan\HutangController;
 use App\Http\Controllers\Keuangan\KeuanganController;
 use App\Http\Controllers\Keuangan\KonfirmasiAsuransiController;
 use App\Http\Controllers\Keuangan\LaporanOkController;
+use App\Http\Controllers\Keuangan\LaporanTindakanMedisController;
 use App\Http\Controllers\Keuangan\LaporanTindakanPasienController;
 use App\Http\Controllers\Keuangan\LaporanUmumController;
 use App\Http\Controllers\Keuangan\LaporanVkController;
@@ -196,6 +197,8 @@ Route::group(['middleware' => ['auth']], function () {
             Route::get('/vk', [LaporanVkController::class, 'index'])
                 ->name('laporan-pendukung.vk.index')
                 ->middleware('can:view laporan vk');
+            Route::get('/vk/print', [LaporanVkController::class, 'print'])->name('laporan-pendukung.vk.print');
+            Route::get('/vk/export', [LaporanVkController::class, 'export'])->name('laporan-pendukung.vk.export');
 
             // Laporan (umum)
             Route::get('/', [LaporanUmumController::class, 'index'])
@@ -205,6 +208,12 @@ Route::group(['middleware' => ['auth']], function () {
             // Laporan Tindakan Pasien
             Route::get('/tindakan-pasien', [LaporanTindakanPasienController::class, 'index'])
                 ->name('laporan-pendukung.tindakan-pasien.index')
+                ->middleware('can:view laporan tindakan pasien');
+            Route::get('/tindakan-pasien/print', [LaporanTindakanPasienController::class, 'print'])
+                ->name('laporan-pendukung.tindakan-pasien.print')
+                ->middleware('can:view laporan tindakan pasien');
+            Route::get('/tindakan-pasien/export', [LaporanTindakanPasienController::class, 'export'])
+                ->name('laporan-pendukung.tindakan-pasien.export')
                 ->middleware('can:view laporan tindakan pasien');
         });
 

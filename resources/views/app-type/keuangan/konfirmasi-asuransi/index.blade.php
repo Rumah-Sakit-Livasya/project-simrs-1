@@ -11,10 +11,10 @@
             }
 
             /*
-                                                    ====================================================================
-                                                    CSS BARU UNTUK DETAILS CONTROL (Disamakan dengan Pertanggung Jawaban)
-                                                    ====================================================================
-                                                */
+                                                        ====================================================================
+                                                        CSS BARU UNTUK DETAILS CONTROL (Disamakan dengan Pertanggung Jawaban)
+                                                        ====================================================================
+                                                    */
             .details-control {
                 cursor: pointer;
                 text-align: center;
@@ -454,6 +454,32 @@
                         // Inisialisasi ulang tooltip jika ada di dalam child row
                         $(row.child()).find('[data-toggle="tooltip"]').tooltip();
                     }
+                });
+
+                $('#dt-basic-example tbody').on('click', 'a[target="_blank"]', function(e) {
+                    // 2. Hentikan perilaku default link (yaitu membuka tab baru).
+                    e.preventDefault();
+
+                    // 3. Ambil URL tujuan dari atribut 'href' link yang diklik.
+                    const url = $(this).attr('href');
+
+                    // 4. Tentukan ukuran dan posisi popup agar hampir fullscreen dan di tengah.
+                    // Mengambil 90% dari lebar dan tinggi layar.
+                    const popupWidth = screen.width * 0.9;
+                    const popupHeight = screen.height * 0.9;
+
+                    // Menghitung posisi kiri (x) dan atas (y) untuk meletakkan popup di tengah layar.
+                    const left = (screen.width - popupWidth) / 2;
+                    const top = (screen.height - popupHeight) / 2;
+
+                    // 5. Gabungkan semua opsi menjadi satu string untuk parameter 'window.open'.
+                    // 'resizable=yes' dan 'scrollbars=yes' penting untuk pengalaman pengguna yang baik.
+                    const windowFeatures =
+                        `width=${popupWidth},height=${popupHeight},left=${left},top=${top},resizable=yes,scrollbars=yes`;
+
+                    // 6. Buka jendela popup baru dengan URL dan fitur yang telah ditentukan.
+                    // 'cetakWindow' adalah nama jendela; jika nama yang sama digunakan lagi, jendela yang ada akan digunakan kembali.
+                    window.open(url, 'cetakWindow', windowFeatures);
                 });
             });
         </script>
