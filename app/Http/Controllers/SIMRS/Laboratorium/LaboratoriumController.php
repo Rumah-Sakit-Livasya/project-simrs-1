@@ -25,7 +25,7 @@ class LaboratoriumController extends Controller
     public function order()
     {
         $laboratoriumDoctors = Doctor::whereHas('department_from_doctors', function ($query) {
-            $query->where('name', 'like', '%laboratorium%');
+            $query->where('name', 'like', '%lab%');
         })->get();
         return view('pages.simrs.laboratorium.order', [
             'laboratoriumDoctors' => $laboratoriumDoctors,
