@@ -214,7 +214,7 @@ class RegistrationController extends Controller
         })->get();
 
         $doctorsLAB = Doctor::with('employee', 'departements')->whereHas('department_from_doctors', function ($query) {
-            $query->where('name', 'like', '%LABORATORIUM%');
+            $query->where('name', 'like', '%lab%');
         })->get();
 
         $penjamins = Penjamin::all();
@@ -741,7 +741,7 @@ class RegistrationController extends Controller
         }
 
         $laboratoriumDoctors = Doctor::whereHas('department_from_doctors', function ($query) {
-            $query->where('name', 'like', '%laboratorium%');
+            $query->where('name', 'like', '%lab%');
         })->get();
 
         $laboratoriumOrders = [];
