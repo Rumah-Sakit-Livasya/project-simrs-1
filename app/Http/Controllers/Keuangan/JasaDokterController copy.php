@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Keuangan;
 
 use App\Http\Controllers\Controller;
 use App\Models\Employee;
-use App\Models\Keuangan\JasaDokter; // <-- Pastikan ini model JasaDokter Anda
+use App\Models\keuangan\JasaDokter; // <-- Pastikan ini model JasaDokter Anda
 use App\Models\SIMRS\Doctor;
 use App\Models\SIMRS\Registration;
 use App\Models\SIMRS\Bilingan;
@@ -32,15 +32,13 @@ class JasaDokterController extends Controller
             ->whereHas('tagihanPasien.bilinganSatu', function ($q) {
                 $q->where('status', 'final');
             })
-            // UBAH BAGIAN INI: Filter untuk mengecualikan 'Biaya Administrasi'
+            // Filter: hanya tagihan tindakan medis
             ->whereHas('tagihanPasien', function ($q) {
-                $q->where('tagihan', 'NOT LIKE', 'Biaya Administrasi%');
+                $q->where('tagihan', 'LIKE', '[Tindakan Medis]%');
             })
-            // --- AKHIR PERUBAHAN ---
             // Relasi yang dibutuhkan untuk view
             ->with(['tagihanPasien.registration.patient', 'tagihanPasien.registration.penjamin', 'tagihanPasien.registration.kelas_rawat', 'tagihanPasien.registration.doctor.employee', 'tagihanPasien.tindakan_medis.tarifTindakanMedis', 'tagihanPasien.bilinganSatu.pembayaranTagihan', 'dokter.employee']);
 
-        // ... (sisa method index tidak perlu diubah) ...
         // Filter tanggal dari bilingan (created_at)
         if ($request->filled('tanggal_awal')) {
             $query->whereHas('tagihanPasien.bilinganSatu', function ($q) use ($request) {
@@ -102,8 +100,7 @@ class JasaDokterController extends Controller
         return view('app-type.keuangan.jasa-dokter.index', compact('jasaDokterItems', 'dokters'));
     }
 
-    // ... (sisa method dari storeSelected hingga sebelum exportExcel tidak perlu diubah) ...
-
+    // Method untuk menyimpan AP Dokter dari item yang dipilih (batch create)
     public function storeSelected(Request $request)
     {
         $request->validate([
@@ -395,7 +392,7 @@ class JasaDokterController extends Controller
     // Method untuk export Excel (jika menggunakan Maatwebsite\Excel)
     public function exportExcel(Request $request)
     {
-        // ... (validasi request tidak perlu diubah) ...
+        // Validasi input
         $request->validate([
             'tanggal_awal' => 'nullable|date',
             'tanggal_akhir' => 'nullable|date|after_or_equal:tanggal_awal',
@@ -411,11 +408,9 @@ class JasaDokterController extends Controller
             ->whereHas('tagihanPasien.bilinganSatu', function ($q) {
                 $q->where('status', 'final'); // Bilingan dari tagihan pasien harus final
             })
-            // UBAH BAGIAN INI: Filter untuk mengecualikan 'Biaya Administrasi'
             ->whereHas('tagihanPasien', function ($q) {
-                $q->where('tagihan', 'NOT LIKE', 'Biaya Administrasi%');
+                $q->where('tagihan', 'LIKE', '[Tindakan Medis]%'); // Hanya tagihan tindakan medis
             })
-            // --- AKHIR PERUBAHAN ---
             ->with([
                 // Eager load relasi yang dibutuhkan untuk data export
                 'tagihanPasien.registration.patient',
@@ -427,7 +422,6 @@ class JasaDokterController extends Controller
                 'dokter.employee', // Dokter AP (yang ada di tabel jasa_dokter)
             ]);
 
-        // ... (sisa method exportExcel tidak perlu diubah) ...
         // --- FILTER PERIODE TANGGAL (WAJIB) ---
         // Filter tanggal dari bilingan (created_at pada tabel bilingan melalui tagihanPasien)
         if ($request->filled('tanggal_awal')) {
@@ -533,8 +527,8 @@ class JasaDokterController extends Controller
             $filename
         );
     }
+    // Tambahkan method baru untuk get data modal
 
-    // ... (sisa method lainnya tidak perlu diubah) ...
     public function getModalData($jasaDokterId)
     {
         try {
