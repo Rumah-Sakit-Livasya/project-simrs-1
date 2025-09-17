@@ -9,6 +9,7 @@ use App\Models\SIMRS\Laboratorium\ParameterLaboratorium;
 use App\Models\SIMRS\Registration;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class OrderLaboratorium extends Model
@@ -49,5 +50,12 @@ class OrderLaboratorium extends Model
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function details(): HasMany
+    {
+        // Asumsi: tabel detail bernama 'order_parameter_laboratoriums'
+        // dan foreign key-nya adalah 'order_laboratorium_id'
+        return $this->hasMany(OrderParameterLaboratorium::class, 'order_laboratorium_id');
     }
 }

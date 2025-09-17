@@ -29,9 +29,7 @@
                 @include('pages.simrs.erm.form.dokter.component.info-masuk', ['data' => $data])
                 @include('pages.simrs.erm.form.dokter.component.anamnesis', ['data' => $data])
                 @include('pages.simrs.erm.form.dokter.component.pemeriksaan', ['data' => $data])
-                @if (isset($registration->department) && Str::of($registration->department->name)->lower()->contains('bedah'))
-                    @include('pages.simrs.erm.form.dokter.component.gambar-anatomi', ['data' => $data])
-                @endif
+                @include('pages.simrs.erm.form.dokter.component.gambar-anatomi', ['data' => $data])
                 @include('pages.simrs.erm.form.dokter.component.edukasi-rencana', ['data' => $data])
 
                 {{-- Bagian Tanda Tangan --}}

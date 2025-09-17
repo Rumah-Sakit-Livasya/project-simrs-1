@@ -102,6 +102,8 @@ class LaboratoriumController extends Controller
             $order = collect();
         }
 
+        // dd($order->first());
+
         return view('pages.simrs.laboratorium.list-order', [
             'orders' => $order
         ]);

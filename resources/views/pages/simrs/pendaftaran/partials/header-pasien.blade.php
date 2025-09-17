@@ -1,9 +1,9 @@
 <div class="card-head">
     <div class="header-pasien">
         @if ($registration->patient->gender == 'Laki-laki')
-            <img src="http://103.191.197.117:8888/real/include/avatar/man-icon.png" width="100">
+            <img src="/img/user/man-icon.png" width="100">
         @else
-            <img src="http://103.191.197.117:8888/real/include/avatar/woman-icon.png" width="100">
+            <img src="/img/user/woman-icon.png" width="100">
         @endif
         <div>
             <div class="detail-regist-name" onclick="reg_patient()">
@@ -26,9 +26,9 @@
             <div class="detail-alergi" onclick="openForm()">Tidak ada alergi</div>
         </div>
         @if ($registration->doctor->employee->gender == 'Laki-laki')
-            <img src="http://103.191.197.117:8888/real/include/avatar/man-icon.png" width="100">
+            <img src="/img/user/man-icon.png" width="100">
         @else
-            <img src="http://103.191.197.117:8888/real/include/avatar/woman-icon.png" width="100">
+            <img src="/img/user/woman-icon.png" width="100">
         @endif
         <div>
             <div class="detail-regist-name">{{ $registration->doctor->employee->fullname }}</div>

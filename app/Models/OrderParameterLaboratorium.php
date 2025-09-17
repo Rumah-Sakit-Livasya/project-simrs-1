@@ -7,7 +7,7 @@ use App\Models\SIMRS\Registration;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\SIMRS\Laboratorium\OrderLaboratorium;
-
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class OrderParameterLaboratorium extends Model
 {
@@ -22,8 +22,12 @@ class OrderParameterLaboratorium extends Model
         return $this->belongsTo(OrderLaboratorium::class, 'order_laboratorium_id');
     }
 
-    public function parameter_laboratorium()
+    /**
+     * Mendapatkan data master dari parameter laboratorium.
+     */
+    public function parameter_laboratorium(): BelongsTo
     {
+        // Asumsi: foreign key adalah 'parameter_laboratorium_id'
         return $this->belongsTo(ParameterLaboratorium::class, 'parameter_laboratorium_id');
     }
 
