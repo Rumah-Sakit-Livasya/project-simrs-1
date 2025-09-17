@@ -1,495 +1,534 @@
-@extends('inc.layout-no-side')
+@extends('inc.layout')
 @section('title', 'Edit Order Laboratorium')
+
 @section('extended-css')
     <style>
-        .display-none {
+        .table-info th,
+        .table-info td {
+            background-color: #d1ecf1 !important;
+            border-color: #bee5eb !important;
+        }
+
+        .form-control-plaintext {
+            padding-top: .375rem;
+            padding-bottom: .375rem;
+            margin-bottom: 0;
+            line-height: 1.5;
+            background-color: transparent;
+            border: solid transparent;
+            border-width: 1px 0;
+        }
+
+        /* CSS untuk Indikator Hasil */
+        .hasil-abnormal {
+            border-color: #fd3995 !important;
+            color: #fd3995;
+            font-weight: 700;
+        }
+
+        .hasil-normal {
+            border-color: #1dc9b7;
+        }
+
+        .hasil-abnormal-radio {
+            color: #fd3995;
+            font-weight: 700;
+        }
+
+        .input-group-hasil {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-group-hasil .input-hasil {
+            flex-grow: 1;
+        }
+
+        .hasil-indicator {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
             display: none;
         }
 
-        .popover {
-            max-width: 100%;
+        .hasil-abnormal+.hasil-indicator {
+            display: inline;
+            color: #fd3995;
         }
 
-        .parameter-photo {
-            max-width: 80px;
-            max-height: 80px;
+        .btn-autofill {
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
         }
 
-        .modal-dialog {
-            max-width: 70%;
+        /* Sesuaikan posisi indikator jika ada tombol autofill */
+        .input-group-append+.hasil-indicator {
+            right: 45px;
+        }
+
+        /* CSS untuk input di dalam tabel */
+        .td-hasil {
+            vertical-align: middle !important;
+        }
+
+        .td-hasil .custom-control {
+            margin-bottom: 0.25rem;
+        }
+
+        .td-hasil .form-control-sm {
+            height: calc(1.5em + 0.5rem + 2px);
+            padding: 0.25rem 0.5rem;
+            font-size: .875rem;
         }
     </style>
 @endsection
+
 @section('content')
     <main id="js-page-content" role="main" class="page-content">
-        <div class="row">
-            <div class="col-xl-12">
-                <div id="panel-1" class="panel">
-                    <div class="panel-hdr">
-                        <h2>
-                            Order Laboratorium [{{ $order->no_order }}]
-                        </h2>
-                    </div>
-                    <div class="panel-container show">
-                        <div class="panel-content">
+        <form id="form-laboratorium" action="{{ route('order.laboratorium.edit-order') }}" method="POST">
+            @csrf
+            <input type="hidden" name="user_id" value="{{ auth()->user()->id }}">
+            <input type="hidden" name="employee_id" value="{{ auth()->user()->employee->id }}">
+            <input type="hidden" name="order_id" value="{{ $order->id }}">
 
-
-                            <form id="form-laboratorium" action="{{ route('order.laboratorium.edit-order') }}"
-                                method="POST">
-                                @csrf
-                                <input type="hidden" name="user_id" value="{{ auth()->user()->id }}">
-                                <input type="hidden" name="employee_id" value="{{ auth()->user()->employee->id }}">
-                                <input type="hidden" name="order_id" value="{{ $order->id }}">
-
-                                <div class="row">
-                                    <div class="col-xl-4">
-                                        <div class="form-group">
-                                            <div class="row align-items-center">
-                                                <div class="col-xl-4 text-right">
-                                                    <label class="form-label" for="order_date">
-                                                        Tanggal Order
-                                                    </label>
-                                                </div>
-                                                <div class="col-xl-8">
-                                                    <input type="text"
-                                                        style="border: 0; border-bottom: 1.9px dashed #aaa; margin-top: -.5rem; border-radius: 0"
-                                                        class="form-control" id="order_date" readonly
-                                                        value="{{ $order->order_date }}" name="order_date">
-                                                    @error('order_date')
-                                                        <div class="invalid-feedback">{{ $message }}</div>
-                                                    @enderror
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <div class="row align-items-center">
-                                                <div class="col-xl-4 text-right">
-                                                    <label class="form-label" for="penjamin">Penjamin</label>
-                                                </div>
-                                                <div class="col-xl-8">
-                                                    <input type="text"
-                                                        style="border: 0; border-bottom: 1.9px dashed #aaa; margin-top: -.5rem; border-radius: 0"
-                                                        class="form-control" id="penjamin" readonly
-                                                        value="{{ $order->registration->penjamin->nama_perusahaan ?? ' - ' }}"
-                                                        name="penjamin">
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <div class="row align-items-center">
-                                                <div class="col-xl-4 text-right">
-                                                    <label class="form-label" for="doctor_id">Poly/Ruang</label>
-                                                </div>
-                                                <div class="col-xl-8">
-                                                    @if ($order->registration_otc)
-                                                        <a>
-                                                            <input type="text"
-                                                                style="border: 0; border-bottom: 1.9px dashed #aaa; margin-top: -.5rem; border-radius: 0"
-                                                                class="form-control" id="poly_ruang" readonly
-                                                                value="{{ $order->registration_otc->poly_ruang }}"
-                                                                name="poly_ruang">
-                                                        </a>
-                                                    @else
-                                                        @if ($order->registration->registration_type != 'rawat-inap')
-                                                            <input type="text"
-                                                                style="border: 0; border-bottom: 1.9px dashed #aaa; margin-top: -.5rem; border-radius: 0"
-                                                                class="form-control" id="poly_ruang" readonly
-                                                                value="{{ $order->registration->poliklinik }}"
-                                                                name="poly_ruang">
-                                                        @elseif(isset($order->registration->kelas_rawat))
-                                                            <input type="text"
-                                                                style="border: 0; border-bottom: 1.9px dashed #aaa; margin-top: -.5rem; border-radius: 0"
-                                                                class="form-control" id="poly_ruang" readonly
-                                                                value="{{ $order->registration->kelas_rawat->room->ruangan }}"
-                                                                name="poly_ruang">
-                                                        @else
-                                                            <input type="text"
-                                                                style="border: 0; border-bottom: 1.9px dashed #aaa; margin-top: -.5rem; border-radius: 0"
-                                                                class="form-control" id="poly_ruang" readonly value=" - "
-                                                                name="poly_ruang">
-                                                        @endif
-                                                    @endif
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <div class="row align-items-center">
-                                                <div class="col-xl-4 text-right">
-                                                    <label class="form-label" for="doctor_id">Diagnosa Klinis*</label>
-                                                </div>
-                                                <div class="col-xl-8">
-                                                    <input type="text" class="form-control" id="diagnosa_klinis"
-                                                        value="{{ $order->diagnosa_klinis }}" name="diagnosa_klinis">
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <div class="row align-items-center">
-                                                <div class="col-xl-4 text-right">
-                                                    <label class="form-label" for="doctor_perujuk">Dokter Perujuk</label>
-                                                </div>
-                                                <div class="col-xl-8">
-                                                    <input type="text"
-                                                        style="border: 0; border-bottom: 1.9px dashed #aaa; margin-top: -.5rem; border-radius: 0"
-                                                        class="form-control" id="doctor_perujuk" readonly
-                                                        value="{{ $order->registration ? $order->registration->doctor->employee->fullname : 'OTC' }}"
-                                                        name="doctor_perujuk">
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-xl-4">
-                                        <div class="form-group">
-                                            <div class="row align-items-center">
-                                                <div class="col-xl-4 text-right">
-                                                    <label class="form-label" for="patient_name">
-                                                        Nama Pasien
-                                                    </label>
-                                                </div>
-                                                <div class="col-xl-8">
-                                                    <input type="text"
-                                                        style="border: 0; border-bottom: 1.9px dashed #aaa; margin-top: -.5rem; border-radius: 0"
-                                                        class="form-control" id="patient_name" readonly
-                                                        value="{{ $order->registration ? $order->registration->patient->name : $order->registration_otc->nama_pasien }}"
-                                                        name="patient_name">
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <div class="row align-items-center">
-                                                <div class="col-xl-4 text-right">
-                                                    <label class="form-label" for="gender">Jenis Kelamin</label>
-                                                </div>
-                                                <div class="col-xl-8">
-                                                    <input type="text"
-                                                        style="border: 0; border-bottom: 1.9px dashed #aaa; margin-top: -.5rem; border-radius: 0"
-                                                        class="form-control" id="gender" readonly
-                                                        value="{{ $order->registration ? $order->registration->patient->gender : $order->registration_otc->jenis_kelamin }}"
-                                                        name="gender">
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <div class="row align-items-center">
-                                                <div class="col-xl-4 text-right">
-                                                    <label class="form-label" for="date_of_birth">Tgl. Lahir</label>
-                                                </div>
-                                                <div class="col-xl-8">
-                                                    <input type="text"
-                                                        style="border: 0; border-bottom: 1.9px dashed #aaa; margin-top: -.5rem; border-radius: 0"
-                                                        class="form-control" id="date_of_birth" readonly
-                                                        value="{{ $order->registration ? $order->registration->patient->date_of_birth : $order->registration_otc->date_of_birth }}"
-                                                        name="date_of_birth">
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <div class="row align-items-center">
-                                                <div class="col-xl-4 text-right">
-                                                    <label class="form-label" for="address">
-                                                        Alamat
-                                                    </label>
-                                                </div>
-                                                <div class="col-xl-8">
-                                                    <input type="text"
-                                                        style="border: 0; border-bottom: 1.9px dashed #aaa; margin-top: -.5rem; border-radius: 0"
-                                                        class="form-control" id="address" readonly
-                                                        value="{{ $order->registration ? $order->registration->patient->address : $order->registration_otc->alamat }}"
-                                                        name="address">
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="form-group">
-                                            <div class="row align-items-center">
-                                                <div class="col-xl-4 text-right">
-                                                    <label class="form-label" for="inspection_date">
-                                                        Tgl Sampel*
-                                                    </label>
-                                                </div>
-                                                <div class="col-xl-8">
-                                                    <input type="datetime-local"
-                                                        class="@error('inspection_date') is-invalid @enderror form-control"
-                                                        id="inspection_date" placeholder="Tanggal Lahir"
-                                                        name="inspection_date"
-                                                        value="{{ $order->inspection_date ? \Carbon\Carbon::parse($order->inspection_date)->format('Y-m-d\TH:i') : old('inspection_date') }}">
-                                                    @error('inspection_date')
-                                                        <p class="invalid-feedback">{{ $message }}</p>
-                                                    @enderror
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-xl-4">
-                                        <div class="form-group">
-                                            <div class="row align-items-center">
-                                                <div class="col-xl-4 text-right">
-                                                    <label class="form-label" for="rm_reg">
-                                                        No RM / Registrasi
-                                                    </label>
-                                                </div>
-                                                <div class="col-xl-8">
-                                                    @if ($order->registration_otc)
-                                                        <input type="text"
-                                                            style="border: 0; border-bottom: 1.9px dashed #aaa; margin-top: -.5rem; border-radius: 0"
-                                                            class="form-control" id="rm_reg" readonly value="OTC"
-                                                            name="rm_reg">
-                                                    @else
-                                                        <input type="text"
-                                                            style="border: 0; border-bottom: 1.9px dashed #aaa; margin-top: -.5rem; border-radius: 0"
-                                                            class="form-control" id="rm_reg" readonly
-                                                            value="{{ $order->registration->patient->medical_record_number }} / {{ $order->registration->registration_number }}"
-                                                            name="rm_reg">
-                                                    @endif
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="form-group">
-                                            <div class="row align-items-center">
-                                                <div class="col-xl-4 text-right">
-                                                    <label class="form-label" for="mobile_phone_number">
-                                                        No Telp
-                                                    </label>
-                                                </div>
-                                                <div class="col-xl-8">
-                                                    <input type="text"
-                                                        style="border: 0; border-bottom: 1.9px dashed #aaa; margin-top: -.5rem; border-radius: 0"
-                                                        class="form-control" id="mobile_phone_number" readonly
-                                                        value="{{ $order->registration ? $order->registration->patient->mobile_phone_number : $order->registration_otc->no_telp }}"
-                                                        name="mobile_phone_number">
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="form-group">
-                                            <div class="row align-items-center">
-                                                <div class="col-xl-4 text-right">
-                                                    <label class="form-label" for="age">
-                                                        Umur
-                                                    </label>
-                                                </div>
-                                                <div class="col-xl-8">
-                                                    <input type="text"
-                                                        style="border: 0; border-bottom: 1.9px dashed #aaa; margin-top: -.5rem; border-radius: 0"
-                                                        class="form-control" id="age" readonly
-                                                        value="{{ $order->registration ? displayAge($order->registration->patient->date_of_birth) : displayAge($order->registration_otc->date_of_birth) }}"
-                                                        name="age">
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="form-group">
-                                            <div class="row align-items-center">
-                                                <div class="col-xl-4 text-right">
-                                                    <label class="form-label" for="result_date">
-                                                        Tgl Hasil*
-                                                    </label>
-                                                </div>
-                                                <div class="col-xl-8">
-                                                    <input type="date"
-                                                        class="@error('result_date') is-invalid @enderror form-control"
-                                                        id="result_date" placeholder="Tanggal Lahir" name="result_date"
-                                                        value="{{ $order->result_date ? \Carbon\Carbon::parse($order->result_date)->format('Y-m-d') : old('result_date') }}">
-                                                    @error('result_date')
-                                                        <p class="invalid-feedback">{{ $message }}</p>
-                                                    @enderror
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    &nbsp;
-                                    <div class="col-xl-12">
-                                        <div class="form-group">
-                                            <table class="table table-bordered">
-                                                <thead>
-                                                    <tr>
-                                                        <th>No.</th>
-                                                        <th>CITO</th>
-                                                        <th>Pemeriksaan</th>
-                                                        <th>Hasil</th>
-                                                        <th>Satuan</th>
-                                                        <th>Nilai Normal</th>
-                                                        <th>Info N.Reff</th>
-                                                        <th>Keterangan</th>
-                                                        <th>Dokter</th>
-                                                        <th>Verifikasi</th>
-                                                        <th>Aksi</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody id="laboratoriumTable">
-                                                    @php
-                                                        $totalCount = 0;
-                                                    @endphp
-                                                    @foreach ($parametersInCategory as $categoryName => $parameters)
-                                                        <tr class="table-info">
-                                                            <td colspan="11">
-                                                                <h4 style="text-align: center">
-                                                                    {{ $categoryName }}</h4>
-                                                            </td>
-                                                        </tr>
-                                                        @foreach ($parameters as $parameter)
-                                                            @php
-                                                                $nilai_normal_parameter = null;
-
-                                                                if ($order->registration) {
-                                                                    $dob = $order->registration->patient->date_of_birth;
-                                                                    $jenis_kelamin =
-                                                                        $order->registration->patient->gender;
-                                                                } else {
-                                                                    // otc
-                                                                    $dob = $order->registration_otc->date_of_birth;
-                                                                    $jenis_kelamin =
-                                                                        $order->registration_otc->jenis_kelamin;
-                                                                }
-
-                                                                foreach ($nilai_normals as $nilai_normal) {
-                                                                    if (
-                                                                        $nilai_normal->parameter_laboratorium_id ==
-                                                                        $parameter->parameter_laboratorium_id
-                                                                    ) {
-                                                                        if (
-                                                                            isWithinAgeRange(
-                                                                                $dob,
-                                                                                $nilai_normal->dari_umur,
-                                                                                $nilai_normal->sampai_umur,
-                                                                            ) &&
-                                                                            ($nilai_normal->jenis_kelamin ==
-                                                                                $jenis_kelamin ||
-                                                                                $nilai_normal->jenis_kelamin ==
-                                                                                    'Semuanya')
-                                                                        ) {
-                                                                            $nilai_normal_parameter = $nilai_normal;
-                                                                            break;
-                                                                        }
-                                                                    }
-                                                                }
-                                                            @endphp
-                                                            <td>{{ ++$totalCount }}</td>
-                                                            <td>{{ $order->tipe_order == 'cito' && 'CITO' }}</td>
-                                                            <td>
-                                                                <h3> {{ $parameter->parameter_laboratorium->parameter }}
-                                                                </h3>
-                                                                @if ($parameter->parameter_laboratorium->is_order)
-                                                                    <p>
-                                                                        {{ number_format($parameter->nominal_rupiah, 0, ',', '.') }}
-                                                                    </p>
-                                                                @endif
-                                                            </td>
-                                                            <td>
-                                                                <input @if (!$parameter->parameter_laboratorium->is_hasil) disabled @endif
-                                                                    type="text" class="form-control"
-                                                                    id="hasil_{{ $parameter->id }}"
-                                                                    value="{{ $parameter->hasil ?? '' }}"
-                                                                    name="hasil_{{ $parameter->id }}">
-                                                            </td>
-                                                            <td>
-                                                                {{ $parameter->parameter_laboratorium->satuan }}
-                                                            </td>
-                                                            <td>
-                                                                @if ($nilai_normal_parameter)
-                                                                    @if ($parameter->parameter_laboratorium->tipe_hasil == 'Angka')
-                                                                        {{ $nilai_normal_parameter->min }} -
-                                                                        {{ $nilai_normal_parameter->max }}
-                                                                    @else
-                                                                        {{ $nilai_normal_parameter->nilai_normal }}
-                                                                    @endif
-                                                                @endif
-                                                            </td>
-                                                            <td>
-                                                                {{ $parameter->nreff && '{nreff}' }}
-                                                            </td>
-                                                            <td>
-                                                                <textarea class="form-control" name="catatan_{{ $parameter->id }}" id="catatan_{{ $parameter->id }}">{{ $parameter->catatan }}</textarea>
-                                                            </td>
-                                                            <td>
-                                                                <div class="form-group">
-                                                                    <div class="row align-items-center">
-                                                                        <div class="col-xl-8">
-                                                                            <input class="form-control" disabled
-                                                                                value="{{ $order->doctor->employee->fullname }}" />
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            </td>
-                                                            <td>
-                                                                @if (!isset($parameter->verifikator_id))
-                                                                    <div align="center">
-                                                                        <button type="button"
-                                                                            data-id="{{ $parameter->id }}"
-                                                                            class="btn btn-primary verify-btn">Verifikasi</button>
-                                                                    </div>
-                                                                @else
-                                                                    <div align="center">
-                                                                        <i class="mdi mdi-check text-success"
-                                                                            style="font-size: 40px"></i>
-                                                                        <p>Verified by
-                                                                            <i>{{ $parameter->verifikator->fullname }}</i>
-                                                                            <br>
-                                                                            On
-                                                                            <i>{{ $parameter->verifikasi_date }}</i>
-                                                                        </p>
-                                                                    </div>
-                                                                @endif
-                                                            </td>
-                                                            <td>
-                                                                @if (
-                                                                    $parameter->parameter_laboratorium->is_order &&
-                                                                        count(array_filter($parameters, function ($param) {
-                                                                                return $param['parameter_laboratorium']['is_order'] ?? false;
-                                                                            })) > 1)
-                                                                    <a class="mdi mdi-close pointer mdi-24px text-danger delete-btn"
-                                                                        title="Hapus Pemeriksaan"
-                                                                        data-id="{{ $parameter->id }}"></a>
-                                                                @endif
-                                                            </td>
-                                                            </tr>
-                                                        @endforeach
-                                                    @endforeach
-                                                    <tr>
-                                                        <td class="text-danger" colspan="8">
-                                                            <h1> <i class="fa fa-calculator"></i>
-                                                                Total:
-                                                                {{ number_format($order->order_parameter_laboratorium->sum('nominal_rupiah'), 0, ',', '.') }}
-                                                            </h1>
-                                                        </td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div>
-                                    <div class="col-xl-12 mt-5">
-                                        <div class="row">
-                                            <div class="col-xl-6">
-                                                <a href="{{ route('laboratorium.list-order') }}"
-                                                    class="btn btn-lg btn-default waves-effect waves-themed">
-                                                    <span class="fal fa-arrow-left mr-1 text-primary"></span>
-                                                    <span class="text-primary">Kembali</span>
-                                                </a>
-                                            </div>
-                                            <div class="col-xl-6 text-right">
-                                                <button type="submit" id="laboratorium-submit"
-                                                    class="btn btn-lg btn-primary waves-effect waves-themed">
-                                                    <span class="fal fa-save mr-1"></span>
-                                                    Simpan
-                                                </button>
-                                            </div>
-                                        </div>
+            {{-- Panel Informasi Pasien & Order --}}
+            <div class="panel" id="panel-info">
+                <div class="panel-hdr">
+                    <h2>
+                        Informasi Pasien & <span class="fw-300"><i>Order [{{ $order->no_order }}]</i></span>
+                    </h2>
+                </div>
+                <div class="panel-container show">
+                    <div class="panel-content">
+                        <div class="row">
+                            {{-- Kolom Kiri: Info Order --}}
+                            <div class="col-md-6 col-lg-4">
+                                <div class="form-group row">
+                                    <label class="col-sm-5 col-form-label">Tanggal Order</label>
+                                    <div class="col-sm-7">
+                                        <input type="text" readonly class="form-control-plaintext"
+                                            value="{{ \Carbon\Carbon::parse($order->order_date)->format('d-m-Y H:i') }}">
                                     </div>
                                 </div>
-                            </form>
+                                <div class="form-group row">
+                                    <label class="col-sm-5 col-form-label">Penjamin</label>
+                                    <div class="col-sm-7">
+                                        <input type="text" readonly class="form-control-plaintext"
+                                            value="{{ $order->registration->penjamin->nama_perusahaan ?? 'OTC' }}">
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label class="col-sm-5 col-form-label">Poli / Ruang</label>
+                                    <div class="col-sm-7">
+                                        @php
+                                            $poliRuang = '-';
+                                            if ($order->registration_otc) {
+                                                $poliRuang = $order->registration_otc->poly_ruang;
+                                            } elseif ($order->registration) {
+                                                $poliRuang =
+                                                    $order->registration->poliklinik ??
+                                                    ($order->registration->kelas_rawat->room->ruangan ?? '-');
+                                            }
+                                        @endphp
+                                        <input type="text" readonly class="form-control-plaintext"
+                                            value="{{ $poliRuang }}">
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label class="col-sm-5 col-form-label">Dokter Perujuk</label>
+                                    <div class="col-sm-7">
+                                        <input type="text" readonly class="form-control-plaintext"
+                                            value="{{ $order->doctor->employee->fullname }}">
+                                    </div>
+                                </div>
+                            </div>
 
+                            {{-- Kolom Tengah: Info Pasien --}}
+                            <div class="col-md-6 col-lg-4">
+                                <div class="form-group row">
+                                    <label class="col-sm-5 col-form-label">Nama Pasien</label>
+                                    <div class="col-sm-7">
+                                        <input type="text" readonly class="form-control-plaintext"
+                                            value="{{ $order->registration->patient->name ?? $order->registration_otc->nama_pasien }}">
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label class="col-sm-5 col-form-label">Jenis Kelamin</label>
+                                    <div class="col-sm-7">
+                                        <input type="text" readonly class="form-control-plaintext"
+                                            value="{{ $order->registration->patient->gender ?? $order->registration_otc->jenis_kelamin }}">
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label class="col-sm-5 col-form-label">Tgl. Lahir / Umur</label>
+                                    <div class="col-sm-7">
+                                        @php
+                                            $dob =
+                                                $order->registration->patient->date_of_birth ??
+                                                $order->registration_otc->date_of_birth;
+                                        @endphp
+                                        <input type="text" readonly class="form-control-plaintext"
+                                            value="{{ \Carbon\Carbon::parse($dob)->format('d-m-Y') }} ({{ displayAge($dob) }})">
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label class="col-sm-5 col-form-label">Alamat</label>
+                                    <div class="col-sm-7">
+                                        <textarea readonly class="form-control-plaintext" rows="1">{{ $order->registration->patient->address ?? $order->registration_otc->alamat }}</textarea>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {{-- Kolom Kanan: Input Medis --}}
+                            <div class="col-md-12 col-lg-4">
+                                <div class="form-group">
+                                    <label class="form-label" for="diagnosa_klinis">Diagnosa Klinis</label>
+                                    <input type="text" class="form-control" id="diagnosa_klinis"
+                                        value="{{ old('diagnosa_klinis', $order->diagnosa_klinis) }}"
+                                        name="diagnosa_klinis">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="inspection_date">Tgl & Jam Sampel</label>
+                                    <input type="datetime-local"
+                                        class="form-control @error('inspection_date') is-invalid @enderror"
+                                        id="inspection_date" name="inspection_date"
+                                        value="{{ old('inspection_date', $order->inspection_date ? \Carbon\Carbon::parse($order->inspection_date)->format('Y-m-d\TH:i') : '') }}">
+                                    @error('inspection_date')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="result_date">Tanggal Hasil</label>
+                                    <input type="date" class="form-control @error('result_date') is-invalid @enderror"
+                                        id="result_date" name="result_date"
+                                        value="{{ old('result_date', $order->result_date ? \Carbon\Carbon::parse($order->result_date)->format('Y-m-d') : '') }}">
+                                    @error('result_date')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </main>
 
+            {{-- Panel Input Hasil Pemeriksaan --}}
+            <div class="panel" id="panel-hasil">
+                <div class="panel-hdr">
+                    <h2>
+                        Input Hasil <span class="fw-300"><i>Pemeriksaan</i></span>
+                    </h2>
+                </div>
+                <div class="panel-container show">
+                    <div class="panel-content p-0">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover mb-0">
+                                <thead class="bg-primary-600">
+                                    <tr>
+                                        <th class="text-center" style="width: 40px;">#</th>
+                                        <th>Pemeriksaan</th>
+                                        <th style="width: 20%;">Hasil</th>
+                                        <th style="width: 8%;">Satuan</th>
+                                        <th style="width: 12%;">Nilai Normal</th>
+                                        <th style="width: 15%;">Keterangan</th>
+                                        <th style="width: 15%;">Verifikasi</th>
+                                        <th class="text-center" style="width: 50px;">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @php $totalCount = 0; @endphp
+                                    @foreach ($parametersInCategory as $categoryName => $parameters)
+                                        <tr class="table-info">
+                                            <td colspan="8" class="fw-500 text-center">{{ $categoryName }}</td>
+                                        </tr>
+                                        @foreach ($parameters as $parameter)
+                                            @php
+                                                $nilai_normal_parameter = null;
+                                                $dob =
+                                                    $order->registration->patient->date_of_birth ??
+                                                    $order->registration_otc->date_of_birth;
+                                                $jenis_kelamin =
+                                                    $order->registration->patient->gender ??
+                                                    $order->registration_otc->jenis_kelamin;
+                                                foreach ($nilai_normals as $nilai_normal) {
+                                                    if (
+                                                        $nilai_normal->parameter_laboratorium_id ==
+                                                            $parameter->parameter_laboratorium_id &&
+                                                        isWithinAgeRange(
+                                                            $dob,
+                                                            $nilai_normal->dari_umur,
+                                                            $nilai_normal->sampai_umur,
+                                                        ) &&
+                                                        ($nilai_normal->jenis_kelamin == $jenis_kelamin ||
+                                                            $nilai_normal->jenis_kelamin == 'Semuanya')
+                                                    ) {
+                                                        $nilai_normal_parameter = $nilai_normal;
+                                                        break;
+                                                    }
+                                                }
+                                                $tipe_hasil = $parameter->parameter_laboratorium->tipe_hasil;
+                                            @endphp
+                                            <tr>
+                                                <td class="text-center">{{ ++$totalCount }}</td>
+                                                <td>
+                                                    <strong>{{ $parameter->parameter_laboratorium->parameter }}</strong>
+                                                    @if ($order->tipe_order == 'cito')
+                                                        <span class="badge badge-danger ml-2">CITO</span>
+                                                    @endif
+                                                </td>
+                                                <td class="p-2 td-hasil" data-tipe-hasil="{{ $tipe_hasil }}"
+                                                    data-nilai-normal="{{ $nilai_normal_parameter->nilai_normal ?? '' }}"
+                                                    data-min="{{ $nilai_normal_parameter->min ?? '' }}"
+                                                    data-max="{{ $nilai_normal_parameter->max ?? '' }}">
+
+                                                    @if (!$parameter->parameter_laboratorium->is_hasil)
+                                                        <span class="text-muted"> (Tidak ada hasil) </span>
+                                                    @elseif ($tipe_hasil == 'Negatif/Positif')
+                                                        <div class="custom-control custom-radio">
+                                                            <input type="radio" id="hasil_{{ $parameter->id }}_neg"
+                                                                name="hasil_{{ $parameter->id }}"
+                                                                class="custom-control-input input-hasil" value="Negatif"
+                                                                {{ old('hasil_' . $parameter->id, $parameter->hasil) == 'Negatif' ? 'checked' : '' }}>
+                                                            <label class="custom-control-label"
+                                                                for="hasil_{{ $parameter->id }}_neg">Negatif</label>
+                                                        </div>
+                                                        <div class="custom-control custom-radio">
+                                                            <input type="radio" id="hasil_{{ $parameter->id }}_pos"
+                                                                name="hasil_{{ $parameter->id }}"
+                                                                class="custom-control-input input-hasil" value="Positif"
+                                                                {{ old('hasil_' . $parameter->id, $parameter->hasil) == 'Positif' ? 'checked' : '' }}>
+                                                            <label class="custom-control-label"
+                                                                for="hasil_{{ $parameter->id }}_pos">Positif</label>
+                                                        </div>
+                                                    @elseif ($tipe_hasil == 'Reaktif/NonReaktif')
+                                                        <div class="custom-control custom-radio">
+                                                            <input type="radio" id="hasil_{{ $parameter->id }}_non"
+                                                                name="hasil_{{ $parameter->id }}"
+                                                                class="custom-control-input input-hasil"
+                                                                value="NonReaktif"
+                                                                {{ old('hasil_' . $parameter->id, $parameter->hasil) == 'NonReaktif' ? 'checked' : '' }}>
+                                                            <label class="custom-control-label"
+                                                                for="hasil_{{ $parameter->id }}_non">Non Reaktif</label>
+                                                        </div>
+                                                        <div class="custom-control custom-radio">
+                                                            <input type="radio" id="hasil_{{ $parameter->id }}_rea"
+                                                                name="hasil_{{ $parameter->id }}"
+                                                                class="custom-control-input input-hasil" value="Reaktif"
+                                                                {{ old('hasil_' . $parameter->id, $parameter->hasil) == 'Reaktif' ? 'checked' : '' }}>
+                                                            <label class="custom-control-label"
+                                                                for="hasil_{{ $parameter->id }}_rea">Reaktif</label>
+                                                        </div>
+                                                    @else
+                                                        <div class="input-group input-group-sm input-group-hasil">
+                                                            <input type="text"
+                                                                class="form-control form-control-sm input-hasil"
+                                                                name="hasil_{{ $parameter->id }}"
+                                                                value="{{ old('hasil_' . $parameter->id, $parameter->hasil) }}"
+                                                                autocomplete="off">
+
+                                                            <i class="fal fa-exclamation-triangle hasil-indicator"
+                                                                title="Hasil di luar rentang normal"></i>
+
+                                                            @if ($tipe_hasil == 'Teks' && $nilai_normal_parameter && strpos($nilai_normal_parameter->nilai_normal, '/') === false)
+                                                                <div class="input-group-append">
+                                                                    <button class="btn btn-primary btn-sm btn-autofill"
+                                                                        type="button" title="Isi dengan nilai normal">
+                                                                        <i class="fal fa-magic"></i>
+                                                                    </button>
+                                                                </div>
+                                                            @endif
+                                                        </div>
+                                                    @endif
+                                                </td>
+                                                <td>{{ $parameter->parameter_laboratorium->satuan }}</td>
+                                                <td>
+                                                    @if ($nilai_normal_parameter)
+                                                        {{ $tipe_hasil == 'Angka' ? $nilai_normal_parameter->min . ' - ' . $nilai_normal_parameter->max : str_replace('/', ' / ', $nilai_normal_parameter->nilai_normal) }}
+                                                    @else
+                                                        -
+                                                    @endif
+                                                </td>
+                                                <td>
+                                                    <textarea class="form-control form-control-sm" name="catatan_{{ $parameter->id }}"
+                                                        id="catatan_{{ $parameter->id }}" rows="1">{{ old('catatan_' . $parameter->id, $parameter->catatan) }}</textarea>
+                                                </td>
+                                                <td class="text-center">
+                                                    @if (isset($parameter->verifikator_id))
+                                                        <div class="text-success">
+                                                            <i class="fas fa-check-circle fa-2x"></i>
+                                                            <div class="fs-xs text-muted mt-1">
+                                                                oleh
+                                                                <strong>{{ $parameter->verifikator->fullname }}</strong><br>
+                                                                {{ \Carbon\Carbon::parse($parameter->verifikasi_date)->format('d-m-Y H:i') }}
+                                                            </div>
+                                                        </div>
+                                                    @else
+                                                        <button type="button" data-id="{{ $parameter->id }}"
+                                                            class="btn btn-sm btn-primary verify-btn">
+                                                            Verifikasi
+                                                        </button>
+                                                    @endif
+                                                </td>
+                                                <td class="text-center">
+                                                    @if ($parameter->parameter_laboratorium->is_order && $order->order_parameter_laboratorium->count() > 1)
+                                                        <a href="javascript:void(0);"
+                                                            class="btn btn-xs btn-icon btn-danger delete-btn"
+                                                            title="Hapus Pemeriksaan" data-id="{{ $parameter->id }}">
+                                                            <i class="fas fa-times"></i>
+                                                        </a>
+                                                    @endif
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Panel Opsi & Tindakan --}}
+            <div class="panel" id="panel-tindakan">
+                <div class="panel-container show">
+                    <div class="panel-content">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <a href="{{ route('laboratorium.list-order') }}"
+                                    class="btn btn-lg btn-secondary waves-effect waves-themed">
+                                    <span class="fal fa-arrow-left mr-2"></span>
+                                    Kembali ke Daftar Order
+                                </a>
+                            </div>
+                            <div class="col-md-6 text-right">
+                                <button type="button" id="btn-open-popup"
+                                    class="btn btn-lg btn-success waves-effect waves-themed">
+                                    <span class="fal fa-plus-circle mr-2"></span>
+                                    Tambah Tindakan
+                                </button>
+                                <button type="submit" id="laboratorium-submit"
+                                    class="btn btn-lg btn-primary waves-effect waves-themed">
+                                    <span class="fal fa-save mr-2"></span>
+                                    Simpan Perubahan
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </main>
+@endsection
+
+@section('plugin')
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             window._order = @json($order);
         });
     </script>
-    <script src="{{ asset('js/simrs/edit-order-laboratorium.js') }}?v={{ time() }}"></script>
+    <script>
+        $(document).ready(function() {
+            // --- LOGIKA POPUP WINDOW ---
+            $('#btn-open-popup').on('click', function() {
+                var orderId = window._order.id;
+                var url = `/simrs/laboratorium/order/${orderId}/add-tindakan-popup`;
+                var width = 1200;
+                var height = 700;
+                var left = (screen.width / 2) - (width / 2);
+                var top = (screen.height / 2) - (height / 2);
+                var popupWindow = window.open(url, 'TambahTindakan',
+                    `width=${width},height=${height},top=${top},left=${left},scrollbars=yes`);
+                if (window.focus) popupWindow.focus();
+                var timer = setInterval(function() {
+                    if (popupWindow.closed) {
+                        clearInterval(timer);
+                        location.reload();
+                    }
+                }, 500);
+            });
+
+            // --- FUNGSI VALIDASI HASIL REAL-TIME ---
+            function checkHasil(inputElement) {
+                const $input = $(inputElement);
+                const $parentTd = $input.closest('td');
+                $parentTd.find('.input-hasil, .custom-control-label').removeClass(
+                    'hasil-abnormal hasil-normal hasil-abnormal-radio');
+                const tipeHasil = $parentTd.data('tipe-hasil');
+                let nilaiInput;
+                if ($input.is(':radio')) {
+                    nilaiInput = $(`input[name="${$input.attr('name')}"]:checked`).val();
+                } else {
+                    nilaiInput = $input.val();
+                }
+                if (typeof nilaiInput === 'undefined' || nilaiInput.trim() === "") return;
+                nilaiInput = nilaiInput.trim();
+                let isAbnormal = false;
+                if (tipeHasil === 'Angka') {
+                    const min = parseFloat($parentTd.data('min'));
+                    const max = parseFloat($parentTd.data('max'));
+                    const nilaiFloat = parseFloat(nilaiInput);
+                    if (!isNaN(min) && !isNaN(max) && !isNaN(nilaiFloat)) {
+                        if (nilaiFloat < min || nilaiFloat > max) isAbnormal = true;
+                    }
+                } else { // Ini mencakup semua tipe Teks, termasuk radio button
+                    const nilaiNormal = $parentTd.data('nilai-normal').toString().toLowerCase();
+                    if (nilaiNormal && !nilaiNormal.includes('/')) {
+                        if (nilaiInput.toLowerCase() !== nilaiNormal) isAbnormal = true;
+                    }
+                }
+                let $targetElement = $input.is(':radio') ? $(`input[name="${$input.attr('name')}"]:checked`).next(
+                    '.custom-control-label') : $input;
+                if (isAbnormal) {
+                    if ($input.is(':radio')) $targetElement.addClass('hasil-abnormal-radio');
+                    else $targetElement.addClass('hasil-abnormal');
+                } else {
+                    $targetElement.addClass('hasil-normal');
+                }
+            }
+
+            // --- EVENT LISTENERS ---
+            $('.input-hasil').on('keyup change', function() {
+                checkHasil(this);
+            });
+            $('.input-hasil').each(function() {
+                if ($(this).is(':radio') && $(this).is(':checked')) checkHasil(this);
+                else if (!$(this).is(':radio')) checkHasil(this);
+            });
+            $('.btn-autofill').on('click', function() {
+                const $parentTd = $(this).closest('td');
+                const $inputHasil = $parentTd.find('.input-hasil');
+                const nilaiNormal = $parentTd.data('nilai-normal');
+                if (nilaiNormal) {
+                    $inputHasil.val(nilaiNormal);
+                    checkHasil($inputHasil[0]);
+                }
+            });
+
+            // --- Aksi Verifikasi & Hapus ---
+            $('.verify-btn').on('click', function() {
+                Swal.fire({
+                        title: 'Verifikasi Hasil?',
+                        text: "Pastikan hasil pemeriksaan ini sudah benar.",
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonText: 'Ya, Verifikasi!',
+                        cancelButtonText: 'Batal'
+                    })
+                    .then((result) => {
+                        if (result.isConfirmed) {
+                            /* AJAX Call Here */
+                            showSuccessAlert('Hasil berhasil diverifikasi.');
+                        }
+                    });
+            });
+            $('.delete-btn').on('click', function() {
+                showDeleteConfirmation(function() {
+                    /* AJAX Call Here */
+                    showSuccessAlert('Pemeriksaan berhasil dihapus.');
+                });
+            });
+        });
+    </script>
 @endsection

@@ -1,181 +1,112 @@
 @extends('inc.layout')
-@section('title', 'Nilai Parameter Laboratorium')
-@section('extended-css')
-    <style>
-        hr {
-            border: 1px dashed #fd3995 !important;
-        }
+@section('title', 'Nilai Normal Parameter Laboratorium')
 
-        div.table-responsive>div.dataTables_wrapper>div.row>div[class^="col-"]:last-child {
-            padding: 0px;
-        }
-
-        .dataTables_scrollHeadInner,
-        .dataTables_scrollFootInner {
-            width: 100% !important;
-        }
-
-        #filter-wrapper .form-group {
-            display: flex;
-            align-items: center;
-        }
-
-        #filter-wrapper .form-label {
-            margin-bottom: 0;
-            width: 100px;
-            /* Atur lebar label agar semua label sejajar */
-        }
-
-        #filter-wrapper .form-control {
-            flex: 1;
-        }
-
-        @media (max-width: 767.98px) {
-            .custom-margin {
-                margin-top: 15px;
-            }
-
-            #filter-wrapper .form-group {
-                flex-direction: column;
-                align-items: flex-start !important;
-            }
-
-            #filter-wrapper .form-label {
-                width: auto;
-                /* Biarkan lebar label mengikuti konten */
-                margin-bottom: 0.5rem;
-            }
-
-            #filter-wrapper .form-control {
-                width: 100%;
-            }
-        }
-    </style>
-@endsection
 @section('content')
     <main id="js-page-content" role="main" class="page-content">
-        <div class="row justify-content-center">
-            <div class="col-xl-10">
-                <div id="panel-1" class="panel">
-                    <div class="panel-hdr">
-                        <h2>
-                            Form Pencarian</span>
-                        </h2>
-                    </div>
-                    <div class="panel-container show">
-                        <div class="panel-content" id="filter-wrapper">
-
-                            <form action="/daftar-rekam-medis" method="get">
-                                @csrf
-                                <div class="row">
-                                    <div class="col-md-12 mb-3">
-                                        <div class="form-group d-flex align-items-center">
-                                            <label for="nama_tindakan_1" class="form-label">Nama</label>
-                                            <input type="text" name="nama_tindakan" id="nama_tindakan_1"
-                                                class="form-control rounded-0 border-top-0 border-left-0 border-right-0 p-0">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-12">
-                                        <button type="submit" class="btn btn-sm float-right mt-2 btn-primary">
-                                            <i class="fas fa-search mr-1"></i> Cari
-                                        </button>
-                                    </div>
+        {{-- Panel Form Pencarian --}}
+        <div class="panel" id="panel-filter">
+            <div class="panel-hdr">
+                <h2>
+                    Filter <span class="fw-300"><i>Pencarian</i></span>
+                </h2>
+            </div>
+            <div class="panel-container show">
+                <div class="panel-content">
+                    <form action="" method="get">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label class="form-label" for="nama_parameter">Nama Parameter</label>
+                                    <input type="text" name="nama_parameter" id="nama_parameter" class="form-control"
+                                        placeholder="Cari nama parameter...">
                                 </div>
-                            </form>
+                            </div>
+                            <div class="col-md-4">
+                                {{-- Filter tambahan bisa diletakkan di sini --}}
+                            </div>
+                            <div class="col-md-4">
+                                {{-- Filter tambahan bisa diletakkan di sini --}}
+                            </div>
                         </div>
-                    </div>
+                        <div class="row">
+                            <div class="col-12 d-flex justify-content-end">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-search mr-1"></i> Cari
+                                </button>
+                            </div>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
 
-        <div class="row">
-            <div class="col-xl-12">
-                <div id="panel-1" class="panel">
-                    <div class="panel-hdr">
-                        <h2>
-                            Parameter Laboratorium
-                        </h2>
-                    </div>
-                    <div class="panel-container show">
-                        <div class="panel-content">
-                            <!-- datatable start -->
-                            <div class="table-responsive">
-                                <table id="dt-basic-example" class="table table-bordered table-hover table-striped w-100">
-                                    <i id="loading-spinner" class="fas fa-spinner fa-spin"></i>
-                                    <thead class="bg-primary-600">
-                                        <tr>
-                                            <th>Parameter</th>
-                                            <th>Referensi</th>
-                                            <th>Umur</th>
-                                            <th>Jenis Kelamin</th>
-                                            <th>Fungsi</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach ($nilai_parameter as $row)
-                                            <tr>
-                                                {{-- Kolom 1: Nama Parameter --}}
-                                                {{-- Mengakses nama parameter melalui relasi 'parameter_laboratorium' --}}
-                                                <td>{{ $row->parameter_laboratorium->parameter ?? 'Parameter Tidak Ditemukan' }}
-                                                </td>
-
-                                                {{-- Kolom 2: Nilai Normal / Rentang Referensi --}}
-                                                {{-- Menampilkan nilai min dan max jika ada, jika tidak tampilkan nilai_normal teks --}}
-                                                <td>
-                                                    @if (isset($row->min) && isset($row->max) && ($row->min > 0 || $row->max > 0))
-                                                        {{ $row->min }} - {{ $row->max }}
-                                                    @else
-                                                        {{ $row->nilai_normal }}
-                                                    @endif
-                                                </td>
-
-                                                {{-- Kolom 3: Umur --}}
-                                                {{-- Menggabungkan dari_umur dan sampai_umur untuk tampilan yang mudah dibaca --}}
-                                                <td>
-                                                    {{-- Fungsi untuk mengubah format umur. Definisikan di AppServiceProvider atau helper. --}}
-                                                    {{ format_umur_range($row->dari_umur, $row->sampai_umur) }}
-                                                </td>
-
-                                                {{-- Kolom 4: Jenis Kelamin --}}
-                                                <td>{{ $row->jenis_kelamin }}</td>
-
-                                                {{-- Kolom 5: Aksi (Edit & Hapus) --}}
-                                                <td>
-                                                    <button class="btn btn-sm btn-success px-2 py-1 btn-edit"
-                                                        data-id="{{ $row->id }}">
-                                                        <i class="fas fa-pencil-alt"></i> {{-- Menggunakan ikon yang lebih umum --}}
-                                                    </button>
-                                                    <button class="btn btn-sm btn-danger px-2 py-1 btn-delete"
-                                                        data-id="{{ $row->id }}">
-                                                        <i class="fas fa-trash"></i>
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                        @endforeach
-                                    </tbody>
-                                    <tfoot>
-                                        <tr>
-                                            <th colspan="5" class="text-center">
-                                                <button type="button" class="btn-outline-primary waves-effect waves-themed"
-                                                    id="btn-tambah-nilai-parameter-laboratorium">
-                                                    <span class="fal fa-plus-circle"></span>
-                                                    Tambah Nilai Parameter Laboratorium
-                                                </button>
-                                            </th>
-                                        </tr>
-                                    </tfoot>
-                                </table>
-                            </div>
-                            <!-- datatable end -->
-                        </div>
+        {{-- Panel Daftar Data --}}
+        <div class="panel" id="panel-data">
+            <div class="panel-hdr">
+                <h2>
+                    Daftar <span class="fw-300"><i>Nilai Normal Parameter</i></span>
+                </h2>
+                <div class="panel-toolbar">
+                    {{-- Tombol Tambah dipindahkan ke sini --}}
+                    <button class="btn btn-success btn-sm" id="btn-tambah-nilai-parameter">
+                        <i class="fas fa-plus mr-1"></i> Tambah Nilai Normal
+                    </button>
+                </div>
+            </div>
+            <div class="panel-container show">
+                <div class="panel-content">
+                    <div class="table-responsive">
+                        <table id="dt-nilai-parameter" class="table table-bordered table-hover table-striped w-100">
+                            <thead class="bg-primary-600">
+                                <tr>
+                                    <th class="text-center" style="width: 30px;">No</th>
+                                    <th>Parameter</th>
+                                    <th>Referensi / Nilai Normal</th>
+                                    <th>Rentang Umur</th>
+                                    <th>Jenis Kelamin</th>
+                                    <th class="text-center" style="width: 80px;">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($nilai_parameter as $row)
+                                    <tr>
+                                        <td class="text-center">{{ $loop->iteration }}</td>
+                                        <td>{{ $row->parameter_laboratorium->parameter ?? 'N/A' }}</td>
+                                        <td>
+                                            @if (isset($row->min) && isset($row->max) && ($row->min > 0 || $row->max > 0))
+                                                <span class="badge badge-info fs-md">{{ $row->min }} -
+                                                    {{ $row->max }}</span>
+                                            @else
+                                                {{ $row->nilai_normal }}
+                                            @endif
+                                        </td>
+                                        <td>{{ format_umur_range($row->dari_umur, $row->sampai_umur) }}</td>
+                                        <td>{{ $row->jenis_kelamin }}</td>
+                                        <td class="text-center">
+                                            <button class="btn btn-xs btn-icon btn-warning btn-edit"
+                                                data-id="{{ $row->id }}" title="Edit Data">
+                                                <i class="fas fa-pencil-alt"></i>
+                                            </button>
+                                            <button class="btn btn-xs btn-icon btn-danger btn-delete"
+                                                data-id="{{ $row->id }}" title="Hapus Data">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
         </div>
     </main>
+
+    {{-- Include Modal --}}
     @include('pages.simrs.master-data.penunjang-medis.laboratorium.partials.tambah-nilai-parameter-lab')
     @include('pages.simrs.master-data.penunjang-medis.laboratorium.partials.edit-nilai-parameter-lab')
 @endsection
+
 @section('plugin')
     <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
     <script src="/js/datagrid/datatables/datatables.export.js"></script>
@@ -183,236 +114,166 @@
     <script src="/js/formplugins/bootstrap-datepicker/bootstrap-datepicker.js"></script>
     <script>
         $(document).ready(function() {
-            let kategoriId = null;
-            $('#loading-spinner').show();
-
-            $("#modal-tambah-nilai-parameter-laboratorium #tanggal").datepicker({
-                dateFormat: "dd-mm-yy" // Mengatur format menjadi dd-mm-yyyy
-            }).datepicker("setDate", new Date());
-
-            $('#btn-tambah-nilai-parameter-laboratorium').click(function() {
-                $('#modal-tambah-nilai-parameter-laboratorium').modal('show');
-            });
-
-            $('#modal-tambah-nilai-parameter-laboratorium .select2').select2({
-                dropdownParent: $('#modal-tambah-nilai-parameter-laboratorium'),
-                placeholder: 'Pilih Data Berikut'
-            });
-
-            $('.btn-edit').click(function() {
-                console.log('clicked');
-                $('#modal-edit-nilai-parameter-laboratorium').modal('show');
-                kategoriId = $(this).attr('data-id');
-                $('#modal-edit-nilai-parameter-laboratorium form').attr('data-id', kategoriId);
-
-                $.ajax({
-                    url: '/api/simrs/master-data/penunjang-medis/laboratorium/nilai-normal-parameter/' +
-                        kategoriId,
-                    type: 'GET',
-                    success: function(response) {
-                        $('#modal-edit-nilai-parameter-laboratorium button#btn-edit')
-                            .attr('data-id', response.id);
-
-                        $.each(response, function(key, value) {
-                            const selector =
-                                `#modal-edit-nilai-parameter-laboratorium [name="${key}"]`;
-
-                            if ($(selector).is('input[type="radio"]')) {
-                                $(selector + '[value="' + value + '"]')
-                                    .prop('checked', true)
-                                    .trigger('change');
-                            } else if ($(selector)
-                                .is('input[type="checkbox"]')) {
-                                $(selector)
-                                    .prop('checked', value)
-                                    .trigger('change');
-                            } else if ($(selector).is('select')) {
-                                $(selector)
-                                    .val(value)
-                                    .trigger('change');
-                            } else {
-                                $(selector)
-                                    .val(value)
-                                    .trigger('change');
-                            }
-                        });
-                    },
-                    error: function(xhr, status, error) {
-                        $('#modal-edit-nilai-parameter-laboratorium').modal('hide');
-                        showErrorAlert('Terjadi kesalahan: ' + error);
-                    }
-                });
-
-            });
-
-            $('.btn-delete').click(function() {
-                var kategoriId = $(this).attr('data-id');
-
-                // Menggunakan confirm() untuk mendapatkan konfirmasi dari pengguna
-                var userConfirmed = confirm('Anda Yakin ingin menghapus ini?');
-
-                if (userConfirmed) {
-                    // Jika pengguna mengklik "Ya" (OK), maka lakukan AJAX request
-                    $.ajax({
-                        url: '/api/simrs/master-data/penunjang-medis/laboratorium/nilai-normal-parameter/' +
-                            kategoriId,
-                        headers: {
-                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                        },
-                        type: 'DELETE',
-                        success: function(response) {
-                            showSuccessAlert(response.message);
-
-                            setTimeout(() => {
-                                console.log('Reloading the page now.');
-                                window.location.reload();
-                            }, 1000);
-                        },
-                        error: function(xhr, status, error) {
-                            showErrorAlert('Terjadi kesalahan: ' + error);
-                        }
-                    });
-                } else {
-                    console.log('Penghapusan dibatalkan oleh pengguna.');
-                }
-            });
-
-            $('#update-form').on('submit', function(e) {
-                e.preventDefault(); // Mencegah form submit secara default
-
-                var formData = $(this).serialize();
-                Id = $(this).attr('data-id');
-                $.ajax({
-                    url: '/api/simrs/master-data/penunjang-medis/laboratorium/nilai-normal-parameter/' +
-                        Id,
-                    type: 'PATCH',
-                    data: formData,
-                    beforeSend: function() {
-                        $('#update-form').find('.ikon-edit').hide();
-                        $('#update-form').find('.spinner-text').removeClass(
-                            'd-none');
-                    },
-                    success: function(response) {
-                        $('#modal-edit-nilai-parameter-laboratorium').modal('hide');
-                        showSuccessAlert(response.message);
-
-                        setTimeout(() => {
-                            console.log('Reloading the page now.');
-                            window.location.reload();
-                        }, 1000);
-                    },
-                    error: function(xhr, status, error) {
-                        if (xhr.status === 422) {
-                            var errors = xhr.responseJSON.errors;
-                            var errorMessages = '';
-
-                            $.each(errors, function(key, value) {
-                                errorMessages += value +
-                                    '\n';
-                            });
-
-                            $('#modal-edit-nilai-parameter-laboratorium').modal('hide');
-                            showErrorAlert('Terjadi kesalahan:\n' +
-                                errorMessages);
-                        } else {
-                            $('#modal-edit-nilai-parameter-laboratorium').modal('hide');
-                            showErrorAlert('Terjadi kesalahan: ' + error);
-                            console.log(error);
-                        }
-                    }
-                });
-            });
-
-            $('#store-form').on('submit', function(e) {
-                e.preventDefault(); // Mencegah form submit secara default
-
-                var formData = $(this).serialize();
-
-                $.ajax({
-                    url: '/api/simrs/master-data/penunjang-medis/laboratorium/nilai-normal-parameter',
-                    type: 'POST',
-                    data: formData,
-                    beforeSend: function() {
-                        $('#store-form').find('.ikon-tambah').hide();
-                        $('#store-form').find('.spinner-text').removeClass(
-                            'd-none');
-                    },
-                    success: function(response) {
-                        $('#modal-tambah-nilai-parameter-laboratorium').modal('hide');
-                        showSuccessAlert(response.message);
-                        console.log(response);
-
-
-                        setTimeout(() => {
-                            console.log('Reloading the page now.');
-                            window.location.reload();
-                        }, 1000);
-                    },
-                    error: function(xhr, status, error) {
-                        if (xhr.status === 422) {
-                            var errors = xhr.responseJSON.errors;
-                            var errorMessages = '';
-
-                            $.each(errors, function(key, value) {
-                                errorMessages += value +
-                                    '\n';
-                            });
-
-                            $('#modal-tambah-nilai-parameter-laboratorium').modal('hide');
-                            showErrorAlert('Terjadi kesalahan:\n' +
-                                errorMessages);
-                        } else {
-                            $('#modal-tambah-nilai-parameter-laboratorium').modal('hide');
-                            showErrorAlert('Terjadi kesalahan: ' + error);
-                            console.log(error);
-                        }
-                    }
-                });
-            });
-
-            // initialize datatable
-            $('#dt-basic-example').DataTable({
-                "drawCallback": function(settings) {
-                    // Menyembunyikan preloader setelah data berhasil dimuat
-                    $('#loading-spinner').hide();
-                },
-                responsive: false, // Responsif diaktifkan
-                scrollX: true, // Tambahkan scroll horizontal
+            // Inisialisasi DataTable
+            $('#dt-nilai-parameter').DataTable({
+                responsive: true,
                 lengthChange: false,
-                dom: "<'row mb-3'<'col-sm-12 col-md-6 d-flex align-items-center justify-content-start'f><'col-sm-12 col-md-6 d-flex align-items-center justify-content-end buttons-container'B>>" +
+                dom: "<'row mb-3'<'col-sm-12 col-md-6 d-flex align-items-center justify-content-start'f><'col-sm-12 col-md-6 d-flex align-items-center justify-content-end'lB>>" +
                     "<'row'<'col-sm-12'tr>>" +
                     "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
                 buttons: [{
                         extend: 'pdfHtml5',
                         text: 'PDF',
                         titleAttr: 'Generate PDF',
-                        className: 'btn-outline-danger btn-sm mr-1 custom-margin'
+                        className: 'btn-outline-danger btn-sm mr-1'
                     },
                     {
                         extend: 'excelHtml5',
                         text: 'Excel',
                         titleAttr: 'Generate Excel',
-                        className: 'btn-outline-success btn-sm mr-1 custom-margin'
+                        className: 'btn-outline-success btn-sm mr-1'
                     },
                     {
                         extend: 'csvHtml5',
                         text: 'CSV',
                         titleAttr: 'Generate CSV',
-                        className: 'btn-outline-primary btn-sm mr-1 custom-margin'
+                        className: 'btn-outline-primary btn-sm mr-1'
                     },
                     {
                         extend: 'copyHtml5',
                         text: 'Copy',
                         titleAttr: 'Copy to clipboard',
-                        className: 'btn-outline-primary btn-sm mr-1 custom-margin'
+                        className: 'btn-outline-primary btn-sm mr-1'
                     },
                     {
                         extend: 'print',
                         text: 'Print',
                         titleAttr: 'Print Table',
-                        className: 'btn-outline-primary btn-sm custom-margin'
+                        className: 'btn-outline-primary btn-sm'
                     }
                 ]
+            });
+
+            // --- Event Handler untuk Modal Tambah ---
+            $('#btn-tambah-nilai-parameter').on('click', function() {
+                $('#modal-tambah-nilai-parameter-laboratorium').modal('show');
+            });
+
+            $('#modal-tambah-nilai-parameter-laboratorium').on('shown.bs.modal', function() {
+                $(this).find('.select2').select2({
+                    dropdownParent: $(this),
+                    placeholder: 'Pilih Data'
+                });
+            });
+
+            // --- Event Delegation untuk Tombol Aksi di Tabel ---
+            $('#dt-nilai-parameter tbody').on('click', '.btn-edit', function() {
+                var dataId = $(this).data('id');
+                $('#modal-edit-nilai-parameter-laboratorium form').attr('data-id', dataId);
+
+                $.ajax({
+                    url: `/api/simrs/master-data/penunjang-medis/laboratorium/nilai-normal-parameter/${dataId}`,
+                    type: 'GET',
+                    success: function(response) {
+                        // Inisialisasi select2 sebelum mengisi data
+                        $('#modal-edit-nilai-parameter-laboratorium .select2').select2({
+                            dropdownParent: $(
+                                '#modal-edit-nilai-parameter-laboratorium')
+                        });
+
+                        // Isi form
+                        $.each(response, function(key, value) {
+                            const selector =
+                                `#modal-edit-nilai-parameter-laboratorium [name="${key}"]`;
+                            if ($(selector).is('select')) {
+                                $(selector).val(value).trigger('change');
+                            } else {
+                                $(selector).val(value);
+                            }
+                        });
+
+                        $('#modal-edit-nilai-parameter-laboratorium').modal('show');
+                    },
+                    error: function(xhr, status, error) {
+                        showErrorAlert('Gagal mengambil data: ' + error);
+                    }
+                });
+            });
+
+            $('#dt-nilai-parameter tbody').on('click', '.btn-delete', function() {
+                var dataId = $(this).data('id');
+
+                // Menggunakan SweetAlert untuk konfirmasi
+                showDeleteConfirmation(function() {
+                    $.ajax({
+                        url: `/api/simrs/master-data/penunjang-medis/laboratorium/nilai-normal-parameter/${dataId}`,
+                        type: 'DELETE',
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        },
+                        success: function(response) {
+                            showSuccessAlert(response.message);
+                            setTimeout(() => window.location.reload(), 1500);
+                        },
+                        error: function(xhr) {
+                            showErrorAlert('Gagal menghapus data: ' + xhr.responseJSON
+                                .message);
+                        }
+                    });
+                });
+            });
+
+
+            // --- Handler untuk Submit Form ---
+            $('#update-form').on('submit', function(e) {
+                e.preventDefault();
+                var formData = $(this).serialize();
+                var dataId = $(this).attr('data-id');
+
+                $.ajax({
+                    url: `/api/simrs/master-data/penunjang-medis/laboratorium/nilai-normal-parameter/${dataId}`,
+                    type: 'PATCH',
+                    data: formData,
+                    success: function(response) {
+                        $('#modal-edit-nilai-parameter-laboratorium').modal('hide');
+                        showSuccessAlert(response.message);
+                        setTimeout(() => window.location.reload(), 1500);
+                    },
+                    error: function(xhr) {
+                        if (xhr.status === 422) {
+                            var errors = Object.values(xhr.responseJSON.errors).join('\n');
+                            showErrorAlert('Terjadi kesalahan validasi:\n' + errors);
+                        } else {
+                            showErrorAlert('Terjadi kesalahan: ' + xhr.responseJSON.message);
+                        }
+                    }
+                });
+            });
+
+            $('#store-form').on('submit', function(e) {
+                e.preventDefault();
+                var formData = $(this).serialize();
+
+                $.ajax({
+                    url: '/api/simrs/master-data/penunjang-medis/laboratorium/nilai-normal-parameter',
+                    type: 'POST',
+                    data: formData,
+                    success: function(response) {
+                        $('#modal-tambah-nilai-parameter-laboratorium').modal('hide');
+                        $('#store-form')[0].reset(); // Reset form setelah berhasil
+                        $('.select2').val(null).trigger('change'); // Reset select2
+                        showSuccessAlert(response.message);
+                        setTimeout(() => window.location.reload(), 1500);
+                    },
+                    error: function(xhr) {
+                        if (xhr.status === 422) {
+                            var errors = Object.values(xhr.responseJSON.errors).join('\n');
+                            showErrorAlert('Terjadi kesalahan validasi:\n' + errors);
+                        } else {
+                            showErrorAlert('Terjadi kesalahan: ' + xhr.responseJSON.message);
+                        }
+                    }
+                });
             });
 
         });

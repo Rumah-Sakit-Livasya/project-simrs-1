@@ -130,20 +130,104 @@ class LaboratoriumController extends Controller
         $parameters = $order->order_parameter_laboratorium;
         $parameterCategories = [];
 
-
         foreach ($parameters as $parameter) {
             $category = $parameter->parameter_laboratorium->kategori_laboratorium->nama_kategori;
-            $category = $parameter['parameter_laboratorium']['kategori_laboratorium']['nama_kategori'];
             if (!isset($parameterCategories[$category])) {
                 $parameterCategories[$category] = [];
             }
             $parameterCategories[$category][] = $parameter;
         }
 
+        // --- TAMBAHAN BARU: Muat semua kategori dan tarif untuk modal ---
+        $all_laboratorium_categories = KategoriLaboratorium::with('parameter_laboratorium')->get();
+        $all_tarifs = TarifParameterLaboratorium::all();
+        // --- AKHIR TAMBAHAN ---
+
         return view('pages.simrs.laboratorium.partials.edit-order', [
             'order' => $order,
             'parametersInCategory' => $parameterCategories,
-            'nilai_normals' => NilaiNormalLaboratorium::all()
+            'nilai_normals' => NilaiNormalLaboratorium::all(),
+            'all_laboratorium_categories' => $all_laboratorium_categories, // Kirim ke view
+            'all_tarifs' => $all_tarifs, // Kirim ke view
+        ]);
+    }
+
+    public function addTindakan(Request $request)
+    {
+        $request->validate([
+            'order_id' => 'required|exists:order_laboratorium,id',
+            'parameter_data' => 'required|array',
+            'parameter_data.*.id' => 'required|integer|exists:parameter_laboratorium,id',
+            'parameter_data.*.jumlah' => 'required|integer|min:1',
+        ]);
+
+        // Eager load relasi yang dibutuhkan untuk efisiensi
+        $order = OrderLaboratorium::with('registration.penjamin', 'registration.kelas_rawat')->findOrFail($request->order_id);
+
+        // --- INI BAGIAN YANG DIPERBAIKI (1) ---
+        // Mengambil ID GRUP Penjamin, bukan ID Penjamin-nya.
+        // Asumsi: Relasi `penjamin` pada model `Registration` ada, dan model `Penjamin` punya kolom `group_penjamin_id`
+        // Jika order OTC atau data tidak lengkap, default ke grup 1 (UMUM)
+        $groupPenjaminId = $order->registration->penjamin->group_penjamin_id ?? 1;
+        $kelasRawatId = $order->registration->kelas_rawat_id ?? 1; // Default ke kelas 1 (atau sesuaikan)
+        // --- AKHIR BAGIAN PERBAIKAN (1) ---
+
+        $addedCount = 0;
+        foreach ($request->parameter_data as $data) {
+            $parameterId = $data['id'];
+            $jumlah = $data['jumlah'];
+
+            $exists = OrderParameterLaboratorium::where('order_laboratorium_id', $order->id)
+                ->where('parameter_laboratorium_id', $parameterId)
+                ->exists();
+
+            if ($exists) {
+                continue;
+            }
+
+            // --- INI BAGIAN YANG DIPERBAIKI (2) ---
+            // Menggunakan kolom 'group_penjamin_id' sesuai dengan skema database
+            $tarif = TarifParameterLaboratorium::where('parameter_laboratorium_id', $parameterId)
+                ->where('group_penjamin_id', $groupPenjaminId) // Menggunakan kolom dan variabel yang benar
+                ->where('kelas_rawat_id', $kelasRawatId)
+                ->first();
+            // --- AKHIR BAGIAN PERBAIKAN (2) ---
+
+            // Loop untuk menambahkan item sebanyak 'jumlah'
+            for ($i = 0; $i < $jumlah; $i++) {
+                OrderParameterLaboratorium::create([
+                    'order_laboratorium_id' => $order->id,
+                    'parameter_laboratorium_id' => $parameterId,
+                    'nominal_rupiah' => $tarif->total ?? 0,
+                    'user_id' => auth()->id(),
+                    'employee_id' => auth()->user()->employee->id,
+                ]);
+            }
+            $addedCount++;
+        }
+
+        if ($addedCount > 0) {
+            return response()->json(['success' => true, 'message' => "$addedCount jenis tindakan berhasil ditambahkan."]);
+        }
+
+        return response()->json(['success' => false, 'message' => "Tidak ada tindakan baru yang ditambahkan (mungkin sudah ada)."]);
+    }
+
+
+    public function addTindakanPopup($order_id)
+    {
+        $order = OrderLaboratorium::findOrFail($order_id);
+
+        // Ambil ID parameter yang sudah ada di order ini untuk dinonaktifkan di popup
+        $existingParameterIds = $order->order_parameter_laboratorium()->pluck('parameter_laboratorium_id')->toArray();
+
+        // Ambil semua kategori untuk ditampilkan
+        $all_laboratorium_categories = KategoriLaboratorium::with('parameter_laboratorium')->get();
+
+        return view('pages.simrs.laboratorium.partials.add-tindakan-popup', [
+            'order' => $order,
+            'all_laboratorium_categories' => $all_laboratorium_categories,
+            'existingParameterIds' => $existingParameterIds
         ]);
     }
 
