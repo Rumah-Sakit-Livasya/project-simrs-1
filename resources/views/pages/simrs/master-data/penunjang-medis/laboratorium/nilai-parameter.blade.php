@@ -88,6 +88,41 @@
             </div>
         </div>
 
+        <div class="card">
+            <div class="card-header">
+                Import / Export Nilai Normal
+            </div>
+            <div class="card-body">
+                <!-- Tampilkan pesan sukses atau error -->
+                @if (session('success'))
+                    <div class="alert alert-success">
+                        {{ session('success') }}
+                    </div>
+                @endif
+                @if ($errors->any())
+                    <div class="alert alert-danger">
+                        <ul>
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
+                <form action="{{ route('simrs.laboratorium.nilai-normal.import') }}" method="POST"
+                    enctype="multipart/form-data">
+                    @csrf
+                    <div class="form-group">
+                        <label for="file">Upload File Excel</label>
+                        <input type="file" name="file" class="form-control" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Import</button>
+                    <a href="{{ route('simrs.laboratorium.nilai-normal.export') }}" class="btn btn-success">Download
+                        Template</a>
+                </form>
+            </div>
+        </div>
+
         <div class="row">
             <div class="col-xl-12">
                 <div id="panel-1" class="panel">
@@ -189,7 +224,7 @@
                     type: 'GET',
                     success: function(response) {
                         $('#modal-edit-nilai-parameter-laboratorium button#btn-edit')
-                            .attr('data-id',response.id);
+                            .attr('data-id', response.id);
 
                         $.each(response, function(key, value) {
                             const selector =

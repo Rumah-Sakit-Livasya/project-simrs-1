@@ -44,7 +44,7 @@ class OrderLaboratorium extends Model
 
     public function doctor()
     {
-        return $this->belongsTo(Doctor::class, 'dokter_laboratorium_id');
+        return $this->belongsTo(Doctor::class, 'doctor_id');
     }
 
     public function user()

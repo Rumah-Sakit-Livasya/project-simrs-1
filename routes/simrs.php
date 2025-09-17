@@ -452,6 +452,9 @@ Route::group(['middleware' => ['auth']], function () {
                         ->name('master-data.penunjang-medis.laboratorium.nilai-parameter');
                     Route::get('/tipe', [TipeLaboratoriumController::class, 'index'])
                         ->name('master-data.penunjang-medis.laboratorium.tipe');
+
+                    Route::get('/nilai-normal-parameter/export', [NilaiNormalLaboratoriumController::class, 'export'])->name('simrs.laboratorium.nilai-normal.export');
+                    Route::post('/nilai-normal-parameter/import', [NilaiNormalLaboratoriumController::class, 'import'])->name('simrs.laboratorium.nilai-normal.import');
                 });
 
                 // Pharmacy routes
