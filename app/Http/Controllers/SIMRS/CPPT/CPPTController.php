@@ -145,19 +145,14 @@ class CPPTController extends Controller
     {
         try {
             // Jika filter Tipe CPPT diisi dan BUKAN 'dokter', langsung kembalikan array kosong.
-            // Ini adalah cara paling efisien untuk menangani kasus ini.
             if ($request->filled('cppt_type') && $request->cppt_type !== 'dokter') {
                 return response()->json([], 200);
             }
 
-            // Mulai membangun query, JANGAN panggil ->get() dulu
+            // Query dengan eager load user.employee dan signature
             $query = CPPT::where('registration_id', $request->registration_id)
-                ->where('tipe_cppt', '=', 'dokter') // Filter utama method ini
-                ->with('user.employee', 'signature'); // Pastikan 'signature' juga di-load
-
-            // ===================================================================
-            // APLIKASIKAN FILTER DARI REQUEST SECARA KONDISIONAL
-            // ===================================================================
+                ->where('tipe_cppt', '=', 'dokter')
+                ->with('user.employee', 'signature');
 
             // Filter berdasarkan Status Rawat (misal: 'ri', 'rj', 'igd')
             if ($request->filled('care_status')) {
@@ -172,15 +167,12 @@ class CPPTController extends Controller
                 ]);
             }
 
-            // ===================================================================
-
-            // Sekarang, eksekusi query setelah semua filter ditambahkan
             $cppt = $query->orderBy('created_at', 'desc')->get();
 
-            // Logika `map` Anda sudah bagus, kita pertahankan.
-            // Tidak perlu lagi `isNotEmpty()` karena `map` aman untuk collection kosong.
+            // Kirim data employee juga
             $formattedCppt = $cppt->map(function ($item) {
-                $item->nama = optional($item->user->employee)->fullname;
+                // Nama dokter (jika ada relasi doctor di employee)
+                $item->nama = optional($item->user->employee->doctor)->name;
 
                 if (! empty($item->tipe_rawat)) {
                     $item->tipe_rawat = $item->tipe_rawat === 'igd'
@@ -188,17 +180,18 @@ class CPPTController extends Controller
                         : ucwords(str_replace('-', ' ', $item->tipe_rawat));
                 }
 
-                // INI BAGIAN PALING PENTING
-                // Pastikan 'signature' di-load, lalu buat 'signature_url' dan 'signature_pic'
+                // Signature
                 $item->signature_url = $item->signature ? Storage::url($item->signature->signature) : null;
                 $item->signature_pic = $item->signature ? $item->signature->pic : null;
+
+                // Kirim data employee (bisa null jika tidak ada)
+                $item->employee = $item->user && $item->user->employee ? $item->user->employee : null;
 
                 return $item;
             });
 
             return response()->json($formattedCppt, 200);
         } catch (\Exception $e) {
-            // Lebih baik menangkap error spesifik jika memungkinkan, tapi ini sudah cukup
             return response()->json(['error' => 'Terjadi kesalahan pada server: ' . $e->getMessage()], 500);
         }
     }
@@ -252,9 +245,10 @@ class CPPTController extends Controller
                 $validatedData['monitoring'] = $request->input('monitoring');
             } else if ($request->has('perawat_id')) {
                 $validatedData['tipe_cppt'] = 'perawat';
+                $validatedData['user_id'] = Doctor::find($request->doctor_id)->employee->user->id;
             } elseif ($request->has('doctor_id')) {
                 $validatedData['tipe_cppt'] = 'dokter';
-                $validatedData['user_id'] = Doctor::find($request->doctor_id)->employee->id;
+                $validatedData['user_id'] = Doctor::find($request->doctor_id)->employee->user->id;
             }
 
             $cppt = CPPT::create($validatedData);

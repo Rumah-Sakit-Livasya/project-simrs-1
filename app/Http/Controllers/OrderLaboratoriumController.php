@@ -187,7 +187,7 @@ class OrderLaboratoriumController extends Controller
                 if (!$dokterLab || !$dokterLab->employee_id) {
                     throw new \Exception("Data Employee untuk Dokter Laboratorium tidak ditemukan.");
                 }
-                $dokterLaboratoriumId = $dokterLab->employee_id;
+                $dokterLaboratoriumId = $dokterLab->id;
 
                 $no_order = $this->generate_order_number();
                 $orderData = [];
@@ -231,7 +231,7 @@ class OrderLaboratoriumController extends Controller
                 $orderData += [
                     'user_id' => $validatedData['user_id'],
                     'patient_id' => $validatedData['patient_id'],
-                    'dokter_laboratorium_id' => $dokterLaboratoriumId,
+                    'doctor_id' => $dokterLaboratoriumId,
                     'order_date' => Carbon::now(),
                     'no_order' => $no_order,
                     'tipe_order' => $validatedData['order_type'],
