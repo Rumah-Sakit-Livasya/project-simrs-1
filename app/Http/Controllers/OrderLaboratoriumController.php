@@ -8,11 +8,18 @@ use App\Models\RelasiParameterLaboratorium;
 use App\Models\SIMRS\Bilingan;
 use App\Models\SIMRS\BilinganTagihanPasien;
 use App\Models\SIMRS\Departement;
+use App\Models\SIMRS\Doctor;
 use App\Models\SIMRS\Laboratorium\OrderLaboratorium;
+use App\Models\SIMRS\Patient;
 use App\Models\SIMRS\Penjamin;
+use App\Models\SIMRS\Registration;
 use App\Models\SIMRS\TagihanPasien;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 class OrderLaboratoriumController extends Controller
 {
@@ -117,142 +124,157 @@ class OrderLaboratoriumController extends Controller
      */
     public function store(Request $request)
     {
-        $request->merge(['parameters' => json_decode($request->parameters, true)]);
-
-        try {
-            $validatedData = $request->validate([
-                'user_id' => 'required|integer',
-                'employee_id' => 'required|integer',
-                'registration_type' => 'string',
-                'catatan' => 'nullable|string',
-                'registration_id' => 'integer',
-                'doctor_id' => 'required|integer',
-                'order_type' => 'required|string',
-                'diagnosa_awal' => 'required|string',
-                'parameters' => 'required|array',
-            ]);
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json([
-                'success' => false,
-                'errors' => $e->errors(),
-            ], 422);
+        // 1. Dekode 'parameters' jika dikirim sebagai string JSON
+        $parameters = $request->input('parameters', []);
+        if (is_string($parameters)) {
+            $parameters = json_decode($parameters, true);
         }
+        $request->merge(['parameters' => $parameters]);
 
-        // Konversi tipe_pasien sesuai instruksi
-        // rajal => 1, ranap => 2, otc => 3
-        $tipePasienMap = [
-            'rajal' => 1,
-            'ranap' => 2,
-            'otc'   => 3,
+        // 2. Tentukan aturan validasi
+        $isOtc = $request->boolean('is_otc');
+        $rules = [
+            'user_id' => 'required|integer|exists:users,id',
+            'employee_id' => 'required|integer|exists:employees,id',
+            'doctor_id' => 'required|integer|exists:doctors,id',
+            'order_type' => ['required', Rule::in(['normal', 'cito'])],
+            'diagnosa_awal' => 'required|string|max:255',
+            'parameters' => 'required|array|min:1',
+            'parameters.*.id' => 'required|integer|exists:parameter_laboratorium,id',
+            'parameters.*.qty' => 'required|integer|min:1',
+            'parameters.*.price' => 'required|numeric|min:0',
+            'registration_id' => [Rule::requiredIf(!$isOtc), 'nullable', 'integer', 'exists:registrations,id'],
+            'is_otc' => 'nullable|boolean',
+            'nama_pasien' => ['nullable', Rule::requiredIf($isOtc), 'string', 'max:255'],
+            'date_of_birth' => ['nullable', Rule::requiredIf($isOtc), 'date'],
+            'jenis_kelamin' => ['nullable', Rule::requiredIf($isOtc), Rule::in(['Laki-laki', 'Perempuan'])],
+            'alamat' => 'nullable|string|max:255',
+            'no_telp' => 'nullable|string|max:20',
+            // patient_id mungkin tidak dikirim dari form OTC, jadi buat opsional
+            'patient_id' => 'nullable|integer|exists:patients,id',
+            // medical_record_number bisa digunakan untuk mencari patient_id jika patient_id tidak ada
+            'medical_record_number' => 'nullable|string|max:50',
         ];
 
-        $registrationType = strtolower($validatedData['registration_type']);
-        $tipePasienValue = $tipePasienMap[$registrationType] ?? $validatedData['registration_type'];
+        $validator = Validator::make($request->all(), $rules);
 
-        $no_order = $this->generate_order_number();
-
-        if ($request->filled('is_otc')) {
-            try {
-                $validatedData['registration_type'] = 'otc';
-
-                // get department id with department name "LABORATORIUM"
-                $department = Departement::where('name', 'LABORATORIUM')->first();
-                $validatedData['departement_id'] = $department->id;
-
-                // get penjamin id with nama_perusahaan "Standar"
-                $penjamin = Penjamin::where('nama_perusahaan', 'Standar')->first();
-                $validatedData['penjamin_id'] = $penjamin->id;
-
-                $registrationOTCid = RegistrationOTC::create([
-                    'user_id' => $validatedData['user_id'],
-                    'employee_id' => $validatedData['employee_id'],
-                    'penjamin_id' => $validatedData['penjamin_id'],
-                    'departement_id' => $validatedData['departement_id'],
-                    'tipe_pasien' => 3,
-                    'nama_pasien' => $request->get('nama_pasien'),
-                    'date_of_birth' => $request->get('date_of_birth'),
-                    'no_telp' => $request->get('no_telp'),
-                    'poly_ruang' => 'LABORATORIUM',
-                    'jenis_kelamin' => $request->get('jenis_kelamin'),
-                    'order_date' => Carbon::now(),
-                    'registration_number' => $this->generate_otc_registration_number(),
-                    'order_lab' => $no_order,
-                    'order_type' => $validatedData['order_type'],
-                    'doctor' => $request->get('doctor'),
-                    'doctor_id' => $validatedData['doctor_id'],
-                    'alamat' => $request->get('alamat'),
-                    'diagnosa_klinis' => $validatedData['diagnosa_awal'],
-                ])->id;
-
-                $orderLaboratorium = OrderLaboratorium::create([
-                    'user_id' => $validatedData['user_id'],
-                    'otc_id' => $registrationOTCid,
-                    'dokter_laboratorium_id' => $validatedData['doctor_id'],
-                    'order_date' => Carbon::now(),
-                    'no_order' => $no_order,
-                    'tipe_order' => $validatedData['order_type'],
-                    'tipe_pasien' => 3,
-                    'diagnosa_klinis' => $validatedData['diagnosa_awal'],
-                    'status_isi_hasil' => 0,
-                    'status_billed' => 0,
-                ]);
-            } catch (\Exception $e) {
-                return response()->json([
-                    'success' => false,
-                    'message' => $e->getMessage(),
-                ], 500);
-            }
-        } else { // normal / not OTC
-            try {
-                $orderLaboratorium = OrderLaboratorium::create([
-                    'user_id' => $validatedData['user_id'],
-                    'registration_id' => $validatedData['registration_id'],
-                    'dokter_laboratorium_id' => $validatedData['doctor_id'],
-                    'order_date' => Carbon::now(),
-                    'no_order' => $no_order,
-                    'tipe_order' => $validatedData['order_type'],
-                    'tipe_pasien' => $tipePasienValue,
-                    'diagnosa_klinis' => $validatedData['diagnosa_awal'],
-                    'status_isi_hasil' => 0,
-                    'status_billed' => 0,
-                ]);
-            } catch (\Exception $e) {
-                return response()->json([
-                    'success' => false,
-                    'message' => $e->getMessage(),
-                ]);
-            }
+        if ($validator->fails()) {
+            Log::error('Validation error in OrderLaboratoriumController@store', ['errors' => $validator->errors(), 'request' => $request->all()]);
+            return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
         }
 
-        $orderLaboratoriumId = $orderLaboratorium->id;
-        foreach ($validatedData['parameters'] as $parameter) {
-            for ($i = 0; $i < $parameter['qty']; $i++) {
-                OrderParameterLaboratorium::create([
-                    'order_laboratorium_id' => $orderLaboratoriumId,
-                    'parameter_laboratorium_id' => $parameter['id'],
-                    'nominal_rupiah' => $parameter['price'],
-                ]);
+        $validatedData = $validator->validated();
 
-                // from table relasi_parameter_laboratorium, get all columns
-                // where main_parameter_id equals parameter['id']
-                $parameterLaboratorium = RelasiParameterLaboratorium::where('main_parameter_id', $parameter['id'])->get();
+        // Jika tidak ada patient_id tapi ada medical_record_number, cari patient_id
+        if (
+            (!array_key_exists('patient_id', $validatedData) || empty($validatedData['patient_id']))
+            && !empty($validatedData['medical_record_number'])
+        ) {
+            $patient = Patient::where('medical_record_number', $validatedData['medical_record_number'])->first();
+            $validatedData['patient_id'] = $patient ? $patient->id : null;
+        }
 
-                // check if $parameterLaboratorium has length
-                if (count($parameterLaboratorium) > 0) {
-                    foreach ($parameterLaboratorium as $relasi) {
+        // Pastikan patient_id selalu ada di $validatedData, set null jika tidak ada
+        if (!array_key_exists('patient_id', $validatedData)) {
+            $validatedData['patient_id'] = null;
+        }
+
+        // 3. Proses penyimpanan menggunakan DB Transaction
+        try {
+            $orderLaboratorium = DB::transaction(function () use ($validatedData, $isOtc, $request) {
+                // Cari employee_id dari doctor_id yang dikirim
+                $dokterLab = Doctor::find($validatedData['doctor_id']);
+                if (!$dokterLab || !$dokterLab->employee_id) {
+                    throw new \Exception("Data Employee untuk Dokter Laboratorium tidak ditemukan.");
+                }
+                $dokterLaboratoriumId = $dokterLab->employee_id;
+
+                $no_order = $this->generate_order_number();
+                $orderData = [];
+
+                if ($isOtc) {
+                    $tipePasien = '3'; // OTC
+
+                    $department = Departement::where('name', 'like', '%LAB%')->firstOrFail();
+                    $penjamin = Penjamin::where('nama_perusahaan', 'Standar')->firstOrFail();
+
+                    $registrationOTC = RegistrationOTC::create([
+                        'user_id' => $validatedData['user_id'],
+                        'employee_id' => $validatedData['employee_id'],
+                        'penjamin_id' => $penjamin->id,
+                        'departement_id' => $department->id,
+                        'tipe_pasien' => 'otc',
+                        'nama_pasien' => $validatedData['nama_pasien'],
+                        'date_of_birth' => $validatedData['date_of_birth'],
+                        'no_telp' => $validatedData['no_telp'] ?? null,
+                        'poly_ruang' => 'LABORATORIUM',
+                        'jenis_kelamin' => $validatedData['jenis_kelamin'],
+                        'order_date' => Carbon::now()->toDateTimeString(),
+                        'registration_number' => $this->generate_otc_registration_number(),
+                        'order_lab' => $no_order,
+                        'order_type' => $validatedData['order_type'],
+                        'doctor_id' => $validatedData['doctor_id'],
+                        'alamat' => $validatedData['alamat'] ?? null,
+                        'diagnosa_klinis' => $validatedData['diagnosa_awal'],
+                        'patient_id' => $validatedData['patient_id'],
+                    ]);
+
+                    $orderData['otc_id'] = $registrationOTC->id;
+                } else { // Pasien terdaftar
+                    $registration = Registration::find($validatedData['registration_id']);
+                    $tipePasien = ($registration->registration_type === 'rawat-inap') ? '2' : '1';
+
+                    $orderData['registration_id'] = $validatedData['registration_id'];
+                }
+
+                // Siapkan data untuk dimasukkan ke tabel 'order_laboratorium'
+                $orderData += [
+                    'user_id' => $validatedData['user_id'],
+                    'patient_id' => $validatedData['patient_id'],
+                    'dokter_laboratorium_id' => $dokterLaboratoriumId,
+                    'order_date' => Carbon::now(),
+                    'no_order' => $no_order,
+                    'tipe_order' => $validatedData['order_type'],
+                    'tipe_pasien' => $tipePasien,
+                    'diagnosa_klinis' => $validatedData['diagnosa_awal'],
+                    'status_isi_hasil' => 0,
+                    'status_billed' => false,
+                ];
+
+                $orderLaboratorium = OrderLaboratorium::create($orderData);
+
+                // Proses detail parameter (tidak berubah)
+                foreach ($validatedData['parameters'] as $parameter) {
+                    for ($i = 0; $i < $parameter['qty']; $i++) {
                         OrderParameterLaboratorium::create([
-                            'order_laboratorium_id' => $orderLaboratoriumId,
-                            'parameter_laboratorium_id' => $relasi->sub_parameter_id,
-                            'nominal_rupiah' => 0,
+                            'order_laboratorium_id' => $orderLaboratorium->id,
+                            'parameter_laboratorium_id' => $parameter['id'],
+                            'nominal_rupiah' => $parameter['price'],
                         ]);
+
+                        $relasiParameters = RelasiParameterLaboratorium::where('main_parameter_id', $parameter['id'])->get();
+                        foreach ($relasiParameters as $relasi) {
+                            OrderParameterLaboratorium::create([
+                                'order_laboratorium_id' => $orderLaboratorium->id,
+                                'parameter_laboratorium_id' => $relasi->sub_parameter_id,
+                                'nominal_rupiah' => 0,
+                            ]);
+                        }
                     }
                 }
-            }
-        }
 
-        return response()->json([
-            'success' => true,
-        ]);
+                return $orderLaboratorium;
+            });
+
+            return response()->json(['success' => true, 'order_id' => $orderLaboratorium->id]);
+        } catch (\Exception $e) {
+            Log::error('Exception in OrderLaboratoriumController@store', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'request' => $request->all(),
+            ]);
+            return response()->json(['success' => false, 'message' => 'Terjadi kesalahan pada server: ' . $e->getMessage()], 500);
+        }
     }
 
     public function confirmPayment(Request $request)

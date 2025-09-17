@@ -217,25 +217,25 @@
                                     <td>
                                         @if ($order->registration_otc)
                                             <a>
-                                                {{ $order->registration_otc->penjamin->name ?? '-' }}
+                                                {{ $order->registration_otc->penjamin->nama_perusahaan ?? '-' }}
                                             </a>
                                         @else
                                             @if ($order->registration->patient->orderBy('created_at', 'desc')->first() !== null)
                                                 @if ($order->registration->patient->orderBy('created_at', 'desc')->first()->status === 'aktif')
                                                     <a
                                                         href="{{ route('detail.registrasi.pasien', $order->registration->patient->orderBy('created_at', 'desc')->first()->id) }}">
-                                                        {{ $order->registration->patient->penjamin->name ?? '-' }}
+                                                        {{ $order->registration->patient->penjamin->nama_perusahaan ?? '-' }}
                                                     </a>
                                                 @else
                                                     <a
                                                         href="{{ route('detail.pendaftaran.pasien', $order->registration->patient->id) }}">
-                                                        {{ $order->registration->patient->penjamin->name ?? '-' }}
+                                                        {{ $order->registration->patient->penjamin->nama_perusahaan ?? '-' }}
                                                     </a>
                                                 @endif
                                             @else
                                                 <a
                                                     href="{{ route('detail.pendaftaran.pasien', $order->registration->patient->id) }}">
-                                                    {{ $order->registration->patient->penjamin->name ?? '-' }}
+                                                    {{ $order->registration->patient->penjamin->nama_perusahaan ?? '-' }}
                                                 </a>
                                             @endif
                                         @endif

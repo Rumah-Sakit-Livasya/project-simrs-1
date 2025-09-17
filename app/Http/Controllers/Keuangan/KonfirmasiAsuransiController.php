@@ -308,7 +308,7 @@ class KonfirmasiAsuransiController extends Controller
                     'jumlah'            => (float) str_replace(',', '', $bilingan->wajib_bayar),
                     'diskon'            => 0,
                     'jatuh_tempo'       => $tanggalJatuhTempo,      // Simpan jatuh tempo
-                    'tanggal'           => now()->toDateString(),
+                    'tanggal'           => now(),
                     'keterangan'        => $keterangan,            // Simpan keterangan
                     'status'            => 'Sudah Di Buat Tagihan',
                     'status_pembayaran' => '-',
