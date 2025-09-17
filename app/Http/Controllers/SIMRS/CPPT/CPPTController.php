@@ -281,30 +281,52 @@ class CPPTController extends Controller
 
             // farmasi rajal
             if ($request->has('resep_manual') || $request->has('gudang_id')) {
-                if (! $request->has('gudang_id')) { // manual recipe only
-                    $re = FarmasiResepElektronik::create([
+
+                // Hasilkan kode resep sekali saja.
+                // Jika request memiliki kode_re yang sudah ada, gunakan itu. Jika tidak, buat yang baru.
+                $kode_re = $request->input('kode_re', $this->generate_pharmacy_re_code());
+
+                // Kriteria untuk mencari record (unique identifier)
+                $searchCriteria = [
+                    'kode_re' => $kode_re,
+                    'registration_id' => $validatedData['registration_id'],
+                ];
+
+                if (! $request->has('gudang_id')) { // Hanya resep manual
+                    // Data yang akan di-update atau di-create
+                    $dataToInsertOrUpdate = [
                         'cppt_id' => $cppt->id,
                         'user_id' => auth()->user()->id,
-                        'kode_re' => $this->generate_pharmacy_re_code(),
-                        'total' => 0,
+                        'total' => 0, // Reset total karena tidak ada item elektronik
                         'resep_manual' => $request->get('resep_manual'),
-                        'registration_id' => $validatedData['registration_id'],
-                    ]);
-                } else {
+                        'gudang_id' => null // Pastikan gudang_id di-null-kan jika hanya resep manual
+                    ];
+
+                    $re = FarmasiResepElektronik::updateOrCreate($searchCriteria, $dataToInsertOrUpdate);
+
+                    // Karena ini mungkin update, hapus item lama jika ada
+                    $re->items()->delete();
+                } else { // Resep elektronik (bisa juga dengan resep manual)
                     $total = $request->get('total_harga_obat');
                     if ($total == null) {
                         throw new \Exception('Total harga obat tidak boleh kosong');
                     }
 
-                    $re = FarmasiResepElektronik::create([
+                    // Data yang akan di-update atau di-create
+                    $dataToInsertOrUpdate = [
                         'cppt_id' => $cppt->id,
                         'user_id' => auth()->user()->id,
-                        'kode_re' => $this->generate_pharmacy_re_code(),
                         'gudang_id' => $request->get('gudang_id'),
                         'total' => $total,
                         'resep_manual' => $request->has('resep_manual') ? $request->get('resep_manual') : null,
-                        'registration_id' => $validatedData['registration_id'],
-                    ]);
+                    ];
+
+                    $re = FarmasiResepElektronik::updateOrCreate($searchCriteria, $dataToInsertOrUpdate);
+
+                    // --- Logika untuk Item: Hapus yang lama, masukkan yang baru ---
+                    // Ini adalah cara paling aman untuk menangani update item.
+                    // Mencegah item duplikat atau item yang sudah dihapus dari UI tetap ada di DB.
+                    $re->items()->delete();
 
                     $barang_ids = $request->get('barang_id');
                     $qtys = $request->get('qty');
@@ -312,8 +334,9 @@ class CPPTController extends Controller
                     $subtotals = $request->get('subtotal');
                     $instruksi_obats = $request->get('instruksi_obat');
                     $signas = $request->get('signa');
+
                     if (! $barang_ids || ! $qtys || ! $hargas || ! $subtotals || ! $instruksi_obats || ! $signas) {
-                        throw new \Exception('Field tidak lengkap');
+                        throw new \Exception('Field item resep tidak lengkap');
                     }
 
                     foreach ($barang_ids as $key => $barang_id) {
@@ -324,22 +347,24 @@ class CPPTController extends Controller
                             'qty' => $qtys[$key],
                             'harga' => $hargas[$key],
                             'subtotal' => $subtotals[$key],
-                            // signa, instruksi
                             'instruksi' => $instruksi_obats[$key],
                             'signa' => $signas[$key],
                         ]);
                     }
                 }
 
-                // create response
-                FarmasiResepResponse::create([
-                    're_id' => $re->id,
-                ]);
+                // --- Logika untuk Response: Gunakan firstOrCreate ---
+                // Ini untuk memastikan response hanya dibuat sekali untuk setiap resep.
+                FarmasiResepResponse::firstOrCreate(
+                    ['re_id' => $re->id] // Cari berdasarkan re_id
+                    // Tidak perlu array kedua karena kita hanya ingin membuat jika tidak ada.
+                );
             }
 
             DB::commit();
 
-            return response()->json(['message' => ' berhasil ditambahkan!'], 200);
+            // Sesuaikan pesan response untuk lebih jelas
+            return response()->json(['message' => 'Resep berhasil disimpan!'], 200);
         } catch (\Exception $e) {
             DB::rollBack();
 

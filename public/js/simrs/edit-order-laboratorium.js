@@ -1,124 +1,98 @@
-// @ts-check
-/// <reference types="jquery" />
-/// <reference path="../types.d.ts" />
+// Pastikan skrip dijalankan setelah DOM sepenuhnya dimuat
+$(document).ready(function () {
+    // Diasumsikan window.Swal adalah instance SweetAlert2 yang sudah ada secara global
+    const Swal = window.Swal;
 
-// @ts-ignore
-const Swal = /** @type {import("sweetalert2").default} */ (window.Swal);
+    // Ambil data order dari variabel global yang di-set oleh server
+    const order = window._order || {};
+    // Ambil token CSRF sekali untuk digunakan kembali
+    const csrfToken = $('meta[name="csrf-token"]').attr("content") || "";
 
-class EditOrderLaboratorium {
     /**
-     * @type {OrderLaboratorium}
+     * Menginisialisasi semua event listener
      */
-    #Order;
-
-    constructor() {
-        document.addEventListener("DOMContentLoaded", () => {
-            this.#init();
-        })
-    }
-
-    #init() {
-        // @ts-ignore
-        this.#Order = window._order;
-
-        this.#addEventListeners('.verify-btn', this.#handleVerifyButton);
-        this.#addEventListeners('.delete-btn', this.#handleDeleteButton);
+    function init() {
+        // Menggunakan delegasi event untuk menangani elemen yang mungkin ditambahkan secara dinamis
+        // Namun, jika tombol sudah pasti ada saat halaman dimuat, .on() langsung juga bisa
+        $(document).on("click", ".verify-btn", handleVerifyButton);
+        $(document).on("click", ".delete-btn", handleDeleteButton);
     }
 
     /**
-    * Handle delete button click
-    * @param {Event} event 
-    */
-    #handleDeleteButton(event) {
+     * Menangani klik pada tombol hapus
+     * @param {Event} event
+     */
+    function handleDeleteButton(event) {
         event.preventDefault();
-        const button = /** @type {HTMLButtonElement} */ (event.target);
-        const id = button.getAttribute("data-id");
+        // $(this) merujuk pada elemen tombol yang diklik
+        const id = $(this).data("id");
         if (!id) return;
 
         Swal.fire({
-            title: 'Hapus order parameter?',
+            title: "Hapus order parameter?",
             text: "Semua sub parameter ini akan ikut dihapus!",
-            icon: 'warning',
+            icon: "warning",
             showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Ya, hapus!',
-            cancelButtonText: 'Batal'
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Ya, hapus!",
+            cancelButtonText: "Batal",
         }).then((result) => {
             if (result.isConfirmed) {
-                this.#deleteData(id);
+                deleteData(id);
             }
         });
     }
 
     /**
-    * Delete data
-    * @param {string} id 
-    */
-    #deleteData(id) {
+     * Mengirim permintaan untuk menghapus data
+     * @param {string} id
+     */
+    function deleteData(id) {
         const formData = new FormData();
-        formData.append('order_parameter_id', id);
-        formData.append('order_id', String(this.#Order.id));
-        formData.append('csrf-token', document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '');
+        formData.append("order_parameter_id", id);
+        formData.append("order_id", order.id);
 
-        fetch('/api/simrs/laboratorium/parameter-delete', {
-            method: 'POST',
-            body: formData,
+        $.ajax({
+            url: "/api/simrs/laboratorium/parameter-delete",
+            method: "POST",
+            data: formData,
+            processData: false, // Penting saat mengirim FormData
+            contentType: false, // Penting saat mengirim FormData
             headers: {
-                'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')) || '',
-                'Cache-Control': 'no-cache'
-            }
-        })
-            .then(response => {
-                if (response.status != 200) {
-                    throw new Error('Error: ' + response.statusText);
-                }
-                showSuccessAlert('Data berhasil disimpan');
+                "X-CSRF-TOKEN": csrfToken,
+            },
+            success: function (response) {
+                // Diasumsikan showSuccessAlert adalah fungsi global
+                showSuccessAlert("Data berhasil dihapus");
                 setTimeout(() => window.location.reload(), 2000);
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                showErrorAlertNoRefresh(`Error: ${error}`);
-            });
-    }
-
-    /**
-     * Add event listeners
-     * @param {string} selector 
-     * @param {Function} handler 
-     * @param {string} event
-     */
-    #addEventListeners(selector, handler, event = 'click') {
-        const buttons = document.querySelectorAll(selector);
-        buttons.forEach((button) => {
-            button.addEventListener(event, handler.bind(this));
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.error("Error:", errorThrown);
+                // Diasumsikan showErrorAlertNoRefresh adalah fungsi global
+                showErrorAlertNoRefresh(`Error: ${errorThrown}`);
+            },
         });
     }
 
     /**
-     * Handle verify button click
-     * @param {Event} event 
+     * Menangani klik pada tombol verifikasi
+     * @param {Event} event
      */
-    #handleVerifyButton(event) {
+    function handleVerifyButton(event) {
         event.preventDefault();
-        const target = /** @type {HTMLElement} */ (event.target);
-        const id = target.getAttribute("data-id");
+        const id = $(this).data("id");
         if (!id) return;
 
-        const now = new Date();
-        const formattedDate = now.toISOString().slice(0, 19).replace("T", " ");
-
-        const employeeIdInput = /** @type {HTMLInputElement} */ (document.querySelector('input[name="employee_id"]'));
-        const employeeId = employeeIdInput ? employeeIdInput.value : null;
+        const employeeId = $('input[name="employee_id"]').val();
         if (!employeeId) {
-            showErrorAlertNoRefresh('Employee ID is required');
+            showErrorAlertNoRefresh("Employee ID is required");
             return;
         }
 
-        const formData = new FormData();
-        formData.append("id", id);
-        formData.append("verifikator_id", employeeId);
-        formData.append("verifikasi_date", formattedDate);
+        const now = new Date();
+        // Membuat format YYYY-MM-DD HH:MM:SS
+        const formattedDate = now.toISOString().slice(0, 19).replace("T", " ");
 
         Swal.fire({
             title: "Verifikasi",
@@ -127,30 +101,36 @@ class EditOrderLaboratorium {
             focusConfirm: true,
             showCancelButton: true,
             confirmButtonText: "Verifikasi",
-            cancelButtonText: "Batal"
-        }).then(result => {
+            cancelButtonText: "Batal",
+        }).then((result) => {
             if (result.isConfirmed) {
-                fetch('/api/simrs/laboratorium/parameter-verify', {
-                    method: 'POST',
-                    body: formData,
+                const formData = new FormData();
+                formData.append("id", id);
+                formData.append("verifikator_id", employeeId);
+                formData.append("verifikasi_date", formattedDate);
+
+                $.ajax({
+                    url: "/api/simrs/laboratorium/parameter-verify",
+                    method: "POST",
+                    data: formData,
+                    processData: false,
+                    contentType: false,
                     headers: {
-                        'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')) || ''
-                    }
-                })
-                    .then(response => {
-                        if (response.status != 200) {
-                            throw new Error('Error: ' + response.statusText);
-                        }
-                        showSuccessAlert('Data berhasil disimpan');
+                        "X-CSRF-TOKEN": csrfToken,
+                    },
+                    success: function (response) {
+                        showSuccessAlert("Data berhasil diverifikasi");
                         setTimeout(() => window.location.reload(), 2000);
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        showErrorAlertNoRefresh(`Error: ${error}`);
-                    });
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        console.error("Error:", errorThrown);
+                        showErrorAlertNoRefresh(`Error: ${errorThrown}`);
+                    },
+                });
             }
         });
     }
-}
 
-const EditOrderLaboratoriumClass = new EditOrderLaboratorium();
+    // Panggil fungsi inisialisasi untuk memulai
+    init();
+});

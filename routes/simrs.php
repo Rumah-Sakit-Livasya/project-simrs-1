@@ -1039,6 +1039,10 @@ Route::group(['middleware' => ['auth']], function () {
             Route::get('label-order/{id}', [LaboratoriumController::class, 'labelOrder'])->name('laboratorium.label-order');
             Route::get('hasil-order/{id}', [LaboratoriumController::class, 'hasilOrder'])->name('laboratorium.hasil-order');
             Route::get('edit-order/{id}', [LaboratoriumController::class, 'editOrder'])->name('laboratorium.edit-order');
+            // Route untuk menangani penambahan data (tetap POST)
+            Route::post('/order/add-tindakan', [LaboratoriumController::class, 'addTindakan'])->name('order.laboratorium.add-tindakan');
+            // Route BARU untuk menampilkan halaman popup
+            Route::get('/order/{order_id}/add-tindakan-popup', [LaboratoriumController::class, 'addTindakanPopup'])->name('order.laboratorium.add-tindakan-popup');
             Route::get('nota-order/{id}', [LaboratoriumController::class, 'notaOrder'])->name('laboratorium.nota-order');
             Route::get('simulasi-harga', [LaboratoriumController::class, 'simulasiHarga'])->name('laboratorium.simulasi-harga');
             Route::get('order', [LaboratoriumController::class, 'order'])->name('laboratorium.order');
