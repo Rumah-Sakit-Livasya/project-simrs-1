@@ -18,4 +18,9 @@ class NilaiNormalLaboratorium extends Model
         'updated_at',
         'deleted_at'
     ];
+
+    public function parameter_laboratorium()
+    {
+        return $this->belongsTo(ParameterLaboratorium::class);
+    }
 }

@@ -22,6 +22,11 @@ class ParameterLaboratorium extends Model
         return $this->hasMany(ParameterLaboratorium::class, 'parameter_laboratorium_id', 'id');
     }
 
+    public function nilai_normal(): HasMany
+    {
+        return $this->hasMany(NilaiNormalLaboratorium::class, 'parameter_laboratorium_id', 'id');
+    }
+
     public function grup_parameter_laboratorium()
     {
         return $this->belongsTo(GrupParameterLaboratorium::class);

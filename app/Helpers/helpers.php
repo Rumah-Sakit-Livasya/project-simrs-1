@@ -725,3 +725,39 @@ class AgeComparison
         return $prefix . '-' . $datePart . '-' . $paddedSequence;
     }
 }
+
+if (!function_exists('format_umur')) {
+    /**
+     * Mengubah format umur Y-m-d menjadi string yang mudah dibaca.
+     */
+    function format_umur($umur_string)
+    {
+        if (empty($umur_string)) return '';
+
+        list($tahun, $bulan, $hari) = explode('-', $umur_string);
+        $parts = [];
+
+        if ($tahun > 0) $parts[] = $tahun . ' thn';
+        if ($bulan > 0) $parts[] = $bulan . ' bln';
+        if ($hari > 0) $parts[] = $hari . ' hr';
+
+        return empty($parts) ? '0 hr' : implode(' ', $parts);
+    }
+}
+
+if (!function_exists('format_umur_range')) {
+    /**
+     * Menggabungkan dua format umur menjadi rentang yang mudah dibaca.
+     */
+    function format_umur_range($dari_umur, $sampai_umur)
+    {
+        $dari = format_umur($dari_umur);
+        $sampai = format_umur($sampai_umur);
+
+        if ($dari === $sampai) {
+            return $dari;
+        }
+
+        return $dari . ' - ' . $sampai;
+    }
+}

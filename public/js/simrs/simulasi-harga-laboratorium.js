@@ -1,263 +1,200 @@
-// @ts-check
-/// <reference types="jquery" />
-/// <reference path="../types.d.ts" />
+// Pastikan skrip dijalankan setelah DOM sepenuhnya dimuat
+$(document).ready(function () {
+    // Variabel yang setara dengan properti kelas
+    // Diasumsikan window._kategoriLaboratorium dan window._tarifLaboratorium di-set dari sisi server
+    const kategoriLaboratorium = window._kategoriLaboratorium || [];
+    const tarifLaboratorium = window._tarifLaboratorium || [];
 
-class SimulasiHargaLaboratorium {
+    let groupTarif = 1;
+    let kelasPerawatan = 1;
+    let totalHarga = 0;
+    const $elementHarga = $("#laboratorium-total"); // Cache elemen total harga
+    let CITO = false;
+
     /**
-     * @type {KategoriLaboratorium[]}
+     * Menginisialisasi semua event listener dan status awal
      */
-    #KategoriLaboratorium;
+    function init() {
+        // Event listener untuk semua checkbox parameter
+        $(".parameter_laboratorium_checkbox").on("change", calculateCost);
 
-    /**
-     * @type {TarifLaboratorium[]}
-     */
-    #TarifLaboratorium;
+        // Event listener untuk semua input jumlah (number)
+        $(".parameter_laboratorium_number").on("input", calculateCost);
 
-    #groupTarif = 1;
+        // Event listener untuk search bar
+        $("#searchLaboratorium").on("keyup", handleSearchBarChange);
 
-    #kelasPerawatan = 1;
+        // Event listener untuk radio button tipe order
+        $("input[type='radio'][name='order_type']").on(
+            "change",
+            orderTypeChange
+        );
 
-    #totalHarga = 0;
-    /**
-     * @type {HTMLElement | undefined}
-     */
-    #elementHarga = undefined;
-
-    #CITO = false;
-
-    constructor() {
-        // @ts-ignore
-        this.#KategoriLaboratorium = window._kategoriLaboratorium;
-        // @ts-ignore
-        this.#TarifLaboratorium = window._tarifLaboratorium;
-
-        document.addEventListener("DOMContentLoaded", this.#init.bind(this));
-    }
-
-    #init() {
-        // Select all checkboxes inside the Blade-generated form
-        const checkboxes = document.querySelectorAll("input[type='checkbox'].parameter_laboratorium_checkbox");
-        checkboxes.forEach((checkbox) => {
-            checkbox.addEventListener("change", this.#handleCheckboxChange.bind(this));
-        });
-
-        // Select all number input fields
-        const numberInputs = document.querySelectorAll("input[type='number'].parameter_laboratorium_number");
-        numberInputs.forEach((input) => {
-            input.addEventListener("input", this.#handleNumberChange.bind(this));
-        });
-
-        // Search bar
-        const searchBar = document.getElementById("searchLaboratorium");
-        if (searchBar) {
-            searchBar.addEventListener("keyup", this.#handleSearchBarChange.bind(this));
+        // Event listener untuk select group tarif
+        const $groupSelect = $("#group_tarif");
+        if ($groupSelect.length) {
+            groupTarif = parseInt($groupSelect.val()) || 1;
+            $groupSelect.on("change", handleGroupTarifSelectChange);
         }
 
-        // Harga
-        this.#elementHarga = document.getElementById("laboratorium-total") || undefined;
-
-        // Order Type Radio
-        const orderType = document.querySelectorAll("input[type='radio'][name='order_type']");
-        if (orderType) {
-            orderType.forEach((radio) => {
-                radio.addEventListener("change", this.#orderTypeChange.bind(this));
-            });
+        // Event listener untuk select kelas perawatan
+        const $kelasSelect = $("#kelas_perawatan");
+        if ($kelasSelect.length) {
+            kelasPerawatan = parseInt($kelasSelect.val()) || 1;
+            $kelasSelect.on("change", handleKelasPerawatanSelectChange);
         }
 
-        // Group Tarif Select
-        const groupSelect = document.getElementById("group_tarif");
-        if (groupSelect) {
-            groupSelect.addEventListener("change", this.#handleGroupTarifSelectChange.bind(this));
-        }
-
-        // Kelas Perawatan Select
-        const kelasSelect = document.getElementById("kelas_perawatan");
-        if (kelasSelect) {
-            kelasSelect.addEventListener("change", this.#handleKelasPerawatanSelectChange.bind(this));
-        }
-
-        this.#updateCost();
+        // Memperbarui harga satuan pada UI saat pertama kali halaman dimuat
+        updateCostDisplay();
+        // Menghitung total biaya awal
+        calculateCost();
     }
 
     /**
-    * Handle kelas perawatan select changes
-    * @param {Event} event 
-    */
-    #handleKelasPerawatanSelectChange(event) {
-        const _target = event.target;
-        if (!_target) return;
-        const select = /** @type {HTMLSelectElement} */ (_target);
-        const selectedValue = select.value;
-        this.#kelasPerawatan = parseInt(selectedValue);
-        this.#updateCost();
-        this.#calculateCost();
-    }
-
-    /**
-    * Handle group select changes
-    * @param {Event} event 
-    */
-    #handleGroupTarifSelectChange(event) {
-        const _target = event.target;
-        if (!_target) return;
-        const select = /** @type {HTMLSelectElement} */ (_target);
-        const selectedValue = select.value;
-        this.#groupTarif = parseInt(selectedValue);
-        this.#updateCost();
-        this.#calculateCost();
-    }
-
-    /**
-     * Handle radio order type changes
-     * @param {Event} event 
+     * Menangani perubahan pada select kelas perawatan
      */
-    #orderTypeChange(event) {
-        const _target = event.target;
-        if (!_target) return;
-
-        const radio = /** @type {HTMLInputElement} */ (_target);
-        let type = radio.value;
-        this.#CITO = type == 'cito' ? true : false;
-        this.#calculateCost();
+    function handleKelasPerawatanSelectChange() {
+        kelasPerawatan = parseInt($(this).val());
+        updateCostDisplay();
+        calculateCost();
     }
 
-    #updateCost() {
-        for (let i = 0; i < this.#KategoriLaboratorium.length; i++) {
-            const KategoriLaboratorium = this.#KategoriLaboratorium[i];
-            for (let ii = 0; ii < KategoriLaboratorium.parameter_laboratorium.length; ii++) {
-                const ParameterLaboratorium = KategoriLaboratorium.parameter_laboratorium[ii];
+    /**
+     * Menangani perubahan pada select group tarif
+     */
+    function handleGroupTarifSelectChange() {
+        groupTarif = parseInt($(this).val());
+        updateCostDisplay();
+        calculateCost();
+    }
 
-                // get span with id "harga_parameter_laboratorium_${ParameterLaboratorium.id}"
-                const hargaParameterLaboratorium = document.getElementById(`harga_parameter_laboratorium_${ParameterLaboratorium.id}`);
-                if (hargaParameterLaboratorium == null) continue;
+    /**
+     * Menangani perubahan pada radio button tipe order (CITO/Biasa)
+     */
+    function orderTypeChange() {
+        CITO = $(this).val() === "cito";
+        calculateCost();
+    }
 
-                // get tarif from #TarifLaboratorium with equal parameter_laboratorium_id, group_penjamin_id and kelas_rawat_id
-                const tarif = this.#TarifLaboratorium
-                    .find((t) => {
-                        if (t.parameter_laboratorium_id == ParameterLaboratorium.id &&
-                            t.group_penjamin_id == this.#groupTarif &&
-                            t.kelas_rawat_id == this.#kelasPerawatan)
-                            return t;
-                    });
+    /**
+     * Memperbarui tampilan harga satuan untuk setiap parameter di UI
+     */
+    function updateCostDisplay() {
+        // Iterasi melalui setiap kategori dan parameternya
+        $.each(kategoriLaboratorium, function (i, kategori) {
+            $.each(kategori.parameter_laboratorium, function (ii, parameter) {
+                const $hargaSpan = $(
+                    `#harga_parameter_laboratorium_${parameter.id}`
+                );
+                if (!$hargaSpan.length) return; // Lanjut jika elemen tidak ditemukan
+
+                // Cari tarif yang sesuai berdasarkan group dan kelas
+                const tarif = tarifLaboratorium.find(
+                    (t) =>
+                        t.parameter_laboratorium_id == parameter.id &&
+                        t.group_penjamin_id == groupTarif &&
+                        t.kelas_rawat_id == kelasPerawatan
+                );
 
                 if (tarif) {
-                    hargaParameterLaboratorium.textContent = tarif.total.toLocaleString("id-ID", {
+                    // Format harga ke format mata uang Rupiah
+                    const formattedPrice = tarif.total.toLocaleString("id-ID", {
                         style: "currency",
                         currency: "IDR",
                     });
+                    $hargaSpan.text(formattedPrice);
                 } else {
-                    console.error("Tarif belum di set atau tidak ditemukan! ID Parameter: " + ParameterLaboratorium.id);
-                    showErrorAlertNoRefresh("Tarif tidak ditemukan atau belum di set! Mohon laporkan ke management. Cek log console!");
+                    console.error(
+                        `Tarif belum di set atau tidak ditemukan! ID Parameter: ${parameter.id}`
+                    );
+                    // Diasumsikan showErrorAlertNoRefresh adalah fungsi global yang sudah ada
+                    if (typeof showErrorAlertNoRefresh === "function") {
+                        showErrorAlertNoRefresh(
+                            "Tarif tidak ditemukan atau belum di set! Mohon laporkan ke management. Cek log console!"
+                        );
+                    }
                 }
-
-            }
-        }
+            });
+        });
     }
 
-    #calculateCost() {
-        this.#totalHarga = 0;
-        const checkboxes = document.querySelectorAll("input[type='checkbox'].parameter_laboratorium_checkbox");
-        checkboxes.forEach((_checkbox) => {
-            const checkbox = /** @type {HTMLInputElement} */ (_checkbox);
-            const isChecked = checkbox.checked;
-            const parameterId = checkbox.value;
-            /** @type {ParameterLaboratorium | undefined} */
-            let parameter;
+    /**
+     * Menghitung total biaya dari semua parameter yang dipilih
+     */
+    function calculateCost() {
+        totalHarga = 0;
+        let subTotal = 0;
 
-            for (const nama_kategori in this.#KategoriLaboratorium) {
-                const parameters = this.#KategoriLaboratorium[nama_kategori].parameter_laboratorium;
-                parameter = parameters.find((p) => p.id == parseInt(parameterId));
-            }
+        // Iterasi hanya pada checkbox yang dicentang
+        $(".parameter_laboratorium_checkbox:checked").each(function () {
+            const parameterId = $(this).val();
 
-            if (isChecked && parameter) {
-                const tarif = this.#TarifLaboratorium
-                    .find((t) => {
-                        if (t.parameter_laboratorium_id == parameter.id &&
-                            t.group_penjamin_id == this.#groupTarif &&
-                            t.kelas_rawat_id == this.#kelasPerawatan)
-                            return t;
-                    });
-                if (tarif) {
-                    const jumlah = /** @type {HTMLInputElement} */ (document.querySelector(`input[id='jumlah_${parameter.id}']`));
-                    if (parseInt(jumlah.value) < 1) {
-                        jumlah.value = String(1);
-                    }
-                    this.#totalHarga += tarif.total * parseInt(jumlah.value);
+            // Cari tarif yang sesuai
+            const tarif = tarifLaboratorium.find(
+                (t) =>
+                    t.parameter_laboratorium_id == parameterId &&
+                    t.group_penjamin_id == groupTarif &&
+                    t.kelas_rawat_id == kelasPerawatan
+            );
 
-                    if (this.#CITO) {
-                        this.#totalHarga += (this.#totalHarga * 30 / 100);
-                    }
+            if (tarif) {
+                const $jumlahInput = $(`#jumlah_${parameterId}`);
+                let jumlah = parseInt($jumlahInput.val());
+
+                // Validasi input jumlah, minimal 1
+                if (isNaN(jumlah) || jumlah < 1) {
+                    jumlah = 1;
+                    $jumlahInput.val(1);
                 }
+                subTotal += tarif.total * jumlah;
             }
         });
 
-        if (this.#elementHarga) {
-            this.#elementHarga.textContent = this.#totalHarga.toLocaleString("id-ID", {
-                style: "currency",
-                currency: "IDR",
-            });
+        totalHarga = subTotal;
+
+        // Jika CITO, tambahkan biaya tambahan 30% dari subtotal
+        if (CITO) {
+            totalHarga += (subTotal * 30) / 100;
+        }
+
+        // Tampilkan total harga yang sudah diformat
+        if ($elementHarga.length) {
+            $elementHarga.text(
+                totalHarga.toLocaleString("id-ID", {
+                    style: "currency",
+                    currency: "IDR",
+                })
+            );
         }
     }
 
     /**
-     * Handle search bar changes
-     * @param {Event} event 
+     * Menangani event ketik pada search bar untuk memfilter parameter
      */
-    #handleSearchBarChange(event) {
-        const _target = event.target;
-        if (!_target) return;
+    function handleSearchBarChange() {
+        const searchQuery = $(this).val().toLowerCase();
 
-        const searchBar = /** @type {HTMLInputElement} */ (_target);
-        const searchQuery = searchBar.value.toLowerCase();
-        if (searchQuery == "") {
-            this.#showAllParameters();
+        if (searchQuery === "") {
+            $(".parameter_laboratorium").show();
             return;
         }
 
-        const parameters = document.querySelectorAll(".parameter_laboratorium");
-        parameters.forEach((parameter) => {
-            const parameterNameElement = parameter.querySelector(".form-check-label");
-            if (!parameterNameElement) return;
-            const parameterName = parameterNameElement.textContent;
-            if (!parameterName) return;
+        $(".parameter_laboratorium").each(function () {
+            const $parameter = $(this);
+            const parameterName = $parameter
+                .find(".form-check-label")
+                .text()
+                .toLowerCase();
 
-            if (parameterName.toLowerCase().includes(searchQuery)) {
-                // @ts-ignore
-                parameter.style.display = "inherit";
+            // Tampilkan atau sembunyikan parameter berdasarkan input pencarian
+            if (parameterName.includes(searchQuery)) {
+                $parameter.show();
             } else {
-                // @ts-ignore
-                parameter.style.display = "none";
+                $parameter.hide();
             }
         });
     }
 
-    #showAllParameters() {
-        const parameters = document.querySelectorAll(".parameter_laboratorium");
-        parameters.forEach((parameter) => {
-            // @ts-ignore
-            parameter.style.display = "inherit";
-        });
-    }
-
-    /**
-     * Handles checkbox state changes
-     * @param {Event} event
-     */
-    #handleCheckboxChange(event) {
-        const _target = event.target;
-        if (!_target) return;
-        this.#calculateCost();
-    }
-
-    /**
-     * Handles number input changes
-     * @param {Event} event
-     */
-    #handleNumberChange(event) {
-        const _target = event.target;
-        if (!_target) return;
-        this.#calculateCost();
-    }
-}
-
-const SimulasiHargaLaboratoriumClass = new SimulasiHargaLaboratorium();
+    // Jalankan fungsi inisialisasi
+    init();
+});

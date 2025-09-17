@@ -30,4 +30,11 @@ class ControlPanelController extends Controller
         $departemens = Departement::where('name', 'LIKE', '%LAB%')->get();
         return view('pages.simrs.control-panel.laboratorium', compact('grupPenjamins', 'departemens'));
     }
+
+    public function nilai_normal()
+    {
+        $grupPenjamins = GroupPenjamin::all();
+        // Ambil hanya departemen laboratorium
+        return view('pages.simrs.control-panel.nilai-normal', compact('grupPenjamins'));
+    }
 }
