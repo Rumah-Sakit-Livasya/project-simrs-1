@@ -17,6 +17,7 @@ use App\Models\SIMRS\Laboratorium\ParameterLaboratorium;
 use App\Models\SIMRS\Laboratorium\TarifParameterLaboratorium;
 use App\Models\SIMRS\Penjamin;
 use App\Models\SIMRS\Registration;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -65,28 +66,38 @@ class LaboratoriumController extends Controller
 
     public function index(Request $request)
     {
-        $query = OrderLaboratorium::query()->with(['registration', 'registration_otc', 'registration_otc.doctor']);
-        $filters = ['medical_record_number', 'registration_number', 'no_order'];
+        // 1. Mulai query dasar seperti biasa
+        $query = OrderLaboratorium::query()
+            ->with(['registration', 'registration_otc', 'registration_otc.doctor'])
+            ->orderByDesc('order_date');
+
+        // 2. Siapkan flag untuk mendeteksi apakah pengguna menerapkan filter
         $filterApplied = false;
 
-        foreach ($filters as $filter) {
+        // --- APLIKASIKAN FILTER PENGGUNA JIKA ADA ---
+
+        // Filter untuk field sederhana (medical_record_number, dll.)
+        $simpleFilters = ['medical_record_number', 'registration_number', 'no_order'];
+        foreach ($simpleFilters as $filter) {
             if ($request->filled($filter)) {
                 $query->where($filter, 'like', '%' . $request->$filter . '%');
                 $filterApplied = true;
             }
         }
 
-        // Filter by date range
-        if ($request->filled('registration_date')) {
+        // Filter berdasarkan rentang tanggal dari input pengguna
+        if ($request->filled('order_date')) { // Perhatikan: saya asumsikan nama inputnya adalah order_date
             $dateRange = explode(' - ', $request->order_date);
             if (count($dateRange) === 2) {
-                $startDate = date('Y-m-d 00:00:00', strtotime($dateRange[0]));
-                $endDate = date('Y-m-d 23:59:59', strtotime($dateRange[1]));
+                // Menggunakan Carbon lebih aman dan bersih
+                $startDate = Carbon::parse($dateRange[0])->startOfDay(); // Contoh: 2025-09-17 00:00:00
+                $endDate = Carbon::parse($dateRange[1])->endOfDay();     // Contoh: 2025-09-17 23:59:59
                 $query->whereBetween('order_date', [$startDate, $endDate]);
+                $filterApplied = true;
             }
-            $filterApplied = true;
         }
 
+        // Filter berdasarkan nama pasien
         if ($request->filled('name')) {
             $query->whereHas('registration.patient', function ($q) use ($request) {
                 $q->where('name', 'like', '%' . $request->name . '%');
@@ -94,18 +105,22 @@ class LaboratoriumController extends Controller
             $filterApplied = true;
         }
 
-        // Get the filtered results if any filter is applied
-        if ($filterApplied) {
-            $order = $query->orderBy('order_date', 'asc')->get();
-        } else {
-            // Return empty collection if no filters applied
-            $order = collect();
+
+        // --- LOGIKA UTAMA PERUBAHAN ---
+        // 3. Jika TIDAK ada filter yang diterapkan oleh pengguna, terapkan filter default
+        if (!$filterApplied) {
+            // Ambil semua order yang memiliki 'order_date' hari ini
+            $query->whereDate('order_date', today());
         }
 
-        // dd($order->first());
+
+        // 4. Eksekusi query dan kirim data ke view
+        // Bagian ini sekarang dijalankan tanpa kondisi `if`, karena query akan selalu memiliki
+        // kondisi (baik dari pengguna atau dari filter default 'hari ini').
+        $orders = $query->orderBy('order_date', 'asc')->get();
 
         return view('pages.simrs.laboratorium.list-order', [
-            'orders' => $order
+            'orders' => $orders
         ]);
     }
 

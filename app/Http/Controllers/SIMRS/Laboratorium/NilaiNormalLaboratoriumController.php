@@ -8,6 +8,7 @@ use App\Imports\NilaiNormalImport;
 use App\Models\SIMRS\Laboratorium\NilaiNormalLaboratorium;
 use App\Models\SIMRS\Laboratorium\ParameterLaboratorium;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -151,16 +152,34 @@ class NilaiNormalLaboratoriumController extends Controller
         try {
             Excel::import(new NilaiNormalImport, $request->file('file'));
 
-            // Redirect kembali dengan pesan sukses
             return back()->with('success', 'Data nilai normal berhasil diimport!');
-        } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
+        } catch (ValidationException $e) {
+            // Ini adalah bagian yang diubah untuk logging
             $failures = $e->failures();
-            // Anda bisa menangani error validasi di sini jika diperlukan
-            // Contoh: return back()->with('import_errors', $failures);
-            return back()->withErrors(['file' => 'Terjadi kesalahan validasi saat import. Pastikan format data di file Excel sudah benar.']);
+            $errorMessages = [];
+
+            foreach ($failures as $failure) {
+                $row = $failure->row(); // baris yang error
+                $attribute = $failure->attribute(); // kolom yang error
+                $errors = implode(', ', $failure->errors()); // pesan error
+                $values = json_encode($failure->values()); // nilai yang diinput
+
+                // Buat pesan log yang detail
+                $logMessage = "Validation Error on Row {$row}: Attribute '{$attribute}' - Errors: [{$errors}] - Input Values: {$values}";
+
+                // Tulis ke laravel.log
+                Log::error('[NILAI_NORMAL_IMPORT] ' . $logMessage);
+
+                // Kumpulkan pesan untuk ditampilkan ke user
+                $errorMessages[] = "Baris {$row}: {$errors} (Kolom: {$attribute})";
+            }
+
+            // Kembalikan ke halaman dengan pesan error yang lebih spesifik
+            return back()->withErrors($errorMessages)->withInput();
         } catch (\Exception $e) {
             // Tangani error umum lainnya
-            return back()->withErrors(['file' => 'Terjadi kesalahan: ' . $e->getMessage()]);
+            Log::error('[NILAI_NORMAL_IMPORT] General Error: ' . $e->getMessage());
+            return back()->withErrors(['file' => 'Terjadi kesalahan umum pada server: ' . $e->getMessage()]);
         }
     }
 }

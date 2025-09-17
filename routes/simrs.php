@@ -320,6 +320,12 @@ Route::group(['middleware' => ['auth']], function () {
                 Route::post('/import', [LaboratoriumController::class, 'import'])->name('laboratorium.import');
             });
 
+            Route::prefix('/nilai-normal')->group(function () {
+                Route::get('/migrasi', [ControlPanelController::class, 'nilai_normal'])->name('nilai.normal.index');
+                Route::get('/export', [NilaiNormalLaboratoriumController::class, 'export'])->name('nilai.normal.export');
+                Route::post('/import', [NilaiNormalLaboratoriumController::class, 'import'])->name('nilai.normal.import');
+            });
+
 
             Route::prefix('/radiologi')->group(function () {
                 Route::get('/migrasi', [ControlPanelController::class, 'radiologi'])->name('radiologi.index');

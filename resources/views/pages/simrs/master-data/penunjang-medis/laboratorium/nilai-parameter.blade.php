@@ -88,41 +88,6 @@
             </div>
         </div>
 
-        <div class="card">
-            <div class="card-header">
-                Import / Export Nilai Normal
-            </div>
-            <div class="card-body">
-                <!-- Tampilkan pesan sukses atau error -->
-                @if (session('success'))
-                    <div class="alert alert-success">
-                        {{ session('success') }}
-                    </div>
-                @endif
-                @if ($errors->any())
-                    <div class="alert alert-danger">
-                        <ul>
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                @endif
-
-                <form action="{{ route('simrs.laboratorium.nilai-normal.import') }}" method="POST"
-                    enctype="multipart/form-data">
-                    @csrf
-                    <div class="form-group">
-                        <label for="file">Upload File Excel</label>
-                        <input type="file" name="file" class="form-control" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Import</button>
-                    <a href="{{ route('simrs.laboratorium.nilai-normal.export') }}" class="btn btn-success">Download
-                        Template</a>
-                </form>
-            </div>
-        </div>
-
         <div class="row">
             <div class="col-xl-12">
                 <div id="panel-1" class="panel">
@@ -149,14 +114,36 @@
                                     <tbody>
                                         @foreach ($nilai_parameter as $row)
                                             <tr>
-                                                <td>{{ $row->parameter_laboratorium_id }}</td>
-                                                <td></td>
-                                                <td></td>
-                                                <td></td>
+                                                {{-- Kolom 1: Nama Parameter --}}
+                                                {{-- Mengakses nama parameter melalui relasi 'parameter_laboratorium' --}}
+                                                <td>{{ $row->parameter_laboratorium->parameter ?? 'Parameter Tidak Ditemukan' }}
+                                                </td>
+
+                                                {{-- Kolom 2: Nilai Normal / Rentang Referensi --}}
+                                                {{-- Menampilkan nilai min dan max jika ada, jika tidak tampilkan nilai_normal teks --}}
+                                                <td>
+                                                    @if (isset($row->min) && isset($row->max) && ($row->min > 0 || $row->max > 0))
+                                                        {{ $row->min }} - {{ $row->max }}
+                                                    @else
+                                                        {{ $row->nilai_normal }}
+                                                    @endif
+                                                </td>
+
+                                                {{-- Kolom 3: Umur --}}
+                                                {{-- Menggabungkan dari_umur dan sampai_umur untuk tampilan yang mudah dibaca --}}
+                                                <td>
+                                                    {{-- Fungsi untuk mengubah format umur. Definisikan di AppServiceProvider atau helper. --}}
+                                                    {{ format_umur_range($row->dari_umur, $row->sampai_umur) }}
+                                                </td>
+
+                                                {{-- Kolom 4: Jenis Kelamin --}}
+                                                <td>{{ $row->jenis_kelamin }}</td>
+
+                                                {{-- Kolom 5: Aksi (Edit & Hapus) --}}
                                                 <td>
                                                     <button class="btn btn-sm btn-success px-2 py-1 btn-edit"
                                                         data-id="{{ $row->id }}">
-                                                        <i class="fas fa-pencil"></i>
+                                                        <i class="fas fa-pencil-alt"></i> {{-- Menggunakan ikon yang lebih umum --}}
                                                     </button>
                                                     <button class="btn btn-sm btn-danger px-2 py-1 btn-delete"
                                                         data-id="{{ $row->id }}">

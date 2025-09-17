@@ -5,17 +5,13 @@ namespace App\Imports;
 use App\Models\SIMRS\Laboratorium\NilaiNormalLaboratorium;
 use App\Models\SIMRS\Laboratorium\ParameterLaboratorium;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log; // <-- TAMBAHKAN INI
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithValidation;
 
 class NilaiNormalImport implements ToModel, WithHeadingRow, WithValidation
 {
-    /**
-     * @param array $row
-     *
-     * @return \Illuminate\Database\Eloquent\Model|null
-     */
     public function model(array $row)
     {
         // Cari parameter_id berdasarkan kode_parameter dari excel
@@ -23,6 +19,7 @@ class NilaiNormalImport implements ToModel, WithHeadingRow, WithValidation
 
         // Jika parameter tidak ditemukan, lewati baris ini
         if (!$parameter) {
+            Log::warning('[NILAI_NORMAL_IMPORT] PARAMETER TIDAK DITEMUKAN untuk kode: ' . ($row['kode_parameter'] ?? 'KOSONG'));
             return null;
         }
 
@@ -30,34 +27,37 @@ class NilaiNormalImport implements ToModel, WithHeadingRow, WithValidation
         $dari_umur = ($row['dari_tahun'] ?? 0) . '-' . ($row['dari_bulan'] ?? 0) . '-' . ($row['dari_hari'] ?? 0);
         $sampai_umur = ($row['sampai_tahun'] ?? 0) . '-' . ($row['sampai_bulan'] ?? 0) . '-' . ($row['sampai_hari'] ?? 0);
 
-        // Gunakan updateOrCreate untuk menghindari duplikasi data berdasarkan kunci unik
-        // Anda bisa sesuaikan field kunci uniknya. Di sini contohnya adalah kombinasi parameter, jk, dan umur.
-        return NilaiNormalLaboratorium::updateOrCreate(
-            [
-                'parameter_laboratorium_id' => $parameter->id,
-                'jenis_kelamin'             => $row['jenis_kelamin'],
-                'dari_umur'                 => $dari_umur,
-                'sampai_umur'               => $sampai_umur,
-            ],
-            [
-                'tanggal'       => now(),
-                'user_input'    => Auth::id() ?? 1, // Ganti dengan user id yang sedang login
-                'min'           => $row['min'],
-                'max'           => $row['max'],
-                'nilai_normal'  => $row['nilai_normal_text'],
-                'keterangan'    => $row['keterangan'],
-                'min_kritis'    => $row['min_kritis'],
-                'max_kritis'    => $row['max_kritis'],
-            ]
-        );
+        // Siapkan data untuk keamanan
+        $attributes = [
+            'parameter_laboratorium_id' => $parameter->id,
+            'jenis_kelamin'             => $row['jenis_kelamin'] ?? null,
+            'dari_umur'                 => $dari_umur,
+            'sampai_umur'               => $sampai_umur,
+        ];
+
+        $values = [
+            'tanggal'       => now(),
+            'user_input'    => Auth::id() ?? 1,
+            'min'           => $row['min'] ?? null,
+            'max'           => $row['max'] ?? null,
+            'nilai_normal'  => $row['nilai_normal_text'] ?? null,
+            'keterangan'    => $row['keterangan'] ?? null,
+            'min_kritis'    => $row['min_kritis'] ?? null,
+            'max_kritis'    => $row['max_kritis'] ?? null,
+        ];
+
+        // Log data sebelum mencoba menyimpan untuk debugging
+        Log::info('[NILAI_NORMAL_IMPORT] Data untuk updateOrCreate: ', ['attributes' => $attributes, 'values' => $values]);
+
+        // Gunakan updateOrCreate dengan data yang sudah disiapkan
+        return NilaiNormalLaboratorium::updateOrCreate($attributes, $values);
     }
 
     public function rules(): array
     {
-        // Tambahkan aturan validasi untuk setiap kolom
         return [
             'kode_parameter' => 'required',
-            'jenis_kelamin' => 'required|in:Laki-laki,Perempuan,Semua',
+            'jenis_kelamin' => 'required|in:Laki-laki,Laki - Laki,Perempuan,Semua',
             'min' => 'nullable|numeric',
             'max' => 'nullable|numeric',
         ];

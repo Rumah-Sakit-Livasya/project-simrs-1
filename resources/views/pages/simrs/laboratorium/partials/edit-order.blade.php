@@ -289,8 +289,7 @@
                                                 <div class="col-xl-8">
                                                     <input type="date"
                                                         class="@error('result_date') is-invalid @enderror form-control"
-                                                        id="result_date" placeholder="Tanggal Lahir"
-                                                        name="result_date"
+                                                        id="result_date" placeholder="Tanggal Lahir" name="result_date"
                                                         value="{{ $order->result_date ? \Carbon\Carbon::parse($order->result_date)->format('Y-m-d') : old('result_date') }}">
                                                     @error('result_date')
                                                         <p class="invalid-feedback">{{ $message }}</p>
@@ -373,7 +372,7 @@
                                                                 </h3>
                                                                 @if ($parameter->parameter_laboratorium->is_order)
                                                                     <p>
-                                                                        {{ (new NumberFormatter('id_ID', NumberFormatter::CURRENCY))->formatCurrency($parameter->nominal_rupiah, 'IDR') }}
+                                                                        {{ number_format($parameter->nominal_rupiah, 0, ',', '.') }}
                                                                     </p>
                                                                 @endif
                                                             </td>
@@ -434,9 +433,11 @@
                                                                 @endif
                                                             </td>
                                                             <td>
-                                                                @if ($parameter->parameter_laboratorium->is_order && count(array_filter($parameters, function ($param) {
-                                                                    return $param['parameter_laboratorium']['is_order'] ?? false;
-                                                                })) > 1)
+                                                                @if (
+                                                                    $parameter->parameter_laboratorium->is_order &&
+                                                                        count(array_filter($parameters, function ($param) {
+                                                                                return $param['parameter_laboratorium']['is_order'] ?? false;
+                                                                            })) > 1)
                                                                     <a class="mdi mdi-close pointer mdi-24px text-danger delete-btn"
                                                                         title="Hapus Pemeriksaan"
                                                                         data-id="{{ $parameter->id }}"></a>
@@ -449,7 +450,7 @@
                                                         <td class="text-danger" colspan="8">
                                                             <h1> <i class="fa fa-calculator"></i>
                                                                 Total:
-                                                                {{ (new NumberFormatter('id_ID', NumberFormatter::CURRENCY))->formatCurrency($order->order_parameter_laboratorium->sum('nominal_rupiah'), 'IDR') }}
+                                                                {{ number_format($order->order_parameter_laboratorium->sum('nominal_rupiah'), 0, ',', '.') }}
                                                             </h1>
                                                         </td>
                                                     </tr>
@@ -460,7 +461,7 @@
                                     <div class="col-xl-12 mt-5">
                                         <div class="row">
                                             <div class="col-xl-6">
-                                                <a onclick="window.close()"
+                                                <a href="{{ route('laboratorium.list-order') }}"
                                                     class="btn btn-lg btn-default waves-effect waves-themed">
                                                     <span class="fal fa-arrow-left mr-1 text-primary"></span>
                                                     <span class="text-primary">Kembali</span>
