@@ -715,13 +715,6 @@ Diagnosa Banding: {{ $assesment?->diagnosa_banding ?? '' }}</textarea>
     <script src="{{ asset('js/simrs/erm/form/dokter/cppt.js') }}?time={{ now() }}"></script>
     <script src="{{ asset('js/simrs/erm/form/dokter/cppt-dokter-form.js') }}?time={{ now() }}"></script>
     <script>
-        /**
-         * Custom matcher for the Select2 drug dropdown to allow searching
-         * by drug name or active substance (zat aktif).
-         * @param {import("select2").SearchOptions} params
-         * @param {import("select2").OptGroupData | import("select2").OptionData} data
-         * @returns {import("select2").OptGroupData | import("select2").OptionData | null}
-         */
         function obatMatcher(params, data) {
             if ($.trim(params.term) === '') {
                 return data;

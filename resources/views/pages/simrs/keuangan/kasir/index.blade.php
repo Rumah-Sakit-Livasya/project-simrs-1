@@ -169,7 +169,7 @@
                             <!-- datatable start -->
                             <table id="dt-basic-example" class="table table-bordered table-hover table-striped w-100">
                                 <i id="loading-spinner" class="fas fa-spinner fa-spin"></i>
-                                <thead class="bg-primary-600">
+                                <thead class="bg-primary-600" style="font-size: .7rem">
                                     <tr>
                                         <th>#</th>
                                         <th>Tanggal</th>
@@ -184,7 +184,7 @@
                                 </thead>
                                 <tbody>
                                     @foreach ($tagihan_pasien as $tagihan)
-                                        <tr>
+                                        <tr style="font-size: .8rem">
                                             <td>{{ $loop->iteration }}</td>
                                             <td>
                                                 <a href="{{ route('tagihan.pasien.detail', $tagihan->id) }}">
@@ -221,9 +221,13 @@
                                                     {{ $tagihan->registration->penjamin->nama_perusahaan }}
                                                 </a>
                                             </td>
-                                            <td>
+                                            <td class="text-center">
                                                 <a href="{{ route('tagihan.pasien.detail', $tagihan->id) }}">
-                                                    {{ $tagihan->status }}
+                                                    @if ($tagihan->status === 'final')
+                                                        <i class='bx bx-money text-success' style="font-size: 1.2em;"></i>
+                                                    @else
+                                                        <i class='bx bx-money text-danger' style="font-size: 1.2em;"></i>
+                                                    @endif
                                                 </a>
                                             </td>
                                         </tr>
@@ -327,47 +331,48 @@
             $('#loading-spinner').show();
             // initialize datatable
             $('#dt-basic-example').dataTable({
-                "drawCallback": function(settings) {
-                    // Menyembunyikan preloader setelah data berhasil dimuat
-                    $('#loading-spinner').hide();
-                },
-                responsive: true,
-                lengthChange: false,
-                dom: "<'row mb-3'<'col-sm-12 col-md-6 d-flex align-items-center justify-content-start'f><'col-sm-12 col-md-6 d-flex align-items-center justify-content-end'lB>>" +
-                    "<'row'<'col-sm-12'tr>>" +
-                    "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
-                buttons: [{
-                        extend: 'pdfHtml5',
-                        text: 'PDF',
-                        titleAttr: 'Generate PDF',
-                        className: 'btn-outline-danger btn-sm mr-1'
+                    "drawCallback": function(settings) {
+                        // Menyembunyikan preloader setelah data berhasil dimuat
+                        $('#loading-spinner').hide();
                     },
-                    {
-                        extend: 'excelHtml5',
-                        text: 'Excel',
-                        titleAttr: 'Generate Excel',
-                        className: 'btn-outline-success btn-sm mr-1'
-                    },
-                    {
-                        extend: 'csvHtml5',
-                        text: 'CSV',
-                        titleAttr: 'Generate CSV',
-                        className: 'btn-outline-primary btn-sm mr-1'
-                    },
-                    {
-                        extend: 'copyHtml5',
-                        text: 'Copy',
-                        titleAttr: 'Copy to clipboard',
-                        className: 'btn-outline-primary btn-sm mr-1'
-                    },
-                    {
-                        extend: 'print',
-                        text: 'Print',
-                        titleAttr: 'Print Table',
-                        className: 'btn-outline-primary btn-sm'
-                    }
-                ]
-            }).addClass('table-sm');
+                    responsive: true,
+                    lengthChange: false,
+                    dom: "<'row mb-3'<'col-sm-12 col-md-6 d-flex align-items-center justify-content-start'f><'col-sm-12 col-md-6 d-flex align-items-center justify-content-end'lB>>" +
+                        "<'row'<'col-sm-12'tr>>" +
+                        "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+                    buttons: [{
+                            extend: 'pdfHtml5',
+                            text: 'PDF',
+                            titleAttr: 'Generate PDF',
+                            className: 'btn-outline-danger btn-sm mr-1'
+                        },
+                        {
+                            extend: 'excelHtml5',
+                            text: 'Excel',
+                            titleAttr: 'Generate Excel',
+                            className: 'btn-outline-success btn-sm mr-1'
+                        },
+                        {
+                            extend: 'csvHtml5',
+                            text: 'CSV',
+                            titleAttr: 'Generate CSV',
+                            className: 'btn-outline-primary btn-sm mr-1'
+                        },
+                        {
+                            extend: 'copyHtml5',
+                            text: 'Copy',
+                            titleAttr: 'Copy to clipboard',
+                            className: 'btn-outline-primary btn-sm mr-1'
+                        },
+                        {
+                            extend: 'print',
+                            text: 'Print',
+                            titleAttr: 'Print Table',
+                            className: 'btn-outline-primary btn-sm'
+                        }
+                    ]
+                })
+                .addClass('table-sm');
 
         });
 
