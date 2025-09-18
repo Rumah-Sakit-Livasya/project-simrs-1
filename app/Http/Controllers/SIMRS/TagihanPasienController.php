@@ -21,7 +21,6 @@ class TagihanPasienController extends Controller
     {
         $query = Bilingan::query();
 
-        // return $request->registration_date;
         if ($request->filled('registration_date')) {
             $dates = explode(' - ', $request->registration_date);
             $start_date = date('Y-m-d 00:00:00', strtotime(trim($dates[0])));

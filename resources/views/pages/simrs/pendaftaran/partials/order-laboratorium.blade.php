@@ -130,7 +130,7 @@
             <div class="panel-content">
                 @csrf
                 {{-- Data tersembunyi (tidak berubah) --}}
-                <input type="text" name="patient_id" value="{{ $patient->id }}">
+                <input type="hidden" name="patient_id" value="{{ $patient->id }}">
                 <input type="hidden" name="user_id" value="{{ auth()->user()->id }}">
                 <input type="hidden" name="employee_id" value="{{ auth()->user()->employee->id }}">
                 <input type="hidden" name="registration_type" value="{{ $registration->registration_type }}">
