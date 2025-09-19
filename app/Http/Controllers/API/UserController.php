@@ -18,8 +18,9 @@ class UserController extends Controller
     public function getUser($id)
     {
         try {
-            $user = User::findOrFail($id);
-            return response()->json(['data' => $user], 200);
+            // Eager load roles untuk efisiensi
+            $user = User::with('roles')->findOrFail($id);
+            return response()->json($user, 200);
         } catch (\Exception $e) {
             return response()->json([
                 'error' => $e->getMessage()
@@ -48,7 +49,7 @@ class UserController extends Controller
             $validator = Validator::make(request()->all(), [
                 'name' => 'required',
                 'employee_id' => 'required',
-                'email' => 'required|email',
+                'email' => 'required|email|unique:users,email',
             ]);
 
             if ($validator->fails()) {
@@ -59,33 +60,41 @@ class UserController extends Controller
                 'name' => request()->name,
                 'employee_id' => request()->employee_id,
                 'email' => request()->email,
+                'password' => Hash::make('password'), // Tambahkan password default
             ]);
 
-            $user->assignRole('employee');
+            // Assign role default jika ada
+            if (request()->has('roles')) {
+                $roles = Role::whereIn('id', request()->roles)->pluck('name');
+                $user->assignRole($roles);
+            } else {
+                $user->assignRole('employee'); // Role default
+            }
+
 
             //return response
             return response()->json(['message' => 'User Berhasil di Tambahkan!']);
         } catch (\Exception $e) {
             return response()->json([
                 'error' => $e->getMessage()
-            ], 404);
+            ], 500);
         }
     }
 
     public function update($id)
     {
         try {
+            $user = User::findOrFail($id);
 
             $validator = Validator::make(request()->all(), [
                 'name' => 'required',
-                'email' => 'required|email',
+                'email' => 'required|email|unique:users,email,' . $user->id,
             ]);
 
             if ($validator->fails()) {
                 return response()->json($validator->errors(), 422);
             }
 
-            $user = User::find($id);
             $employee = Employee::find($user->employee_id);
 
             //find company by ID
@@ -93,10 +102,14 @@ class UserController extends Controller
                 'email' => request()->email,
                 'name' => request()->name,
             ]);
-            $employee->update([
-                'email' => request()->email,
-                'fullname' => request()->name,
-            ]);
+
+            if ($employee) {
+                $employee->update([
+                    'email' => request()->email,
+                    'fullname' => request()->name,
+                ]);
+            }
+
             //return response
             return response()->json(['message' => 'User Berhasil di Update!']);
         } catch (\Exception $e) {
@@ -106,31 +119,45 @@ class UserController extends Controller
         }
     }
 
+    /**
+     * Update roles for a specific user.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function updateRole($id)
     {
         try {
-            $role = Role::find(request()->role);
+            $validator = Validator::make(request()->all(), [
+                'roles' => 'required|array',
+                'roles.*' => 'exists:roles,id' // Validasi setiap item dalam array
+            ]);
 
-            $user = User::find($id);
+            if ($validator->fails()) {
+                return response()->json($validator->errors(), 422);
+            }
 
-            // Hapus semua peran yang telah ditetapkan sebelumnya untuk pengguna ini
-            $user->roles()->detach();
+            $user = User::findOrFail($id);
 
-            // Tetapkan peran baru untuk pengguna
-            $user->assignRole($role->name);
+            // Ambil nama role dari ID yang diberikan
+            $roles = Role::whereIn('id', request()->roles)->pluck('name');
+
+            // Sync roles, ini akan menghapus semua role lama dan menggantinya dengan yang baru
+            $user->syncRoles($roles);
 
             // Berhasil memperbarui peran pengguna
             return response()->json(['message' => 'Role pengguna berhasil diperbarui!']);
         } catch (\Exception $e) {
             // Tangani jika terjadi kesalahan
-            return response()->json(['error' => $e->getMessage()], 404);
+            return response()->json(['error' => $e->getMessage()], 500);
         }
     }
+
 
     public function destroy($id)
     {
         try {
-            $user = User::find($id);
+            $user = User::findOrFail($id);
             $user->delete();
             //return response
             return response()->json(['message' => 'User Berhasil di Hapus!']);

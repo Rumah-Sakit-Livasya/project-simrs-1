@@ -3,7 +3,8 @@
         <div class="modal-content">
             <form autocomplete="off" novalidate action="javascript:void(0)" id="akses-form" method="post"
                 enctype="multipart/form-data">
-                @method('put')
+                {{-- Method akan diatur via JS, tapi tetap di sini sebagai fallback --}}
+                @method('PUT')
                 @csrf
                 <div class="modal-header">
                     <h5 class="modal-title">Ubah Akses</h5>
@@ -13,11 +14,12 @@
                 </div>
                 <div class="modal-body">
                     <div class="form-group">
-                        <label for="Pegawai">Pegawai</label>
-                        <select class="select2 form-control w-100 " id="role" name="role">
+                        <label for="roles">Pilih Role</label>
+                        {{-- Tambahkan atribut multiple --}}
+                        <select class="select2 form-control w-100" id="roles" name="roles[]" multiple="multiple">
                             @foreach ($roles as $role)
                                 <option value="{{ $role->id }}">
-                                    {{ strlen($role->name) < 3 ? strtoupper($role->name) : ucfirst($role->name) }}
+                                    {{ ucfirst($role->name) }}
                                 </option>
                             @endforeach
                         </select>

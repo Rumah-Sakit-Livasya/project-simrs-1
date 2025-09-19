@@ -143,4 +143,86 @@
             window.open(`/simrs/laboratorium/hasil-order/${orderId}`, '_blank');
         });
     </script>
+
+    <script>
+        $(document).ready(function() {
+            /* Fungsi untuk memformat child row, termasuk total biaya */
+            function format(details) {
+                if (!details || details.length === 0) {
+                    return '<div class="p-3 text-center">Tidak ada detail parameter untuk order ini.</div>';
+                }
+                let totalPrice = 0;
+                let table = `<table class="table table-sm table-striped table-bordered child-table">
+                            <thead class="bg-info-50">
+                                <tr>
+                                    <th style="width: 30px;">#</th>
+                                    <th>Parameter</th>
+                                    <th>Harga</th>
+                                    <th>Catatan</th>
+                                </tr>
+                            </thead>
+                            <tbody>`;
+                details.forEach((item, index) => {
+                    totalPrice += (parseFloat(item.nominal_rupiah) || 0);
+                    const formattedPrice = new Intl.NumberFormat('id-ID', {
+                        style: 'currency',
+                        currency: 'IDR',
+                        minimumFractionDigits: 2
+                    }).format(item.nominal_rupiah || 0);
+                    const parameterName = item.parameter_laboratorium ? item.parameter_laboratorium
+                        .parameter : '<i class="text-muted">N/A</i>';
+                    table += `<tr>
+                            <td>${index + 1}</td>
+                            <td>${parameterName}</td>
+                            <td>${formattedPrice}</td>
+                            <td>${item.catatan || ''}</td>
+                          </tr>`;
+                });
+                table += '</tbody>';
+                const formattedTotal = new Intl.NumberFormat('id-ID', {
+                    style: 'currency',
+                    currency: 'IDR',
+                    minimumFractionDigits: 2
+                }).format(totalPrice);
+                table += `<tfoot>
+                        <tr>
+                            <td colspan="2" class="text-right font-weight-bold">Total Biaya</td>
+                            <td class="font-weight-bold">${formattedTotal}</td>
+                            <td></td>
+                        </tr>
+                      </tfoot>`;
+                table += '</table>';
+                return table;
+            }
+
+            // Inisialisasi DataTable
+            var table = $('#dt-lab-orders').DataTable({
+                responsive: true,
+                order: [
+                    [1, 'desc']
+                ],
+                columnDefs: [{
+                    orderable: false,
+                    targets: 0
+                }]
+            });
+
+            // Event listener untuk membuka dan menutup detail
+            $('#dt-lab-orders tbody').on('click', 'td.details-control', function() {
+                var tr = $(this).closest('tr');
+                var row = table.row(tr);
+                var icon = $(this).find('i');
+                var detailData = JSON.parse(tr.attr('data-details'));
+                if (row.child.isShown()) {
+                    row.child.hide();
+                    tr.removeClass('details-shown');
+                    icon.removeClass('fa-minus-circle text-danger').addClass('fa-plus-circle text-success');
+                } else {
+                    row.child(format(detailData)).show();
+                    tr.addClass('details-shown');
+                    icon.removeClass('fa-plus-circle text-success').addClass('fa-minus-circle text-danger');
+                }
+            });
+        });
+    </script>
 @endsection

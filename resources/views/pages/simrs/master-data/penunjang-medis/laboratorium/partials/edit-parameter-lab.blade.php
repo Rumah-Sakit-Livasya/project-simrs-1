@@ -80,13 +80,11 @@
                                 <div class="form-group">
                                     <label class="d-block">Status</label>
                                     <div>
-                                        <input type="checkbox" name="is_hasil"
-                                            id="is_hasil">
+                                        <input type="checkbox" name="is_hasil" id="is_hasil">
                                         <label for="is_hasil">Isi Hasil</label>
                                     </div>
                                     <div>
-                                        <input type="checkbox" name="is_order"
-                                            id="is_order">
+                                        <input type="checkbox" name="is_order" id="is_order">
                                         <label for="is_order">Bisa Di Order</label>
                                     </div>
                                 </div>

@@ -436,18 +436,6 @@
                         {{-- Menu Daftar Layanan1 --}}
                         @include('pages.simrs.pendaftaran.partials.menu-daftar-layanan')
                     </div>
-                    <div id="pengkajian-nurse-rajal" style="display: none;">
-                        {{-- Header Pasien --}}
-                        @include('pages.simrs.pendaftaran.partials.menu')
-                        @include('pages.simrs.pendaftaran.partials.header-pasien')
-                        {{-- Perawat --}}
-                        @include('pages.simrs.pendaftaran.partials.perawat.pengkajian-nurse-rajal')
-                        @include('pages.simrs.pendaftaran.partials.perawat.transfer-pasien-antar-ruangan')
-                        {{-- Dokter --}}
-                        @include('pages.simrs.pendaftaran.partials.dokter.pengkajian-dokter-rajal')
-                        @include('pages.simrs.pendaftaran.partials.dokter.cppt')
-                        @include('pages.simrs.pendaftaran.partials.dokter.resume-medis-rajal')
-                    </div>
                     <div id="tindakan-medis" style="display: none;">
                         {{-- Tindakan Medis --}}
                         @include('pages.simrs.pendaftaran.partials.tindakan-medis')
@@ -467,6 +455,10 @@
                     <div id="laboratorium" style="display: none;">
                         {{-- Laboratorium --}}
                         @include('pages.simrs.pendaftaran.partials.laboratorium')
+                    </div>
+                    <div id="pemakaian_alat" style="display: none;">
+                        {{-- Laboratorium --}}
+                        @include('pages.simrs.pendaftaran.partials.pemakaian-alat')
                     </div>
 
 
@@ -721,6 +713,7 @@
     </script>
 
     @yield('script-radiologi')
+    @yield('script-pemakaian-alat')
     @yield('script-tindakan-medis')
     @yield('script-laboratorium')
     @yield('script-operasi')

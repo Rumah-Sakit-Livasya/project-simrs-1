@@ -55,8 +55,7 @@
                         <span>Radiologi</span>
                     </li>
                     <li>
-                        <div class="circle-menu waves-effect blue menu-layanan"
-                            data-layanan="pemakaian_alat/list_pemakaian_alat">
+                        <div class="circle-menu waves-effect blue menu-layanan" data-layanan="pemakaian_alat">
                             <i class="mdi mdi-source-merge"></i>
                         </div>
                         <span>Pemakaian Alat</span>

@@ -2,12 +2,16 @@
 
 namespace App\Http\Controllers\SIMRS\Peralatan;
 
+use App\Exports\PeralatanExport;
 use App\Http\Controllers\Controller;
+use App\Imports\PeralatanImport;
 use App\Models\SIMRS\GroupPenjamin;
 use App\Models\SIMRS\KelasRawat;
 use App\Models\SIMRS\Peralatan\Peralatan;
 use App\Models\SIMRS\Peralatan\TarifPeralatan;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
+use Maatwebsite\Excel\Facades\Excel;
 
 class PeralatanController extends Controller
 {
@@ -135,5 +139,32 @@ class PeralatanController extends Controller
         $kelas_rawat = KelasRawat::select('id', 'kelas')->get();
 
         return view('pages.simrs.master-data.peralatan.tarif-peralatan', compact('peralatan', 'grup_penjamin', 'kelas_rawat'));
+    }
+
+    public function export(Request $request)
+    {
+        $request->validate([
+            'group_penjamin_id' => 'required|exists:group_penjamin,id'
+        ]);
+
+        $groupPenjamin = GroupPenjamin::find($request->group_penjamin_id);
+        $fileName = 'template_tarif_peralatan_' . Str::slug($groupPenjamin->nama) . '.xlsx';
+
+        return Excel::download(new PeralatanExport($request->group_penjamin_id), $fileName);
+    }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xls,xlsx'
+        ]);
+
+        try {
+            Excel::import(new PeralatanImport, $request->file('file'));
+            return back()->with('success', 'Data peralatan dan tarif berhasil diimpor!');
+        } catch (\Exception $e) {
+            // Berikan pesan error yang lebih deskriptif
+            return back()->with('error', 'Terjadi kesalahan saat import: ' . $e->getMessage());
+        }
     }
 }

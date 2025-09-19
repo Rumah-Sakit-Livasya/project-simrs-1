@@ -6,6 +6,7 @@ use App\Http\Controllers\API\DayOffRequestController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Pages\CompanyController;
 use App\Http\Controllers\API\CompanyController as ApiCompanyController;
+use App\Http\Controllers\API\RoleController;
 use App\Http\Controllers\API\TimeScheduleController;
 use App\Http\Controllers\API\WasteTransportController;
 use App\Http\Controllers\ApplicationController;
@@ -353,10 +354,21 @@ Route::middleware([LastSeenUser::class])->group(function () {
         | USERS AKSES
         |--------------------------------------------------------------------------
         */
-            Route::prefix('roles-permissions')->group(function () {
+            // Master Data Roles & Permissions
+            Route::prefix('roles-permissions')->middleware(['auth'])->group(function () {
                 Route::get('/permissions', [DashboardController::class, 'getDataPermissions'])->name('permissions');
                 Route::get('/roles', [DashboardController::class, 'getDataRoles'])->name('roles');
             });
+
+            Route::middleware(['auth'])->group(function () {
+                // Halaman utama Role (list)
+                Route::get('/roles', [DashboardController::class, 'getDataRoles'])->name('roles.index');
+                // Halaman assign permissions ke Role
+                Route::get('/roles/{role}/permissions', [RoleController::class, 'assignPermissions'])->name('roles.assignPermissions');
+                // Simpan perubahan permissions ke Role
+                Route::post('/roles/{role}/permissions', [RoleController::class, 'syncPermissions'])->name('roles.syncPermissions');
+            });
+
 
             Route::prefix('users')->group(function () {
                 Route::get('/', [DashboardController::class, 'getDataUsers'])->name('users');

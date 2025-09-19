@@ -4,7 +4,9 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
+use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
 class RoleController extends Controller
@@ -12,97 +14,116 @@ class RoleController extends Controller
     public function getRole($id)
     {
         try {
-            $role = Role::findById($id);
-            $permissions = $role->getPermissionNames();
+            $role = Role::findOrFail($id);
+            // Get permission IDs associated with this role
+            $permissionIds = $role->permissions->pluck('id');
 
             return response()->json([
                 'role' => $role,
-                'permissions' => $permissions
+                'permissionIds' => $permissionIds
             ], 200);
         } catch (\Exception $e) {
-            return response()->json([
-                'error' => $e->getMessage()
-            ]);
+            return response()->json(['message' => 'Role not found.'], 404);
         }
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store()
+    public function store(Request $request)
     {
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|unique:roles,name',
+            'guard_name' => 'required|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 422);
+        }
+
         try {
-            $validator = Validator::make(request()->all(), [
-                'name' => 'required',
-                'guard_name' => 'required',
-            ]);
-
-            if ($validator->fails()) {
-                return response()->json($validator->errors(), 422);
-            }
-
-            $role = Role::create([
-                'name' => request()->name,
-                'guard_name' => request()->guard_name,
-            ]);
-
-            //return response
-            return response()->json(['message' => 'Role Berhasil di Tambahkan!']);
+            Role::create($validator->validated());
+            return response()->json(['message' => 'Role Berhasil di Tambahkan!'], 201);
         } catch (\Exception $e) {
-            return response()->json([
-                'error' => $e->getMessage()
-            ], 404);
+            Log::error('Error creating role: ' . $e->getMessage());
+            return response()->json(['message' => 'Gagal menambahkan role.'], 500);
         }
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update($id)
+    public function update(Request $request, $id)
     {
-        try {
-            //define validation rules
-            $validator = request()->validate([
-                'name' => 'required',
-                'guard_name' => 'required',
-            ]);
+        $role = Role::findOrFail($id);
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|unique:roles,name,' . $role->id,
+            'guard_name' => 'required|string',
+        ]);
 
-            //find company by ID
-            $role = Role::find($id);
-            $role->update($validator);
-            //return response
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 422);
+        }
+
+        try {
+            $role->update($validator->validated());
             return response()->json(['message' => 'Role Berhasil di Update!']);
         } catch (\Exception $e) {
-            return response()->json([
-                'error' => 'No result'
-            ], 404);
+            Log::error('Error updating role: ' . $e->getMessage());
+            return response()->json(['message' => 'Gagal memperbarui role.'], 500);
         }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy($id)
     {
-        // dd($id);
         try {
-            $role = Role::findById($id);
-            if (!$role) {
-                return response()->json(['error' => 'Role tidak ditemukan'], 404);
-            }
+            $role = Role::findOrFail($id);
             $role->delete();
             return response()->json(['message' => 'Role Berhasil di Hapus!']);
         } catch (\Exception $e) {
-            return response()->json([
-                'error' => $e->getMessage()
-            ], 404);
+            Log::error('Error deleting role: ' . $e->getMessage());
+            return response()->json(['message' => 'Gagal menghapus role.'], 500);
         }
     }
 
-    public function assignPermissions($roleName)
+    /**
+     * Menampilkan halaman untuk assign permissions ke role.
+     * Ini adalah metode yang kita perbaiki.
+     *
+     * @param  \Spatie\Permission\Models\Role  $role
+     * @return \Illuminate\View\View
+     */
+    public function assignPermissions(Role $role)
     {
-        $role = Role::findByName($roleName);
-        // Assign permissions ke role
-        $role->syncPermissions(request()->permissions);
+        // 1. Ambil semua permissions dan kelompokkan berdasarkan kolom 'group'.
+        // Ini adalah logika yang benar dari contoh Anda.
+        $permissionsByGroup = Permission::orderBy('group')->get()->groupBy('group');
+
+        // 2. Dapatkan ID dari permissions yang sudah dimiliki oleh role ini.
+        $rolePermissions = $role->permissions->pluck('id')->toArray();
+
+        // 3. Kirim data yang sudah benar ke view.
+        return view('pages.master-data.role.assign-permissions', [
+            'role' => $role,
+            'permissionsByGroup' => $permissionsByGroup,
+            'rolePermissions' => $rolePermissions,
+            // 'getNotify' => $this->getNotify()
+        ]);
+    }
+
+    public function syncPermissions(Request $request, Role $role)
+    {
+        $request->validate([
+            'permissions' => 'nullable|array',
+            'permissions.*' => 'exists:permissions,id',
+        ]);
+
+        try {
+            // BENAR: Ambil instance model Permission berdasarkan ID dari request
+            $permissions = Permission::whereIn('id', $request->permissions ?? [])->get();
+
+            // Sekarang berikan koleksi model Permission ke syncPermissions
+            $role->syncPermissions($permissions);
+
+            return response()->json(['message' => 'Permissions for role ' . $role->name . ' updated successfully!']);
+        } catch (\Exception $e) {
+            // Menggunakan Log lebih baik untuk debugging
+            \Log::error('Permission sync error for role ' . $role->id . ': ' . $e->getMessage());
+            return response()->json(['message' => 'An error occurred while updating permissions.'], 500);
+        }
     }
 }

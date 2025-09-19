@@ -29,7 +29,9 @@ use App\Models\SIMRS\GroupPenjamin;
 use App\Models\SIMRS\JadwalDokter;
 use App\Models\SIMRS\KategoriRadiologi;
 use App\Models\SIMRS\KelasRawat;
+use App\Models\SIMRS\Laboratorium\KategoriLaboratorium;
 use App\Models\SIMRS\Laboratorium\OrderLaboratorium;
+use App\Models\SIMRS\Laboratorium\TarifParameterLaboratorium;
 use App\Models\SIMRS\Operasi\KategoriOperasi;
 use App\Models\SIMRS\Operasi\OrderOperasi;
 use App\Models\SIMRS\Operasi\TipeOperasi;
@@ -1539,9 +1541,29 @@ class ERMController extends Controller
                 return view('pages.simrs.erm.form.layanan.pemakaian-alat', compact('registration', 'registrations', 'menu', 'departements', 'jadwal_dokter', 'list_peralatan', 'alat_medis_yang_dipakai', 'doctors', 'path'));
 
             case 'patologi_klinik':
-                $order_lab = OrderLaboratorium::where('registration_id', $registration->id)->get();
+                $patient = $registration->patient;
+                $laboratoriumDoctors = Doctor::whereHas('department_from_doctors', function ($query) {
+                    $query->where('name', 'like', '%lab%');
+                })->get();
+                $laboratorium_categories = KategoriLaboratorium::all();
+                $laboratorium_tarifs = TarifParameterLaboratorium::all();
+                $kelas_rawats = KelasRawat::all();
+                // Mengambil semua order laboratorium untuk registrasi yang spesifik
+                $laboratoriumOrders = OrderLaboratorium::where('registration_id', $registration->id)
+                    // Eager loading relasi untuk menghindari N+1 query problem. Ini SANGAT PENTING untuk performa.
+                    ->with([
+                        'doctor.employee', // Memuat relasi dokter dan data pegawainya
+                        'order_parameter_laboratorium.parameter_laboratorium' // Memuat detail order & nama parameternya
+                    ])
+                    // Mengurutkan data agar order terbaru muncul di paling atas
+                    ->orderBy('order_date', 'desc')
+                    // Eksekusi query dan dapatkan hasilnya sebagai koleksi
+                    ->get();
+                // $order_lab = OrderLaboratorium::where('registration_id', $registration->id)->get();
 
-                return view('pages.simrs.erm.form.layanan.patologi-klinik', compact('order_lab', 'registration', 'registrations', 'menu', 'departements', 'jadwal_dokter', 'path'));
+                $groupPenjaminId = GroupPenjamin::where('id', $registration->penjamin->group_penjamin_id)->first()->id;
+
+                return view('pages.simrs.erm.form.layanan.patologi-klinik', compact('laboratoriumOrders', 'laboratoriumDoctors', 'laboratorium_categories', 'laboratorium_tarifs', 'patient', 'groupPenjaminId', 'kelas_rawats', 'registration', 'registrations', 'menu', 'departements', 'jadwal_dokter', 'path'));
 
             case 'transfer_pasien_perawat':
                 $pengkajian = TransferPasienAntarRuangan::firstWhere('registration_id', $registration->id);

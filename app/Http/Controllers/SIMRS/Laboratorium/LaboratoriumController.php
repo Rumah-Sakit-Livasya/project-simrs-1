@@ -66,58 +66,76 @@ class LaboratoriumController extends Controller
 
     public function index(Request $request)
     {
-        // 1. Mulai query dasar seperti biasa
-        $query = OrderLaboratorium::query()
-            ->with(['registration', 'registration_otc', 'registration_otc.doctor'])
-            ->orderByDesc('order_date');
+        // 1. Eager Loading Komprehensif
+        // Muat semua relasi yang dibutuhkan oleh view di awal untuk menghindari N+1 query.
+        // Ini adalah langkah paling penting untuk performa.
+        $query = OrderLaboratorium::query()->with([
+            'registration.patient.penjamin',
+            'registration_otc.penjamin',
+            'doctor.employee',
+            'order_parameter_laboratorium.parameter_laboratorium' // Untuk child row
+        ]);
 
-        // 2. Siapkan flag untuk mendeteksi apakah pengguna menerapkan filter
-        $filterApplied = false;
+        // 2. Terapkan Filter Secara Kondisional menggunakan when()
+        // Metode when() hanya akan menjalankan closure jika kondisi pertamanya true.
 
-        // --- APLIKASIKAN FILTER PENGGUNA JIKA ADA ---
-
-        // Filter untuk field sederhana (medical_record_number, dll.)
-        $simpleFilters = ['medical_record_number', 'registration_number', 'no_order'];
-        foreach ($simpleFilters as $filter) {
-            if ($request->filled($filter)) {
-                $query->where($filter, 'like', '%' . $request->$filter . '%');
-                $filterApplied = true;
-            }
-        }
-
-        // Filter berdasarkan rentang tanggal dari input pengguna
-        if ($request->filled('order_date')) { // Perhatikan: saya asumsikan nama inputnya adalah order_date
-            $dateRange = explode(' - ', $request->order_date);
+        // Filter berdasarkan rentang tanggal
+        $query->when($request->filled('order_date'), function ($q) use ($request) {
+            $dateRange = explode(' to ', $request->order_date); // Disesuaikan untuk flatpickr range
             if (count($dateRange) === 2) {
-                // Menggunakan Carbon lebih aman dan bersih
-                $startDate = Carbon::parse($dateRange[0])->startOfDay(); // Contoh: 2025-09-17 00:00:00
-                $endDate = Carbon::parse($dateRange[1])->endOfDay();     // Contoh: 2025-09-17 23:59:59
-                $query->whereBetween('order_date', [$startDate, $endDate]);
-                $filterApplied = true;
+                $startDate = Carbon::parse($dateRange[0])->startOfDay();
+                $endDate = Carbon::parse($dateRange[1])->endOfDay();
+                $q->whereBetween('order_date', [$startDate, $endDate]);
             }
-        }
+        });
 
-        // Filter berdasarkan nama pasien
-        if ($request->filled('name')) {
-            $query->whereHas('registration.patient', function ($q) use ($request) {
-                $q->where('name', 'like', '%' . $request->name . '%');
+        // Filter berdasarkan No. Order (ada di tabel utama OrderLaboratorium)
+        $query->when($request->filled('no_order'), function ($q) use ($request) {
+            $q->where('no_order', 'like', '%' . $request->no_order . '%');
+        });
+
+        // --- FILTER UNIVERSAL (Mencari di Pasien Biasa DAN Pasien OTC) ---
+
+        // Filter berdasarkan Nama Pasien (mencari di dua relasi sekaligus)
+        $query->when($request->filled('name'), function ($q) use ($request) {
+            $q->where(function ($subQuery) use ($request) {
+                $subQuery->whereHas('registration.patient', function ($patientQuery) use ($request) {
+                    $patientQuery->where('name', 'like', '%' . $request->name . '%');
+                })->orWhereHas('registration_otc', function ($otcQuery) use ($request) {
+                    $otcQuery->where('nama_pasien', 'like', '%' . $request->name . '%');
+                });
             });
-            $filterApplied = true;
-        }
+        });
+
+        // Filter berdasarkan No. Registrasi (mencari di dua relasi sekaligus)
+        $query->when($request->filled('registration_number'), function ($q) use ($request) {
+            $q->where(function ($subQuery) use ($request) {
+                $subQuery->whereHas('registration', function ($regQuery) use ($request) {
+                    $regQuery->where('registration_number', 'like', '%' . $request->registration_number . '%');
+                })->orWhereHas('registration_otc', function ($otcQuery) use ($request) {
+                    $otcQuery->where('registration_number', 'like', '%' . $request->registration_number . '%');
+                });
+            });
+        });
+
+        // Filter berdasarkan No. Rekam Medis (hanya ada di pasien biasa)
+        $query->when($request->filled('medical_record_number'), function ($q) use ($request) {
+            $q->whereHas('registration.patient', function ($patientQuery) use ($request) {
+                $patientQuery->where('medical_record_number', 'like', '%' . $request->medical_record_number . '%');
+            });
+        });
 
 
-        // --- LOGIKA UTAMA PERUBAHAN ---
-        // 3. Jika TIDAK ada filter yang diterapkan oleh pengguna, terapkan filter default
-        if (!$filterApplied) {
-            // Ambil semua order yang memiliki 'order_date' hari ini
+        // 3. Terapkan Filter Default (Hanya jika tidak ada filter lain yang aktif)
+        // Cek apakah ada input filter yang diisi oleh pengguna
+        $activeFilters = ['order_date', 'no_order', 'name', 'registration_number', 'medical_record_number'];
+        if (!$request->hasAny($activeFilters)) {
+            // Jika tidak ada filter, tampilkan data untuk hari ini saja
             $query->whereDate('order_date', today());
         }
 
-
-        // 4. Eksekusi query dan kirim data ke view
-        // Bagian ini sekarang dijalankan tanpa kondisi `if`, karena query akan selalu memiliki
-        // kondisi (baik dari pengguna atau dari filter default 'hari ini').
-        $orders = $query->orderBy('order_date', 'asc')->get();
+        // 4. Eksekusi Query dan Kirim Data ke View
+        $orders = $query->orderByDesc('order_date')->get();
 
         return view('pages.simrs.laboratorium.list-order', [
             'orders' => $orders

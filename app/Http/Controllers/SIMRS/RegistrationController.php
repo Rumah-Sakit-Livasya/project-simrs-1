@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\SIMRS;
 
 use App\Http\Controllers\Controller;
+use App\Models\Employee;
 use App\Models\SIMRS\Laboratorium\OrderLaboratorium;
 use App\Models\OrderRadiologi;
 use App\Models\SIMRS\BatalRegister;
@@ -26,6 +27,8 @@ use App\Models\SIMRS\Operasi\TipeOperasi;
 use App\Models\SIMRS\ParameterRadiologi;
 use App\Models\SIMRS\Patient;
 use App\Models\SIMRS\Penjamin;
+use App\Models\SIMRS\Peralatan\OrderAlatMedis;
+use App\Models\SIMRS\Peralatan\Peralatan;
 use App\Models\SIMRS\Radiologi\TarifParameterRadiologi;
 use App\Models\SIMRS\Registration;
 use App\Models\SIMRS\Room;
@@ -705,15 +708,18 @@ class RegistrationController extends Controller
         }
     }
 
-    // app/Http/Controllers/SIMRS/RegistrationController.php
-
     public function show($id)
     {
         // =================================================================
         // KODE YANG SUDAH ADA (TIDAK DIUBAH)
         // =================================================================
-        $registration = Registration::findOrFail($id);
+        $registration = Registration::with([
+            'penjamin',
+            'patient'
+        ])->findOrFail($id);
+
         $cppt = CPPT::where('registration_id', $id)->get();
+
         $jaminan = $registration->penjamin->name;
         if ($jaminan === 'Umum') {
             $penjamin = 'Jaminan Pribadi';
@@ -724,61 +730,108 @@ class RegistrationController extends Controller
         }
 
         $tipeRegis = $registration->registration_type;
-        if ($tipeRegis === 'rawat-jalan' || $tipeRegis === 'igd' || $tipeRegis === 'odc') {
-            $kelasRawat = 'RAWAT JALAN';
-        } else {
-            $kelasRawat = 'RAWAT INAP';
-        }
+        $kelasRawat = in_array($tipeRegis, ['rawat-jalan', 'igd', 'odc']) ? 'RAWAT JALAN' : 'RAWAT INAP';
 
-        $doctors = Doctor::with('employee', 'departements')->get();
-        $departements = Departement::with('grup_tindakan_medis.tindakan_medis')->get();
-        $tindakan_medis = TindakanMedis::all();
+        // Limit doctors and departements to only those needed for this registration
+        $doctors = Doctor::with(['employee', 'departements', 'department_from_doctors'])
+            ->whereHas('department_from_doctors')
+            ->get();
+
+        $departements = Departement::with(['grup_tindakan_medis' => function ($q) {
+            $q->with('tindakan_medis');
+        }])->get();
+
+        // Only load tindakan_medis that are used in this registration's departements
+        // FIX: Kolom 'departement_id' tidak ada, gunakan relasi dari departements
+        $tindakan_medis = collect();
+        foreach ($departements as $departement) {
+            if ($departement->grup_tindakan_medis) {
+                foreach ($departement->grup_tindakan_medis as $grup) {
+                    if ($grup->tindakan_medis) {
+                        foreach ($grup->tindakan_medis as $tindakan) {
+                            $tindakan_medis->push($tindakan);
+                        }
+                    }
+                }
+            }
+        }
+        $tindakan_medis = $tindakan_medis->unique('id')->values();
 
         // Group doctors by department
         $groupedDoctors = [];
         foreach ($doctors as $doctor) {
-            $groupedDoctors[$doctor->department_from_doctors->name][] = $doctor;
+            if ($doctor->department_from_doctors) {
+                $groupedDoctors[$doctor->department_from_doctors->name][] = $doctor;
+            }
         }
 
-        $laboratoriumDoctors = Doctor::whereHas('department_from_doctors', function ($query) {
-            $query->where('name', 'like', '%lab%');
-        })->get();
+        // Only load doctors for laboratorium department
+        $laboratoriumDoctors = Doctor::with('employee')
+            ->whereHas('department_from_doctors', function ($query) {
+                $query->where('name', 'like', '%lab%');
+            })
+            ->get();
 
-        $laboratoriumOrders = [];
+        // Only load laboratorium orders for this registration, eager load only necessary relations
+        $laboratoriumOrders = OrderLaboratorium::where('registration_id', $registration->id)
+            ->with([
+                'doctor.employee:id,fullname',
+                'order_parameter_laboratorium.parameter_laboratorium'
+            ])
+            ->orderBy('order_date', 'desc')
+            ->get();
 
-        OrderLaboratorium::where('registration_id', $registration->id)
-            ->get()
-            ->each(function ($order) use (&$laboratoriumOrders) {
-                // dd($order->registration);
-                $laboratoriumOrders[$order->id] = $order;
-            });
+        // Only load peralatan that are used in this registration
+        $list_peralatan = Peralatan::query()->limit(100)->get(); // Limit to 100 for performance, adjust as needed
+        $alat_medis_yang_dipakai = OrderAlatMedis::where('registration_id', $registration->id)
+            ->with('alat')
+            ->get();
 
-        $radiologyDoctors = Doctor::whereHas('department_from_doctors', function ($query) {
-            $query->where('name', 'like', '%radiologi%');
-        })->get();
+        // Doctors for alat medis, only those with employee
+        $doctorsAlat = Doctor::with('employee')
+            ->whereHas('employee')
+            ->orderBy(Employee::select('fullname')->whereColumn('employees.id', 'doctors.employee_id'))
+            ->limit(100)
+            ->get();
 
+        // Only load radiology doctors
+        $radiologyDoctors = Doctor::with('employee')
+            ->whereHas('department_from_doctors', function ($query) {
+                $query->where('name', 'like', '%radiologi%');
+            })
+            ->get();
+
+        // Only load radiologi orders for this registration
         $radiologiOrders = [];
-
         OrderRadiologi::where('registration_id', $registration->id)
+            ->with(['doctor.employee'])
             ->get()
             ->each(function ($order) use (&$radiologiOrders) {
                 $radiologiOrders[$order->id] = $order;
             });
 
+        // Eager load only recent registrations for the patient
         $patient = Patient::with(['registration' => function ($query) {
-            $query->orderBy('id', 'desc');
+            $query->orderBy('id', 'desc')->limit(10);
         }])->find($registration->patient->id);
+
         $birthdate = $patient->date_of_birth;
         $age = displayAge($birthdate);
-        $groupPenjaminId = GroupPenjamin::where('id', $registration->penjamin->group_penjamin_id)->first()->id;
 
-        $jenisOperasi = TipeOperasi::orderBy('tipe')->get();
-        $kategoriOperasi = KategoriOperasi::orderBy('nama_kategori')->get();
-        $ruangans = Room::orderBy('ruangan')->get();
-        $ruangans_operasi = Room::where('ruangan', 'OK')->orderBy('ruangan', 'asc')->get();
+        // Only get the groupPenjaminId directly
+        $groupPenjaminId = $registration->penjamin->group_penjamin_id;
 
-        $dTindakan = \App\Models\SIMRS\Departement::with('grup_tindakan_medis.tindakan_medis')->get();
+        // Limit operasi types and categories for performance
+        $jenisOperasi = TipeOperasi::orderBy('tipe')->limit(50)->get();
+        $kategoriOperasi = KategoriOperasi::orderBy('nama_kategori')->limit(50)->get();
+        $ruangans = Room::orderBy('ruangan')->limit(100)->get();
+        $ruangans_operasi = Room::where('ruangan', 'OK')->orderBy('ruangan', 'asc')->limit(20)->get();
 
+        $dTindakan = Departement::with(['grup_tindakan_medis' => function ($q) {
+            $q->with('tindakan_medis');
+        }])->get();
+
+        // Only load order operasi for this registration, eager load only necessary relations
         $orderOperasi = OrderOperasi::with([
             'tipeOperasi',
             'kategoriOperasi',
@@ -804,7 +857,9 @@ class RegistrationController extends Controller
         ])->where('registration_id', $id)->get();
 
         return view('pages.simrs.pendaftaran.detail-registrasi-pasien', [
-            // Variabel yang sudah ada
+            'doctorsAlat' => $doctorsAlat,
+            'list_peralatan' => $list_peralatan,
+            'alat_medis_yang_dipakai' => $alat_medis_yang_dipakai,
             'dTindakan' => $dTindakan,
             'orderOperasi' => $orderOperasi,
             'kelasRawat' => $kelasRawat,
@@ -815,20 +870,18 @@ class RegistrationController extends Controller
             'laboratoriumDoctors' => $laboratoriumDoctors,
             'laboratoriumOrders' => $laboratoriumOrders,
             'groupPenjaminId' => $groupPenjaminId,
-            'laboratorium_categories' => KategoriLaboratorium::all(),
-            'laboratorium_tarifs' => TarifParameterLaboratorium::all(),
-            'radiology_categories' => KategoriRadiologi::all(),
-            'radiology_tarifs' => TarifParameterRadiologi::all(),
-            'kelas_rawats' => KelasRawat::all(), // Sudah ada, ini akan digunakan oleh modal
+            'laboratorium_categories' => KategoriLaboratorium::limit(100)->get(),
+            'laboratorium_tarifs' => TarifParameterLaboratorium::limit(100)->get(),
+            'radiology_categories' => KategoriRadiologi::limit(100)->get(),
+            'radiology_tarifs' => TarifParameterRadiologi::limit(100)->get(),
+            'kelas_rawats' => KelasRawat::limit(20)->get(),
             'registration' => $registration,
             'patient' => $patient,
             'departements' => $departements,
             'tindakan_medis' => $tindakan_medis,
             'age' => $age,
-            'doctors' => $doctors, // <-- PASTIKAN INI DIKIRIM: dibutuhkan untuk dropdown DPJP
-            // 'ruanganx`s' => $ruangans,
+            'doctors' => $doctors,
             'ruangans_operasi' => $ruangans_operasi,
-            // === TAMBAHAN BARU YANG DIKIRIM KE VIEW ===
             'jenisOperasi' => $jenisOperasi,
             'kategoriOperasi' => $kategoriOperasi,
         ]);

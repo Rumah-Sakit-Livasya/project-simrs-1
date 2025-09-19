@@ -44,8 +44,7 @@
     <div class="card-actionbar-row-left">
         <button type="button" class="btn btn-primary waves-effect waves-light margin-left-xl" id="panggil"
             onclick="panggil()"><span class="glyphicon glyphicon-music "></span>&nbsp;&nbsp;Panggil Antrian</button>
-        <button class="btn btn-warning"
-            onclick="popupFull('http://103.191.196.126:8888/real/antrol_bpjs/update_waktu_antrean_vclaim/2409047399','p_card', 900,600,'no'); return false;">
+        <button class="btn btn-warning" onclick="">
             <i class="mdi mdi-update"></i> Antrol BPJS
         </button>
         <button class="btn btn-danger waves-effect waves-light" onclick="showIcare();"><i

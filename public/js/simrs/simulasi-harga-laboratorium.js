@@ -109,9 +109,9 @@ $(document).ready(function () {
                     );
                     // Diasumsikan showErrorAlertNoRefresh adalah fungsi global yang sudah ada
                     if (typeof showErrorAlertNoRefresh === "function") {
-                        showErrorAlertNoRefresh(
-                            "Tarif tidak ditemukan atau belum di set! Mohon laporkan ke management. Cek log console!"
-                        );
+                        // showErrorAlertNoRefresh(
+                        //     "Tarif tidak ditemukan atau belum di set! Mohon laporkan ke management. Cek log console!"
+                        // );
                     }
                 }
             });

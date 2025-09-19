@@ -203,6 +203,7 @@ Route::middleware(['web', 'auth'])->prefix('dashboard')->group(function () {
         Route::get('/delete/{id}', [RoleController::class, 'destroy']);
         Route::post('/assignPermissions/{roleName}', [RoleController::class, 'assignPermissions']);
     });
+
     Route::prefix('user')->group(function () {
         Route::post('/store', [UserController::class, 'store']);
         Route::put('/update/{id}', [UserController::class, 'update']);

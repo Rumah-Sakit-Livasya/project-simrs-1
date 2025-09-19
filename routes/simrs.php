@@ -338,6 +338,12 @@ Route::group(['middleware' => ['auth']], function () {
             Route::get('/migrasi-tindakan', [TindakanMedisController::class, 'index'])->name('tindakan.migrasi');
             Route::post('/migrasi-tindakan/download', [TindakanMedisController::class, 'export'])->name('tindakan.export');
             Route::post('/migrasi-tindakan/upload', [TindakanMedisController::class, 'import'])->name('tindakan.import');
+
+            Route::prefix('peralatan')->group(function () {
+                Route::get('/migrasi', [ControlPanelController::class, 'peralatan'])->name('peralatan.index');
+                Route::post('/export', [PeralatanController::class, 'export'])->name('peralatan.export');
+                Route::post('/import', [PeralatanController::class, 'import'])->name('peralatan.import');
+            });
         });
 
         /*
