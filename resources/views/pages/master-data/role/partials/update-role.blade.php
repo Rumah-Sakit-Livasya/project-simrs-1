@@ -1,10 +1,7 @@
 <div class="modal fade" id="ubah-role" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
-            <form autocomplete="off" novalidate action="javascript:void(0)" id="update-form" method="post"
-                enctype="multipart/form-data">
-                @method('put')
-                @csrf
+            <form autocomplete="off" novalidate id="update-form">
                 <div class="modal-header">
                     <h5 class="modal-title">Ubah Role</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -13,22 +10,14 @@
                 </div>
                 <div class="modal-body">
                     <div class="form-group">
-                        <label for="name">Nama</label>
-                        <input type="text" value="{{ old('name', $role->name) }}"
-                            class="form-control @error('name') is-invalid @enderror" id="name" name="name"
+                        <label for="update_name">Nama Role</label>
+                        <input type="text" class="form-control" id="update_name" name="name"
                             placeholder="Nama Role">
-                        @error('name')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
                     </div>
                     <div class="form-group">
-                        <label for="guard_name">Guard Name</label>
-                        <input type="text" value="{{ old('guard_name', $role->guard_name) }}"
-                            class="form-control @error('guard_name') is-invalid @enderror" id="guard_name"
-                            name="guard_name" placeholder="Guard Name">
-                        @error('guard_name')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
+                        <label for="update_guard_name">Guard Name</label>
+                        <input type="text" class="form-control" id="update_guard_name" name="guard_name"
+                            placeholder="web" value="web">
                     </div>
                 </div>
                 <div class="modal-footer">

@@ -118,7 +118,7 @@
                                         @foreach ($parameter as $row)
                                             <tr>
                                                 <td>{{ $row->tipe_laboratorium_id }}</td>
-                                                <td>{{ $row->grup_parameter_laboratorium_id }}</td>
+                                                <td>{{ $row->grup_parameter_laboratorium->nama_grup }}</td>
                                                 <td>{{ $row->no_urut }}</td>
                                                 <td>{{ $row->kode }}</td>
                                                 <td>{{ $row->parameter }}</td>
@@ -195,7 +195,7 @@
                     .replace(':id', id_param);
                 const popupWidth = 900;
                 const popupHeight = 600;
-            const left = (screen.width - popupWidth) / 2;
+                const left = (screen.width - popupWidth) / 2;
                 const top = (screen.height - popupHeight) / 2;
 
                 window.open(
@@ -257,7 +257,7 @@
                         const subParameters = [];
                         for (let i = 0; i < response.sub_parameters.length; i++) {
                             subParameters.push(
-                            `${response.sub_parameters[i].sub_parameter_id}`);
+                                `${response.sub_parameters[i].sub_parameter_id}`);
                         }
 
                         // this is a multiple select

@@ -5,58 +5,10 @@
         <div class="tab-content p-3">
             <div class="tab-pane fade show active" id="tab_default-1" role="tabpanel">
                 @include('pages.simrs.erm.partials.detail-pasien')
-                <hr style="border-color: #868686; margin-top: 50px; margin-bottom: 30px;">
-                <header class="text-primary text-center font-weight-bold mb-4">
-                    <div id="alert-pengkajian"></div>
-                    <h2 class="font-weight-bold">
-                        DAFTAR ORDER
-                        </h4>
-                </header>
-                <hr style="border-color: #868686; margin-top: 30px; margin-bottom: 30px;">
-                <div class="row">
-                    <div class="col-md-12">
-                        <!-- datatable start -->
-                        <div class="table-responsive">
-                            <table id="dt-basic-example" class="table table-bordered table-hover table-striped w-100">
-                                <thead class="bg-primary-600">
-                                    <tr>
-                                        <th>No</th>
-                                        <th>Tanggal</th>
-                                        <th>Dokter</th>
-                                        <th>Alat</th>
-                                        <th>Jml</th>
-                                        <th>Kelas</th>
-                                        <th>Lokasi</th>
-                                        <th>Entry By</th>
-                                        <th>Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <!-- Rows will be added here dynamically -->
-
-                                </tbody>
-                            </table>
-                        </div>
-                        <!-- datatable end -->
-                    </div>
-                </div>
             </div>
         </div>
         <div class="p-3">
-            <div class="tab-pane fade show active" id="tab_default-1" role="tabpanel">
-                <hr style="border-color: #868686; margin-top: 50px; margin-bottom: 30px;">
-                <header class="text-primary text-center font-weight-bold mb-4">
-                    <div id="alert-pengkajian"></div>
-                    <h2 class="font-weight-bold">
-                        <i class="mdi mdi-flask-outline mdi-24px"></i> ORDER LABORATORIUM
-                        </h4>
-                </header>
-                <hr style="border-color: #868686; margin-top: 30px; margin-bottom: 30px;">
-
-                <form action="javascript:void(0)" method="POST" id="form_order_lab">
-
-                </form>
-            </div>
+            @include('pages.simrs.pendaftaran.partials.laboratorium')
         </div>
     @endif
 @endsection
@@ -73,9 +25,8 @@
                 dropdownParent: $('#modal-tambah-alat')
             });
 
-            $('#departement_id').select2({
-                placeholder: 'Pilih Klinik',
-            });
+            placeholder: 'Pilih Klinik',
+                $('#departement_id').select2({});
             // $('#doctor_id').select2({
             //     placeholder: 'Pilih Dokter',
             // });
@@ -96,4 +47,41 @@
             });
         });
     </script>
+    <script>
+        $(document).ready(function() {
+            // Inisialisasi DataTable untuk daftar order
+            $('#dt-lab-orders').DataTable({
+                responsive: true,
+                "order": [
+                    [2, "desc"]
+                ] // Urutkan berdasarkan tanggal order
+            });
+
+            // Inisialisasi Popover (jika masih menggunakan Bootstrap 4/SmartAdmin)
+            $('[data-toggle="popover"]').popover();
+
+            // Logika untuk menampilkan/menyembunyikan form
+            $('#btn-show-lab-form').on('click', function() {
+                $('#panel-laboratorium-list').hide();
+                $('#panel-laboratorium-form').show();
+            });
+
+            // Event listener untuk tombol kembali di dalam form
+            // Diletakkan di sini agar bisa mengakses kedua panel
+            $(document).on('click', '.btn-back-to-lab-list', function() {
+                $('#panel-laboratorium-form').hide();
+                $('#panel-laboratorium-list').show();
+            });
+        });
+    </script>
+    <script>
+        // Pass data dari PHP ke JavaScript
+        window._kategoriLaboratorium = @json($laboratorium_categories);
+        window._tarifLaboratorium = @json($laboratorium_tarifs);
+        window._registration = @json($registration);
+        window._groupPenjaminId = @json($groupPenjaminId);
+        window._kelasRawats = @json($kelas_rawats);
+    </script>
+    {{-- Pastikan nama file JS ini sesuai dan dimuat di layout utama Anda --}}
+    <script src="{{ asset('js/simrs/form-laboratorium.js') }}?v={{ time() }}"></script>
 @endsection

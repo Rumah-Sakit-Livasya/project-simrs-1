@@ -308,7 +308,7 @@ class DashboardController extends Controller
 
     public function  getDataRoles()
     {
-        $roles = Role::all();
+        $roles = Role::with('permissions')->get();
         $permissions = Permission::all();
         $getNotify = $this->getNotify();
         return view('pages.master-data.role.index', compact('roles', 'permissions', 'getNotify'));
@@ -321,9 +321,10 @@ class DashboardController extends Controller
         return view('pages.master-data.menu.index', compact('menus', 'getNotify'));
     }
 
-    public function  getDataUsers()
+    public function getDataUsers()
     {
-        $users = User::where('is_active', 1)->get();
+        // Eager load roles untuk menghindari N+1 query problem
+        $users = User::with('roles')->where('is_active', 1)->get();
         $employees = Employee::where('is_active', 1)->get();
         $roles = Role::all();
         $getNotify = $this->getNotify();

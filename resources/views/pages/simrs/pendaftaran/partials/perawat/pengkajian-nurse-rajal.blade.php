@@ -249,7 +249,8 @@
                         </div>
                         <div class="col-md-6 mb-3">
                             <div class="form-group">
-                                <label for="alergi_makanan" class="control-label text-primary margin-tb-10 d-block">Alergi
+                                <label for="alergi_makanan"
+                                    class="control-label text-primary margin-tb-10 d-block">Alergi
                                     Makanan</label>
                                 <div class="custom-control custom-radio custom-control-inline">
                                     <input type="radio" class="custom-control-input" value="Ya"
@@ -262,17 +263,18 @@
                                 <div class="custom-control custom-radio custom-control-inline">
                                     <input type="radio" class="custom-control-input" value="Tidak"
                                         name="alergi_makanan" id="alergi_makanan2">
-                                    <label class="custom-control-label text-primary" for="alergi_makanan2">Tidak</label>
+                                    <label class="custom-control-label text-primary"
+                                        for="alergi_makanan2">Tidak</label>
                                 </div>
                             </div>
                         </div>
-                            <div class="form-group">
-                                <label for="reaksi_alergi_makanan" class="control-label text-primary">Reaksi terhadap
-                                    alergi
-                                    makanan</label>
-                                <input name="reaksi_alergi_makanan" id="reaksi_alergi_makanan"
-                                    class="form-control alergi" type="text">
-                            </div>
+                        <div class="form-group">
+                            <label for="reaksi_alergi_makanan" class="control-label text-primary">Reaksi terhadap
+                                alergi
+                                makanan</label>
+                            <input name="reaksi_alergi_makanan" id="reaksi_alergi_makanan"
+                                class="form-control alergi" type="text">
+                        </div>
                     </div>
                     <div class="col-md-6">
                         <div class="form-group">
@@ -368,41 +370,41 @@
                     <div class="col-md-11">
                         <div class="wongbaker">
                             <div class="img-baker">
-                                <img src="http://103.191.196.126:8888/testing/include/images/wongbaker/1.jpg">
+                                <img src="/img/emoticon/1.jpg">
                                 <div class="text-center">
                                     <span class="badge pink accent-2 pointer" data-skor="0">0</span>
                                 </div>
                             </div>
                             <div class="img-baker">
-                                <img src="http://103.191.196.126:8888/testing/include/images/wongbaker/2.jpg">
+                                <img src="/img/emoticon/2.jpg">
                                 <div class="text-center">
                                     <span class="badge green pointer" data-skor="1">1</span>
                                     <span class="badge green pointer" data-skor="2">2</span>
                                 </div>
                             </div>
                             <div class="img-baker">
-                                <img src="http://103.191.196.126:8888/testing/include/images/wongbaker/3.jpg">
+                                <img src="/img/emoticon/3.jpg">
                                 <div class="text-center">
                                     <span class="badge blue pointer" data-skor="3">3</span>
                                     <span class="badge blue pointer" data-skor="4">4</span>
                                 </div>
                             </div>
                             <div class="img-baker">
-                                <img src="http://103.191.196.126:8888/testing/include/images/wongbaker/4.jpg">
+                                <img src="/img/emoticon/4.jpg">
                                 <div class="text-center">
                                     <span class="badge purple pointer" data-skor="5">5</span>
                                     <span class="badge purple pointer" data-skor="6">6</span>
                                 </div>
                             </div>
                             <div class="img-baker">
-                                <img src="http://103.191.196.126:8888/testing/include/images/wongbaker/5.jpg">
+                                <img src="/img/emoticon/5.jpg">
                                 <div class="text-center">
                                     <span class="badge orange pointer" data-skor="7">7</span>
                                     <span class="badge orange pointer" data-skor="8">8</span>
                                 </div>
                             </div>
                             <div class="img-baker">
-                                <img src="http://103.191.196.126:8888/testing/include/images/wongbaker/6.jpg">
+                                <img src="/img/emoticon/6.jpg">
                                 <div class="text-center">
                                     <span class="badge pointer red" data-skor="9">9</span>
                                     <span class="badge pointer red" data-skor="10">10</span>
@@ -1046,7 +1048,8 @@
                                 <div class="custom-control custom-checkbox">
                                     <input class="custom-control-input" name="kebuthan_pembelajaran6"
                                         id="kebuthan_pembelajaran6" value="Diet &amp; nutrisi" type="checkbox">
-                                    <label for="kebuthan_pembelajaran6" class="custom-control-label text-primary">Diet
+                                    <label for="kebuthan_pembelajaran6"
+                                        class="custom-control-label text-primary">Diet
                                         &amp; nutrisi</label>
                                 </div>
                             </div>
@@ -1360,7 +1363,7 @@
         // ===================================================
         // :                    STORE                        :
         // ===================================================
-        
+
         let actionType = '';
 
         $('#sd-pengkajian-dokter-rajal').off('click').on('click', function(event) {

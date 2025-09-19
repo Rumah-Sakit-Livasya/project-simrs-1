@@ -37,4 +37,10 @@ class ControlPanelController extends Controller
         // Ambil hanya departemen laboratorium
         return view('pages.simrs.control-panel.nilai-normal', compact('grupPenjamins'));
     }
+
+    public function peralatan()
+    {
+        $groupPenjamin = GroupPenjamin::all();
+        return view('pages.simrs.control-panel.peralatan', compact('groupPenjamin')); // Buat view ini
+    }
 }
