@@ -443,3 +443,4 @@ Route::apiResource('kunjungan', KunjunganController::class);
 
 
 require __DIR__ . '/api-simrs.php';
+require __DIR__ . '/api-bpjs.php';
