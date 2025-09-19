@@ -1,18 +1,16 @@
 @extends('inc.layout')
 @section('title', 'Role')
-@section('extended-css')
-    {{-- Tambahkan sedikit style untuk badge permission --}}
-    <style>
-        .permission-badge {
-            margin: 2px;
-            font-size: 0.8rem;
-            font-weight: 500;
-        }
-    </style>
-@endsection
 @section('content')
     <main id="js-page-content" role="main" class="page-content">
-        {{-- ... (bagian atas tetap sama) ... --}}
+        <div class="row mb-5">
+            <div class="col-xl-12">
+                <button type="button" class="btn btn-primary waves-effect waves-themed" data-backdrop="static"
+                    data-keyboard="false" data-toggle="modal" data-target="#tambah-role" title="Tambah Role">
+                    <span class="fal fa-plus-circle mr-1"></span>
+                    Tambah Role
+                </button>
+            </div>
+        </div>
 
         <div class="row">
             <div class="col-xl-12">
@@ -30,8 +28,6 @@
                                         <th style="white-space: nowrap">No</th>
                                         <th style="white-space: nowrap">Nama Role</th>
                                         <th style="white-space: nowrap">Guard Name</th>
-                                        {{-- 1. TAMBAHKAN KOLOM BARU DI HEADER --}}
-                                        <th class="w-50">Permissions</th>
                                         <th style="white-space: nowrap">Aksi</th>
                                     </tr>
                                 </thead>
@@ -43,30 +39,27 @@
                                                 {{ ucfirst($role->name) }}
                                             </td>
                                             <td style="white-space: nowrap">{{ $role->guard_name }}</td>
-
-                                            {{-- 2. TAMBAHKAN KOLOM BARU DI BODY UNTUK MENAMPILKAN PERMISSION --}}
-                                            <td>
-                                                {{-- Loop melalui permissions yang sudah kita eager load --}}
-                                                @forelse ($role->permissions as $permission)
-                                                    <span
-                                                        class="badge badge-info permission-badge">{{ $permission->name }}</span>
-                                                @empty
-                                                    <span class="text-muted">No permissions assigned</span>
-                                                @endforelse
-                                            </td>
-
+                                            {{-- Ganti bagian Aksi di dalam <tbody> --}}
                                             <td style="white-space: nowrap">
-                                                {{-- ... (Tombol aksi tetap sama) ... --}}
                                                 <button type="button" data-backdrop="static" data-keyboard="false"
                                                     class="badge mx-1 btn-edit badge-primary p-2 border-0 text-white"
                                                     data-id="{{ $role->id }}" title="Ubah">
                                                     <span class="fal fa-pencil ikon-edit"></span>
+                                                    <div class="span spinner-text d-none">
+                                                        <span class="spinner-border spinner-border-sm" role="status"
+                                                            aria-hidden="true"></span> Loading...
+                                                    </div>
                                                 </button>
                                                 <button type="button" data-backdrop="static" data-keyboard="false"
                                                     class="badge mx-1 badge-danger p-2 border-0 text-white btn-hapus"
                                                     data-id="{{ $role->id }}" title="Hapus">
                                                     <span class="fal fa-trash ikon-hapus"></span>
+                                                    <div class="span spinner-text d-none">
+                                                        <span class="spinner-border spinner-border-sm" role="status"
+                                                            aria-hidden="true"></span> Loading...
+                                                    </div>
                                                 </button>
+                                                {{-- INI YANG DIUBAH --}}
                                                 <a href="{{ route('roles.assignPermissions', $role->id) }}"
                                                     class="badge mx-1 badge-warning p-2 border-0 text-white"
                                                     title="Assign Permissions">
@@ -81,8 +74,6 @@
                                         <th style="white-space: nowrap">No</th>
                                         <th style="white-space: nowrap">Nama Role</th>
                                         <th style="white-space: nowrap">Guard Name</th>
-                                        {{-- 3. TAMBAHKAN KOLOM BARU DI FOOTER --}}
-                                        <th>Permissions</th>
                                         <th style="white-space: nowrap">Aksi</th>
                                     </tr>
                                 </tfoot>
@@ -95,18 +86,21 @@
 
         @include('pages.master-data.role.partials.create-role')
         @include('pages.master-data.role.partials.update-role')
-        {{-- Anda tidak perlu meng-include modal assign-permissions lagi di sini --}}
-        {{-- @include('pages.master-data.role.partials.assign-permissions') --}}
+        @include('pages.master-data.role.partials.assign-permissions')
     </main>
 @endsection
 @section('plugin')
-    {{-- Script JavaScript Anda tidak perlu diubah sama sekali --}}
     <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
     <script src="/js/formplugins/select2/select2.bundle.js"></script>
     <script>
         $(document).ready(function() {
-            // ... (SEMUA KODE JS ANDA TETAP SAMA)
             let roleId;
+
+            // Initialize Select2
+            $('#permissions').select2({
+                placeholder: 'Pilih permissions',
+                dropdownParent: $('#assign-permissions')
+            });
 
             const dt = $('#dt-basic-example').DataTable({
                 responsive: true
@@ -209,6 +203,53 @@
                                 .responseJSON.message);
                         }
                     });
+                });
+            });
+
+            // Handle ASSIGN PERMISSIONS button click
+            // $('#dt-basic-example').on('click', '.btn-akses', function() {
+            //     roleId = $(this).data('id');
+            //     $.ajax({
+            //         type: "GET",
+            //         url: `/api/dashboard/role/get/${roleId}`,
+            //         success: function({
+            //             role,
+            //             permissionIds
+            //         }) {
+            //             $('#roleName').text(role.name);
+            //             $('#permissions').val(permissionIds).trigger('change');
+            //             $('#assign-permissions').modal('show');
+            //         },
+            //         error: function() {
+            //             showErrorAlertNoRefresh('Gagal memuat data permissions.');
+            //         }
+            //     });
+            // });
+
+            // Handle ASSIGN PERMISSIONS form submission
+            $('#assign-permissions-form').on('submit', function(e) {
+                e.preventDefault();
+                const button = $(this).find('button[type="submit"]');
+                const formData = $(this).serialize();
+                $.ajax({
+                    type: "POST",
+                    url: `/api/dashboard/role/${roleId}/sync-permissions`,
+                    data: formData,
+                    beforeSend: function() {
+                        button.prop('disabled', true).find('.fal').hide().parent().append(
+                            '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>'
+                        );
+                    },
+                    success: function(response) {
+                        $('#assign-permissions').modal('hide');
+                        showSuccessAlert(response.message);
+                    },
+                    error: function(xhr) {
+                        showErrorAlertNoRefresh('Gagal menyimpan: ' + xhr.responseJSON.message);
+                    }
+                }).always(function() {
+                    button.prop('disabled', false).find('.fal').show().parent().find(
+                        '.spinner-border').remove();
                 });
             });
         });
