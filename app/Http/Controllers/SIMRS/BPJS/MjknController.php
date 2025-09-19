@@ -4,11 +4,27 @@ namespace App\Http\Controllers\SIMRS\BPJS;
 
 use App\Http\Controllers\Controller;
 use App\Models\BPJS\BpjsPasienBaruMjkn;
+use App\Models\SIMRS\Departement;
+use App\Models\SIMRS\Doctor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 
 class MjknController extends Controller
 {
+    public function index()
+    {
+        // PENYESUAIAN: Ambil data dari model Departement dan Doctor dengan kolom yang benar
+        $departements = Departement::whereNotNull('kode_poli')->orderBy('name', 'asc')->get();
+        $doctors = Doctor::whereNotNull('kode_dpjp')
+            ->with('employee')
+            ->get()
+            ->sortBy(fn($doctor) => optional($doctor->employee)->fullname)
+            ->values();
+
+        // PENYESUAIAN: Kirim variabel dengan nama yang baru ke view
+        return view('app-type.simrs.bpjs.mjkn.dashboard', compact('departements', 'doctors'));
+    }
+
     /**
      * Menampilkan halaman Pasien Baru MJKN.
      */

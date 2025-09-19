@@ -22,9 +22,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'superadmin' => \App\Http\Middleware\SuperAdminMiddleware::class,
             'check.api.credentials' => \App\Http\Middleware\CheckApiCredentials::class,
             'auth.api' => \App\Http\Middleware\AuthenticatedApi::class,
+            'mjkn.auth' => \App\Http\Middleware\MjknAuthMiddleware::class,
         ]);
     })
-    // >>>>> PENAMBAHAN DIMULAI DI SINI <<<<<
     ->withProviders([
         // Daftarkan provider Anda yang lain di sini jika perlu,
         // tapi untuk kasus ini, kita hanya butuh BroadcastServiceProvider.
