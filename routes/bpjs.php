@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AppController\SettingController;
+use App\Http\Controllers\SIMRS\BPJS\AplicareController;
 use App\Http\Controllers\SIMRS\BPJS\BridgingEclaimController;
 use App\Http\Controllers\SIMRS\BPJS\BridgingVclaimController;
 use App\Http\Controllers\SIMRS\BPJS\LaporanController;
@@ -34,11 +35,32 @@ Route::group(['middleware' => ['auth']], function () {
         });
 
         Route::prefix('mjkn')->name('mjkn.')->group(function () {
+            Route::get('/dashboard', [MjknController::class, 'index'])->name('mjkn.dashboard');
+
             Route::get('pasien-baru', [MjknController::class, 'pasienBaru'])
                 ->name('pasien-baru');
 
             Route::post('list-pasien-baru', [MjknController::class, 'listPasienBaru'])
                 ->name('list-pasien-baru');
+        });
+
+        Route::prefix('aplicares')->name('aplicares.')->group(function () {
+            Route::get('/', [AplicareController::class, 'index'])->name('index');
+            Route::get('/data', [AplicareController::class, 'getData'])->name('data');
+
+            // Rute untuk aksi API
+            // Method POST sudah cocok untuk update dan insert via AJAX
+            Route::post('/update/{roomId}', [AplicareController::class, 'updateRoom'])->name('update');
+            Route::post('/insert/{roomId}', [AplicareController::class, 'insertRoom'])->name('insert');
+
+            // Method DELETE adalah yang paling tepat untuk aksi hapus.
+            // Jika AJAX Anda kesulitan, Anda bisa menggantinya menjadi POST.
+            Route::delete('/delete/{roomId}', [AplicareController::class, 'deleteRoom'])->name('delete');
+
+            Route::post('/mapping/{roomId}', [AplicareController::class, 'saveMapping'])->name('save-mapping');
+
+            // Route baru untuk mengambil data LANGSUNG dari server BPJS
+            Route::get('/bpjs-data', [AplicareController::class, 'getDataFromBpjs'])->name('bpjs-data');
         });
 
         Route::prefix('bridging-vclaim')->group(function () {
