@@ -1359,6 +1359,7 @@ class RegistrationController extends Controller
         return match ($layanan) {
             'tindakan-medis'   => view('pages.simrs.pendaftaran.partials.tindakan-medis', $viewData),
             'laboratorium'     => view('pages.simrs.pendaftaran.partials.laboratorium', $viewData),
+            'radiologi'     => view('pages.simrs.pendaftaran.partials.radiologi', $viewData),
             'pemakaian-alat'   => view('pages.simrs.pendaftaran.partials.pemakaian-alat', $viewData),
             'visite-dokter'    => view('pages.simrs.pendaftaran.partials.visite-dokter', $viewData),
             'operasi'          => view('pages.simrs.pendaftaran.partials.operasi', $viewData),
