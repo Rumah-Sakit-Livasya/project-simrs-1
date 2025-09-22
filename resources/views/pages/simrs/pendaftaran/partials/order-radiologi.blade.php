@@ -268,7 +268,7 @@
                 <hr class="mt-0">
 
                 {{-- PEMILIHAN PEMERIKSAAN --}}
-                <div class="px-3 mb-3">
+                <div class="px-3 mt-3">
                     <div class="form-group">
                         <label class="form-label" for="searchRadiology">Cari Pemeriksaan</label>
                         <div class="input-group">
