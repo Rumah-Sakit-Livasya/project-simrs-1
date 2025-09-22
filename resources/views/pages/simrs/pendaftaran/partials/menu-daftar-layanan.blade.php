@@ -107,11 +107,14 @@
                             <span>Persalinan (VK)</span>
                         </a>
                     </li>
-                    <li>
-                        <div class="circle-menu waves-effect red menu-layanan" data-layanan="gizi/list_order_gizi">
-                            <i class="mdi mdi-bowl"></i>
-                        </div>
-                        <span>Gizi</span>
+                    <li class="text-center">
+                        <a
+                            href="{{ route('detail.registrasi.pasien.layanan', ['registrations' => $registration->registration_number, 'layanan' => 'gizi']) }}">
+                            <div class="circle-menu waves-effect red accent-3 menu-layanan" data-layanan="gizi">
+                                <i class="mdi mdi-bowl"></i>
+                            </div>
+                            <span>Gizi</span>
+                        </a>
                     </li>
                 </ul>
             </div>
