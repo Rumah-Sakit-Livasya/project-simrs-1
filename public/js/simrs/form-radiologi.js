@@ -1,446 +1,397 @@
-// @ts-check
-/// <reference types="jquery" />
-/// <reference path="../types.d.ts" />
+/**
+ * Script for Embedded Radiology Order Form (Class-based approach - Submit Fix)
+ * Author: Your Name
+ * Version: 7.1.0
+ * Dependencies: jQuery, SweetAlert2, Bootstrap Datepicker, Select2
+ */
 
-class RadiologiForm {
+jQuery(function ($) {
     /**
-     * @type {KategoriRadiologi[]}
+     * @class RadiologiForm
+     * Mengelola logika form order radiologi di halaman detail registrasi.
      */
-    #KategoriRadiologi;
+    class RadiologiForm {
+        _TarifRadiologi;
+        _Registration;
+        _GroupPenjaminId;
+        _totalHarga = 0;
+        _elementHarga;
+        _elementForm;
+        _CITO = false;
 
-    /**
-     * @type {KelasRawat[]}
-     */
-    #KelasRawat;
-
-    /**
-     * @type {number}
-     */
-    #GroupPenjaminId;
-
-    /**
-     * @type {TarifRadiologi[]}
-     */
-    #TarifRadiologi;
-
-    /**
-     * @type {Registration}
-     */
-    #Registration;
-
-    #totalHarga = 0;
-    /**
-     * @type {HTMLElement | undefined}
-     */
-    #elementHarga = undefined;
-
-    /**
-     * @type {HTMLFormElement | undefined}
-     */
-    #elementForm = undefined;
-
-    #CITO = false;
-
-    constructor() {
-        // @ts-ignore
-        this.#KategoriRadiologi = window._kategoriRadiologi;
-        // @ts-ignore
-        this.#TarifRadiologi = window._tarifRadiologi;
-        // @ts-ignore
-        this.#Registration = window._registration;
-        // @ts-ignore
-        this.#GroupPenjaminId = window._groupPenjaminId;
-        // @ts-ignore
-        this.#KelasRawat = window._kelasRawats;
-
-        document.addEventListener("DOMContentLoaded", this.#init.bind(this));
-    }
-
-    #init() {
-        // Harga
-        this.#elementHarga =
-            document.getElementById("radiologi-total") || undefined;
-
-        // Order Type Radio
-        const orderType = document.querySelectorAll(
-            "input[type='radio'][name='order_type']"
-        );
-        if (orderType) {
-            orderType.forEach((radio) => {
-                radio.addEventListener(
-                    "change",
-                    this.#orderTypeChange.bind(this)
-                );
-            });
+        constructor() {
+            this._TarifRadiologi = window._tarifRadiologi || [];
+            this._Registration = window._registration || {};
+            this._GroupPenjaminId = window._groupPenjaminId || 1;
+            this._init();
         }
 
-        // Form
-        const form = document.querySelector("form#form-radiologi");
-        if (form) {
-            this.#elementForm = /** @type {HTMLFormElement} */ (form);
-            form.addEventListener("submit", this.#submit.bind(this));
-        }
-
-        // Select all checkboxes inside the Blade-generated form
-        const checkboxes = document.querySelectorAll(
-            "input[type='checkbox'].parameter_radiologi_checkbox"
-        );
-        checkboxes.forEach((checkbox) => {
-            checkbox.addEventListener(
-                "change",
-                this.#handleCheckboxChange.bind(this)
-            );
-        });
-
-        // Select all number input fields
-        const numberInputs = document.querySelectorAll(
-            "input[type='number'].parameter_radiologi_number"
-        );
-        numberInputs.forEach((input) => {
-            input.addEventListener(
-                "input",
-                this.#handleNumberChange.bind(this)
-            );
-        });
-
-        // Search bar
-        const searchBar = document.getElementById("searchRadiology");
-        if (searchBar) {
-            searchBar.addEventListener(
-                "keyup",
-                this.#handleSearchBarChange.bind(this)
-            );
-        }
-
-        this.#updateCost();
-    }
-
-    /**
-     * Handle search bar changes
-     * @param {Event} event
-     */
-    #handleSearchBarChange(event) {
-        const _target = event.target;
-        if (!_target) return;
-
-        const searchBar = /** @type {HTMLInputElement} */ (_target);
-        const searchQuery = searchBar.value.toLowerCase();
-        if (searchQuery == "") {
-            this.#showAllParameters();
-            return;
-        }
-
-        const parameters = document.querySelectorAll(".parameter_radiologi");
-        parameters.forEach((parameter) => {
-            const parameterNameElement =
-                parameter.querySelector(".form-check-label");
-            if (!parameterNameElement) return;
-            const parameterName = parameterNameElement.textContent;
-            if (!parameterName) return;
-
-            if (parameterName.toLowerCase().includes(searchQuery)) {
-                // @ts-ignore
-                parameter.style.display = "inherit";
-            } else {
-                // @ts-ignore
-                parameter.style.display = "none";
-            }
-        });
-    }
-
-    #showAllParameters() {
-        const parameters = document.querySelectorAll(".parameter_radiologi");
-        parameters.forEach((parameter) => {
-            // @ts-ignore
-            parameter.style.display = "inherit";
-        });
-    }
-
-    /**
-     * Handles checkbox state changes
-     * @param {Event} event
-     */
-    #handleCheckboxChange(event) {
-        const _target = event.target;
-        if (!_target) return;
-        this.#calculateCost();
-    }
-
-    /**
-     * Handle radio order type changes
-     * @param {Event} event
-     */
-    #orderTypeChange(event) {
-        const _target = event.target;
-        if (!_target) return;
-
-        const radio = /** @type {HTMLInputElement} */ (_target);
-        let type = radio.value;
-        this.#CITO = type == "cito" ? true : false;
-        this.#calculateCost();
-    }
-
-    /**
-     * Submit form
-     * @param {Event} event
-     */
-    #submit(event) {
-        event.preventDefault();
-        const formData = new FormData(this.#elementForm);
-
-        // get parameters
         /**
-         * @typedef {{
-         * id: number
-         * qty: number
-         * price: number
-         *  }} Parameter
+         * Inisialisasi awal, menyeleksi elemen DOM dan memasang event listener.
          */
-        let parameters = /** @type {Parameter[]} */ ([]);
-        const checkboxes = document.querySelectorAll(
-            "input[type='checkbox'].parameter_radiologi_checkbox"
-        );
-        checkboxes.forEach((_checkbox) => {
-            const checkbox = /** @type {HTMLInputElement} */ (_checkbox);
-            const isChecked = checkbox.checked;
-            const parameterId = checkbox.value;
-            /** @type {ParameterRadiologi | undefined} */
-            let parameter;
+        _init() {
+            this._elementHarga = $("#radiologi-total");
+            this._elementForm = $("#form-radiologi");
 
-            for (const nama_kategori in this.#KategoriRadiologi) {
-                const parameters =
-                    this.#KategoriRadiologi[nama_kategori].parameter_radiologi;
-                parameter = parameters.find(
-                    (p) => p.id == parseInt(parameterId)
-                );
-            }
-            const kelasRajal = this.#KelasRawat.find(
-                (k) => k.kelas.toLowerCase() == "rawat jalan"
+            // Inisialisasi plugins
+            this._initializePlugins();
+
+            // === AWAL PERBAIKAN 1: EVENT LISTENER UNTUK TOMBOL SUBMIT ===
+            // Ganti event listener dari 'submit' form menjadi 'click' pada tombol.
+            $("#radiologi-submit").on("click", this._submit.bind(this));
+            // === AKHIR PERBAIKAN 1 ===
+
+            this._elementForm.on(
+                "change",
+                'input[name="order_type"]',
+                this._orderTypeChange.bind(this)
             );
-            if (!kelasRajal)
-                return showErrorAlertNoRefresh(
-                    "Kelas rawat jalan tidak ditemukan!"
-                );
+            $("#searchRadiology").on(
+                "keyup",
+                this._handleSearchBarChange.bind(this)
+            );
 
-            if (isChecked && parameter) {
-                const Tarif = this.#TarifRadiologi.find((t) => {
-                    const EqualParameterId =
-                        t.parameter_radiologi_id == parameter.id;
-                    const EqualKelasRawatId =
-                        this.#Registration.registration_type == "rawat-jalan"
-                            ? t.kelas_rawat_id == kelasRajal.id
-                            : t.kelas_rawat_id ==
-                              (this.#Registration.kelas_rawat_id ?? -1);
-                    const EqualGroupPenjaminId =
-                        t.group_penjamin_id == (this.#GroupPenjaminId ?? -1);
-                    if (
-                        EqualParameterId &&
-                        EqualKelasRawatId &&
-                        EqualGroupPenjaminId
-                    )
-                        return t;
-                });
-                if (!Tarif) {
-                    return showErrorAlertNoRefresh(
-                        "Tarif tidak ditemukan! Mohon laporkan ke managemen. Parameter id: " +
-                            parameter.id
-                    );
+            const $gridContainer = $("#radiology-grid-container");
+            $gridContainer.on(
+                "change",
+                ".parameter_radiologi_checkbox",
+                this._handleCheckboxChange.bind(this)
+            );
+            $gridContainer.on(
+                "input change",
+                ".parameter_radiologi_number",
+                this._handleNumberChange.bind(this)
+            );
+            $gridContainer.on("click", ".btn-quantity-stepper", (e) => {
+                const $button = $(e.currentTarget);
+                const action = $button.data("action");
+                const $input = $button.siblings(".quantity-input");
+                if ($input.is(":disabled")) return;
+                let currentValue = parseInt($input.val()) || 1;
+                if (action === "increment") {
+                    currentValue++;
+                } else if (action === "decrement" && currentValue > 1) {
+                    currentValue--;
                 }
-                let Price = Tarif.total;
-                if (this.#CITO) {
-                    Price += (Price * 30) / 100;
-                }
-                const jumlah = /** @type {HTMLInputElement} */ (
-                    document.querySelector(
-                        `input[id='jumlah_${parameter.id}'].parameter_radiologi_number`
-                    )
-                );
-                if (parseInt(jumlah.value) < 1) {
-                    jumlah.value = String(1);
-                }
-                parameters.push({
-                    id: parameter.id,
-                    qty: parseInt(jumlah.value),
-                    price: Price,
-                });
-            }
-        });
-        formData.append("parameters", JSON.stringify(parameters));
-        formData.append("registration_id", String(this.#Registration.id));
-
-        fetch("/api/simrs/order-radiologi", {
-            method: "POST",
-            body: formData,
-            headers: {
-                "X-CSRF-TOKEN": String(formData.get("_token")),
-            },
-        })
-            .then(async (data) => {
-                console.log(data.url);
-                console.log(await data.text());
-                if (data.status != 200) {
-                    throw new Error("Error: " + data.statusText);
-                }
-                showSuccessAlert("Data berhasil disimpan");
-                setTimeout(() => window.location.reload(), 2000);
-            })
-            .catch((error) => {
-                console.log("Error:", error);
-                showErrorAlertNoRefresh(`Error: ${error}`);
+                $input.val(currentValue);
+                this._calculateCost();
             });
-    }
 
-    #calculateCost() {
-        this.#totalHarga = 0;
-
-        const checkboxes = document.querySelectorAll(
-            "input[type='checkbox'].parameter_radiologi_checkbox"
-        );
-        const kelasRajal = this.#KelasRawat.find(
-            (k) => k.kelas.toLowerCase() == "rawat jalan"
-        );
-        if (!kelasRajal)
-            return showErrorAlertNoRefresh(
-                "Kelas rawat jalan tidak ditemukan!"
-            );
-        checkboxes.forEach((_checkbox) => {
-            const checkbox = /** @type {HTMLInputElement} */ (_checkbox);
-            const isChecked = checkbox.checked;
-            const parameterId = checkbox.value;
-            /** @type {ParameterRadiologi | undefined} */
-            let parameter;
-
-            for (const nama_kategori in this.#KategoriRadiologi) {
-                const parameters =
-                    this.#KategoriRadiologi[nama_kategori].parameter_radiologi;
-                parameter = parameters.find(
-                    (p) => p.id == parseInt(parameterId)
-                );
-            }
-
-            if (isChecked && parameter) {
-                const Tarif = this.#TarifRadiologi.find((t) => {
-                    const EqualParameterId =
-                        t.parameter_radiologi_id == parameter.id;
-                    const EqualKelasRawatId =
-                        this.#Registration.registration_type == "rawat-jalan"
-                            ? t.kelas_rawat_id == kelasRajal.id
-                            : t.kelas_rawat_id ==
-                              (this.#Registration.kelas_rawat_id ?? -1);
-                    const EqualGroupPenjaminId =
-                        t.group_penjamin_id == (this.#GroupPenjaminId ?? -1);
-                    if (
-                        EqualParameterId &&
-                        EqualKelasRawatId &&
-                        EqualGroupPenjaminId
-                    )
-                        return t;
-                });
-                if (!Tarif) {
-                    return showErrorAlertNoRefresh(
-                        "Tarif tidak ditemukan! Mohon laporkan ke managemen. Parameter id: " +
-                            parameter.id
-                    );
-                }
-                const jumlah = /** @type {HTMLInputElement} */ (
-                    document.querySelector(
-                        `input[id='jumlah_${parameter.id}'].parameter_radiologi_number`
-                    )
-                );
-                if (parseInt(jumlah.value) < 1) {
-                    jumlah.value = String(1);
-                }
-
-                let Price = Tarif.total * parseInt(jumlah.value);
-                if (this.#CITO) {
-                    Price += (Price * 30) / 100;
-                }
-                this.#totalHarga += Price;
-            }
-        });
-
-        if (this.#elementHarga) {
-            this.#elementHarga.textContent = this.#totalHarga.toLocaleString(
-                "id-ID",
-                {
-                    style: "currency",
-                    currency: "IDR",
-                }
-            );
+            // Inisialisasi UI
+            this._updateAllParameterPricesUI();
+            this._disableAllQuantityInputs();
+            this._calculateCost();
         }
 
-        return this.#totalHarga;
-    }
-
-    #updateCost() {
-        const kelasRajal = this.#KelasRawat.find(
-            (k) => k.kelas.toLowerCase() == "rawat jalan"
-        );
-        if (!kelasRajal)
-            return showErrorAlertNoRefresh(
-                "Kelas rawat jalan tidak ditemukan!"
-            );
-        for (let i = 0; i < this.#KategoriRadiologi.length; i++) {
-            const KategoriRadiologi = this.#KategoriRadiologi[i];
-            for (
-                let ii = 0;
-                ii < KategoriRadiologi.parameter_radiologi.length;
-                ii++
+        _initializePlugins() {
+            if (
+                $("#doctor_id").length &&
+                !$("#doctor_id").hasClass("select2-hidden-accessible")
             ) {
-                const ParameterRadiologi =
-                    KategoriRadiologi.parameter_radiologi[ii];
-
-                // get span with id "harga_parameter_radiologi_${ParameterRadiologi.id}"
-                const hargaParameterRadiologi = document.getElementById(
-                    `harga_parameter_radiologi_${ParameterRadiologi.id}`
-                );
-                if (hargaParameterRadiologi == null) continue;
-
-                // get tarif from #TarifRadiologi with equal parameter_radiologi_id, group_penjamin_id and kelas_rawat_id
-                const tarif = this.#TarifRadiologi.find((t) => {
-                    const EqualParameterId =
-                        t.parameter_radiologi_id == ParameterRadiologi.id;
-                    const EqualKelasRawatId =
-                        this.#Registration.registration_type == "rawat-jalan"
-                            ? t.kelas_rawat_id == kelasRajal.id
-                            : t.kelas_rawat_id ==
-                              (this.#Registration.kelas_rawat_id ?? -1);
-                    const EqualGroupPenjaminId =
-                        t.group_penjamin_id == (this.#GroupPenjaminId ?? -1);
-                    if (
-                        EqualParameterId &&
-                        EqualKelasRawatId &&
-                        EqualGroupPenjaminId
-                    )
-                        return t;
+                $("#doctor_id").select2({
+                    placeholder: "Pilih Dokter Radiologi",
+                    allowClear: true,
+                    dropdownParent: $("#doctor_id").parent(),
                 });
+            }
+            if ($(".datepicker").length) {
+                $(".datepicker").datepicker({
+                    todayHighlight: true,
+                    orientation: "bottom left",
+                    format: "dd-mm-yyyy",
+                    autoclose: true,
+                });
+            }
+        }
 
+        _disableAllQuantityInputs() {
+            $(".parameter_radiologi_number").prop("disabled", true);
+            $(".btn-quantity-stepper").prop("disabled", true);
+        }
+
+        _handleSearchBarChange(event) {
+            const searchQuery = $(event.target).val().toLowerCase().trim();
+            $(".category-column").each(function () {
+                const $categoryCard = $(this);
+                let categoryVisible = false;
+                $categoryCard.find(".parameter_radiologi").each(function () {
+                    const $item = $(this);
+                    const itemName = $item
+                        .find(".custom-control-label")
+                        .text()
+                        .toLowerCase();
+                    if (itemName.includes(searchQuery)) {
+                        $item.show();
+                        categoryVisible = true;
+                    } else {
+                        $item.hide();
+                    }
+                });
+                $categoryCard.toggle(categoryVisible);
+            });
+        }
+
+        _handleCheckboxChange(event) {
+            const $checkbox = $(event.currentTarget);
+            const $testItem = $checkbox.closest(".test-item");
+            const $quantityInput = $testItem.find(".quantity-input");
+            const $stepperButtons = $testItem.find(".btn-quantity-stepper");
+
+            if ($checkbox.is(":checked")) {
+                $quantityInput.prop("disabled", false);
+                $stepperButtons.prop("disabled", false);
+                if (
+                    parseInt($quantityInput.val()) < 1 ||
+                    $quantityInput.val() === ""
+                ) {
+                    $quantityInput.val(1);
+                }
+            } else {
+                $quantityInput.prop("disabled", true).val(1);
+                $stepperButtons.prop("disabled", true);
+            }
+            this._calculateCost();
+        }
+
+        _handleNumberChange(event) {
+            const $input = $(event.target);
+            let value = parseInt($input.val());
+            if (isNaN(value) || value < 1) {
+                $input.val(1);
+            }
+            this._calculateCost();
+        }
+
+        _orderTypeChange(event) {
+            this._CITO = $(event.target).val() === "cito";
+            this._calculateCost();
+        }
+
+        _updateAllParameterPricesUI() {
+            const self = this;
+            $(".parameter_radiologi").each(function () {
+                const $item = $(this);
+                const $checkbox = $item.find(".parameter_radiologi_checkbox");
+                const parameterId = parseInt($checkbox.val());
+                const $priceElement = $(
+                    `#harga_parameter_radiologi_${parameterId}`
+                );
+                if (!parameterId || isNaN(parameterId)) return;
+                const tarif = self._findApplicableTarif(parameterId);
                 if (tarif) {
-                    hargaParameterRadiologi.textContent =
-                        tarif.total.toLocaleString("id-ID", {
+                    const formattedPrice = parseInt(tarif.total).toLocaleString(
+                        "id-ID",
+                        {
                             style: "currency",
                             currency: "IDR",
-                        });
+                            minimumFractionDigits: 0,
+                        }
+                    );
+                    $priceElement
+                        .text(`(${formattedPrice})`)
+                        .removeClass("text-danger");
                 } else {
-                    // console.log(
-                    //     "Tarif belum di set atau tidak ditemukan! ID Parameter: " +
-                    //         ParameterRadiologi.id
-                    // );
-                    // showErrorAlertNoRefresh("Tarif tidak ditemukan atau belum di set! Mohon laporkan ke management. Cek log console!");
+                    $priceElement.text("(N/A)").addClass("text-danger");
                 }
+            });
+        }
+
+        _calculateCost() {
+            this._totalHarga = 0;
+            let itemCount = 0;
+            const self = this;
+            $(".parameter_radiologi_checkbox:checked").each(function () {
+                const parameterId = parseInt($(this).val());
+                const $quantityInput = $(`#jumlah_${parameterId}`);
+                const kuantitas = parseInt($quantityInput.val()) || 1;
+                const tarif = self._findApplicableTarif(parameterId);
+                if (tarif) {
+                    let hargaSatuan = parseInt(tarif.total);
+                    if (self._CITO) {
+                        hargaSatuan = Math.round(hargaSatuan * 1.3);
+                    }
+                    self._totalHarga += hargaSatuan * kuantitas;
+                    itemCount++;
+                }
+            });
+            this._elementHarga.text(
+                this._totalHarga.toLocaleString("id-ID", {
+                    style: "currency",
+                    currency: "IDR",
+                    minimumFractionDigits: 0,
+                })
+            );
+            $("#radiologi-submit").prop("disabled", itemCount === 0);
+        }
+
+        _submit(event) {
+            event.preventDefault();
+            if (!$("#doctor_id").val()) {
+                return this._showErrorAlert("Silakan pilih Dokter Radiologi.");
+            }
+            if (!$("#diagnosa_awal").val().trim()) {
+                return this._showErrorAlert("Diagnosa klinis wajib diisi.");
+            }
+            const $checkedItems = $(".parameter_radiologi_checkbox:checked");
+            if ($checkedItems.length === 0) {
+                return this._showErrorAlert(
+                    "Pilih minimal satu pemeriksaan radiologi."
+                );
+            }
+            const formElement = this._elementForm[0];
+            const formData = new FormData(formElement);
+            const self = this;
+            const parameters = [];
+
+            if (this._Registration && this._Registration.id) {
+                formData.append("registration_id", this._Registration.id);
+            } else {
+                return this._showErrorAlert(
+                    "Data registrasi pasien tidak ditemukan."
+                );
+            }
+            if (this._Registration && this._Registration.patient_id) {
+                formData.append("patient_id", this._Registration.patient_id);
+            } else {
+                return this._showErrorAlert("Data pasien tidak ditemukan.");
+            }
+
+            $checkedItems.each(function () {
+                const parameterId = parseInt($(this).val());
+                const kuantitas =
+                    parseInt($(`#jumlah_${parameterId}`).val()) || 1;
+                const tarif = self._findApplicableTarif(parameterId);
+                if (tarif) {
+                    let hargaSatuan = parseInt(tarif.total);
+                    if (self._CITO) {
+                        hargaSatuan = Math.round(hargaSatuan * 1.3);
+                    }
+                    parameters.push({
+                        id: parameterId,
+                        qty: kuantitas,
+                        price: hargaSatuan,
+                    });
+                }
+            });
+
+            formData.append("parameters", JSON.stringify(parameters));
+            formData.append("total_biaya", this._totalHarga);
+
+            Swal.fire({
+                title: "Konfirmasi Order",
+                html: `Anda akan menyimpan order radiologi dengan total biaya <b>${this._elementHarga.text()}</b>.<br>Apakah Anda yakin?`,
+                icon: "question",
+                showCancelButton: true,
+                confirmButtonText: "Ya, Simpan!",
+                cancelButtonText: "Batal",
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    this._sendData(formData);
+                }
+            });
+        }
+
+        _sendData(formData) {
+            const $submitBtn = $("#radiologi-submit");
+            const self = this; // === AWAL PERBAIKAN 2: Simpan konteks `this` ===
+
+            $.ajax({
+                url: "/api/simrs/order-radiologi",
+                method: "POST",
+                data: formData,
+                processData: false,
+                contentType: false,
+                headers: {
+                    "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr(
+                        "content"
+                    ),
+                },
+                beforeSend: function () {
+                    $submitBtn
+                        .prop("disabled", true)
+                        .html(
+                            '<span class="spinner-border spinner-border-sm"></span> Menyimpan...'
+                        );
+                },
+                success: function (response) {
+                    if (response.success) {
+                        Swal.fire({
+                            title: "Sukses",
+                            text: "Order radiologi berhasil disimpan!",
+                            icon: "success",
+                            confirmButtonText: "OK",
+                        });
+                        setTimeout(() => window.location.reload(), 1500);
+                    } else {
+                        const errorMessages = response.errors
+                            ? Object.values(response.errors).join("<br>")
+                            : response.message || "Terjadi kesalahan";
+                        self._showErrorAlert(errorMessages); // Gunakan `self`
+                    }
+                },
+                error: function (jqXHR) {
+                    console.error("AJAX Error:", jqXHR.responseText);
+                    if (jqXHR.status === 419) {
+                        self._showErrorAlert(
+                            "Sesi Anda telah berakhir. Silakan muat ulang halaman."
+                        ); // Gunakan `self`
+                    } else if (
+                        jqXHR.status === 422 &&
+                        jqXHR.responseJSON.errors
+                    ) {
+                        const firstError = Object.values(
+                            jqXHR.responseJSON.errors
+                        )[0][0];
+                        self._showErrorAlert(
+                            `Kesalahan Validasi: ${firstError}`
+                        ); // Gunakan `self`
+                    } else {
+                        self._showErrorAlert(
+                            "Terjadi kesalahan teknis. Silakan hubungi administrator."
+                        ); // Gunakan `self`
+                    }
+                },
+                complete: function () {
+                    $submitBtn
+                        .prop("disabled", false)
+                        .html('<i class="fal fa-save mr-1"></i> Simpan Order');
+                },
+            });
+            // === AKHIR PERBAIKAN 2 ===
+        }
+
+        _findApplicableTarif(parameterId) {
+            const kelasRawatId =
+                this._Registration.registration_type === "rawat-inap"
+                    ? this._Registration.kelas_rawat_id || 1
+                    : 1;
+            return this._TarifRadiologi.find((t) => {
+                const isCorrectParameter =
+                    parseInt(t.parameter_radiologi_id) === parameterId;
+                const isCorrectGroupPenjamin =
+                    parseInt(t.group_penjamin_id) === this._GroupPenjaminId;
+                const isCorrectKelasRawat =
+                    parseInt(t.kelas_rawat_id) === kelasRawatId;
+                return (
+                    isCorrectParameter &&
+                    isCorrectGroupPenjamin &&
+                    isCorrectKelasRawat
+                );
+            });
+        }
+
+        _showErrorAlert(message) {
+            if (typeof Swal !== "undefined") {
+                Swal.fire({
+                    title: "Error",
+                    html: message,
+                    icon: "error",
+                    confirmButtonText: "OK",
+                });
+            } else {
+                alert(message);
             }
         }
     }
-
-    /**
-     * Handles number input changes
-     * @param {Event} event
-     */
-    #handleNumberChange(event) {
-        const _target = event.target;
-        if (!_target) return;
-        this.#calculateCost();
-    }
-}
-
-const RadiologiFormClass = new RadiologiForm();
+    new RadiologiForm();
+});

@@ -1,313 +1,210 @@
-// @ts-check
-/// <reference types="jquery" />
-/// <reference path="../types.d.ts" />
+// public/js/simrs/simulasi-harga-radiologi.js
 
-class SimulasiHargaRadiologi {
+$(document).ready(function () {
+    // =================================================================
+    // DEKLARASI VARIABEL
+    // =================================================================
+
+    // Ambil data dari Blade, sediakan array kosong sebagai fallback
+    const kategoriRadiologi = window._kategoriRadiologi || [];
+    const tarifRadiologi = window._tarifRadiologi || [];
+
+    // Variabel untuk menyimpan state filter dan total
+    let groupTarif = 1;
+    let kelasPerawatan = 1;
+    let totalHarga = 0;
+    const $elementHarga = $("#radiologi-total"); // Cache elemen jQuery
+    let CITO = false;
+
+    // =================================================================
+    // FUNGSI-FUNGSI UTAMA
+    // =================================================================
+
     /**
-     * @type {KategoriRadiologi[]}
+     * Menginisialisasi semua event listener dan status awal halaman.
      */
-    #KategoriRadiologi;
+    function init() {
+        // Event listener untuk semua checkbox parameter
+        $(".parameter_radiologi_checkbox").on("change", calculateCost);
 
-    /**
-     * @type {TarifRadiologi[]}
-     */
-    #TarifRadiologi;
+        // Event listener untuk semua input jumlah (number)
+        $(".parameter_radiologi_number").on("input", calculateCost);
 
-    #groupTarif = 1;
+        // Event listener untuk search bar
+        $("#searchRadiology").on("keyup", handleSearchBarChange);
 
-    #kelasPerawatan = 1;
-
-    #totalHarga = 0;
-    /**
-     * @type {HTMLElement | undefined}
-     */
-    #elementHarga = undefined;
-
-    #CITO = false;
-
-    constructor() {
-        // @ts-ignore
-        this.#KategoriRadiologi = window._kategoriRadiologi;
-        // @ts-ignore
-        this.#TarifRadiologi = window._tarifRadiologi;
-
-        document.addEventListener("DOMContentLoaded", this.#init.bind(this));
-    }
-
-    #init() {
-        // Select all checkboxes inside the Blade-generated form
-        const checkboxes = document.querySelectorAll(
-            "input[type='checkbox'].parameter_radiologi_checkbox"
+        // Event listener untuk radio button tipe order
+        $("input[type='radio'][name='order_type']").on(
+            "change",
+            orderTypeChange
         );
-        checkboxes.forEach((checkbox) => {
-            checkbox.addEventListener(
-                "change",
-                this.#handleCheckboxChange.bind(this)
-            );
-        });
 
-        // Select all number input fields
-        const numberInputs = document.querySelectorAll(
-            "input[type='number'].parameter_radiologi_number"
-        );
-        numberInputs.forEach((input) => {
-            input.addEventListener(
-                "input",
-                this.#handleNumberChange.bind(this)
-            );
-        });
-
-        // Search bar
-        const searchBar = document.getElementById("searchRadiology");
-        if (searchBar) {
-            searchBar.addEventListener(
-                "keyup",
-                this.#handleSearchBarChange.bind(this)
-            );
+        // Event listener untuk select group tarif
+        const $groupSelect = $("#group_tarif");
+        if ($groupSelect.length) {
+            groupTarif = parseInt($groupSelect.val()) || 1;
+            $groupSelect.on("change", handleGroupTarifSelectChange);
         }
 
-        // Harga
-        this.#elementHarga =
-            document.getElementById("radiologi-total") || undefined;
+        // Event listener untuk select kelas perawatan
+        const $kelasSelect = $("#kelas_perawatan");
+        if ($kelasSelect.length) {
+            kelasPerawatan = parseInt($kelasSelect.val()) || 1;
+            $kelasSelect.on("change", handleKelasPerawatanSelectChange);
+        }
 
-        // Order Type Radio
-        const orderType = document.querySelectorAll(
-            "input[type='radio'][name='order_type']"
-        );
-        if (orderType) {
-            orderType.forEach((radio) => {
-                radio.addEventListener(
-                    "change",
-                    this.#orderTypeChange.bind(this)
+        // Update harga satuan pada UI saat pertama kali halaman dimuat
+        updateCostDisplay();
+        // Hitung total biaya awal
+        calculateCost();
+    }
+
+    /**
+     * Menangani perubahan pada select kelas perawatan.
+     */
+    function handleKelasPerawatanSelectChange() {
+        kelasPerawatan = parseInt($(this).val());
+        updateCostDisplay();
+        calculateCost();
+    }
+
+    /**
+     * Menangani perubahan pada select group tarif.
+     */
+    function handleGroupTarifSelectChange() {
+        groupTarif = parseInt($(this).val());
+        updateCostDisplay();
+        calculateCost();
+    }
+
+    /**
+     * Menangani perubahan pada radio button tipe order (CITO/Normal).
+     */
+    function orderTypeChange() {
+        CITO = $(this).val() === "cito";
+        calculateCost();
+    }
+
+    /**
+     * Memperbarui tampilan harga satuan untuk setiap parameter di UI.
+     */
+    function updateCostDisplay() {
+        $.each(kategoriRadiologi, function (i, kategori) {
+            $.each(kategori.parameter_radiologi, function (ii, parameter) {
+                const $hargaSpan = $(
+                    `#harga_parameter_radiologi_${parameter.id}`
                 );
-            });
-        }
+                if (!$hargaSpan.length) return; // Lanjut jika elemen span harga tidak ada
 
-        // Group Tarif Select
-        const groupSelect = document.getElementById("group_tarif");
-        if (groupSelect) {
-            groupSelect.addEventListener(
-                "change",
-                this.#handleGroupTarifSelectChange.bind(this)
-            );
-        }
-
-        // Kelas Perawatan Select
-        const kelasSelect = document.getElementById("kelas_perawatan");
-        if (kelasSelect) {
-            kelasSelect.addEventListener(
-                "change",
-                this.#handleKelasPerawatanSelectChange.bind(this)
-            );
-        }
-
-        this.#updateCost();
-    }
-
-    /**
-     * Handle kelas perawatan select changes
-     * @param {Event} event
-     */
-    #handleKelasPerawatanSelectChange(event) {
-        const _target = event.target;
-        if (!_target) return;
-        const select = /** @type {HTMLSelectElement} */ (_target);
-        const selectedValue = select.value;
-        this.#kelasPerawatan = parseInt(selectedValue);
-        this.#updateCost();
-        this.#calculateCost();
-    }
-
-    /**
-     * Handle group select changes
-     * @param {Event} event
-     */
-    #handleGroupTarifSelectChange(event) {
-        const _target = event.target;
-        if (!_target) return;
-        const select = /** @type {HTMLSelectElement} */ (_target);
-        const selectedValue = select.value;
-        this.#groupTarif = parseInt(selectedValue);
-        this.#updateCost();
-        this.#calculateCost();
-    }
-
-    /**
-     * Handle radio order type changes
-     * @param {Event} event
-     */
-    #orderTypeChange(event) {
-        const _target = event.target;
-        if (!_target) return;
-
-        const radio = /** @type {HTMLInputElement} */ (_target);
-        let type = radio.value;
-        this.#CITO = type == "cito" ? true : false;
-        this.#calculateCost();
-    }
-
-    #updateCost() {
-        for (let i = 0; i < this.#KategoriRadiologi.length; i++) {
-            const KategoriRadiologi = this.#KategoriRadiologi[i];
-            for (
-                let ii = 0;
-                ii < KategoriRadiologi.parameter_radiologi.length;
-                ii++
-            ) {
-                const ParameterRadiologi =
-                    KategoriRadiologi.parameter_radiologi[ii];
-
-                // get span with id "harga_parameter_radiologi_${ParameterRadiologi.id}"
-                const hargaParameterRadiologi = document.getElementById(
-                    `harga_parameter_radiologi_${ParameterRadiologi.id}`
-                );
-                if (hargaParameterRadiologi == null) continue;
-
-                // get tarif from #TarifRadiologi with equal parameter_radiologi_id, group_penjamin_id and kelas_rawat_id
-                const tarif = this.#TarifRadiologi.find((t) => {
-                    if (
-                        t.parameter_radiologi_id == ParameterRadiologi.id &&
-                        t.group_penjamin_id == this.#groupTarif &&
-                        t.kelas_rawat_id == this.#kelasPerawatan
-                    )
-                        return t;
-                });
-
-                if (tarif) {
-                    hargaParameterRadiologi.textContent =
-                        tarif.total.toLocaleString("id-ID", {
-                            style: "currency",
-                            currency: "IDR",
-                        });
-                } else {
-                    console.log(
-                        "Tarif belum di set atau tidak ditemukan! ID Parameter: " +
-                            ParameterRadiologi.id
-                    );
-                    // showErrorAlertNoRefresh("Tarif tidak ditemukan atau belum di set! Mohon laporkan ke management. Cek log console!");
-                }
-            }
-        }
-    }
-
-    #calculateCost() {
-        this.#totalHarga = 0;
-        const checkboxes = document.querySelectorAll(
-            "input[type='checkbox'].parameter_radiologi_checkbox"
-        );
-        checkboxes.forEach((_checkbox) => {
-            const checkbox = /** @type {HTMLInputElement} */ (_checkbox);
-            const isChecked = checkbox.checked;
-            const parameterId = checkbox.value;
-            /** @type {ParameterRadiologi | undefined} */
-            let parameter;
-
-            for (const nama_kategori in this.#KategoriRadiologi) {
-                const parameters =
-                    this.#KategoriRadiologi[nama_kategori].parameter_radiologi;
-                parameter = parameters.find(
-                    (p) => p.id == parseInt(parameterId)
-                );
-            }
-
-            if (isChecked && parameter) {
-                const tarif = this.#TarifRadiologi.find((t) => {
-                    if (
+                // Cari tarif yang sesuai berdasarkan group dan kelas
+                const tarif = tarifRadiologi.find(
+                    (t) =>
                         t.parameter_radiologi_id == parameter.id &&
-                        t.group_penjamin_id == this.#groupTarif &&
-                        t.kelas_rawat_id == this.#kelasPerawatan
-                    )
-                        return t;
-                });
-                if (tarif) {
-                    const jumlah = /** @type {HTMLInputElement} */ (
-                        document.querySelector(
-                            `input[id='jumlah_${parameter.id}']`
-                        )
-                    );
-                    if (parseInt(jumlah.value) < 1) {
-                        jumlah.value = String(1);
-                    }
-                    this.#totalHarga += tarif.total * parseInt(jumlah.value);
+                        t.group_penjamin_id == groupTarif &&
+                        t.kelas_rawat_id == kelasPerawatan
+                );
 
-                    if (this.#CITO) {
-                        this.#totalHarga += (this.#totalHarga * 30) / 100;
-                    }
+                if (tarif && tarif.total !== undefined) {
+                    const formattedPrice = parseFloat(
+                        tarif.total
+                    ).toLocaleString("id-ID", {
+                        style: "currency",
+                        currency: "IDR",
+                    });
+                    $hargaSpan.text(formattedPrice);
+                } else {
+                    $hargaSpan.text("Rp 0,00"); // Tampilkan harga default jika tarif tidak ditemukan
                 }
+            });
+        });
+    }
+
+    /**
+     * Menghitung total biaya dari semua parameter yang dipilih.
+     * Ini adalah versi yang sudah diperbaiki logikanya.
+     */
+    function calculateCost() {
+        let subTotal = 0;
+
+        // Iterasi hanya pada checkbox yang dicentang untuk efisiensi
+        $(".parameter_radiologi_checkbox:checked").each(function () {
+            const parameterId = $(this).val();
+
+            // Cari tarif yang sesuai
+            const tarif = tarifRadiologi.find(
+                (t) =>
+                    t.parameter_radiologi_id == parameterId &&
+                    t.group_penjamin_id == groupTarif &&
+                    t.kelas_rawat_id == kelasPerawatan
+            );
+
+            if (tarif && tarif.total !== undefined) {
+                const $jumlahInput = $(`#jumlah_${parameterId}`);
+                let jumlah = parseInt($jumlahInput.val());
+
+                // Validasi input jumlah, minimal 1
+                if (isNaN(jumlah) || jumlah < 1) {
+                    jumlah = 1;
+                    $jumlahInput.val(1);
+                }
+                subTotal += parseFloat(tarif.total) * jumlah;
             }
         });
 
-        if (this.#elementHarga) {
-            this.#elementHarga.textContent = this.#totalHarga.toLocaleString(
-                "id-ID",
-                {
+        totalHarga = subTotal;
+
+        // Tambahkan biaya CITO 30% dari subtotal, HANYA SEKALI setelah loop selesai.
+        if (CITO) {
+            totalHarga += (subTotal * 30) / 100;
+        }
+
+        // Tampilkan total harga yang sudah diformat
+        if ($elementHarga.length) {
+            $elementHarga.text(
+                totalHarga.toLocaleString("id-ID", {
                     style: "currency",
                     currency: "IDR",
-                }
+                })
             );
         }
     }
 
     /**
-     * Handle search bar changes
-     * @param {Event} event
+     * Menangani event ketik pada search bar untuk memfilter parameter.
      */
-    #handleSearchBarChange(event) {
-        const _target = event.target;
-        if (!_target) return;
+    function handleSearchBarChange() {
+        const searchQuery = $(this).val().toLowerCase();
 
-        const searchBar = /** @type {HTMLInputElement} */ (_target);
-        const searchQuery = searchBar.value.toLowerCase();
-        if (searchQuery == "") {
-            this.#showAllParameters();
-            return;
-        }
+        // Iterasi per card untuk bisa menyembunyikan card jika kosong
+        $(".card-tindakan").each(function () {
+            const $card = $(this);
+            let cardVisible = false;
 
-        const parameters = document.querySelectorAll(".parameter_radiologi");
-        parameters.forEach((parameter) => {
-            const parameterNameElement =
-                parameter.querySelector(".form-check-label");
-            if (!parameterNameElement) return;
-            const parameterName = parameterNameElement.textContent;
-            if (!parameterName) return;
+            $card.find(".item.parameter_radiologi").each(function () {
+                const $item = $(this);
+                const parameterName = $item
+                    .find(".custom-control-label")
+                    .text()
+                    .toLowerCase();
 
-            if (parameterName.toLowerCase().includes(searchQuery)) {
-                // @ts-ignore
-                parameter.style.display = "inherit";
+                if (parameterName.includes(searchQuery)) {
+                    $item.show();
+                    cardVisible = true;
+                } else {
+                    $item.hide();
+                }
+            });
+
+            if (cardVisible) {
+                $card.show();
             } else {
-                // @ts-ignore
-                parameter.style.display = "none";
+                $card.hide();
             }
         });
     }
 
-    #showAllParameters() {
-        const parameters = document.querySelectorAll(".parameter_radiologi");
-        parameters.forEach((parameter) => {
-            // @ts-ignore
-            parameter.style.display = "inherit";
-        });
-    }
-
-    /**
-     * Handles checkbox state changes
-     * @param {Event} event
-     */
-    #handleCheckboxChange(event) {
-        const _target = event.target;
-        if (!_target) return;
-        this.#calculateCost();
-    }
-
-    /**
-     * Handles number input changes
-     * @param {Event} event
-     */
-    #handleNumberChange(event) {
-        const _target = event.target;
-        if (!_target) return;
-        this.#calculateCost();
-    }
-}
-
-const SimulasiHargaRadiologiClass = new SimulasiHargaRadiologi();
+    // =================================================================
+    // INISIALISASI
+    // =================================================================
+    init();
+});

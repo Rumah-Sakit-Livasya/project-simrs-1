@@ -96,12 +96,21 @@
 
 <script>
     function pilihPasien(registration) {
-        if(window.opener){
-            window.opener.postMessage({data: registration}, "*")
-        } else{
+        if (window.opener) {
+            // --- INI PERBAIKANNYA ---
+            // Buat objek pesan yang sesuai dengan yang diharapkan halaman utama
+            const message = {
+                type: 'patientSelected', // Tambahkan properti 'type'
+                data: registration // Kirim objek registrasi langsung
+            };
+
+            // Kirim pesan dengan format yang benar
+            window.opener.postMessage(message, "*");
+            // -------------------------
+
+        } else {
             alert("window.opener is not defined");
         }
-        // console.log(registration);
-        window.close();        
+        window.close();
     }
 </script>
