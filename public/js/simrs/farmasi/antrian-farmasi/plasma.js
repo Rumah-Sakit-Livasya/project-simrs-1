@@ -38,21 +38,24 @@ class PlasmaFarmasiHandler {
     constructor() {
         this.#$Toaster.hide();
         this.#hash = {
-            "a": "",
-            "b": "",
-            "c": "",
-            "d": ""
+            a: "",
+            b: "",
+            c: "",
+            d: "",
         };
-        this.#letters = ['a', 'b', 'c', 'd'];
+        this.#letters = ["a", "b", "c", "d"];
 
         $(document).ready(() => {
             this.#initialize();
         });
 
-        window.addEventListener('message', (event) => {
+        window.addEventListener("message", (event) => {
             switch (event.data.type) {
                 case "call":
-                    this.#makeCallAnnouncement(event.data.data.id, event.data.data.queue)
+                    this.#makeCallAnnouncement(
+                        event.data.data.id,
+                        event.data.data.queue
+                    );
                     break;
             }
         });
@@ -92,17 +95,17 @@ class PlasmaFarmasiHandler {
                 body: body,
                 headers: {
                     // 'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': String($("input[name='_token']").val()),
-                }
+                    "X-CSRF-TOKEN": String($("input[name='_token']").val()),
+                },
             })
                 .then(async (response) => {
                     if (response.status != 200) {
-                        throw new Error('Error: ' + response.statusText);
+                        throw new Error("Error: " + response.statusText);
                     }
                     resolve(!raw ? await response.json() : response);
                 })
-                .catch(error => {
-                    console.error('Error:', error);
+                .catch((error) => {
+                    console.log("Error:", error);
                     // alert(`Error: ${error}`);
                     return reject(error);
                 });
@@ -122,12 +125,12 @@ class PlasmaFarmasiHandler {
 
     /** @param {number} ms */
     sleep(ms) {
-        return new Promise(r => setTimeout(() => r(true), ms));
+        return new Promise((r) => setTimeout(() => r(true), ms));
     }
 
     /**
-     * @param {number} id 
-     * @param {string} queue 
+     * @param {number} id
+     * @param {string} queue
      */
     async #makeCallAnnouncement(id, queue) {
         this.#announceList.push({ id, queue });
@@ -136,7 +139,9 @@ class PlasmaFarmasiHandler {
         this.#isAnnouncing = true;
 
         while (this.#announceList.length > 0) {
-            const { id, queue } = /** @type {{id: number, queue: string}} */ (this.#announceList.shift());
+            const { id, queue } = /** @type {{id: number, queue: string}} */ (
+                this.#announceList.shift()
+            );
 
             // queue format: {{letter}}{{number}}
             const [Letter, Number] = queue.split(/(\d+)/).filter(Boolean);
@@ -159,12 +164,16 @@ class PlasmaFarmasiHandler {
 
     async #playTTS(text) {
         try {
-            const response = await fetch(`http://liva_simrs_laravel11.test/api/tts?text=${encodeURIComponent(text)}`);
+            const response = await fetch(
+                `http://liva_simrs_laravel11.test/api/tts?text=${encodeURIComponent(
+                    text
+                )}`
+            );
 
             if (!response.ok) {
                 console.log(await response.text());
 
-                throw new Error('Network response was not ok');
+                throw new Error("Network response was not ok");
             }
 
             const audioBlob = await response.blob();
@@ -178,27 +187,35 @@ class PlasmaFarmasiHandler {
             let playPromise = audio.play();
 
             if (playPromise !== undefined) {
-                playPromise.then(() => {
-                    // Autoplay worked -> unmute
-                    audio.muted = false;
-                }).catch(() => {
-                    // Autoplay failed -> wait for user gesture
-                    console.warn("Autoplay blocked. Waiting for user action to play TTS.");
-
-                    const resume = () => {
+                playPromise
+                    .then(() => {
+                        // Autoplay worked -> unmute
                         audio.muted = false;
-                        audio.play().catch(err => console.error("Manual play failed:", err));
-                        document.removeEventListener("click", resume);
-                    };
+                    })
+                    .catch(() => {
+                        // Autoplay failed -> wait for user gesture
+                        console.warn(
+                            "Autoplay blocked. Waiting for user action to play TTS."
+                        );
 
-                    // Resume on next click anywhere
-                    document.addEventListener("click", resume);
-                });
+                        const resume = () => {
+                            audio.muted = false;
+                            audio
+                                .play()
+                                .catch((err) =>
+                                    console.log("Manual play failed:", err)
+                                );
+                            document.removeEventListener("click", resume);
+                        };
+
+                        // Resume on next click anywhere
+                        document.addEventListener("click", resume);
+                    });
             }
 
             return audioUrl;
         } catch (error) {
-            console.error('Error fetching TTS:', error);
+            console.log("Error fetching TTS:", error);
             throw error;
         }
     }
@@ -218,7 +235,7 @@ class PlasmaFarmasiHandler {
         //     </div>
         //     <div class="item-code">QUEUE CODE / NO</div>
         // </div>
-        return  /*html*/`
+        return /*html*/ `
          <div class="item-row">
              <div class="item-left">
                  <div class="item-id">${queue.re?.registration?.patient?.medical_record_number}</div>
@@ -231,33 +248,41 @@ class PlasmaFarmasiHandler {
     }
 
     /**
-     * @param {string} letter 
-     * @param {number} count 
+     * @param {string} letter
+     * @param {number} count
      */
     #updateCounter(letter, count) {
         switch (letter.toUpperCase()) {
-            case 'A':
+            case "A":
                 // Umum / Asuransi Non Racikan
                 this.#prosessNonRacikan = count;
-                this.#$CountNonRacikan.text(this.#prosessNonRacikan + this.#prosessNonRacikanBPJS);
+                this.#$CountNonRacikan.text(
+                    this.#prosessNonRacikan + this.#prosessNonRacikanBPJS
+                );
                 break;
 
-            case 'B':
+            case "B":
                 // Umum / Asuransi Racikan
                 this.#prosessRacikan = count;
-                this.#$CountRacikan.text(this.#prosessRacikan + this.#prosessRacikanBPJS);
+                this.#$CountRacikan.text(
+                    this.#prosessRacikan + this.#prosessRacikanBPJS
+                );
                 break;
 
-            case 'C':
+            case "C":
                 // BPJS Non Racikan
                 this.#prosessNonRacikanBPJS = count;
-                this.#$CountNonRacikan.text(this.#prosessNonRacikan + this.#prosessNonRacikanBPJS);
+                this.#$CountNonRacikan.text(
+                    this.#prosessNonRacikan + this.#prosessNonRacikanBPJS
+                );
                 break;
 
-            case 'D':
+            case "D":
                 // BPJS Racikan
                 this.#prosessRacikanBPJS = count;
-                this.#$CountRacikan.text(this.#prosessRacikan + this.#prosessRacikanBPJS);
+                this.#$CountRacikan.text(
+                    this.#prosessRacikan + this.#prosessRacikanBPJS
+                );
                 break;
         }
     }
@@ -268,17 +293,22 @@ class PlasmaFarmasiHandler {
      */
     async #refreshTable(letter) {
         const URL = PlasmaFarmasiHandler.BaseAPI + `/get-antrian/${letter}`;
-        const NewHash = /** @type {string} */ (await (await this.#fetchAPI(URL, null, "GET", true)).text());
+        const NewHash = /** @type {string} */ (
+            await (await this.#fetchAPI(URL, null, "GET", true)).text()
+        );
 
-        if (this.#hash[letter] == NewHash) return /* console.log("No Update on table " + letter) */; // no update
+        if (this.#hash[letter] == NewHash)
+            return /* console.log("No Update on table " + letter) */; // no update
         this.#hash[letter] = NewHash;
 
-        const Content = /** @type {FarmasiAntrian[]} */ (JSON.parse(atob(NewHash)));
+        const Content = /** @type {FarmasiAntrian[]} */ (
+            JSON.parse(atob(NewHash))
+        );
         this.#updateCounter(letter, Content.length);
         $(`#list-${letter}`).empty();
 
         let no = 0;
-        Content.forEach(Queue => {
+        Content.forEach((Queue) => {
             $(`#list-${letter}`).append(this.#getQueueHTML(Queue, ++no));
         });
     }

@@ -617,7 +617,7 @@
                     error: function(xhr) {
                         $('.loading-overlay').hide();
                         toastr.error('Gagal mengambil data');
-                        console.error(xhr);
+                        console.log(xhr);
                     }
                 });
             });
@@ -711,7 +711,7 @@
                     error: function(xhr) {
                         $('.loading-overlay').hide();
                         toastr.error('Gagal menghapus data');
-                        console.error(xhr);
+                        console.log(xhr);
                     }
                 });
             });
@@ -760,7 +760,7 @@
                     error: function(xhr) {
                         $('.loading-overlay').hide();
                         toastr.error('Terjadi kesalahan server saat menyimpan data.');
-                        console.error(xhr);
+                        console.log(xhr);
                     }
                 });
             });

@@ -259,7 +259,7 @@
             });
 
             const keslingOrgId = {{ $keslingOrgId ?? 'null' }};
-            if (!keslingOrgId) console.error("ID Organisasi Kesling belum diatur!");
+            if (!keslingOrgId) console.log("ID Organisasi Kesling belum diatur!");
 
             function initializePlugins(row) {
                 row.find('.datepicker').datepicker({

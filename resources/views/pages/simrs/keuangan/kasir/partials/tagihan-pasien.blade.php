@@ -116,11 +116,11 @@
                         $row.find('.input-diskon-rp').val(diskonRp);
                         $row.find('.input-wajib-bayar').val(wajibBayar);
                     } else {
-                        console.error('Gagal mengambil tarif:', response.error);
+                        console.log('Gagal mengambil tarif:', response.error);
                     }
                 },
                 error: function(xhr) {
-                    console.error('Error AJAX:', xhr.responseText);
+                    console.log('Error AJAX:', xhr.responseText);
                 }
             });
         }
@@ -158,11 +158,11 @@
                             callback(diskon);
                         }
                     } else {
-                        console.error('Gagal mendapatkan tarif:', response.error);
+                        console.log('Gagal mendapatkan tarif:', response.error);
                     }
                 },
                 error: function(xhr) {
-                    console.error('Error fetching tarif:', xhr.responseText);
+                    console.log('Error fetching tarif:', xhr.responseText);
                 }
             });
         }
@@ -695,7 +695,7 @@
                                 $('#tagihanTable').DataTable().ajax.reload();
                             },
                             error: function(xhr) {
-                                console.error('Error deleting tagihan:', xhr
+                                console.log('Error deleting tagihan:', xhr
                                     .responseText);
                                 Swal.fire({
                                     icon: 'error',

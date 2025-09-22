@@ -467,7 +467,7 @@
                             $('#jenis_operasi_id').trigger('change');
                         },
                         error: function(xhr, status, error) {
-                            console.error('Error loading jenis operasi:', error);
+                            console.log('Error loading jenis operasi:', error);
                             $('#jenis_operasi_id').empty().append(
                                 '<option value="">Error - Silakan refresh</option>');
                             $('#jenis_operasi_id').prop('disabled', false);
@@ -505,7 +505,7 @@
                             $('#tindakan_operasi_id').prop('disabled', false);
                         },
                         error: function(xhr, status, error) {
-                            console.error('Error loading tindakan operasi:', error);
+                            console.log('Error loading tindakan operasi:', error);
                             $('#tindakan_operasi_id').empty().append(
                                 '<option value="">Error - Silakan refresh</option>');
                             $('#tindakan_operasi_id').prop('disabled', false);
@@ -546,7 +546,7 @@
                 submitFormWithStatus('draft', $(this));
             });
 
-            // HANDLE TOMBOL SAVE FINAL  
+            // HANDLE TOMBOL SAVE FINAL
             $('#btn-final').on('click', function() {
                 submitFormWithStatus('final', $(this));
             });

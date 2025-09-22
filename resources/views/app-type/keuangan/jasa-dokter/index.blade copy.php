@@ -824,7 +824,7 @@
                     }
                 },
                 error: function(xhr, status, error) {
-                    console.error('AJAX Error:', xhr.responseText);
+                    console.log('AJAX Error:', xhr.responseText);
                     let errorMessage = 'Terjadi kesalahan saat mengambil data item.';
                     if (xhr.responseJSON && xhr.responseJSON.message) {
                         errorMessage = xhr.responseJSON.message;
@@ -935,7 +935,7 @@
                 },
                 error: function(xhr) {
                     let errorMessage = 'Terjadi kesalahan saat menyimpan data';
-                    console.error('Save AJAX Error:', xhr.responseText);
+                    console.log('Save AJAX Error:', xhr.responseText);
 
                     // Tangani error validasi (status 422)
                     if (xhr.status === 422) {

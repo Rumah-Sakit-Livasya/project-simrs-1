@@ -168,7 +168,7 @@ class CPPTDokterFormHandler {
 
             $barangSelect.trigger("change");
         } catch (error) {
-            console.error("Error loading barang options:", error);
+            console.log("Error loading barang options:", error);
             this.#showErrorAlert("Gagal memuat data obat");
         } finally {
             this.#showLoading(false);
@@ -231,7 +231,7 @@ class CPPTDokterFormHandler {
                 this.#handleValidationErrors(result.errors);
             }
         } catch (error) {
-            console.error("Error submitting CPPT:", error);
+            console.log("Error submitting CPPT:", error);
             this.#showErrorAlert("Terjadi kesalahan saat menyimpan data");
         } finally {
             this.#setSubmitButtonState(false);

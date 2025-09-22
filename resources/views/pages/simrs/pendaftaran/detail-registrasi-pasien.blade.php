@@ -74,6 +74,8 @@
             display: none !important;
         }
     </style>
+
+    @stack('css-detail-regis')
 @endsection
 @section('content')
     @php
@@ -432,44 +434,29 @@
                             </div>
                         </div>
                     </div>
-                    <div id="menu-layanan">
-                        {{-- Menu Daftar Layanan1 --}}
-                        @include('pages.simrs.pendaftaran.partials.menu-daftar-layanan')
-                    </div>
-                    <div id="tindakan-medis" style="display: none;">
-                        {{-- Tindakan Medis --}}
-                        @include('pages.simrs.pendaftaran.partials.tindakan-medis')
-                    </div>
-                    <div id="operasi" style="display: none; padding: 15px;">
-                        {{-- Operasi --}}
-                        @include('pages.simrs.pendaftaran.partials.operasi')
-                    </div>
+                    @php
+                        $isTindakanMedis = request()->is('daftar-registrasi-pasien/*/*');
+                    @endphp
 
-                    <div id="persalinan" style="display: none;">
-                        @include('pages.simrs.pendaftaran.partials.persalinan')
-                    </div>
-                    <div id="radiologi" style="display: none;">
-                        {{-- Radiologi --}}
-                        @include('pages.simrs.pendaftaran.partials.radiologi')
-                    </div>
-                    <div id="laboratorium" style="display: none;">
-                        {{-- Laboratorium --}}
-                        @include('pages.simrs.pendaftaran.partials.laboratorium')
-                    </div>
-                    <div id="pemakaian_alat" style="display: none;">
-                        {{-- Laboratorium --}}
-                        @include('pages.simrs.pendaftaran.partials.pemakaian-alat')
-                    </div>
+                    @if (!$isTindakanMedis)
+                        <div id="menu-layanan">
+                            {{-- Menu Daftar Layanan1 --}}
+                            @include('pages.simrs.pendaftaran.partials.menu-daftar-layanan')
+                        </div>
+                    @endif
+
+                    @if ($isTindakanMedis)
+                        @yield('page-layanan')
+                    @endif
 
 
                 </div>
             </div>
         </div>
-        </div>
 
         </div>
     </main>
-    {{-- {{ $registration->pengkajian_nurse_rajal->id }} --}}
+
     @if ($registration->pengkajian_nurse_rajal)
         <input type="hidden" id="pengkajian-rajal-id" value="{{ $registration->pengkajian_nurse_rajal->id }}">
     @endif
@@ -480,6 +467,7 @@
     @include('pages.simrs.pendaftaran.form.ganti-dpjp-form')
     @include('pages.simrs.pendaftaran.form.ganti-diagnosa-form')
 @endsection
+
 @section('plugin')
     {{-- Select 2 --}}
     <script src="/js/formplugins/select2/select2.bundle.js"></script>
@@ -489,8 +477,6 @@
 
     <script>
         $(document).ready(function() {
-            // Event handler for the "Kembali" button specific to the #laboratorium context
-            // We're targeting the button *within* the #laboratorium container
             $('.btn-back-to-layanan').on('click', function(e) {
                 e.preventDefault(); // Prevent default link behavior
                 var currentPanelId = $(this).data(
@@ -518,32 +504,31 @@
             });
 
             // Hide and show services menu with fade effect
-            $('#pengkajian-nurse-rajal').hide();
-            $('.menu-layanan').on('click', function() {
-                $('#menu-layanan').fadeOut(500); // 500ms for transition
+            // $('.menu-layanan').on('click', function() {
+            //     $('#menu-layanan').fadeOut(500); // 500ms for transition
 
-                // Get data-layanan to determine which element to show
-                var namaLayanan = $(this).data('layanan');
-                switch (namaLayanan) {
-                    case 'pengkajian-nurse-rajal':
-                        $('#pengkajian-nurse-rajal').show();
-                        break;
-                    case 'radiologi':
-                        $('#radiologi').show();
-                        break;
-                    case 'laboratorium':
-                        $('#laboratorium').show();
-                        break;
-                    case 'operasi':
-                        $('#operasi').show();
-                        break;
-                }
+            //     // Get data-layanan to determine which element to show
+            //     var namaLayanan = $(this).data('layanan');
+            //     switch (namaLayanan) {
+            //         case 'pengkajian-nurse-rajal':
+            //             $('#pengkajian-nurse-rajal').show();
+            //             break;
+            //         case 'radiologi':
+            //             $('#radiologi').show();
+            //             break;
+            //         case 'laboratorium':
+            //             $('#laboratorium').show();
+            //             break;
+            //         case 'operasi':
+            //             $('#operasi').show();
+            //             break;
+            //     }
 
-                var pengkajianId = $('#pengkajian-rajal-id').val();
+            //     var pengkajianId = $('#pengkajian-rajal-id').val();
 
-                // Show the selected service element with fade in effect
-                $('#' + namaLayanan).delay(500).fadeIn(500); // 500ms for transition
-            });
+            //     // Show the selected service element with fade in effect
+            //     $('#' + namaLayanan).delay(500).fadeIn(500); // 500ms for transition
+            // });
 
             // Select2 initialization for various dropdowns
             $(function() {
@@ -568,147 +553,6 @@
                     dropdownParent: $('#ganti-dpjp')
                 });
             });
-
-            // DataTable initialization
-            $('#cppt-table').DataTable({
-                responsive: true,
-                lengthChange: false,
-                pageLength: 4,
-                language: {
-                    search: "", // Empty to not display "Search:" label
-                    searchPlaceholder: "Cari...", // Placeholder for search input
-                    zeroRecords: "Tidak ada data yang ditemukan",
-                    info: "Menampilkan halaman _PAGE_ dari _PAGES_",
-                    infoEmpty: "Tidak ada data yang tersedia",
-                    infoFiltered: "(difilter dari _MAX_ total entri)",
-                    paginate: {
-                        first: "Pertama",
-                        last: "Terakhir",
-                        next: "Selanjutnya",
-                        previous: "Sebelumnya"
-                    }
-                }
-            });
-
-            // Event listener for history of assessments
-            $('#histori_pengkajian').on('click', function() {
-                atmedic.App.popup({
-                    url: base_url() + 'pengkajian/histori_pengkajian/189221',
-                    mode: 'md',
-                    data: {
-                        pregid: '189221',
-                        ftid: '-24'
-                    },
-                    title: 'Histori pengkajian'
-                });
-            });
-
-            // Event listener for signature button
-            $('#btn-ttd').on('click', function() {
-                popupwindow(base_url() + 'pengkajian/signature/ttd', 'popup_ttd', 730, 420, 'no');
-            });
-
-            // Event listener for pain score selection
-            $('.img-baker .pointer').on('click', function() {
-                $('#skor_nyeri').val($(this).data('skor'));
-            });
-
-            // Bartel index calculation
-            $('.bartel').on('change', function() {
-                let skor = bartelIndex();
-                $('#skor_bartel').val(skor);
-                if (skor < 9)
-                    $('#analisis_bartel').val('Total Care');
-                else if (skor >= 9 && skor < 12)
-                    $('#analisis_bartel').val('Partial Care');
-                else
-                    $('#analisis_bartel').val('Self Care');
-            });
-
-            let bartelIndex = function() {
-                let data = 0;
-                $('.bartel').each(function(index) {
-                    data += isNaN($("option:selected", this).data('skor')) ? 0 : $("option:selected",
-                        this).data('skor');
-                });
-                return data;
-            }
-
-            // BMI calculation
-            function get_bmi() {
-                var A = $('#body_height').val();
-                var B = $('#body_weight').val();
-                if (A != '' && B != '') {
-                    A = A / 100;
-                    C = B / (A * A);
-                    C = Math.round(C * 10) / 10;
-
-                    if (C < 18.5)
-                        document.getElementById('kat_bmi').value = 'Kurus';
-                    else if (C > 24.9)
-                        document.getElementById('kat_bmi').value = 'Gemuk';
-                    else if ((C >= 18.5) && (C <= 24.9))
-                        document.getElementById('kat_bmi').value = 'Normal';
-                    else
-                        document.getElementById('kat_bmi').value = '';
-                    document.getElementById('bmi').value = C;
-
-                    $('#bmi, #kat_bmi').addClass('dirty');
-                } else {
-                    document.getElementById('bmi').value = '';
-                    document.getElementById('kat_bmi').value = '';
-                    $('#bmi, #kat_bmi').removeClass('dirty');
-                }
-            }
-
-            get_bmi();
-
-            $('.calc-bmi').on('change', get_bmi);
-
-            // Fall risk assessment
-            // Fall risk assessment
-            function resiko_jatuh() {
-                // 📝 Cek apakah elemen ada di DOM
-                var elem1 = document.getElementById('resiko_jatuh1');
-                var elem2 = document.getElementById('resiko_jatuh2');
-                var elem3 = document.getElementById('resiko_jatuh3');
-                var hasilElem = document.getElementById('resiko_jatuh_hasil');
-
-                // 📝 Jika salah satu elemen tidak ada, fungsi berhenti
-                if (!elem1 || !elem2 || !elem3 || !hasilElem) {
-                    console.warn("Element resiko jatuh tidak ditemukan di DOM.");
-                    return;
-                }
-
-                // 📝 Ambil status checkbox
-                var resiko_jatuh1 = elem1.checked;
-                var resiko_jatuh2 = elem2.checked;
-                var resiko_jatuh3 = elem3.checked;
-
-                // 📝 Logika perhitungan risiko
-                if (!resiko_jatuh1 && !resiko_jatuh2 && !resiko_jatuh3) {
-                    $('#resiko_jatuh_hasil').val("Tidak Beresiko");
-                } else if (resiko_jatuh1 || resiko_jatuh2) {
-                    if (resiko_jatuh3) {
-                        $('#resiko_jatuh_hasil').val("Resiko Tinggi");
-                    } else {
-                        $('#resiko_jatuh_hasil').val("Resiko Sedang");
-                    }
-                } else if (!resiko_jatuh1 || !resiko_jatuh2) {
-                    if (resiko_jatuh3) {
-                        $('#resiko_jatuh_hasil').val("Resiko Sedang");
-                    } else {
-                        $('#resiko_jatuh_hasil').val("Resiko Tinggi");
-                    }
-                }
-            }
-            resiko_jatuh();
-
-            // Function to open signature pad
-            function openSignaturePad() {
-                idSignature = $(this).attr('data-id');
-                $('#signatureModal').modal('show'); // Example using Bootstrap modal
-            }
         });
     </script>
 
@@ -717,91 +561,9 @@
     @yield('script-tindakan-medis')
     @yield('script-laboratorium')
     @yield('script-operasi')
+    @yield('script-persalinan')
     @yield('script-vk')
+    @yield('script-visite-dokter')
 
-    <script>
-        let idSignature = null;
-        const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
-        let painting = false;
-        let history = [];
-        const offsetX = 0;
-        const offsetY = 5;
-
-        function startPosition(e) {
-            painting = true;
-            draw(e);
-        }
-
-        function endPosition() {
-            painting = false;
-            ctx.beginPath();
-            history.push(ctx.getImageData(0, 0, canvas.width, canvas.height));
-        }
-
-        function draw(e) {
-            if (!painting) return;
-
-            const rect = canvas.getBoundingClientRect();
-            const x = e.clientX - rect.left - offsetX;
-            const y = e.clientY - rect.top - offsetY;
-
-            ctx.lineWidth = 5;
-            ctx.lineCap = 'round';
-            ctx.strokeStyle = 'black';
-
-            ctx.lineTo(x, y);
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(x, y);
-        }
-
-        function clearCanvas() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            history = [];
-        }
-
-        function undo() {
-            if (history.length > 0) {
-                ctx.putImageData(history.pop(), 0, 0);
-            }
-        }
-
-        function saveSignature() {
-            const dataURL = canvas.toDataURL('image/png');
-            $.ajax({
-                url: '/api/dashboard/kpi/save-signature/' + idSignature,
-                type: 'POST',
-                data: {
-                    _token: '{{ csrf_token() }}',
-                    signature_image: dataURL
-                },
-                success: function(response) {
-                    // Update the signature display
-                    $('#tombol-' + idSignature).hide();
-                    $('#signature-display-' + idSignature).attr('src', response.path).show();
-                    $('#signatureModal').modal('hide'); // Hide the modal
-                },
-                error: function(xhr, status, error) {
-                    console.error(xhr.responseText);
-                }
-            });
-        }
-
-        function openSignaturePad(id) {
-            if (id == null) {
-                $('#tombol-pegawai').attr('id', 'tombol-' + idSignature);
-                $('#signature-display').attr('id', 'signature-display-' + idSignature);
-            } else {
-                idSignature = id;
-            }
-
-
-            $('#signatureModal').modal('show');
-        }
-
-        canvas.addEventListener('mousedown', startPosition);
-        canvas.addEventListener('mouseup', endPosition);
-        canvas.addEventListener('mousemove', draw);
-    </script>
+    @stack('script-detail-regis')
 @endsection

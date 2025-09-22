@@ -11,18 +11,21 @@ class EditOrderRadiologi {
     }
 
     #init() {
-        this.#addEventListeners('.verify-btn', this.#handleVerifyButton);
-        this.#addEventListeners('.parameter-photo', this.#handleParameterPhotoClick);
+        this.#addEventListeners(".verify-btn", this.#handleVerifyButton);
+        this.#addEventListeners(
+            ".parameter-photo",
+            this.#handleParameterPhotoClick
+        );
         this.#addEventListeners(".edit-btn", this.#handleEditClick);
     }
 
     /**
      * Add event listeners
-     * @param {string} selector 
-     * @param {Function} handler 
+     * @param {string} selector
+     * @param {Function} handler
      * @param {string} event
      */
-    #addEventListeners(selector, handler, event = 'click') {
+    #addEventListeners(selector, handler, event = "click") {
         const buttons = document.querySelectorAll(selector);
         buttons.forEach((button) => {
             button.addEventListener(event, handler.bind(this));
@@ -30,28 +33,29 @@ class EditOrderRadiologi {
     }
 
     /**
-    * Handle upload photo button click
-    * @param {Event} event 
-    */
+     * Handle upload photo button click
+     * @param {Event} event
+     */
     #handleParameterPhotoClick(event) {
         event.preventDefault();
         const target = /** @type {HTMLElement} */ (event.target);
         const src = target.getAttribute("src");
         if (!src) return;
 
-        
-
         window.open(
             src,
             "popupWindow_" + new Date().getTime(),
-            "width=" + screen.width + ",height=" + screen.height + 
-            ",scrollbars=yes,resizable=yes"
+            "width=" +
+                screen.width +
+                ",height=" +
+                screen.height +
+                ",scrollbars=yes,resizable=yes"
         );
     }
 
     /**
      * Handle edit button click
-     * @param {Event} event 
+     * @param {Event} event
      */
     #handleEditClick(event) {
         event.preventDefault();
@@ -64,14 +68,17 @@ class EditOrderRadiologi {
         window.open(
             url,
             "popupWindow_" + new Date().getTime(),
-            "width=" + screen.width + ",height=" + screen.height +
-            ",scrollbars=yes,resizable=yes"
+            "width=" +
+                screen.width +
+                ",height=" +
+                screen.height +
+                ",scrollbars=yes,resizable=yes"
         );
     }
 
     /**
      * Handle verify button click
-     * @param {Event} event 
+     * @param {Event} event
      */
     #handleVerifyButton(event) {
         event.preventDefault();
@@ -82,10 +89,12 @@ class EditOrderRadiologi {
         const now = new Date();
         const formattedDate = now.toISOString().slice(0, 19).replace("T", " ");
 
-        const employeeIdInput = /** @type {HTMLInputElement} */ (document.querySelector('input[name="employee_id"]'));
+        const employeeIdInput = /** @type {HTMLInputElement} */ (
+            document.querySelector('input[name="employee_id"]')
+        );
         const employeeId = employeeIdInput ? employeeIdInput.value : null;
         if (!employeeId) {
-            showErrorAlertNoRefresh('Employee ID is required');
+            showErrorAlertNoRefresh("Employee ID is required");
             return;
         }
 
@@ -101,25 +110,28 @@ class EditOrderRadiologi {
             focusConfirm: true,
             showCancelButton: true,
             confirmButtonText: "Verifikasi",
-            cancelButtonText: "Batal"
-        }).then(result => {
+            cancelButtonText: "Batal",
+        }).then((result) => {
             if (result.isConfirmed) {
-                fetch('/api/simrs/verifikasi-order-parameter-radiologi', {
-                    method: 'POST',
+                fetch("/api/simrs/verifikasi-order-parameter-radiologi", {
+                    method: "POST",
                     body: formData,
                     headers: {
-                        'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')) || ''
-                    }
+                        "X-CSRF-TOKEN":
+                            document
+                                .querySelector('meta[name="csrf-token"]')
+                                ?.getAttribute("content") || "",
+                    },
                 })
-                    .then(response => {
+                    .then((response) => {
                         if (response.status != 200) {
-                            throw new Error('Error: ' + response.statusText);
+                            throw new Error("Error: " + response.statusText);
                         }
-                        showSuccessAlert('Data berhasil disimpan');
+                        showSuccessAlert("Data berhasil disimpan");
                         setTimeout(() => window.location.reload(), 2000);
                     })
-                    .catch(error => {
-                        console.error('Error:', error);
+                    .catch((error) => {
+                        console.log("Error:", error);
                         showErrorAlertNoRefresh(`Error: ${error}`);
                     });
             }

@@ -161,7 +161,7 @@
                 $('#is_active').val(data.is_active);
                 $('#itemModal').modal('show');
             } catch (error) {
-                console.error(error);
+                console.log(error);
                 Swal.fire('Error', error.message, 'error');
             }
         }

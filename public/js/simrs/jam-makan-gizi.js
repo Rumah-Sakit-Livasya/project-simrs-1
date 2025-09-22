@@ -6,7 +6,6 @@
 const Swal = /** @type {import("sweetalert2").default} */ (window.Swal);
 
 class JamMakanGiziHandler {
-
     constructor() {
         document.addEventListener("DOMContentLoaded", this.#init.bind(this));
     }
@@ -17,11 +16,11 @@ class JamMakanGiziHandler {
 
     /**
      * Add event listeners
-     * @param {string} selector 
-     * @param {Function} handler 
+     * @param {string} selector
+     * @param {Function} handler
      * @param {string} event
      */
-    #addEventListeners(selector, handler, event = 'click') {
+    #addEventListeners(selector, handler, event = "click") {
         const buttons = document.querySelectorAll(selector);
         buttons.forEach((button) => {
             button.addEventListener(event, handler.bind(this));
@@ -39,13 +38,13 @@ class JamMakanGiziHandler {
         if (!id) return;
 
         Swal.fire({
-            title: 'Hapus jam makan gizi?',
-            icon: 'warning',
+            title: "Hapus jam makan gizi?",
+            icon: "warning",
             showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Ya, hapus!',
-            cancelButtonText: 'Batal'
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Ya, hapus!",
+            cancelButtonText: "Batal",
         }).then((result) => {
             if (result.isConfirmed) {
                 this.#deleteMenu(id);
@@ -55,33 +54,40 @@ class JamMakanGiziHandler {
 
     /**
      * Delete jam makan after confirmation
-     * @param {number} id 
+     * @param {number} id
      */
     #deleteMenu(id) {
         const formData = new FormData();
-        formData.append('id', String(id));
-        formData.append('csrf-token', document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '');
+        formData.append("id", String(id));
+        formData.append(
+            "csrf-token",
+            document
+                .querySelector('meta[name="csrf-token"]')
+                ?.getAttribute("content") || ""
+        );
 
-        fetch('/api/simrs/gizi/jam-makan/destroy/' + id, {
-            method: 'DELETE',
+        fetch("/api/simrs/gizi/jam-makan/destroy/" + id, {
+            method: "DELETE",
             body: formData,
             headers: {
-                'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')) || ''
-            }
+                "X-CSRF-TOKEN":
+                    document
+                        .querySelector('meta[name="csrf-token"]')
+                        ?.getAttribute("content") || "",
+            },
         })
-            .then(response => {
+            .then((response) => {
                 if (response.status != 200) {
-                    throw new Error('Error: ' + response.statusText);
+                    throw new Error("Error: " + response.statusText);
                 }
-                showSuccessAlert('Data berhasil dihapus!');
+                showSuccessAlert("Data berhasil dihapus!");
                 setTimeout(() => window.location.reload(), 2000);
             })
-            .catch(error => {
-                console.error('Error:', error);
+            .catch((error) => {
+                console.log("Error:", error);
                 showErrorAlertNoRefresh(`Error: ${error}`);
             });
     }
-
 }
 
 const JamMakanGiziClass = new JamMakanGiziHandler();

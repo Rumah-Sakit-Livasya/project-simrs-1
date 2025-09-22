@@ -82,7 +82,7 @@
 
             const audio = new Audio(ttsUrl);
             audio.playbackRate = 0.7;
-            audio.play().catch(error => console.error('Gagal memutar audio:', error));
+            audio.play().catch(error => console.log('Gagal memutar audio:', error));
         });
     });
 </script>

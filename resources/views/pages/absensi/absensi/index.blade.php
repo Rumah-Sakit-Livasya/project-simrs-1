@@ -524,7 +524,7 @@
         //             ]);
         //             console.log('Models loaded successfully');
         //         } catch (error) {
-        //             console.error('Error loading models:', error);
+        //             console.log('Error loading models:', error);
         //             alert('Error loading models. Check console for details.');
         //         }
         //     }
@@ -537,7 +537,7 @@
         //             $video[0].srcObject = stream;
         //             $video[0].play();
         //         } catch (err) {
-        //             console.error("Error accessing webcam: ", err);
+        //             console.log("Error accessing webcam: ", err);
         //             showErrorAlert('Error accessing webcam. Check console for details.');
         //         }
         //     }
@@ -598,11 +598,11 @@
         //                         }
         //                     });
         //                 } catch (error) {
-        //                     console.error('Error detecting faces:', error);
+        //                     console.log('Error detecting faces:', error);
         //                 }
         //             }, 100);
         //         } catch (error) {
-        //             console.error('Error loading labeled images:', error);
+        //             console.log('Error loading labeled images:', error);
         //             alert('Update Foto profile terlebih dahulu!');
         //         }
         //     });
@@ -616,12 +616,12 @@
         //             if (detections) {
         //                 descriptions.push(detections.descriptor);
         //             } else {
-        //                 console.error('No face detected in the image.');
+        //                 console.log('No face detected in the image.');
         //                 alert('No face detected in the profile image.');
         //             }
         //             return [new faceapi.LabeledFaceDescriptors(name, descriptions)];
         //         } catch (error) {
-        //             console.error('Error loading labeled images:', error);
+        //             console.log('Error loading labeled images:', error);
         //             alert('Update Foto profile terlebih dahulu!');
         //         }
         //     }
@@ -862,14 +862,14 @@
         //                 const stream = await navigator.mediaDevices.getUserMedia(constraints);
         //                 console.log('Stream berhasil didapatkan:', stream);
         //             } catch (error) {
-        //                 console.error('Kesalahan getUserMedia:', error);
+        //                 console.log('Kesalahan getUserMedia:', error);
         //             }
 
         //             video.srcObject = stream;
         //             video.setAttribute('playsinline', true);
         //             video.addEventListener('loadedmetadata', adjustCanvasSize);
         //         } catch (error) {
-        //             console.error('Kesalahan saat mencoba mengakses kamera:', error);
+        //             console.log('Kesalahan saat mencoba mengakses kamera:', error);
         //             if (error.name === 'NotAllowedError') {
         //                 alert('Izinkan akses kamera untuk melanjutkan.');
         //             } else if (error.name === 'NotFoundError') {
@@ -907,7 +907,7 @@
         //                 adjustCanvasSize();
         //             });
         //         } catch (error) {
-        //             console.error('Error accessing the camera again:', error);
+        //             console.log('Error accessing the camera again:', error);
         //             // alert('Kamera harus diizinkan untuk melanjutkan!');
         //         }
         //     }
@@ -923,12 +923,12 @@
         //                     resolve(position);
         //                 }, error => {
         //                     toggleLoadingIndicator(true);
-        //                     console.error("Geolocation failed: " + error.message);
+        //                     console.log("Geolocation failed: " + error.message);
         //                     reject(error);
         //                 });
         //             } else {
         //                 toggleLoadingIndicator(true);
-        //                 console.error("Geolocation is not supported by this browser.");
+        //                 console.log("Geolocation is not supported by this browser.");
         //                 reject(new Error("Geolocation not supported"));
         //             }
         //         });
@@ -962,7 +962,7 @@
         //                 .bindPopup('You are here.<br> Accuracy: ' + accuracy + ' meters.')
         //                 .openPopup();
         //         } catch (error) {
-        //             console.error("Error initializing map: ", error);
+        //             console.log("Error initializing map: ", error);
         //             alert("Gagal memuat peta. Silakan coba lagi.");
         //         }
         //     }
@@ -1199,7 +1199,7 @@
                             toggleLoadingIndicator(false);
                             alert(
                                 'Gagal mendapatkan lokasi, silahkan aktifkan gps dan buka google maps terlebih dahulu!'
-                                );
+                            );
                             reject(error);
                         });
                     } else {
@@ -1306,7 +1306,7 @@
                 } else {
                     alert(
                         'Gagal mendapatkan lokasi, silahkan aktifkan gps dan buka google maps terlebih dahulu!'
-                        );
+                    );
                 }
             });
 
@@ -1338,7 +1338,7 @@
                 const result = await response.json();
                 return result;
             } catch (error) {
-                console.error('Error fetching attendance details:', error);
+                console.log('Error fetching attendance details:', error);
                 showErrorAlert(error.message);
                 throw error;
             }
@@ -1432,7 +1432,7 @@
                     alert(result.message);
                 }
             } catch (error) {
-                console.error('Error handling detail-absensi click:', error.message);
+                console.log('Error handling detail-absensi click:', error.message);
                 alert('Terjadi kesalahan saat mengambil data absensi.');
             }
         });

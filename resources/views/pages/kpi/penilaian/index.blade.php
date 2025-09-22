@@ -339,7 +339,8 @@
                                                 <tr>
                                                     <td colspan="6" class="text-white"
                                                         style="background-color: rgb(138, 196, 248); font-size: 11pt; font-weight: bold; padding: 8px;">
-                                                        ABSENSI DAN KETERLAMBATAN DALAM PERIODE BULAN <span id="periode_text"></span>
+                                                        ABSENSI DAN KETERLAMBATAN DALAM PERIODE BULAN <span
+                                                            id="periode_text"></span>
                                                     </td>
                                                 </tr>
                                                 <tr>
@@ -1147,7 +1148,7 @@
                     clearCanvas();
                 },
                 error: function(xhr, status, error) {
-                    console.error(xhr.responseText);
+                    console.log(xhr.responseText);
                 }
             });
         }

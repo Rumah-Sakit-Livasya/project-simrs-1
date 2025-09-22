@@ -6,7 +6,6 @@
 const Swal = /** @type {import("sweetalert2").default} */ (window.Swal);
 
 class PopupPBPharmacyHandler {
-
     /**
      * @type {JQuery<HTMLElement>}
      */
@@ -172,23 +171,64 @@ class PopupPBPharmacyHandler {
 
     #init() {
         this.#addEventListeners("#add-btn", this.#handleAddButtonClick);
-        this.#addEventListeners("#searchItemInput", this.#handleItemSearchBar, "keyup");
-        this.#addEventListeners("#searchPOInput", this.#handlePOSearchBar, "keyup");
-        this.#addEventListeners("#searchPOSupplierInput", this.#handlePOSearchBar, "keyup");
-        this.#addEventListeners("#order-submit-draft", this.#handleDraftButtonClick);
-        this.#addEventListeners("#order-submit-final", this.#handleFinalButtonClick);
-        this.#addEventListeners("#tipe_terima", this.#handleTipeTerimaChange, "change");
-        this.#addEventListeners("select[name='tipe_bayar']", this.#handleTipeBayarChange, "change");
-        this.#addEventListeners("input[type='number']", this.refreshTotal, "input");
-        this.#addEventListeners("input[type='number']", this.enforceNumberLimit, "input");
-        this.#addEventListeners("#supplier", this.#handleSupplierChange, "select2:select");
-        this.#$Supplier.on('select2:select', this.#handleSupplierChange.bind(this));
+        this.#addEventListeners(
+            "#searchItemInput",
+            this.#handleItemSearchBar,
+            "keyup"
+        );
+        this.#addEventListeners(
+            "#searchPOInput",
+            this.#handlePOSearchBar,
+            "keyup"
+        );
+        this.#addEventListeners(
+            "#searchPOSupplierInput",
+            this.#handlePOSearchBar,
+            "keyup"
+        );
+        this.#addEventListeners(
+            "#order-submit-draft",
+            this.#handleDraftButtonClick
+        );
+        this.#addEventListeners(
+            "#order-submit-final",
+            this.#handleFinalButtonClick
+        );
+        this.#addEventListeners(
+            "#tipe_terima",
+            this.#handleTipeTerimaChange,
+            "change"
+        );
+        this.#addEventListeners(
+            "select[name='tipe_bayar']",
+            this.#handleTipeBayarChange,
+            "change"
+        );
+        this.#addEventListeners(
+            "input[type='number']",
+            this.refreshTotal,
+            "input"
+        );
+        this.#addEventListeners(
+            "input[type='number']",
+            this.enforceNumberLimit,
+            "input"
+        );
+        this.#addEventListeners(
+            "#supplier",
+            this.#handleSupplierChange,
+            "select2:select"
+        );
+        this.#$Supplier.on(
+            "select2:select",
+            this.#handleSupplierChange.bind(this)
+        );
         this.#showLoading(false);
     }
 
     /**
      * Handle supplier select change
-     * @param {JQuery.Event} event 
+     * @param {JQuery.Event} event
      */
     #handleSupplierChange(event) {
         // @ts-ignore
@@ -198,7 +238,7 @@ class PopupPBPharmacyHandler {
 
     /**
      * Handle tipe bayar select change
-     * @param {Event} event 
+     * @param {Event} event
      */
     #handleTipeBayarChange(event) {
         const Select = /**@type {HTMLSelectElement} */ (event.target);
@@ -206,13 +246,13 @@ class PopupPBPharmacyHandler {
             // enable #$Kas
             this.#$Kas.removeAttr("disabled");
         } else {
-            this.#$Kas.attr("disabled", "disabled")
+            this.#$Kas.attr("disabled", "disabled");
         }
     }
 
     /**
      * Handle tipe terima select change
-     * @param {Event} event 
+     * @param {Event} event
      */
     #handleTipeTerimaChange(event) {
         this.#reset();
@@ -234,23 +274,23 @@ class PopupPBPharmacyHandler {
 
     /**
      * Enforce number input min max limit on manual input
-     * @param {Event} event 
+     * @param {Event} event
      */
     enforceNumberLimit(event) {
         const inputField = /** @type {HTMLInputElement} */ (event.target);
         let value = parseFloat(inputField.value);
-        let min = parseInt(String(inputField.min || 0));  // Default to 0 if not set
-        let max = parseInt(String(inputField.max || Number.MAX_SAFE_INTEGER));  // Set default to a large number
+        let min = parseInt(String(inputField.min || 0)); // Default to 0 if not set
+        let max = parseInt(String(inputField.max || Number.MAX_SAFE_INTEGER)); // Set default to a large number
 
         if (isNaN(value)) {
-            inputField.value = '';  // Reset to empty on invalid input
+            inputField.value = ""; // Reset to empty on invalid input
             return this;
         }
 
         if (value < min) {
-            inputField.value = String(min);  // Clamp value at min
+            inputField.value = String(min); // Clamp value at min
         } else if (value > max) {
-            inputField.value = String(max);  // Clamp value at max
+            inputField.value = String(max); // Clamp value at max
         }
 
         return this;
@@ -258,12 +298,12 @@ class PopupPBPharmacyHandler {
 
     /**
      * Handle modal select PO event
-     * @param {PurchaseOrder} po 
+     * @param {PurchaseOrder} po
      */
     SelectPO(po) {
         this.#reset(); // reset to initial state
 
-        // first, update value of #$KodePO and #$POid in the class 
+        // first, update value of #$KodePO and #$POid in the class
         this.#$POid.val(po.id);
         this.#$KodePO.val(po.kode_po);
 
@@ -271,48 +311,47 @@ class PopupPBPharmacyHandler {
         this.#$SupplierId.val(po.supplier_id);
         this.#$Supplier.val(po.supplier_id);
         // trigger Select2 change
-        this.#$Supplier.trigger('change');
+        this.#$Supplier.trigger("change");
 
         // update ppn too
         this.#$PPN.val(po.ppn);
 
-
         // finally, for each item, give it to addPOItem
-        po.items?.forEach(item => this.#addPOItem(item));  // addPOItem is a method that will be defined later
+        po.items?.forEach((item) => this.#addPOItem(item)); // addPOItem is a method that will be defined later
         this.refreshTotal();
     }
 
     #reset() {
         // empty the table
-        this.#$Table.empty();  // #$Table is a reference to the table element in the class
+        this.#$Table.empty(); // #$Table is a reference to the table element in the class
         // refresh total
         this.refreshTotal();
         // also empty NoFaktur, TanggalFaktur, PICPenerima, Keterangan, Gudang, Supplier, KodePO, POid
-        this.#$NoFaktur.val('');
-        this.#$TanggalFaktur.val('');
-        this.#$PICPenerima.val('');
-        this.#$Keterangan.val('');
-        this.#$Gudang.val('');
-        this.#$Supplier.val('');
-        this.#$SupplierId.val('');
-        this.#$KodePO.val('');
-        this.#$POid.val('');
-        this.#$DiskonFaktur.val(0)
-        this.#$PPN.val(0)
-        this.#$PPNNominal.val(0)
-        this.#$Total.val(0)
-        this.#$TotalFinal.val(0)
-        this.#$TotalFinalDisplay.val(0)
-        this.#$diskonTotal.val(0)
+        this.#$NoFaktur.val("");
+        this.#$TanggalFaktur.val("");
+        this.#$PICPenerima.val("");
+        this.#$Keterangan.val("");
+        this.#$Gudang.val("");
+        this.#$Supplier.val("");
+        this.#$SupplierId.val("");
+        this.#$KodePO.val("");
+        this.#$POid.val("");
+        this.#$DiskonFaktur.val(0);
+        this.#$PPN.val(0);
+        this.#$PPNNominal.val(0);
+        this.#$Total.val(0);
+        this.#$TotalFinal.val(0);
+        this.#$TotalFinalDisplay.val(0);
+        this.#$diskonTotal.val(0);
 
         // trigger change on Gudang and Supplier
-        this.#$Gudang.trigger('change');
-        this.#$Supplier.trigger('change');
+        this.#$Gudang.trigger("change");
+        this.#$Supplier.trigger("change");
     }
 
     /**
      * Add item from PO select
-     * @param {ItemPO} item 
+     * @param {ItemPO} item
      */
     #addPOItem(item) {
         // if qty equals or more than received qty, return
@@ -323,7 +362,7 @@ class PopupPBPharmacyHandler {
 
     /**
      * Handle save order final button click
-     * @param {Event} event 
+     * @param {Event} event
      */
     #handleFinalButtonClick(event) {
         const button = /** @type {HTMLButtonElement} */ (event.target);
@@ -339,7 +378,7 @@ class PopupPBPharmacyHandler {
 
     /**
      * Handle save order draft button click
-     * @param {Event} event 
+     * @param {Event} event
      */
     #handleDraftButtonClick(event) {
         const button = /** @type {HTMLButtonElement} */ (event.target);
@@ -355,7 +394,7 @@ class PopupPBPharmacyHandler {
 
     /**
      * Handle item search bar on key up
-     * @param {Event} event 
+     * @param {Event} event
      */
     #handleItemSearchBar(event) {
         const searchInput = /** @type {HTMLInputElement} */ (event.target);
@@ -370,13 +409,15 @@ class PopupPBPharmacyHandler {
             if (!itemName) return;
 
             // @ts-ignore
-            item.style.display = itemName.toLowerCase().includes(value) ? "" : "none";
+            item.style.display = itemName.toLowerCase().includes(value)
+                ? ""
+                : "none";
         });
     }
 
     /**
      * Handle PO search bar on key up
-     * @param {Event} event 
+     * @param {Event} event
      */
     #handlePOSearchBar(event) {
         const searchInput = /** @type {HTMLInputElement} */ (event.target);
@@ -398,7 +439,10 @@ class PopupPBPharmacyHandler {
             supplier_po = supplierPOElement.textContent || "";
 
             // @ts-ignore
-            if (kode_po.toLowerCase().includes(value) || supplier_po.toLowerCase().includes(value)) {
+            if (
+                kode_po.toLowerCase().includes(value) ||
+                supplier_po.toLowerCase().includes(value)
+            ) {
                 // @ts-ignore
                 item.style.display = "";
             } else {
@@ -410,7 +454,7 @@ class PopupPBPharmacyHandler {
 
     /**
      * Handle PO Supplier search bar on key up
-     * @param {Event} event 
+     * @param {Event} event
      */
     #handlePOSupplierSearchBar(event) {
         const searchInput = /** @type {HTMLInputElement} */ (event.target);
@@ -425,13 +469,15 @@ class PopupPBPharmacyHandler {
             if (!itemName) return;
 
             // @ts-ignore
-            item.style.display = itemName.toLowerCase().includes(value) ? "" : "none";
+            item.style.display = itemName.toLowerCase().includes(value)
+                ? ""
+                : "none";
         });
     }
 
     /**
      * Add item from item select
-     * @param {BarangFarmasi} barang 
+     * @param {BarangFarmasi} barang
      */
     addItem(barang) {
         const HTML = this.#getItemTableCol(barang);
@@ -441,18 +487,28 @@ class PopupPBPharmacyHandler {
 
     /**
      * Generate HTML string for Item table collumn
-     * @param {BarangFarmasi} item 
+     * @param {BarangFarmasi} item
      */
     #getItemTableCol(item) {
         const key = Math.round(Math.random() * 100000);
 
-        return /*html*/`
+        return /*html*/ `
             <tr id="item${key}">
-                <input type="hidden" name="kode_barang[${key}]" value="${item.kode}">
-                <input type="hidden" name="nama_barang[${key}]" value="${item.nama}">
-                <input type="hidden" name="barang_id[${key}]" value="${item.id}">
-                <input type="hidden" name="unit_barang[${key}]" value="${item.satuan?.nama}">
-                <input type="hidden" name="satuan_id[${key}]" value="${item.satuan_id}">
+                <input type="hidden" name="kode_barang[${key}]" value="${
+            item.kode
+        }">
+                <input type="hidden" name="nama_barang[${key}]" value="${
+            item.nama
+        }">
+                <input type="hidden" name="barang_id[${key}]" value="${
+            item.id
+        }">
+                <input type="hidden" name="unit_barang[${key}]" value="${
+            item.satuan?.nama
+        }">
+                <input type="hidden" name="satuan_id[${key}]" value="${
+            item.satuan_id
+        }">
                 <input type="hidden" name="subtotal[${key}]" value="0">
 
                 <td><input type="checkbox" class="form-control" name="is_bonus[${key}]" onclick="PopupPBPharmacyClass.refreshTotal()"></td>
@@ -466,11 +522,13 @@ class PopupPBPharmacyHandler {
                 <td><input type="number" name="qty[${key}]" class="form-control qty" min="0" step="1"
                  onkeyup="PopupPBPharmacyClass.enforceNumberLimit(event).refreshTotal()" onchange="PopupPBPharmacyClass.enforceNumberLimit(event).refreshTotal()" required></td>
                 <td>${this.#rp(item.hna || 0)}</td>
-                <td><input type="number" name="harga[${key}]" class="form-control" value="${item.hna || ''}" 
+                <td><input type="number" name="harga[${key}]" class="form-control" value="${
+            item.hna || ""
+        }"
                  onkeyup="PopupPBPharmacyClass.refreshTotal()" onchange="PopupPBPharmacyClass.refreshTotal()" required></td>
                 <td><input type="number" name="diskon_percent[${key}]" class="form-control" min="0" value="0" step="1" max="100"
                  onkeyup="PopupPBPharmacyClass.enforceNumberLimit(event).diskonPercentChange(event)" onchange="PopupPBPharmacyClass.enforceNumberLimit(event).diskonPercentChange(event)"></td>
-                <td><input type="number" name="diskon_nominal[${key}]" min="0" step="1" value="0" class="form-control" 
+                <td><input type="number" name="diskon_nominal[${key}]" min="0" step="1" value="0" class="form-control"
                  onkeyup="PopupPBPharmacyClass.enforceNumberLimit(event).diskonNominalChange(event)" onchange="PopupPBPharmacyClass.enforceNumberLimit(event).diskonNominalChange(event)"></td>
                 <td class="subtotal-display">Rp 0</td>
                 <td>
@@ -483,18 +541,28 @@ class PopupPBPharmacyHandler {
 
     /**
      * Generate HTML string for PO Item table collumn
-     * @param {ItemPO} item 
+     * @param {ItemPO} item
      */
     #getItemPOTableCol(item) {
         const key = Math.round(Math.random() * 100000);
 
-        return /*html*/`
+        return /*html*/ `
             <tr id="item${key}">
-                <input type="hidden" name="kode_barang[${key}]" value="${item.kode_barang}">
-                <input type="hidden" name="nama_barang[${key}]" value="${item.nama_barang}">
-                <input type="hidden" name="barang_id[${key}]" value="${item.barang_id}">
-                <input type="hidden" name="unit_barang[${key}]" value="${item.unit_barang}">
-                <input type="hidden" name="satuan_id[${key}]" value="${item.barang?.satuan_id}">
+                <input type="hidden" name="kode_barang[${key}]" value="${
+            item.kode_barang
+        }">
+                <input type="hidden" name="nama_barang[${key}]" value="${
+            item.nama_barang
+        }">
+                <input type="hidden" name="barang_id[${key}]" value="${
+            item.barang_id
+        }">
+                <input type="hidden" name="unit_barang[${key}]" value="${
+            item.unit_barang
+        }">
+                <input type="hidden" name="satuan_id[${key}]" value="${
+            item.barang?.satuan_id
+        }">
                 <input type="hidden" name="poi_id[${key}]" value="${item.id}">
                 <input type="hidden" name="subtotal[${key}]" value="0">
 
@@ -506,14 +574,18 @@ class PopupPBPharmacyHandler {
                 <td><input type="text" name="batch_no[${key}]" class="form-control" required></td>
                 <td>${item.qty}</td>
                 <td>${item.qty - item.qty_received}</td>
-                <td><input type="number" name="qty[${key}]" class="form-control qty" min="0" step="1" max="${item.qty - item.qty_received}"
+                <td><input type="number" name="qty[${key}]" class="form-control qty" min="0" step="1" max="${
+            item.qty - item.qty_received
+        }"
                  onkeyup="PopupPBPharmacyClass.enforceNumberLimit(event).refreshTotal()" onchange="PopupPBPharmacyClass.enforceNumberLimit(event).refreshTotal()" required></td>
                 <td>${this.#rp(item.barang?.hna || 0)}</td>
-                <td><input type="number" name="harga[${key}]" class="form-control" value="${item.barang?.hna || ''}" 
+                <td><input type="number" name="harga[${key}]" class="form-control" value="${
+            item.barang?.hna || ""
+        }"
                  onkeyup="PopupPBPharmacyClass.refreshTotal()" onchange="PopupPBPharmacyClass.refreshTotal()" required></td>
                 <td><input type="number" name="diskon_percent[${key}]" class="form-control" min="0" value="0" step="1" max="100"
                  onkeyup="PopupPBPharmacyClass.enforceNumberLimit(event).diskonPercentChange(event)" onchange="PopupPBPharmacyClass.enforceNumberLimit(event).diskonPercentChange(event)"></td>
-                <td><input type="number" name="diskon_nominal[${key}]" min="0" step="1" value="0" class="form-control" 
+                <td><input type="number" name="diskon_nominal[${key}]" min="0" step="1" value="0" class="form-control"
                  onkeyup="PopupPBPharmacyClass.enforceNumberLimit(event).diskonNominalChange(event)" onchange="PopupPBPharmacyClass.enforceNumberLimit(event).diskonNominalChange(event)"></td>
                 <td class="subtotal-display">Rp 0</td>
                 <td>
@@ -526,7 +598,7 @@ class PopupPBPharmacyHandler {
 
     /**
      * Handle diskon percent input change
-     * @param {Event} event 
+     * @param {Event} event
      */
     diskonPercentChange(event) {
         const input = /** @type {HTMLInputElement} */ (event.target);
@@ -537,7 +609,7 @@ class PopupPBPharmacyHandler {
         if (!tr) {
             alert("TR Not found!");
             return this;
-        };
+        }
 
         const dscnEl = $(tr).find("input[name^=diskon_nominal]");
         if (!dscnEl) {
@@ -545,11 +617,15 @@ class PopupPBPharmacyHandler {
             return this;
         }
 
-        const qty = /** @type {number | undefined} */ ($(tr).find("input[name^=qty]").val());
+        const qty = /** @type {number | undefined} */ (
+            $(tr).find("input[name^=qty]").val()
+        );
         // if quantity is not set, skip calculating this row
         if (!qty) return;
 
-        const cost = /** @type {number | undefined} */ ($(tr).find("input[name^=harga]").val());
+        const cost = /** @type {number | undefined} */ (
+            $(tr).find("input[name^=harga]").val()
+        );
         // if cost is not set, skip calculating this row
         if (!cost) return;
 
@@ -563,7 +639,7 @@ class PopupPBPharmacyHandler {
 
     /**
      * Handle diskon nominal input change
-     * @param {Event} event 
+     * @param {Event} event
      */
     diskonNominalChange(event) {
         const input = /** @type {HTMLInputElement} */ (event.target);
@@ -574,7 +650,7 @@ class PopupPBPharmacyHandler {
         if (!tr) {
             alert("TR Not found!");
             return this;
-        };
+        }
 
         const dscpEl = $(tr).find("input[name^=diskon_percent]");
         if (!dscpEl) {
@@ -582,11 +658,15 @@ class PopupPBPharmacyHandler {
             return this;
         }
 
-        const qty = /** @type {number | undefined} */ ($(tr).find("input[name^=qty]").val());
+        const qty = /** @type {number | undefined} */ (
+            $(tr).find("input[name^=qty]").val()
+        );
         // if quantity is not set, skip calculating this row
         if (!qty) return;
 
-        const cost = /** @type {number | undefined} */ ($(tr).find("input[name^=harga]").val());
+        const cost = /** @type {number | undefined} */ (
+            $(tr).find("input[name^=harga]").val()
+        );
         // if cost is not set, skip calculating this row
         if (!cost) return;
 
@@ -602,7 +682,6 @@ class PopupPBPharmacyHandler {
         let total = 0;
         let diskon_total = 0;
         this.#$Table.find("tr").each((i, tr) => {
-
             const bonusCheckbox = $(tr).find("input[name^=is_bonus]");
             console.log(bonusCheckbox.is(":checked"));
 
@@ -610,23 +689,35 @@ class PopupPBPharmacyHandler {
             if (bonusCheckbox.is(":checked")) {
                 $(tr).find("td.subtotal-display").text(this.#rp(0));
                 $(tr).find("input[name^='subtotal']").val(0);
-                return
-            }; // skip if bonus checkbox is checked
+                return;
+            } // skip if bonus checkbox is checked
 
-            const qty = /** @type {number | undefined} */ ($(tr).find("input[name^=qty]").val());
+            const qty = /** @type {number | undefined} */ (
+                $(tr).find("input[name^=qty]").val()
+            );
             // if quantity is not set, skip calculating this row
             if (!qty) return;
 
-            const cost = /** @type {number | undefined} */ ($(tr).find("input[name^=harga]").val());
+            const cost = /** @type {number | undefined} */ (
+                $(tr).find("input[name^=harga]").val()
+            );
             // if cost is not set, skip calculating this row
             if (!cost) return;
 
             const harga = qty * cost;
 
-            const discountNominalElement = $(tr).find("input[name^=diskon_nominal]");
-            const discountPercentElement = $(tr).find("input[name^=diskon_percent]");
-            const discountNominal = parseInt(/** @type {string} */(discountNominalElement.val()) || "0");
-            const discountPercent = parseInt(/** @type {string} */(discountPercentElement.val()) || "0");
+            const discountNominalElement = $(tr).find(
+                "input[name^=diskon_nominal]"
+            );
+            const discountPercentElement = $(tr).find(
+                "input[name^=diskon_percent]"
+            );
+            const discountNominal = parseInt(
+                /** @type {string} */ (discountNominalElement.val()) || "0"
+            );
+            const discountPercent = parseInt(
+                /** @type {string} */ (discountPercentElement.val()) || "0"
+            );
 
             if (option.updatediskon) {
                 discountPercentElement.val((discountNominal / harga) * 100);
@@ -640,12 +731,16 @@ class PopupPBPharmacyHandler {
             $(tr).find("td.subtotal-display").text(this.#rp(subtotal));
             $(tr).find("input[name^='subtotal']").val(subtotal);
         });
-        const Materai = parseInt(/** @type {string} */(this.#$Materai.val()) || "0");
-        const DiskonFaktur = parseInt(/** @type {string} */(this.#$DiskonFaktur.val()) || "0");
+        const Materai = parseInt(
+            /** @type {string} */ (this.#$Materai.val()) || "0"
+        );
+        const DiskonFaktur = parseInt(
+            /** @type {string} */ (this.#$DiskonFaktur.val()) || "0"
+        );
         const PPN = /** @type {number} */ (this.#$PPN.val());
-        const PPN_Nominal = (total * PPN) / 100
-        const grandtotal = (total + PPN_Nominal) - diskon_total - DiskonFaktur + Materai;
-
+        const PPN_Nominal = (total * PPN) / 100;
+        const grandtotal =
+            total + PPN_Nominal - diskon_total - DiskonFaktur + Materai;
 
         this.#$PPNNominal.val(PPN_Nominal);
         this.#$diskonTotal.text(this.#rp(diskon_total));
@@ -656,7 +751,7 @@ class PopupPBPharmacyHandler {
 
     /**
      * Delete item from table and variable
-     * @param {string} key 
+     * @param {string} key
      */
     deleteItem(key) {
         this.#$Table.find("#item" + key).remove();
@@ -664,9 +759,9 @@ class PopupPBPharmacyHandler {
     }
 
     /**
-    * Handle add button click
-    * @param {Event} event 
-    */
+     * Handle add button click
+     * @param {Event} event
+     */
     #handleAddButtonClick(event) {
         event.preventDefault();
         this.#loadAddItemModal();
@@ -674,7 +769,9 @@ class PopupPBPharmacyHandler {
 
     #loadAddItemModal() {
         if (this.#$TipeTerima.val() === "po") {
-            showErrorAlertNoRefresh("Tipe terima harus non PO untuk dapat menambahkan item secara manual!");
+            showErrorAlertNoRefresh(
+                "Tipe terima harus non PO untuk dapat menambahkan item secara manual!"
+            );
             return;
         }
 
@@ -683,11 +780,11 @@ class PopupPBPharmacyHandler {
 
     /**
      * Add event listeners
-     * @param {string} selector 
-     * @param {Function} handler 
+     * @param {string} selector
+     * @param {Function} handler
      * @param {string} event
      */
-    #addEventListeners(selector, handler, event = 'click') {
+    #addEventListeners(selector, handler, event = "click") {
         const buttons = document.querySelectorAll(selector);
         buttons.forEach((button) => {
             button.addEventListener(event, handler.bind(this));
@@ -696,7 +793,7 @@ class PopupPBPharmacyHandler {
 
     /**
      * Show or hide the loading icon
-     * @param {boolean} show 
+     * @param {boolean} show
      */
     #showLoading(show) {
         this.#$LoadingIcon.toggle(show);
@@ -705,8 +802,8 @@ class PopupPBPharmacyHandler {
 
     /**
      * Make a fetch call with API URL as base URL
-     * @param {string} url 
-     * @param {any | null} body 
+     * @param {string} url
+     * @param {any | null} body
      * @param {"GET" | "POST" | "PATCH" | "PUT" | "DELETE"} method
      */
     #APIfetch(url, body = null, method = "GET", raw = false) {
@@ -715,22 +812,24 @@ class PopupPBPharmacyHandler {
                 method: method,
                 body: body,
                 headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')) || ''
-                }
+                    "Content-Type": "application/json",
+                    "X-CSRF-TOKEN":
+                        document
+                            .querySelector('meta[name="csrf-token"]')
+                            ?.getAttribute("content") || "",
+                },
             })
                 .then(async (response) => {
                     if (response.status != 200) {
-                        throw new Error('Error: ' + response.statusText);
+                        throw new Error("Error: " + response.statusText);
                     }
                     resolve(!raw ? await response.json() : response);
                 })
-                .catch(error => {
-                    console.error('Error:', error);
+                .catch((error) => {
+                    console.log("Error:", error);
 
                     // @ts-ignore
-                    if (this.#showLoading)
-                        this.#showLoading(false); // assert
+                    if (this.#showLoading) this.#showLoading(false); // assert
 
                     showErrorAlertNoRefresh(`Error: ${error}`);
                     return reject(error);
@@ -740,14 +839,13 @@ class PopupPBPharmacyHandler {
 
     /**
      * Format angka menjadi mata uang rupiah
-     * @param {number} amount 
-     * @returns 
+     * @param {number} amount
+     * @returns
      */
     #rp(amount) {
-        const formattedAmount = 'Rp ' + amount.toLocaleString('id-ID');
+        const formattedAmount = "Rp " + amount.toLocaleString("id-ID");
         return formattedAmount;
     }
-
 }
 
 const PopupPBPharmacyClass = new PopupPBPharmacyHandler();

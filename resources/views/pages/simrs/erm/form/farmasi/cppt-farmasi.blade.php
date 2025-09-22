@@ -537,7 +537,7 @@
                         });
                     },
                     error: function(xhr, status, error) {
-                        console.error(xhr.responseText);
+                        console.log(xhr.responseText);
                     }
                 });
             }

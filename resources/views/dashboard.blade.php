@@ -1421,7 +1421,7 @@
                 if (ctx) {
                     new Chart(ctx, config);
                 } else {
-                    console.error("Konteks kanvas tidak ditemukan");
+                    console.log("Konteks kanvas tidak ditemukan");
                 }
             };
 

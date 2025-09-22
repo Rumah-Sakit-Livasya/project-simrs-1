@@ -608,7 +608,7 @@
                         }
                     },
                     error: function(xhr) {
-                        console.error(xhr.responseText);
+                        console.log(xhr.responseText);
                     },
                     complete: function() {
                         $('#loading-indicator').hide(); // Sembunyikan loader setelah selesai

@@ -72,6 +72,13 @@
                     <td style="white-space: nowrap">
                         {{ $employee->identity_number ?? '-' }}</td>
                     <td style="white-space: nowrap">
+                        @if ($employee->doctor)
+                            <button type="button" onclick="openTariffPopup({{ $employee->doctor->id }})"
+                                class="btn btn-info btn-sm btn-icon waves-effect waves-themed" data-toggle="tooltip"
+                                data-placement="top" title="Set Tarif Visite Dokter">
+                                <i class="fal fa-pills"></i>
+                            </button>
+                        @endif
                         <button type="button" data-backdrop="static" data-keyboard="false"
                             class="badge mx-1 badge-danger p-2 border-0 text-white"
                             data-template="<div class=&quot;tooltip&quot; role=&quot;tooltip&quot;><div class=&quot;tooltip-inner bg-danger-500&quot;></div></div>"

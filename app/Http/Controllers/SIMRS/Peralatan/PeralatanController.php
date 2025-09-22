@@ -46,7 +46,6 @@ class PeralatanController extends Controller
 
     public function store(Request $request)
     {
-
         $validatedData = $request->validate([
             'kode' => 'required',
             'nama' => 'required',

@@ -484,7 +484,7 @@ class OrderLaboratorium {
                             currency: "IDR",
                         });
                 } else {
-                    console.error(
+                    console.log(
                         "Tarif belum di set atau tidak ditemukan! ID Parameter: " +
                             ParameterLaboratorium.id
                     );
@@ -560,7 +560,7 @@ class OrderLaboratorium {
                 });
 
                 if (!Tarif) {
-                    console.error(
+                    console.log(
                         "Tarif belum di set atau tidak ditemukan! ID Parameter: " +
                             parameter.id
                     );
@@ -703,7 +703,7 @@ class OrderLaboratorium {
                 });
 
                 if (!Tarif) {
-                    console.error(
+                    console.log(
                         "Tarif belum di set atau tidak ditemukan! ID Parameter: " +
                             parameter.id
                     );
@@ -760,7 +760,7 @@ class OrderLaboratorium {
                 setTimeout(() => window.location.reload(), 2000);
             })
             .catch((error) => {
-                console.error("Error:", error);
+                console.log("Error:", error);
                 showErrorAlertNoRefresh(`Error: ${error}`);
             });
     }

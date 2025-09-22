@@ -683,7 +683,7 @@ Diagnosa Keperawatan: {{ $registration?->pengkajian_nurse_rajal?->diagnosa_keper
                         });
                     },
                     error: function(xhr, status, error) {
-                        console.error(xhr.responseText);
+                        console.log(xhr.responseText);
                     }
                 });
             }

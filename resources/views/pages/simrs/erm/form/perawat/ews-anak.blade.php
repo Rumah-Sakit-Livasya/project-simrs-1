@@ -450,7 +450,7 @@
                         }
                     },
                     error: function(xhr) {
-                        console.error('Load data error:', xhr.responseText);
+                        console.log('Load data error:', xhr.responseText);
                     },
                     complete: function() {
                         $('#loading-indicator').hide(); // Sembunyikan loader setelah selesai

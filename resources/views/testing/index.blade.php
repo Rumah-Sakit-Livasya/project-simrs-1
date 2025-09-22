@@ -67,7 +67,7 @@
                 $('#tambah-data').modal('show');
             });
 
-            // Store Form 
+            // Store Form
             $('#store-form').on('submit', function(e) {
                 e.preventDefault();
                 var formData = $(this).serialize();
@@ -83,7 +83,7 @@
                     },
                     error: function(xhr, status, error) {
                         // Handle error response
-                        console.error(xhr.responseText);
+                        console.log(xhr.responseText);
                         $('#tambah-data').modal('hide');
                         showErrorAlertNoRefresh(xhr.responseText);
                     }
@@ -105,12 +105,12 @@
 
                     },
                     error: function(xhr, status, error) {
-                        console.error(xhr.responseText);
+                        console.log(xhr.responseText);
                     }
                 });
             });
 
-            // Update Form 
+            // Update Form
             $('#update-form').on('submit', function(e) {
                 e.preventDefault();
                 var id = $('.edit-btn').data('id');
@@ -168,7 +168,7 @@
                                     'Terjadi kesalahan saat menghapus data.',
                                     'error'
                                 );
-                                console.error(xhr.responseText);
+                                console.log(xhr.responseText);
                             }
                         });
                     }

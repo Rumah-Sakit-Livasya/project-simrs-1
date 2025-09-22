@@ -238,7 +238,7 @@
                                                             data-action="decrement">-</button>
                                                         <input type="number" value="1"
                                                             class="form-control form-control-sm quantity-input parameter_laboratorium_number"
-                                                            id="jumlah_{{ $parameter->id }}">
+                                                            id="jumlah_{{ $parameter->id }}_lab">
                                                         <button class="btn btn-sm btn-quantity-stepper" type="button"
                                                             data-action="increment">+</button>
                                                     </div>

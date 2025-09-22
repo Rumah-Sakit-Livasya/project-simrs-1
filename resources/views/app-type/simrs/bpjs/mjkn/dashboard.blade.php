@@ -232,7 +232,7 @@
                                 }
                             },
                             error: function(jqXHR, textStatus, errorThrown) {
-                                console.error('Error fetching status:', textStatus,
+                                console.log('Error fetching status:', textStatus,
                                     errorThrown);
                                 showErrorAlertNoRefresh(
                                     'Gagal mengambil data status antrean. Cek konsol untuk detail.'
@@ -246,7 +246,7 @@
                         });
                     },
                     error: function(jqXHR, textStatus, errorThrown) {
-                        console.error('Error fetching token:', textStatus, errorThrown);
+                        console.log('Error fetching token:', textStatus, errorThrown);
                         showErrorAlertNoRefresh(
                             'Gagal mendapatkan token otentikasi. Cek konsol untuk detail.');
                         // Sembunyikan loading jika gagal di tahap token

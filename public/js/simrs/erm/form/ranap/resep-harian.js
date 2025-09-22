@@ -17,24 +17,41 @@ class ResepHarianClass {
     constructor() {
         this.#showLoading(false);
         $("#simpan-btn").on("click", this.#handleFormSubmit.bind(this));
-        $(document).on("change input keyup", "input[type='number']", ResepHarianClass.enforceNumberLimit);
-        $(document).on("change input keyup", "input[type='number']", this.refreshTotal.bind(this));
-        this.#$GudangSelect.on('select2:select', (e) => this.#handleGudangSelect.bind(this, e)());
-        this.#$BarangSelect.on('select2:select', (e) => this.#handleBarangSelect.bind(this, e)());
+        $(document).on(
+            "change input keyup",
+            "input[type='number']",
+            ResepHarianClass.enforceNumberLimit
+        );
+        $(document).on(
+            "change input keyup",
+            "input[type='number']",
+            this.refreshTotal.bind(this)
+        );
+        this.#$GudangSelect.on("select2:select", (e) =>
+            this.#handleGudangSelect.bind(this, e)()
+        );
+        this.#$BarangSelect.on("select2:select", (e) =>
+            this.#handleBarangSelect.bind(this, e)()
+        );
     }
 
     #handleFormSubmit(event) {
         // check if textarea #resep_manual is empty
         // and if there's no tr.item-obat element
-        if ($("textarea#resep_manual").val() === "" && $("tr.item-obat").length === 0) {
+        if (
+            $("textarea#resep_manual").val() === "" &&
+            $("tr.item-obat").length === 0
+        ) {
             event.preventDefault();
-            showErrorAlertNoRefresh("Mohon isi resep manual atau tambahkan obat resep elektronik!");
+            showErrorAlertNoRefresh(
+                "Mohon isi resep manual atau tambahkan obat resep elektronik!"
+            );
         }
     }
 
     /**
      * Handle gudang change
-     * @param {Select2.Event<HTMLElement, Select2.DataParams>} event 
+     * @param {Select2.Event<HTMLElement, Select2.DataParams>} event
      */
     #handleBarangSelect(event) {
         event.preventDefault();
@@ -43,12 +60,14 @@ class ResepHarianClass {
 
         // unselect the select2
         // @ts-ignore
-        this.#$BarangSelect.val(null).trigger('change');
+        this.#$BarangSelect.val(null).trigger("change");
 
         //get data-item
         const $option = $(`option[value='${selectedId}'].obat`);
 
-        const item = /** @type {BarangFarmasi & {qty: number}} */ ($option.data('item'));
+        const item = /** @type {BarangFarmasi & {qty: number}} */ (
+            $option.data("item")
+        );
 
         // prevent duplicate
         const Obat = $("tr.obat-" + item.id);
@@ -70,9 +89,9 @@ class ResepHarianClass {
         // <th style="width: 10%;">Total Qty</th>
         // <th style="width: 15%">Signa</th>
         // <th style="width: 1%;">Aksi</th>
-        // 
+        //
         // insert to this.#$Table
-        this.#$Table.append(/*html*/`
+        this.#$Table.append(/*html*/ `
                 <tr id="item${key}" class="item-obat obat-${item.id}">
                     <input type="hidden" name="barang_id[${key}]" value="${item.id}">
 
@@ -114,7 +133,7 @@ class ResepHarianClass {
 
     /**
      * Handle gudang change
-     * @param {Select2.Event<HTMLElement, Select2.DataParams>} event 
+     * @param {Select2.Event<HTMLElement, Select2.DataParams>} event
      */
     #handleGudangSelect(event) {
         event.preventDefault();
@@ -124,21 +143,25 @@ class ResepHarianClass {
         this.#showLoading(true, "Fetching Items...");
         const url = `/obat/${selectedId}`;
         this.#APIfetch(url)
-            .then(response => {
+            .then((response) => {
                 // add to select2 options
                 this.#$BarangSelect.empty();
                 this.#$BarangSelect.append(new Option("", ""));
-                response.items.forEach(item => {
+                response.items.forEach((item) => {
                     // this.#$BarangSelect.append(new Option(`${item.nama} (Stock: ${item.qty})`, item.id));
-                    this.#$BarangSelect.append($(/*html*/`
-                            <option value="${item.id}" data-item='${JSON.stringify(item)}' class="obat">
+                    this.#$BarangSelect.append(
+                        $(/*html*/ `
+                            <option value="${
+                                item.id
+                            }" data-item='${JSON.stringify(item)}' class="obat">
                                 ${item.nama} (Stock: ${item.qty})
                             </option>
-                        `));
+                        `)
+                    );
                 });
-                this.#$BarangSelect.trigger('change'); // trigger change event to update select2
+                this.#$BarangSelect.trigger("change"); // trigger change event to update select2
             })
-            .catch(error => {
+            .catch((error) => {
                 showErrorAlertNoRefresh(error.message);
             })
             .finally(() => this.#showLoading(false));
@@ -146,8 +169,8 @@ class ResepHarianClass {
 
     /**
      * Show or hide the loading icon
-     * @param {boolean} show 
-     * @param {string?} message 
+     * @param {boolean} show
+     * @param {string?} message
      */
     #showLoading(show, message = null) {
         this.#$Loadings.toggle(show);
@@ -155,23 +178,23 @@ class ResepHarianClass {
         if (message) {
             this.#$LoadingsMessage.text(message);
         } else {
-            this.#$LoadingsMessage.text('Loading...');
+            this.#$LoadingsMessage.text("Loading...");
         }
     }
 
     /**
      * Format angka menjadi mata uang rupiah
-     * @param {number} amount 
-     * @returns 
+     * @param {number} amount
+     * @returns
      */
     #rp(amount) {
-        const formattedAmount = 'Rp ' + amount.toLocaleString('id-ID');
+        const formattedAmount = "Rp " + amount.toLocaleString("id-ID");
         return formattedAmount;
     }
 
     /**
      * Enforce number input min max limit on manual input
-     * @param {Event} event 
+     * @param {Event} event
      */
     static enforceNumberLimit(event) {
         const inputField = /** @type {HTMLInputElement} */ (event.target);
@@ -180,7 +203,7 @@ class ResepHarianClass {
         let max = parseInt(String(inputField.max || Number.MAX_SAFE_INTEGER));
 
         if (isNaN(value)) {
-            inputField.value = '';
+            inputField.value = "";
             return;
         }
 
@@ -193,8 +216,8 @@ class ResepHarianClass {
 
     /**
      * Make a fetch call with API URL as base URL
-     * @param {string} url 
-     * @param {any | null} body 
+     * @param {string} url
+     * @param {any | null} body
      * @param {"GET" | "POST" | "PATCH" | "PUT" | "DELETE"} method
      */
     #APIfetch(url, body = null, method = "GET", raw = false) {
@@ -203,18 +226,21 @@ class ResepHarianClass {
                 method: method,
                 body: body,
                 headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')) || ''
-                }
+                    "Content-Type": "application/json",
+                    "X-CSRF-TOKEN":
+                        document
+                            .querySelector('meta[name="csrf-token"]')
+                            ?.getAttribute("content") || "",
+                },
             })
                 .then(async (response) => {
                     if (response.status != 200) {
-                        throw new Error('Error: ' + response.statusText);
+                        throw new Error("Error: " + response.statusText);
                     }
                     resolve(!raw ? await response.json() : response);
                 })
-                .catch(error => {
-                    console.error('Error:', error);
+                .catch((error) => {
+                    console.log("Error:", error);
 
                     // @ts-ignore
                     if (this.#showLoading) this.#showLoading(false); // assert

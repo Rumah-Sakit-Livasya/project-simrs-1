@@ -6,7 +6,6 @@
 const Swal = /** @type {import("sweetalert2").default} */ (window.Swal);
 
 class PopupPRPharmacyHandler {
-
     /**
      * @type {JQuery<HTMLElement>}
      */
@@ -64,15 +63,25 @@ class PopupPRPharmacyHandler {
 
     #init() {
         this.#addEventListeners("#add-btn", this.#handleAddButtonClick);
-        this.#addEventListeners("#searchItemInput", this.#handleItemSearchBar, "keyup");
-        this.#addEventListeners("#order-submit-draft", this.#handleDraftButtonClick);
-        this.#addEventListeners("#order-submit-final", this.#handleFinalButtonClick);
+        this.#addEventListeners(
+            "#searchItemInput",
+            this.#handleItemSearchBar,
+            "keyup"
+        );
+        this.#addEventListeners(
+            "#order-submit-draft",
+            this.#handleDraftButtonClick
+        );
+        this.#addEventListeners(
+            "#order-submit-final",
+            this.#handleFinalButtonClick
+        );
         this.#showLoading(false);
     }
 
     /**
      * Handle save order final button click
-     * @param {Event} event 
+     * @param {Event} event
      */
     #handleFinalButtonClick(event) {
         const button = /** @type {HTMLButtonElement} */ (event.target);
@@ -88,7 +97,7 @@ class PopupPRPharmacyHandler {
 
     /**
      * Handle save order draft button click
-     * @param {Event} event 
+     * @param {Event} event
      */
     #handleDraftButtonClick(event) {
         const button = /** @type {HTMLButtonElement} */ (event.target);
@@ -104,7 +113,7 @@ class PopupPRPharmacyHandler {
 
     /**
      * Handle item search bar on key up
-     * @param {Event} event 
+     * @param {Event} event
      */
     #handleItemSearchBar(event) {
         const searchInput = /** @type {HTMLInputElement} */ (event.target);
@@ -119,7 +128,9 @@ class PopupPRPharmacyHandler {
             if (!itemName) return;
 
             // @ts-ignore
-            item.style.display = itemName.toLowerCase().includes(value) ? "" : "none";
+            item.style.display = itemName.toLowerCase().includes(value)
+                ? ""
+                : "none";
         });
     }
 
@@ -138,7 +149,9 @@ class PopupPRPharmacyHandler {
         }
 
         const Item = /** @type {BarangFarmasi} */ (row.data("item"));
-        const selectedOption = row.find("select[name='satuan" + Item.id + "']").find("option:selected");
+        const selectedOption = row
+            .find("select[name='satuan" + Item.id + "']")
+            .find("option:selected");
         const Satuan = /** @type {Satuan} */ (selectedOption.data("satuan"));
         const HTML = this.#getItemTableCol(Item, Satuan, Qty);
         this.#$Table.append(HTML);
@@ -147,25 +160,35 @@ class PopupPRPharmacyHandler {
 
     /**
      * Generate HTML string for Item table collumn
-     * @param {BarangFarmasi} item 
+     * @param {BarangFarmasi} item
      * @param {Satuan} satuan
-     * @param {number} qty 
+     * @param {number} qty
      */
     #getItemTableCol(item, satuan, qty) {
         const key = Math.round(Math.random() * 100000);
 
-        return /*html*/`
+        return /*html*/ `
             <tr id="item${key}">
                 <td>${item.kode}
-                    <input type="hidden" name="kode_barang[${key}]" value="${item.kode}">
+                    <input type="hidden" name="kode_barang[${key}]" value="${
+            item.kode
+        }">
                 </td>
                 <td>${item.nama}
-                    <input type="hidden" name="nama_barang[${key}]" value="${item.nama}">
-                    <input type="hidden" name="barang_id[${key}]" value="${item.id}">
+                    <input type="hidden" name="nama_barang[${key}]" value="${
+            item.nama
+        }">
+                    <input type="hidden" name="barang_id[${key}]" value="${
+            item.id
+        }">
                 </td>
                 <td>${satuan.nama}
-                    <input type="hidden" name="unit_barang[${key}]" value="${satuan.nama}">
-                    <input type="hidden" name="satuan_id[${key}]" value="${satuan.id}">
+                    <input type="hidden" name="unit_barang[${key}]" value="${
+            satuan.nama
+        }">
+                    <input type="hidden" name="satuan_id[${key}]" value="${
+            satuan.id
+        }">
                 </td>
                 <td><input type="text" name="keterangan_item[${key}]" class="form-control"></td>
                 <td><input type="number" name="qty[${key}]" min="0" step="1" class="form-control" value="${qty}"
@@ -192,16 +215,18 @@ class PopupPRPharmacyHandler {
             if (isNaN(qty) || isNaN(hna)) return;
 
             total += qty * hna;
-            $(tr).find("td.subtotal").text(this.#rp(qty * hna));
+            $(tr)
+                .find("td.subtotal")
+                .text(this.#rp(qty * hna));
             this.#$Total.text(this.#rp(total));
         });
         this.#$Total.text(this.#rp(total));
-        this.#$Nominal.val(total)
+        this.#$Nominal.val(total);
     }
 
     /**
      * Delete item from table and variable
-     * @param {string} key 
+     * @param {string} key
      */
     deleteItem(key) {
         this.#$Table.find("#item" + key).remove();
@@ -209,9 +234,9 @@ class PopupPRPharmacyHandler {
     }
 
     /**
-    * Handle add button click
-    * @param {Event} event 
-    */
+     * Handle add button click
+     * @param {Event} event
+     */
     async #handleAddButtonClick(event) {
         event.preventDefault();
         const gudangId = this.#$GudangId.val();
@@ -222,7 +247,9 @@ class PopupPRPharmacyHandler {
 
         this.#showLoading(true);
         const url = "/get/item-gudang/" + gudangId;
-        const HTML = await (await this.#APIfetch(url, null, "GET", true)).text();
+        const HTML = await (
+            await this.#APIfetch(url, null, "GET", true)
+        ).text();
         this.#showLoading(false);
 
         this.#$ModalTable.html(HTML);
@@ -231,11 +258,11 @@ class PopupPRPharmacyHandler {
 
     /**
      * Add event listeners
-     * @param {string} selector 
-     * @param {Function} handler 
+     * @param {string} selector
+     * @param {Function} handler
      * @param {string} event
      */
-    #addEventListeners(selector, handler, event = 'click') {
+    #addEventListeners(selector, handler, event = "click") {
         const buttons = document.querySelectorAll(selector);
         buttons.forEach((button) => {
             button.addEventListener(event, handler.bind(this));
@@ -244,7 +271,7 @@ class PopupPRPharmacyHandler {
 
     /**
      * Show or hide the loading icon
-     * @param {boolean} show 
+     * @param {boolean} show
      */
     #showLoading(show) {
         this.#$LoadingIcon.toggle(show);
@@ -253,8 +280,8 @@ class PopupPRPharmacyHandler {
 
     /**
      * Make a fetch call with API URL as base URL
-     * @param {string} url 
-     * @param {FormData | null} body 
+     * @param {string} url
+     * @param {FormData | null} body
      * @param {"GET" | "POST" | "PATCH" | "PUT" | "DELETE"} method
      */
     #APIfetch(url, body = null, method = "GET", raw = false) {
@@ -263,21 +290,23 @@ class PopupPRPharmacyHandler {
                 method: method,
                 body: body,
                 headers: {
-                    'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')) || ''
-                }
+                    "X-CSRF-TOKEN":
+                        document
+                            .querySelector('meta[name="csrf-token"]')
+                            ?.getAttribute("content") || "",
+                },
             })
                 .then(async (response) => {
                     if (response.status != 200) {
-                        throw new Error('Error: ' + response.statusText);
+                        throw new Error("Error: " + response.statusText);
                     }
                     resolve(!raw ? await response.json() : response);
                 })
-                .catch(error => {
-                    console.error('Error:', error);
+                .catch((error) => {
+                    console.log("Error:", error);
 
                     // @ts-ignore
-                    if (this.#showLoading)
-                        this.#showLoading(false); // assert
+                    if (this.#showLoading) this.#showLoading(false); // assert
 
                     showErrorAlertNoRefresh(`Error: ${error}`);
                     return reject(error);
@@ -287,14 +316,13 @@ class PopupPRPharmacyHandler {
 
     /**
      * Format angka menjadi mata uang rupiah
-     * @param {number} amount 
-     * @returns 
+     * @param {number} amount
+     * @returns
      */
     #rp(amount) {
-        const formattedAmount = 'Rp ' + amount.toLocaleString('id-ID');
+        const formattedAmount = "Rp " + amount.toLocaleString("id-ID");
         return formattedAmount;
     }
-
 }
 
 const PopupPRPharmacyClass = new PopupPRPharmacyHandler();

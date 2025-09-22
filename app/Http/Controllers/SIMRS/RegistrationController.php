@@ -782,7 +782,7 @@ class RegistrationController extends Controller
             ->get();
 
         // Only load peralatan that are used in this registration
-        $list_peralatan = Peralatan::query()->limit(100)->get(); // Limit to 100 for performance, adjust as needed
+        $list_peralatan = Peralatan::query()->get(); // Limit to 100 for performance, adjust as needed
         $alat_medis_yang_dipakai = OrderAlatMedis::where('registration_id', $registration->id)
             ->with('alat')
             ->get();
@@ -824,12 +824,8 @@ class RegistrationController extends Controller
         // Limit operasi types and categories for performance
         $jenisOperasi = TipeOperasi::orderBy('tipe')->limit(50)->get();
         $kategoriOperasi = KategoriOperasi::orderBy('nama_kategori')->limit(50)->get();
-        $ruangans = Room::orderBy('ruangan')->limit(100)->get();
+        $ruangans = Room::orderBy('ruangan')->get();
         $ruangans_operasi = Room::where('ruangan', 'OK')->orderBy('ruangan', 'asc')->limit(20)->get();
-
-        $dTindakan = Departement::with(['grup_tindakan_medis' => function ($q) {
-            $q->with('tindakan_medis');
-        }])->get();
 
         // Only load order operasi for this registration, eager load only necessary relations
         $orderOperasi = OrderOperasi::with([
@@ -860,7 +856,7 @@ class RegistrationController extends Controller
             'doctorsAlat' => $doctorsAlat,
             'list_peralatan' => $list_peralatan,
             'alat_medis_yang_dipakai' => $alat_medis_yang_dipakai,
-            'dTindakan' => $dTindakan,
+            // 'dTindakan' => $dTindakan,
             'orderOperasi' => $orderOperasi,
             'kelasRawat' => $kelasRawat,
             'penjamin' => $penjamin,
@@ -870,10 +866,10 @@ class RegistrationController extends Controller
             'laboratoriumDoctors' => $laboratoriumDoctors,
             'laboratoriumOrders' => $laboratoriumOrders,
             'groupPenjaminId' => $groupPenjaminId,
-            'laboratorium_categories' => KategoriLaboratorium::limit(100)->get(),
-            'laboratorium_tarifs' => TarifParameterLaboratorium::limit(100)->get(),
-            'radiology_categories' => KategoriRadiologi::limit(100)->get(),
-            'radiology_tarifs' => TarifParameterRadiologi::limit(100)->get(),
+            'laboratorium_categories' => KategoriLaboratorium::get(),
+            'laboratorium_tarifs' => TarifParameterLaboratorium::get(),
+            'radiology_categories' => KategoriRadiologi::get(),
+            'radiology_tarifs' => TarifParameterRadiologi::get(),
             'kelas_rawats' => KelasRawat::limit(20)->get(),
             'registration' => $registration,
             'patient' => $patient,
@@ -1235,5 +1231,139 @@ class RegistrationController extends Controller
         ]);
 
         return response()->json(['message' => 'Pasien berhasil dihapus dari bed.']);
+    }
+
+    /**
+     * Menampilkan detail layanan untuk registrasi pasien tertentu.
+     *
+     * @param  int  $id
+     * @param  string  $layanan
+     * @return \Illuminate\View\View|\Illuminate\Http\Response
+     */
+    public function layanan(int $id, string $layanan)
+    {
+        $registration = Registration::with(['patient', 'doctor', 'penjamin'])
+            ->where('registration_number', $id)
+            ->firstOrFail();
+
+        $doctors = Doctor::with(['employee', 'departements', 'department_from_doctors'])->get();
+
+        // Group doctors by department name, but keep as a collection of models, not arrays
+        $groupedDoctors = $doctors->groupBy(function ($doctor) {
+            return optional($doctor->department_from_doctors)->name;
+        })->filter();
+
+        $dTindakan = Departement::with(['grup_tindakan_medis.tindakan_medis'])->get();
+        $kelas_rawats = KelasRawat::all();
+
+        $patient = Patient::with(['registration' => function ($query) {
+            $query->orderByDesc('id')->limit(10);
+        }])->findOrFail($registration->patient->id);
+
+        $age = displayAge($patient->date_of_birth);
+
+        $tipeRegis = $registration->registration_type;
+        $kelasRawat = in_array($tipeRegis, ['rawat-jalan', 'igd', 'odc']) ? 'RAWAT JALAN' : 'RAWAT INAP';
+
+        $jaminan = $registration->penjamin->name;
+        $penjamin = match ($jaminan) {
+            'Umum' => 'Jaminan Pribadi',
+            'BPJS' => 'BPJS Kesehatan',
+            default => $jaminan,
+        };
+
+        $kategoriOperasi = KategoriOperasi::orderBy('nama_kategori')->limit(50)->get();
+        $jenisOperasi = TipeOperasi::orderBy('tipe')->limit(50)->get();
+        $ruangans = Room::orderBy('ruangan')->get();
+        $ruangans_operasi = Room::where('ruangan', 'OK')->orderBy('ruangan')->limit(20)->get();
+
+        $radiologiOrders = OrderRadiologi::where('registration_id', $registration->id)
+            ->with(['doctor.employee'])
+            ->get()
+            ->keyBy('id');
+
+        $radiologyDoctors = Doctor::with('employee')
+            ->whereHas('department_from_doctors', fn($q) => $q->where('name', 'like', '%radiologi%'))
+            ->get();
+
+        $radiology_categories = KategoriRadiologi::get();
+        $radiology_tarifs = TarifParameterRadiologi::get();
+
+        $groupPenjaminId = $registration->penjamin->group_penjamin_id;
+
+        $laboratoriumDoctors = Doctor::with('employee')
+            ->whereHas('department_from_doctors', fn($q) => $q->where('name', 'like', '%lab%'))
+            ->get();
+
+        $laboratoriumOrders = OrderLaboratorium::where('registration_id', $registration->id)
+            ->with([
+                'doctor.employee:id,fullname',
+                'order_parameter_laboratorium.parameter_laboratorium'
+            ])
+            ->orderByDesc('order_date')
+            ->get();
+
+        $laboratorium_categories = KategoriLaboratorium::get();
+        $laboratorium_tarifs = TarifParameterLaboratorium::get();
+
+        $list_peralatan = Peralatan::all();
+        $alat_medis_yang_dipakai = OrderAlatMedis::where('registration_id', $registration->id)
+            ->with('alat')
+            ->get();
+
+        $doctorsAlat = Doctor::with('employee')
+            ->whereHas('employee')
+            ->orderBy(Employee::select('fullname')->whereColumn('employees.id', 'doctors.employee_id'))
+            ->limit(100)
+            ->get();
+
+        $departements = Departement::with(['grup_tindakan_medis.tindakan_medis'])->get();
+
+        $tindakan_medis = $departements
+            ->pluck('grup_tindakan_medis')
+            ->flatten()
+            ->pluck('tindakan_medis')
+            ->flatten()
+            ->unique('id')
+            ->values();
+
+        $viewData = compact(
+            'registration',
+            'doctors',
+            'groupedDoctors',
+            'dTindakan',
+            'kelas_rawats',
+            'patient',
+            'age',
+            'kelasRawat',
+            'penjamin',
+            'kategoriOperasi',
+            'jenisOperasi',
+            'ruangans',
+            'ruangans_operasi',
+            'radiologiOrders',
+            'radiologyDoctors',
+            'radiology_categories',
+            'radiology_tarifs',
+            'groupPenjaminId',
+            'laboratoriumDoctors',
+            'laboratoriumOrders',
+            'laboratorium_categories',
+            'laboratorium_tarifs',
+            'alat_medis_yang_dipakai',
+            'list_peralatan',
+            'doctorsAlat',
+            'departements',
+        );
+
+        return match ($layanan) {
+            'tindakan-medis'   => view('pages.simrs.pendaftaran.partials.tindakan-medis', $viewData),
+            'laboratorium'     => view('pages.simrs.pendaftaran.partials.laboratorium', $viewData),
+            'pemakaian-alat'   => view('pages.simrs.pendaftaran.partials.pemakaian-alat', $viewData),
+            'visite-dokter'    => view('pages.simrs.pendaftaran.partials.visite-dokter', $viewData),
+            'operasi'          => view('pages.simrs.pendaftaran.partials.operasi', $viewData),
+            'persalinan'          => view('pages.simrs.pendaftaran.partials.persalinan', $viewData),
+            default            => abort(404, 'Layanan tidak ditemukan'),
+        };
     }
 }

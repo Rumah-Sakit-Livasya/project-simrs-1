@@ -600,7 +600,7 @@
                     }
 
                     showErrorMessage(errorMessage);
-                    console.error('Error:', error);
+                    console.log('Error:', error);
                 }
             });
         }

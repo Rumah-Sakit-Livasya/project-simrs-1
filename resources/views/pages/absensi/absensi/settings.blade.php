@@ -22,7 +22,7 @@
                 width: 20px;
                 height: 20px;
             }
-            
+
         }
     </style>
 @endsection
@@ -173,7 +173,7 @@
                     console.log(response.message || 'Update berhasil!');
                 },
                 error: function(error) {
-                    console.error('Error:', error);
+                    console.log('Error:', error);
                     alert('Gagal memperbarui data. Coba lagi.');
                 }
             });
@@ -253,7 +253,7 @@
             //             console.log(response.message);
             //         },
             //         error: function(error) {
-            //             console.error(error);
+            //             console.log(error);
             //         }
             //     });
             // });

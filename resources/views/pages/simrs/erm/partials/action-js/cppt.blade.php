@@ -122,7 +122,7 @@
                     });
                 })
                 .catch(error => {
-                    console.error("Gagal memuat data CPPT:", error);
+                    console.log("Gagal memuat data CPPT:", error);
                     targetElement.html(
                         '<div class="alert alert-danger">Gagal memuat data CPPT. Silakan coba lagi.</div>'
                     );
@@ -224,7 +224,7 @@
                     });
                 })
                 .catch(error => {
-                    console.error("Gagal memuat data CPPT:", error);
+                    console.log("Gagal memuat data CPPT:", error);
                     targetElement.html(
                         '<div class="alert alert-danger">Gagal memuat data CPPT. Silakan coba lagi.</div>'
                     );

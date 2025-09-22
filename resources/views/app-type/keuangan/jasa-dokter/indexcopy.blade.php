@@ -804,7 +804,7 @@
                             }
                         },
                         error: function(xhr, status, error) {
-                            console.error('AJAX Error:', xhr.responseText);
+                            console.log('AJAX Error:', xhr.responseText);
                             let errorMessage = 'Terjadi kesalahan saat mengambil data item.';
                             if (xhr.responseJSON && xhr.responseJSON.message) {
                                 errorMessage = xhr.responseJSON.message;
@@ -908,7 +908,7 @@
                                         .responseText ||
                                         'Terjadi kesalahan saat memproses permintaan.';
                                     toastr.error(errorMessage);
-                                    console.error("AJAX Error Save AP:", xhr.responseText);
+                                    console.log("AJAX Error Save AP:", xhr.responseText);
                                 },
                                 complete: function() {
                                     $btn.prop('disabled', false).html(

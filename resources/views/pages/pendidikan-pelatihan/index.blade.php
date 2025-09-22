@@ -213,7 +213,7 @@
                     error: function(xhr) {
                         // Tangani error dan tampilkan pesan error
                         $('#store-form').find('.btn-primary').attr('disabled', false);
-                        console.error(xhr.responseText);
+                        console.log(xhr.responseText);
                     }
                 });
             });

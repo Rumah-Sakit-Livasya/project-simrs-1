@@ -247,7 +247,7 @@
                     })
                     .catch(error => {
                         Swal.close(); // Sembunyikan loading
-                        console.error('Error:', error);
+                        console.log('Error:', error);
                         Swal.fire({
                             icon: 'error',
                             title: 'Terjadi Kesalahan',

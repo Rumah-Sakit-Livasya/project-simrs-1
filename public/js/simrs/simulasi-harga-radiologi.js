@@ -180,7 +180,7 @@ class SimulasiHargaRadiologi {
                             currency: "IDR",
                         });
                 } else {
-                    console.error(
+                    console.log(
                         "Tarif belum di set atau tidak ditemukan! ID Parameter: " +
                             ParameterRadiologi.id
                     );

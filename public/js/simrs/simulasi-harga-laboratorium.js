@@ -104,7 +104,7 @@ $(document).ready(function () {
                     });
                     $hargaSpan.text(formattedPrice);
                 } else {
-                    console.error(
+                    console.log(
                         `Tarif belum di set atau tidak ditemukan! ID Parameter: ${parameter.id}`
                     );
                     // Diasumsikan showErrorAlertNoRefresh adalah fungsi global yang sudah ada

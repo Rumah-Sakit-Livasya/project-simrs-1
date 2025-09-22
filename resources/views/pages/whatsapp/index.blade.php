@@ -475,7 +475,7 @@
                 // Koneksi dan Listener Laravel Echo
                 // ---------------------------------
                 if (typeof window.Echo === 'undefined') {
-                    console.error('Laravel Echo tidak ditemukan! Pastikan bootstrap.js sudah dimuat.');
+                    console.log('Laravel Echo tidak ditemukan! Pastikan bootstrap.js sudah dimuat.');
                     return;
                 }
 
@@ -483,7 +483,7 @@
                 const channel = window.Echo.private('whatsapp-chat');
 
                 channel.error((error) => {
-                    console.error("Gagal subscribe ke channel:", error);
+                    console.log("Gagal subscribe ke channel:", error);
                 });
 
                 channel.subscribed(() => {

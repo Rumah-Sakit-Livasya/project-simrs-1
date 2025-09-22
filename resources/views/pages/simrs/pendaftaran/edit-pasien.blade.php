@@ -944,7 +944,7 @@
                 const subdistrictSelect = $('#subdistrict');
 
                 if (!data || !data.kecamatan) {
-                    console.error("Data alamat tidak lengkap diterima:", data);
+                    console.log("Data alamat tidak lengkap diterima:", data);
                     return;
                 }
 

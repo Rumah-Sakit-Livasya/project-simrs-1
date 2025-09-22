@@ -4,7 +4,9 @@ namespace App\Models\SIMRS\Peralatan;
 
 use App\Models\SIMRS\Departement;
 use App\Models\SIMRS\Doctor;
+use App\Models\SIMRS\KelasRawat;
 use App\Models\SIMRS\Registration;
+use App\Models\SIMRS\TagihanPasien;
 use App\Models\SIMRS\TindakanMedis;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
@@ -38,5 +40,16 @@ class OrderAlatMedis extends Model
     public function doctor()
     {
         return $this->belongsTo(Doctor::class, 'doctor_id');
+    }
+
+    public function kelas_rawat()
+    {
+        return $this->belongsTo(KelasRawat::class, 'kelas_rawat_id');
+    }
+
+    public function tagihan_pasien()
+    {
+        // Ganti namespace jika model TagihanPasien Anda berada di lokasi lain
+        return $this->hasOne(TagihanPasien::class);
     }
 }

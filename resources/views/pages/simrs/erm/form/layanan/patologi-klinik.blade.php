@@ -15,7 +15,8 @@
 @section('plugin-erm')
     <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
     <script script src="/js/formplugins/select2/select2.bundle.js"></script>
-    @include('pages.simrs.poliklinik.partials.action-js.pemakaian_alat')
+    <script src="/js/formplugins/bootstrap-datepicker/bootstrap-datepicker.js"></script>
+
     <script>
         $(document).ready(function() {
             $('body').addClass('layout-composed');
@@ -25,11 +26,10 @@
                 dropdownParent: $('#modal-tambah-alat')
             });
 
-            placeholder: 'Pilih Klinik',
-                $('#departement_id').select2({});
-            // $('#doctor_id').select2({
-            //     placeholder: 'Pilih Dokter',
-            // });
+            $('#departement_id').select2({
+                placeholder: 'Pilih Klinik',
+            });
+
             $('#dt-basic-example').dataTable({
                 responsive: false,
             });
@@ -49,12 +49,102 @@
     </script>
     <script>
         $(document).ready(function() {
-            // Inisialisasi DataTable untuk daftar order
-            $('#dt-lab-orders').DataTable({
+            /* Fungsi untuk memformat child row */
+            function format(details) {
+                // Handle jika tidak ada detail
+                if (!details || details.length === 0) {
+                    return '<div class="p-3 text-center">Tidak ada detail parameter untuk order ini.</div>';
+                }
+
+                // 1. Inisialisasi variabel untuk menyimpan total biaya
+                let totalPrice = 0;
+
+                // Memulai string HTML untuk tabel
+                let table = `<table class="table table-sm table-striped table-bordered child-table">
+                            <thead class="bg-info-50">
+                                <tr>
+                                    <th scope="col" style="width: 30px;">#</th>
+                                    <th scope="col">Parameter</th>
+                                    <th scope="col">Harga</th>
+                                    <th scope="col">Catatan</th>
+                                </tr>
+                            </thead>
+                            <tbody>`;
+
+                // Loop melalui setiap item detail untuk membuat baris tabel
+                details.forEach((item, index) => {
+                    // 2. Akumulasi total di dalam loop. Pastikan nilainya adalah angka.
+                    totalPrice += (parseFloat(item.nominal_rupiah) || 0);
+
+                    const formattedPrice = new Intl.NumberFormat('id-ID', {
+                        style: 'currency',
+                        currency: 'IDR',
+                        minimumFractionDigits: 2
+                    }).format(item.nominal_rupiah || 0);
+
+                    const parameterName = item.parameter_laboratorium ? item.parameter_laboratorium
+                        .parameter : '<i class="text-muted">N/A</i>';
+
+                    table += `<tr>
+                            <td>${index + 1}</td>
+                            <td>${parameterName}</td>
+                            <td>${formattedPrice}</td>
+                            <td>${item.catatan || ''}</td>
+                        </tr>`;
+                });
+
+                // Menutup tbody
+                table += '</tbody>';
+
+                // 3. Tambahkan <tfoot> untuk menampilkan total biaya
+                // Format total harga ke dalam format mata uang Rupiah
+                const formattedTotal = new Intl.NumberFormat('id-ID', {
+                    style: 'currency',
+                    currency: 'IDR',
+                    minimumFractionDigits: 2
+                }).format(totalPrice);
+
+                table += `<tfoot>
+                        <tr>
+                            <td colspan="2" class="font-weight-bold">Total Biaya</td>
+                            <td class="font-weight-bold">${formattedTotal}</td>
+                            <td></td>
+                        </tr>
+                      </tfoot>`;
+
+                // Menutup tabel
+                table += '</table>';
+                return table;
+            }
+
+            // Inisialisasi DataTable (tidak ada perubahan di sini)
+            var table = $('#dt-lab-orders').DataTable({
                 responsive: true,
-                "order": [
-                    [2, "desc"]
-                ] // Urutkan berdasarkan tanggal order
+                order: [
+                    [1, 'desc']
+                ],
+                columnDefs: [{
+                    orderable: false,
+                    targets: 0
+                }]
+            });
+
+            // Event listener untuk membuka dan menutup detail (tidak ada perubahan di sini)
+            $('#dt-lab-orders tbody').on('click', 'td.details-control', function() {
+                var tr = $(this).closest('tr');
+                var row = table.row(tr);
+                var icon = $(this).find('i');
+                var detailData = JSON.parse(tr.attr('data-details'));
+
+                if (row.child.isShown()) {
+                    row.child.hide();
+                    tr.removeClass('details-shown');
+                    icon.removeClass('fa-minus-circle text-danger').addClass('fa-plus-circle text-success');
+                } else {
+                    row.child(format(detailData)).show();
+                    tr.addClass('details-shown');
+                    icon.removeClass('fa-plus-circle text-success').addClass('fa-minus-circle text-danger');
+                }
             });
 
             // Inisialisasi Popover (jika masih menggunakan Bootstrap 4/SmartAdmin)

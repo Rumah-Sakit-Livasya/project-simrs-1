@@ -28,12 +28,15 @@
                         </center>
                         </a>
                     </li>
-                    <li>
-                        <div class="circle-menu waves-effect light-green accent-3 menu-layanan"
-                            data-layanan="tindakan-medis">
-                            <i class="mdi mdi-needle"></i>
-                        </div>
-                        <span>Tindakan Medis</span>
+                    <li class="text-center">
+                        <a
+                            href="{{ route('detail.registrasi.pasien.layanan', ['registrations' => $registration->registration_number, 'layanan' => 'tindakan-medis']) }}">
+                            <div class="circle-menu waves-effect light-green accent-3 menu-layanan"
+                                data-layanan="tindakan-medis">
+                                <i class="mdi mdi-needle"></i>
+                            </div>
+                            <span>Tindakan Medis</span>
+                        </a>
                     </li>
                     <li>
                         <div class="circle-menu waves-effect amber lighten-1 menu-layanan"
@@ -42,11 +45,15 @@
                         </div>
                         <span>Obat/Alkes</span>
                     </li>
-                    <li>
-                        <div class="circle-menu waves-effect purple menu-layanan" data-layanan="laboratorium">
-                            <i class="mdi mdi-flask-outline"></i>
-                        </div>
-                        <span>Laboratorium</span>
+                    <li class="text-center">
+                        <a
+                            href="{{ route('detail.registrasi.pasien.layanan', ['registrations' => $registration->registration_number, 'layanan' => 'laboratorium']) }}">
+                            <div class="circle-menu waves-effect purple accent-3 menu-layanan"
+                                data-layanan="laboratorium">
+                                <i class="mdi mdi-flask-outline"></i>
+                            </div>
+                            <span>Laboratorium</span>
+                        </a>
                     </li>
                     <li>
                         <div class="circle-menu waves-effect red menu-layanan" data-layanan="radiologi">
@@ -54,18 +61,25 @@
                         </div>
                         <span>Radiologi</span>
                     </li>
-                    <li>
-                        <div class="circle-menu waves-effect blue menu-layanan" data-layanan="pemakaian_alat">
-                            <i class="mdi mdi-source-merge"></i>
-                        </div>
-                        <span>Pemakaian Alat</span>
+                    <li class="text-center">
+                        <a
+                            href="{{ route('detail.registrasi.pasien.layanan', ['registrations' => $registration->registration_number, 'layanan' => 'pemakaian-alat']) }}">
+                            <div class="circle-menu waves-effect blue accent-3 menu-layanan"
+                                data-layanan="pemakaian-alat">
+                                <i class="mdi mdi-source-merge"></i>
+                            </div>
+                            <span>Pemakaian Alat</span>
+                        </a>
                     </li>
-                    <li>
-                        <div class="circle-menu waves-effect blue darken-3 menu-layanan"
-                            data-layanan="visite/visite_list">
-                            <i class="mdi mdi-stethoscope"></i>
-                        </div>
-                        <span>Visite</span>
+                    <li class="text-center">
+                        <a
+                            href="{{ route('detail.registrasi.pasien.layanan', ['registrations' => $registration->registration_number, 'layanan' => 'visite-dokter']) }}">
+                            <div class="circle-menu waves-effect blue accent-3 menu-layanan"
+                                data-layanan="visite-dokter">
+                                <i class="mdi mdi-stethoscope"></i>
+                            </div>
+                            <span>Visite</span>
+                        </a>
                     </li>
                     <li>
                         <div class="circle-menu waves-effect pink accent-2 menu-layanan"
@@ -74,17 +88,24 @@
                         </div>
                         <span>BMHP</span>
                     </li>
-                    <li>
-                        <div class="circle-menu waves-effect light-green accent-3 menu-layanan" data-layanan="operasi">
-                            <i class="mdi mdi-heart-pulse"></i>
-                        </div>
-                        <span>Operasi (OK)</span>
+                    <li class="text-center">
+                        <a
+                            href="{{ route('detail.registrasi.pasien.layanan', ['registrations' => $registration->registration_number, 'layanan' => 'operasi']) }}">
+                            <div class="circle-menu waves-effect light-green accent-3 menu-layanan"
+                                data-layanan="operasi">
+                                <i class="mdi mdi-heart-pulse"></i>
+                            </div>
+                            <span>Operasi</span>
+                        </a>
                     </li>
-                    <li>
-                        <div class="circle-menu waves-effect teal menu-layanan" data-layanan="persalinan">
-                            <i class="mdi mdi-seat-flat-angled"></i>
-                        </div>
-                        <span>Persalinan (VK)</span>
+                    <li class="text-center">
+                        <a
+                            href="{{ route('detail.registrasi.pasien.layanan', ['registrations' => $registration->registration_number, 'layanan' => 'persalinan']) }}">
+                            <div class="circle-menu waves-effect teal accent-3 menu-layanan" data-layanan="persalinan">
+                                <i class="mdi mdi-seat-flat-angled"></i>
+                            </div>
+                            <span>Persalinan (VK)</span>
+                        </a>
                     </li>
                     <li>
                         <div class="circle-menu waves-effect red menu-layanan" data-layanan="gizi/list_order_gizi">

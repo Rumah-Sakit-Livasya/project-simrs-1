@@ -232,7 +232,7 @@
 
                 $('#vehicleModal').modal('show');
             } catch (error) {
-                console.error(error);
+                console.log(error);
                 Swal.fire('Error', error.message, 'error');
             }
         }
@@ -284,7 +284,7 @@
                 Swal.fire('Sukses', result.message, 'success');
 
             } catch (error) {
-                console.error(error.message);
+                console.log(error.message);
                 Swal.fire('Error', error.message, 'error');
             } finally {
                 submitButton.prop('disabled', false).html('Simpan');

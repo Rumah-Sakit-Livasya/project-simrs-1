@@ -181,7 +181,7 @@
                     },
                     error: function(xhr) {
                         alert('Terjadi kesalahan saat memproses data.');
-                        console.error(xhr.responseText);
+                        console.log(xhr.responseText);
                     },
                     complete: function() {
                         $('button[type=submit]').prop('disabled', false).html(

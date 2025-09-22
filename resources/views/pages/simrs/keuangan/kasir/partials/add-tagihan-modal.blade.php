@@ -129,7 +129,7 @@
                         $('#tagihanTable').DataTable().ajax.reload();
                     },
                     error: function(xhr) {
-                        console.error('Error:', xhr.responseText);
+                        console.log('Error:', xhr.responseText);
                         Swal.fire({
                             icon: 'error',
                             title: 'Gagal',
@@ -301,7 +301,7 @@
                                 $('#nominal').val(total.toLocaleString('id-ID'));
                             },
                             error: function(xhr) {
-                                console.error('Error fetching tarif:', xhr.responseText);
+                                console.log('Error fetching tarif:', xhr.responseText);
                             }
                         });
                     }
@@ -331,7 +331,7 @@
                             $('#nominal').val(response.harga.toLocaleString('id-ID'));
                         },
                         error: function(xhr) {
-                            console.error('Error fetching tarif:', xhr.responseText);
+                            console.log('Error fetching tarif:', xhr.responseText);
                         }
                     });
                 }
@@ -353,7 +353,7 @@
                     $('#dokter').val(data.data.dokter_id).trigger('change');
                 },
                 error: function(xhr) {
-                    console.error('Error loading registration data:', xhr.responseText);
+                    console.log('Error loading registration data:', xhr.responseText);
                 }
             });
         }
