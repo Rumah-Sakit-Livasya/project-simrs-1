@@ -4,30 +4,21 @@
     <main id="js-page-content" role="main" class="page-content">
         <div class="row mb-5">
             <div class="col-xl-12">
-                @if (auth()->user()->is_request_attendance == 1)
-                    <button type="button" class="btn btn-primary waves-effect waves-themed btn-ajukan mt-2" data-backdrop="static"
-                        data-keyboard="false" data-toggle="modal" data-target="#tambah-data" title="Tambah User">
-                        <span class="fal fa-plus-circle mr-1"></span>
-                        Pengajuan Absensi
-                    </button>
-                @else
-                    <div class="alert alert-danger">
-                        Mohon maaf akses pengajuan absensi belum diberikan. Silahkan
-                        menghubungi atasan masing-masing untuk dibukakan aksesnya!
-                    </div>
-                @endif
+                <button type="button" class="btn btn-primary waves-effect waves-themed btn-ajukan mt-2" data-backdrop="static"
+                    data-keyboard="false" data-toggle="modal" data-target="#tambah-data" title="Tambah User">
+                    <span class="fal fa-plus-circle mr-1"></span>
+                    Pengajuan Absensi
+                </button>
 
-                @can('pengajuan pj')
-                    <a href="{{ route('attendance-requests.form') }}" class="btn btn-primary mt-2">
-                        <span class="fal fa-plus-circle mr-1"></span>
-                        Tambah Form Pengajuan
-                    </a>
-                   
-                    <a href="{{ asset('pengajuan_absensi.docx') }}" class="btn btn-primary mt-2">
-                        <span class="fal fa-plus-circle mr-1"></span>
-                        Download Form Pengajuan
-                    </a> 
-                @endcan
+                <a href="{{ route('attendance-requests.form') }}" class="btn btn-primary mt-2">
+                    <span class="fal fa-plus-circle mr-1"></span>
+                    Tambah Form Pengajuan
+                </a>
+
+                <a href="{{ asset('pengajuan_absensi.docx') }}" class="btn btn-primary mt-2">
+                    <span class="fal fa-plus-circle mr-1"></span>
+                    Download Form Pengajuan
+                </a>
             </div>
         </div>
 
