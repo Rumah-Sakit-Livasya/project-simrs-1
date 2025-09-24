@@ -66,8 +66,12 @@
             </x-form-row>
 
             <x-form-row label="Dokter" for="doctor_id">
-                <x-doctor-select id="doctor_id" name="doctor_id" :doctors="$groupedDoctors" :selected="old('doctor_id')" />
+                <x-doctor-select id="doctor_id" name="doctor_id" :doctors="$doctors" :selected="old('doctor_id')" />
             </x-form-row>
+
+            {{-- <x-form-row label="Dokter" for="doctor_id">
+                <x-doctor-select id="doctor_id" name="doctor_id" :doctors="$groupedDoctors" :selected="old('doctor_id')" />
+            </x-form-row> --}}
 
             <x-form-row label="Kelas / Kamar Rawat" for="kamar_tujuan">
                 {{-- Ini adalah input custom, jadi kita letakkan HTML-nya langsung di dalam slot komponen --}}

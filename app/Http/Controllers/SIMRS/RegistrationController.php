@@ -251,6 +251,32 @@ class RegistrationController extends Controller
                 ]);
                 break;
 
+            case 'rawat-inap':
+                $lastRanapRegistration = Registration::where(['patient_id' => $patient->id, 'registration_type' => 'rawat-inap'])->orderBy('created_at', 'desc')->first();
+                $grupPenjaminBPJS = GroupPenjamin::where('name', 'like', '%BPJS%')->first();
+                $ranapBPJSdalam1bulan =
+                    $lastRanapRegistration && $lastRanapRegistration['penjamin_id'] == $grupPenjaminBPJS->id && // ranap BPJS
+                    \Carbon\Carbon::parse($lastRanapRegistration['registration_date'])->diffInDays() <= 30; // kurang dari 30 hari / 1 bulan
+                if ($ranapBPJSdalam1bulan) {
+                    // reassign the $penjamins variable
+                    // filter it to exclude penjamins BPJS
+                    $penjamins = Penjamin::where('group_penjamin_id', '!=', $grupPenjaminBPJS->id)->get();
+                }
+
+                return view('pages.simrs.pendaftaran.form-registrasi', [
+                    'title' => "Rawat Inap",
+                    'groupedDoctors' => $groupedDoctors,
+                    'doctors' => $doctors,
+                    'kelas_rawats' => $kelas_rawats,
+                    'kelasTitipan' => $kelas_rawats,
+                    'penjamins' => $penjamins,
+                    'case' => 'rawat-inap',
+                    'patient' => $patient,
+                    'age' => $age,
+                    'ranapBPJSdalam1bulan' => $ranapBPJSdalam1bulan
+                ]);
+                break;
+
             case 'igd':
                 return view('pages.simrs.pendaftaran.form-registrasi', [
                     'title' => "IGD",
@@ -278,30 +304,6 @@ class RegistrationController extends Controller
                     'case' => 'odc',
                     'patient' => $patient,
                     'age' => $age
-                ]);
-                break;
-
-            case 'rawat-inap':
-                $lastRanapRegistration = Registration::where(['patient_id' => $patient->id, 'registration_type' => 'rawat-inap'])->orderBy('created_at', 'desc')->first();
-                $grupPenjaminBPJS = GroupPenjamin::where('name', 'like', '%BPJS%')->first();
-                $ranapBPJSdalam1bulan =
-                    $lastRanapRegistration && $lastRanapRegistration['penjamin_id'] == $grupPenjaminBPJS->id && // ranap BPJS
-                    \Carbon\Carbon::parse($lastRanapRegistration['registration_date'])->diffInDays() <= 30; // kurang dari 30 hari / 1 bulan
-                if ($ranapBPJSdalam1bulan) {
-                    // reassign the $penjamins variable
-                    // filter it to exclude penjamins BPJS
-                    $penjamins = Penjamin::where('group_penjamin_id', '!=', $grupPenjaminBPJS->id)->get();
-                }
-                return view('pages.simrs.pendaftaran.form-registrasi', [
-                    'title' => "Rawat Inap",
-                    'groupedDoctors' => $groupedDoctors,
-                    'kelas_rawats' => $kelas_rawats,
-                    'kelasTitipan' => $kelas_rawats,
-                    'penjamins' => $penjamins,
-                    'case' => 'rawat-inap',
-                    'patient' => $patient,
-                    'age' => $age,
-                    'ranapBPJSdalam1bulan' => $ranapBPJSdalam1bulan
                 ]);
                 break;
 

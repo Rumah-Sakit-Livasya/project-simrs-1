@@ -1,148 +1,83 @@
 @extends('inc.layout')
-@section('title', 'List Makanan')
+@section('title', 'Daftar Makanan Gizi')
+
+@section('extended-css')
+    <link rel="stylesheet" media="screen, print" href="/css/datagrid/datatables/datatables.bundle.css">
+    <link rel="stylesheet" media="screen, print" href="/css/formplugins/select2/select2.bundle.css">
+@endsection
+
 @section('content')
     <main id="js-page-content" role="main" class="page-content">
-
-        @include('pages.simrs.gizi.partials.makanan-form')
-
-        @include('pages.simrs.gizi.partials.makanan-datatable')
-
-        @include('pages.simrs.gizi.partials.add-makanan-modal')
+        <div class="row">
+            <div class="col-xl-12">
+                <div id="panel-1" class="panel">
+                    <div class="panel-hdr">
+                        <h2>Filter Pencarian Makanan</h2>
+                    </div>
+                    <div class="panel-container show">
+                        <div class="panel-content">
+                            <form id="filter-form">
+                                <div class="form-group row align-items-center">
+                                    <label class="col-md-2 col-form-label text-right" for="nama_makanan_filter">Nama
+                                        Makanan</label>
+                                    <div class="col-md-4">
+                                        <input type="text" class="form-control" id="nama_makanan_filter"
+                                            name="nama_makanan">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <button type="submit" class="btn btn-primary waves-effect waves-themed">
+                                            <i class="fal fa-search mr-1"></i> Cari
+                                        </button>
+                                        <button type="button" class="btn btn-success waves-effect waves-themed"
+                                            data-toggle="modal" data-target="#addModal">
+                                            <i class="fal fa-plus mr-1"></i> Tambah Makanan
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xl-12">
+                <div id="panel-2" class="panel">
+                    <div class="panel-hdr">
+                        <h2>Daftar Makanan</h2>
+                    </div>
+                    <div class="panel-container show">
+                        <div class="panel-content">
+                            <!-- datatable start -->
+                            <table id="dt-makanan" class="table table-bordered table-hover table-striped w-100">
+                                <thead class="bg-primary-600">
+                                    <tr>
+                                        <th>No</th>
+                                        <th>Nama Makanan</th>
+                                        <th>Harga</th>
+                                        <th>Status</th>
+                                        <th>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Data akan diisi oleh DataTables -->
+                                </tbody>
+                            </table>
+                            <!-- datatable end -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </main>
+
+    {{-- Include Add Modal --}}
+    @include('pages.simrs.gizi.partials.add-makanan-modal')
+
 @endsection
+
 @section('plugin')
     <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
-    <script src="/js/datagrid/datatables/datatables.export.js"></script>
-    {{-- Select 2 --}}
     <script src="/js/formplugins/select2/select2.bundle.js"></script>
-    {{-- Datepicker --}}
-    <script src="/js/formplugins/bootstrap-datepicker/bootstrap-datepicker.js"></script>
-    {{-- Datepicker Range --}}
-    <script src="/js/dependency/moment/moment.js"></script>
-    <script src="/js/formplugins/bootstrap-daterangepicker/bootstrap-daterangepicker.js"></script>
-    <script src="/js/bootstrap.js"></script>
-
-    <script>
-        var controls = {
-            leftArrow: '<i class="fal fa-angle-left" style="font-size: 1.25rem"></i>',
-            rightArrow: '<i class="fal fa-angle-right" style="font-size: 1.25rem"></i>'
-        }
-
-        var runDatePicker = function() {
-
-            // minimum setup
-            $('#date_of_birth').datepicker({
-                todayHighlight: true,
-                orientation: "bottom left",
-                templates: controls
-            });
-
-        }
-
-        $(document).ready(function() {
-
-            // Datepciker
-            runDatePicker();
-
-            // Select 2
-            $(function() {
-                $('.select2').select2({
-                    dropdownCssClass: "move-up"
-                });
-                $(".select2").on("select2:open", function() {
-                    // Mengambil elemen kotak pencarian
-                    var searchField = $(".select2-search__field");
-
-                    // Mengubah urutan elemen untuk memindahkannya ke atas
-                    searchField.insertBefore(searchField.prev());
-                });
-            });
-
-            /// Get the current date and time
-            var today = new Date();
-
-            // Format it as "YYYY-MM-DD"
-            var formattedToday = today.getFullYear() + '-' +
-                ('0' + (today.getMonth() + 1)).slice(-2) + '-' +
-                ('0' + today.getDate()).slice(-2) + ' ' +
-                ('0' + today.getHours()).slice(-2) + ':' +
-                ('0' + today.getMinutes()).slice(-2) + ':' +
-                ('0' + today.getSeconds()).slice(-2);
-
-            // Set the default date for the datepicker
-            $('#datepicker-1').daterangepicker({
-                opens: 'left',
-                startDate: moment(today).format('YYYY-MM-DD'),
-                endDate: moment(today).format('YYYY-MM-DD'),
-                // timePicker: true, // Enable time selection
-                // timePicker24Hour: true, // 24-hour format
-                // timePickerSeconds: true, // Include seconds in time selection
-                locale: {
-                    format: 'YYYY-MM-DD' // Display format for the picker
-                }
-            }, function(start, end, label) {
-                console.log("A new date selection was made: " + start.format('YYYY-MM-DD') +
-                    ' to ' + end.format('YYYY-MM-DD'));
-            });
-
-
-            $('#loading-spinner').show();
-            // initialize datatable
-            $('#dt-basic-example').dataTable({
-                "drawCallback": function(settings) {
-                    // Menyembunyikan preloader setelah data berhasil dimuat
-                    $('#loading-spinner').hide();
-                },
-                responsive: true,
-                lengthChange: false,
-                dom: "<'row mb-3'<'col-sm-12 col-md-6 d-flex align-items-center justify-content-start'f><'col-sm-12 col-md-6 d-flex align-items-center justify-content-end'lB>>" +
-                    "<'row'<'col-sm-12'tr>>" +
-                    "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
-                buttons: [{
-                        extend: 'pdfHtml5',
-                        text: 'PDF',
-                        titleAttr: 'Generate PDF',
-                        className: 'btn-outline-danger btn-sm mr-1'
-                    },
-                    {
-                        extend: 'excelHtml5',
-                        text: 'Excel',
-                        titleAttr: 'Generate Excel',
-                        className: 'btn-outline-success btn-sm mr-1'
-                    },
-                    {
-                        extend: 'csvHtml5',
-                        text: 'CSV',
-                        titleAttr: 'Generate CSV',
-                        className: 'btn-outline-primary btn-sm mr-1'
-                    },
-                    {
-                        extend: 'copyHtml5',
-                        text: 'Copy',
-                        titleAttr: 'Copy to clipboard',
-                        className: 'btn-outline-primary btn-sm mr-1'
-                    },
-                    {
-                        extend: 'print',
-                        text: 'Print',
-                        titleAttr: 'Print Table',
-                        className: 'btn-outline-primary btn-sm'
-                    }
-                ]
-            });
-
-        });
-
-
-        function formatAngka(input) {
-            var value = input.value.replace(/\D/g, '');
-            var formattedValue = '';
-
-            formattedValue = value.replace(/\B(?=(\d{3})+(?!\d))/g, '');
-
-            input.value = formattedValue;
-        }
-    </script>
-
-    <script src="{{ asset('js/simrs/makanan-gizi.js') }}?v={{ time() }}"></script>
+    <script src="/js/simrs/makanan-gizi.js"></script>
 @endsection

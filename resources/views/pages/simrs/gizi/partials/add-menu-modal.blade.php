@@ -1,122 +1,89 @@
-<div class="modal fade" id="addModal" tabindex="-1" aria-labelledby="addModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+<div class="modal fade" id="addMenuModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
-            <form action="{{ route('menu.gizi.store') }}" method="post">
+            <form action="{{ route('gizi.menu.store') }}" method="POST" class="form-menu">
                 @csrf
-                @method('post')
                 <div class="modal-header">
-                    <h1 class="modal-title fs-5" id="addModalLabel">Tambah Menu</h1>
+                    <h5 class="modal-title">Tambah Menu Baru</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true"><i class="fal fa-times"></i></span>
+                    </button>
                 </div>
-            <div class="modal-body">
-
-                    <table style="width: 100%">
-                        <tr>
-                            <td>Nama Menu</td>
-                            <td>:</td>
-                            <td>
-                                <input type="text" value="{{ request('nama') }}"
-                                    style="border: 0; border-bottom: 1.9px solid #eaeaea; margin-top: -.5rem; border-radius: 0"
-                                    class="form-control" id="nama" name="nama">
-                                @error('nama')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td>Status Aktif</td>
-                            <td>:</td>
-                            <td>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="aktif" id="status_aktif_true"
-                                        value="1" checked>
-                                    <label class="form-check-label" for="status_aktif_true">
-                                        Aktif
-                                    </label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="aktif"
-                                        id="status_aktif_false" value="0">
-                                    <label class="form-check-label" for="status_aktif_false">
-                                        Non Aktif
-                                    </label>
-                                </div>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td>Kategori</td>
-                            <td>:</td>
-                            <td>
-                                <select class="select2 form-control w-100" name="kategori_id">
-                                    <option value=""></option>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">Nama Menu</label>
+                                <input type="text" name="nama" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">Kategori</label>
+                                <select name="kategori_id" class="form-control select2" required>
+                                    <option value="" disabled selected>Pilih Kategori</option>
                                     @foreach ($categories as $category)
-                                        <option value="{{ $category->id }}">
-                                            {{ $category->nama }}
-                                        </option>
+                                        <option value="{{ $category->id }}">{{ $category->nama }}</option>
                                     @endforeach
                                 </select>
-                            </td>
-                        </tr>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Status</label>
+                        <div>
+                            <div class="custom-control custom-radio custom-control-inline">
+                                <input type="radio" class="custom-control-input" id="add-aktif-true" name="aktif"
+                                    value="1" checked>
+                                <label class="custom-control-label" for="add-aktif-true">Aktif</label>
+                            </div>
+                            <div class="custom-control custom-radio custom-control-inline">
+                                <input type="radio" class="custom-control-input" id="add-aktif-false" name="aktif"
+                                    value="0">
+                                <label class="custom-control-label" for="add-aktif-false">Non Aktif</label>
+                            </div>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="form-group">
+                        <label class="form-label">Cari & Tambah Makanan</label>
+                        <select class="form-control select2-food-search"
+                            data-target-table="#addMenuModal .food-table-body">
+                            <option></option>
+                            @foreach ($foods as $food)
+                                <option value="{{ $food->id }}">{{ $food->nama }} - (Rp
+                                    {{ number_format($food->harga) }})</option>
+                            @endforeach
+                        </select>
+                    </div>
 
-                        <tr>
-                            <td>Cari Makanan</td>
-                            <td>:</td>
-                            <td>
-                                <select class="select2 form-control w-100" id="search-food">
-                                    <option value=""></option>
-                                    @foreach ($foods as $food)
-                                        <option value="{{ $food->id }}">
-                                            [{{ rp($food->harga) }}] {{ $food->nama }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <table class="table table-bordered table-hover table-striped w-100">
-                                <thead class="bg-primary-600">
-                                    <tr>
-                                        <th>Nama Makanan</th>
-                                        <th>Harga</th>
-                                        <th>Status</th>
-                                        <th>Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="table-food">
-
-                                </tbody>
-                                <tfoot>
-                                    <tr>
-                                        <td colspan="3" class="text-right">Total
-                                            <input type="hidden" value="0" name="harga">
-                                        </td>
-                                        <td id="harga-display">Rp. 0</td>
-                                    </tr>
-                                </tfoot>
-                            </table>
-                        </tr>
-
-
+                    <table class="table table-bordered table-sm mt-3">
+                        <thead class="bg-primary-200">
+                            <tr>
+                                <th>Nama Makanan</th>
+                                <th class="text-right">Harga</th>
+                                <th class="text-center">Status</th>
+                                <th class="text-center">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody class="food-table-body">
+                            {{-- Baris makanan akan ditambahkan di sini oleh JS --}}
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td class="text-right font-weight-bold">Total Harga</td>
+                                <td class="text-right font-weight-bold total-harga-display">Rp 0</td>
+                                <td colspan="2"></td>
+                            </tr>
+                        </tfoot>
                     </table>
-
+                    <input type="hidden" name="harga" class="total-harga-input" value="0">
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-primary">
-                        <span class="fal fa-plus mr-1"></span>
-                        Simpan
-                    </button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
+                    <button type="submit" class="btn btn-primary">Simpan Menu</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
-<script>
-    // on document ready
-    // use vanilla js
-    document.addEventListener('DOMContentLoaded', function() {
-        window["handler_" + "#addModal"] = new ModalMenuGiziHandler("#addModal");
-    });
-</script>

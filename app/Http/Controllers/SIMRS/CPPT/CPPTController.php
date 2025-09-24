@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\SIMRS\CPPT;
 
 use App\Http\Controllers\Controller;
+use App\Models\Employee;
 use App\Models\FarmasiResepElektronik;
 use App\Models\FarmasiResepElektronikItems;
 use App\Models\FarmasiResepResponse;
@@ -213,7 +214,6 @@ class CPPTController extends Controller
 
     public function store(Request $request, $type, $registration_number)
     {
-        // dd($request->all());
         $validatedData = $request->validate([
             'registration_id' => 'required',
             'doctor_id' => 'nullable',
@@ -245,7 +245,7 @@ class CPPTController extends Controller
                 $validatedData['monitoring'] = $request->input('monitoring');
             } else if ($request->has('perawat_id')) {
                 $validatedData['tipe_cppt'] = 'perawat';
-                $validatedData['user_id'] = Doctor::find($request->doctor_id)->employee->user->id;
+                $validatedData['user_id'] = Employee::find($request->perawat_id)->user->id;
             } elseif ($request->has('doctor_id')) {
                 $validatedData['tipe_cppt'] = 'dokter';
                 $validatedData['user_id'] = Doctor::find($request->doctor_id)->employee->user->id;
@@ -367,11 +367,13 @@ class CPPTController extends Controller
             return response()->json(['message' => 'Resep berhasil disimpan!'], 200);
         } catch (\Exception $e) {
             DB::rollBack();
-
+            \Log::error('CPPTController@store error: ' . $e->getMessage(), [
+                'exception' => $e,
+                'request' => $request->all(),
+            ]);
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
-
     /**
      * Mengambil data satu CPPT untuk form edit.
      */

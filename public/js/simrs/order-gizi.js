@@ -1,289 +1,209 @@
-// @ts-check
-/// <reference types="jquery" />
-/// <reference path="../types.d.ts" />
+$(document).ready(function () {
+    // --- SETUP ---
+    $(".select2").select2();
 
-// @ts-ignore
-const Swal = /** @type {import("sweetalert2").default} */ (window.Swal);
-
-class OrderGiziHandler {
-    /**
-     * All orders in the datatable, displayed or not
-     * @type {OrderGizi[]}
-     */
-    #Orders;
-
-    constructor() {
-        document.addEventListener("DOMContentLoaded", this.#init.bind(this));
-
-        // @ts-ignore
-        this.#Orders = window._orders;
-    }
-
-    #init() {
-        this.#addEventListeners(".send-btn", this.#handleSendButtonClick);
-        this.#addEventListeners(
-            ".print-label-btn",
-            this.#handlePrintLabelButtonClick
-        );
-        this.#addEventListeners(
-            ".bulk-send-btn",
-            this.#handleBulkSendButtonClick
-        );
-        this.#addEventListeners(
-            ".bulk-print-btn",
-            this.#handleBulkPrintButtonClick
-        );
-        this.#addEventListeners(
-            ".print-nota-btn",
-            this.#handlePrintNotaButtonClick
-        );
-        this.#addEventListeners(".edit-btn", this.#handleEditButtonClick);
-    }
-
-    /**
-     * Add event listeners
-     * @param {string} selector
-     * @param {Function} handler
-     * @param {string} event
-     */
-    #addEventListeners(selector, handler, event = "click") {
-        const buttons = document.querySelectorAll(selector);
-        buttons.forEach((button) => {
-            button.addEventListener(event, handler.bind(this));
-        });
-    }
-
-    /**
-     * Handle edit order button click
-     * @param {Event} event
-     */
-    #handleEditButtonClick(event) {
-        event.preventDefault();
-        const button = /** @type {HTMLButtonElement} */ (event.target);
-        const id = button.getAttribute("data-id");
-        const url = "/simrs/gizi/popup/edit/" + id;
-        const width = screen.width / 2;
-        const height = screen.height / 2;
-        const left = width - width / 2;
-        const top = height - height / 2;
-        window.open(
-            url,
-            "popupWindow_editOrderGizi",
-            "width=" +
-                width +
-                ",height=" +
-                height +
-                ",scrollbars=yes,resizable=yes,left=" +
-                left +
-                ",top=" +
-                top
-        );
-    }
-
-    /**
-     * Handle print order button click event
-     * @param {Event} event
-     */
-    #handlePrintNotaButtonClick(event) {
-        event.preventDefault();
-        const button = /** @type {HTMLButtonElement} */ (event.target);
-        const id = button.getAttribute("data-id");
-        const url = "/simrs/gizi/popup/print-nota/" + id;
-        const width = screen.width;
-        const height = screen.height;
-        window.open(
-            url,
-            "popupWindow_printNotaOrderGizi" + id,
-            "width=" +
-                width +
-                ",height=" +
-                height +
-                ",scrollbars=yes,resizable=yes"
-        );
-    }
-
-    /**
-     * Handle bulk print label button click event
-     * @param {Event} event
-     */
-    #handleBulkPrintButtonClick(event) {
-        event.preventDefault();
-
-        // create an input array
-        // with name order_ids
-        const orderIds = [];
-        this.#Orders.forEach((order) => {
-            orderIds.push(order.id);
-        });
-
-        const url = "/simrs/gizi/popup/bulk-label/" + JSON.stringify(orderIds);
-        const width = screen.width / 2;
-        const height = screen.height / 2;
-        const left = width - width / 2;
-        const top = height - height / 2;
-        window.open(
-            url,
-            "popupWindow_bulkLabelOrderGizi",
-            "width=" +
-                width +
-                ",height=" +
-                height +
-                ",scrollbars=yes,resizable=yes,left=" +
-                left +
-                ",top=" +
-                top
-        );
-    }
-
-    /**
-     * Handle bulk send button click event
-     * @param {Event} event
-     */
-    #handleBulkSendButtonClick(event) {
-        event.preventDefault();
-
-        // fire Swal confirmation alert
-        Swal.fire({
-            title: "Update status semua pesanan?",
-            text: "Ubah status semua pesanan yang ada di table menjadi terkirim?",
-            icon: "question",
-            showCancelButton: true,
-            confirmButtonColor: "#3085d6",
-            cancelButtonColor: "#d33",
-            confirmButtonText: "Ubah semua",
-            cancelButtonText: "Batal",
-        }).then((result) => {
-            if (result.isConfirmed) {
-                // send request to server
-                this.#bulkUpdateOrderStatus();
-            }
-        });
-    }
-
-    #bulkUpdateOrderStatus() {
-        // first, get every order
-        // where "status_order" is false or 0
-        const orders = this.#Orders.filter((order) => order.status_order == 0);
-        if (orders.length === 0) {
-            showErrorAlertNoRefresh("Semua pesanan sudah terkirim!");
-            return;
-        }
-
-        // second, loop through orders
-        // and update status_order to 1
-        // with #updateOrderStatus
-        orders.forEach(async (order) => {
-            await this.#updateOrderStatus(order.id, false);
-        });
-
-        // lastly, prompt success alert
-        showSuccessAlert("Data berhasil disimpan");
-        setTimeout(() => window.location.reload(), 2000);
-    }
-
-    /**
-     * Handle send button click event
-     * @param {Event} event
-     */
-    #handleSendButtonClick(event) {
-        event.preventDefault();
-        const button = /** @type {HTMLButtonElement} */ (event.target);
-
-        // get id from attribute data-id
-        const dataId = button.getAttribute("data-id");
-        if (!dataId) {
-            showErrorAlertNoRefresh("Data ID tidak ditemukan");
-            return;
-        }
-        const id = parseInt(dataId);
-
-        // fire Swal confirmation alert
-        Swal.fire({
-            title: "Update status pesanan?",
-            text: "Ubah status pesanan menjadi terkirim?",
-            icon: "question",
-            showCancelButton: true,
-            confirmButtonColor: "#3085d6",
-            cancelButtonColor: "#d33",
-            confirmButtonText: "Ubah",
-            cancelButtonText: "Batal",
-        }).then((result) => {
-            if (result.isConfirmed) {
-                // send request to server
-                this.#updateOrderStatus(id);
-            }
-        });
-    }
-
-    /**
-     * Update order status after confirmation
-     * @param {number} id
-     * @param {boolean} alert
-     */
-    #updateOrderStatus(id, alert = true) {
-        if (!id || id == 0) return showErrorAlertNoRefresh("ID tidak valid!");
-        const formData = new FormData();
-        formData.append("id", String(id));
-
-        return fetch("/api/simrs/gizi/order/update/status", {
-            method: "POST",
-            body: formData,
-            headers: {
-                "X-CSRF-TOKEN":
-                    document
-                        .querySelector('meta[name="csrf-token"]')
-                        ?.getAttribute("content") || "",
+    // --- DATATABLES ---
+    var table = $("#dt-order").DataTable({
+        processing: true,
+        serverSide: true,
+        responsive: true,
+        ajax: {
+            url: "/api/simrs/gizi/order/datatable",
+            type: "GET",
+            data: function (d) {
+                // Mengambil semua data dari form filter
+                var formData = $("#filter-form").serializeArray();
+                $.each(formData, function (i, field) {
+                    d[field.name] = field.value;
+                });
             },
-        })
-            .then((response) => {
-                if (response.status != 200) {
-                    throw new Error("Error: " + response.statusText);
-                }
-                if (alert) {
-                    showSuccessAlert("Data berhasil disimpan");
-                    setTimeout(() => window.location.reload(), 2000);
-                }
-            })
-            .catch((error) => {
-                console.log("Error:", error);
-                showErrorAlertNoRefresh(`Error: ${error}`);
-            });
-    }
+        },
+        columns: [
+            {
+                className: "details-control",
+                orderable: false,
+                data: null,
+                defaultContent: "",
+            },
+            {
+                data: "id", // Gunakan 'id' order sebagai sumber data
+                name: "id",
+                orderable: false,
+                searchable: false,
+                render: function (data, type, row) {
+                    // Render sebagai input checkbox
+                    // Tambahkan atribut 'disabled' jika status order sudah 'Delivered' (true)
+                    const disabled = row.status_order ? "disabled" : "";
+                    return `<input type="checkbox" class="row-checkbox" value="${data}" ${disabled}>`;
+                },
+            },
+            { data: "nama_pemesan", name: "nama_pemesan" },
+            { data: "untuk", name: "untuk" },
+            { data: "pasien_info", name: "registration.patient.name" }, // Sertakan relasi untuk pencarian server-side
+            { data: "no_reg_rm", name: "registration.registration_number" },
+            { data: "waktu_makan", name: "waktu_makan" },
+            { data: "harga_formatted", name: "total_harga" },
+            { data: "ditagihkan_formatted", name: "ditagihkan" },
+            {
+                data: "status_payment_formatted",
+                name: "status_payment",
+                orderable: false,
+                searchable: false,
+            },
+            { data: "status_order_formatted", name: "status_order" },
+            {
+                data: "action",
+                name: "action",
+                orderable: false,
+                searchable: false,
+            },
+            { data: "detail_makanan", name: "detail_makanan", visible: false },
+        ],
+        order: [[5, "desc"]], // Urutkan berdasarkan no registrasi/rm
+        columnDefs: [{ targets: [1, 11], className: "text-center" }],
+    });
 
-    /**
-     * Handle print label button click event
-     * @param {Event} event
-     */
-    #handlePrintLabelButtonClick(event) {
-        event.preventDefault();
-        const button = /** @type {HTMLButtonElement} */ (event.target);
+    // --- EVENT HANDLERS ---
+    $("#filter-form").on("submit", function (e) {
+        e.preventDefault();
+        table.draw();
+    });
 
-        // get id from attribute data-id
-        const dataId = button.getAttribute("data-id");
-        if (!dataId) {
-            showErrorAlertNoRefresh("Data ID tidak ditemukan");
-            return;
+    $("#reset-filter-btn").on("click", function () {
+        $("#filter-form").trigger("reset");
+        $(".select2").val(null).trigger("change");
+        table.draw();
+    });
+
+    // Child row handler
+    $("#dt-order tbody").on("click", "td.details-control", function () {
+        var tr = $(this).closest("tr");
+        var row = table.row(tr);
+        if (row.child.isShown()) {
+            row.child.hide();
+            tr.removeClass("shown");
+        } else {
+            row.child(row.data().detail_makanan).show();
+            tr.addClass("shown");
         }
-        const id = parseInt(dataId);
+    });
 
-        const url = "/simrs/gizi/popup/label/" + id;
-        const width = 400;
-        const height = 400;
-        const left = width - screen.width / 2;
-        const top = height - screen.height / 2;
+    // Aksi-aksi (delegation)
+    $("#dt-order tbody").on("click", ".send-btn", function () {
+        var id = $(this).data("id");
+        Swal.fire({
+            title: "Kirim Pesanan?",
+            text: "Status pesanan akan diubah menjadi 'Terkirim'.",
+            icon: "question",
+            showCancelButton: true,
+            confirmButtonText: "Ya, Kirim!",
+            cancelButtonText: "Batal",
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: "/api/simrs/gizi/order/status/" + id,
+                    type: "PUT",
+                    success: function (response) {
+                        if (response.success) {
+                            showSuccessAlert(response.message);
+                            table.ajax.reload();
+                        }
+                    },
+                    error: function () {
+                        showErrorAlert("Gagal mengubah status.");
+                    },
+                });
+            }
+        });
+    });
+
+    // Popup handlers
+    function openPopup(url, title, width, height) {
         window.open(
             url,
-            "popupWindow_labelOrderGizi_" + id,
-            "width=" +
-                width +
-                ",height=" +
-                height +
-                ",scrollbars=yes,resizable=yes,left=" +
-                left +
-                ",top=" +
-                top
+            title,
+            `width=${width},height=${height},scrollbars=yes,resizable=yes`
         );
     }
-}
 
-const OrderGiziClass = new OrderGiziHandler();
+    $("#dt-order tbody").on("click", ".print-nota-btn", function () {
+        openPopup(
+            "/api/simrs/gizi/popup/print-nota/" + $(this).data("id"),
+            "PrintNota",
+            800,
+            600
+        );
+    });
+    $("#dt-order tbody").on("click", ".print-label-btn", function () {
+        openPopup(
+            "/api/simrs/gizi/popup/label/" + $(this).data("id"),
+            "PrintLabel",
+            400,
+            400
+        );
+    });
+    $("#dt-order tbody").on("click", ".edit-btn", function () {
+        openPopup(
+            "/api/simrs/gizi/popup/edit/" + $(this).data("id"),
+            "EditSisaMakanan",
+            600,
+            500
+        );
+    });
+
+    // Bulk actions
+    $("#select-all-checkbox").on("click", function () {
+        $(".row-checkbox").prop("checked", this.checked);
+    });
+
+    function getSelectedIds() {
+        return $(".row-checkbox:checked")
+            .map(function () {
+                return $(this).val();
+            })
+            .get();
+    }
+
+    $("#bulk-send-btn").on("click", function () {
+        var ids = getSelectedIds();
+        if (ids.length === 0) {
+            showErrorAlertNoRefresh(
+                "Pilih minimal satu order yang akan dikirim."
+            );
+            return;
+        }
+        Swal.fire({
+            title: "Kirim " + ids.length + " Pesanan?",
+            icon: "question",
+            showCancelButton: true,
+            confirmButtonText: "Ya, Kirim!",
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: "/api/simrs/gizi/order/bulk-status",
+                    type: "POST",
+                    data: { ids: ids },
+                    success: function (response) {
+                        showSuccessAlert(response.message);
+                        table.ajax.reload();
+                    },
+                    error: function () {
+                        showErrorAlert("Gagal mengirim pesanan terpilih.");
+                    },
+                });
+            }
+        });
+    });
+
+    $("#bulk-print-btn").on("click", function () {
+        var ids = getSelectedIds();
+        if (ids.length === 0) {
+            showErrorAlertNoRefresh(
+                "Pilih minimal satu order untuk dicetak labelnya."
+            );
+            return;
+        }
+        var url = "/api/simrs/gizi/popup/bulk-label?ids=" + JSON.stringify(ids);
+        openPopup(url, "BulkPrintLabel", 800, 600);
+    });
+});

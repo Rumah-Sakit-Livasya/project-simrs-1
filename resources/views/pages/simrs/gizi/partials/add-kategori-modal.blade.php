@@ -1,83 +1,47 @@
-<div class="modal fade" id="addModal" tabindex="-1" aria-labelledby="addModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+<div class="modal fade" id="addKategoriModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
         <div class="modal-content">
-            <form action="{{ route('kategori.gizi.store') }}" method="post">
+            <form action="{{ route('gizi.kategori.store') }}" method="POST">
                 @csrf
-                @method('post')
                 <div class="modal-header">
-                    <h1 class="modal-title fs-5" id="addModalLabel">Tambah Kategori Gizi</h1>
+                    <h5 class="modal-title">Tambah Kategori Baru</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true"><i class="fal fa-times"></i></span>
+                    </button>
                 </div>
                 <div class="modal-body">
-
-                    <table style="width: 100%">
-                        <tr>
-                            <td>Nama Kategori</td>
-                            <td>:</td>
-                            <td>
-                                <input type="text" value="{{ request('nama') }}"
-                                    style="border: 0; border-bottom: 1.9px solid #eaeaea; margin-top: -.5rem; border-radius: 0"
-                                    class="form-control" id="nama" name="nama">
-                                @error('nama')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td>Status Aktif</td>
-                            <td>:</td>
-                            <td>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="aktif"
-                                        id="status_aktif_true" value="1" checked>
-                                    <label class="form-check-label" for="status_aktif_true">
-                                        Aktif
-                                    </label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="aktif"
-                                        id="status_aktif_false" value="0">
-                                    <label class="form-check-label" for="status_aktif_false">
-                                        Non Aktif
-                                    </label>
-                                </div>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td>COA Pendapatan</td>
-                            <td>:</td>
-                            <td>
-                                <input type="text" value="{{ request('coa_pendapatan') }}"
-                                    style="border: 0; border-bottom: 1.9px solid #eaeaea; margin-top: -.5rem; border-radius: 0"
-                                    class="form-control" id="coa_pendapatan" name="coa_pendapatan">
-                                @error('coa_pendapatan')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td>COA Biaya</td>
-                            <td>:</td>
-                            <td>
-                                <input type="text" value="{{ request('coa_biaya') }}"
-                                    style="border: 0; border-bottom: 1.9px solid #eaeaea; margin-top: -.5rem; border-radius: 0"
-                                    class="form-control" id="coa_biaya" name="coa_biaya">
-                                @error('coa_biaya')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </td>
-                        </tr>
-                    </table>
-
+                    <div class="form-group">
+                        <label class="form-label" for="add-nama">Nama Kategori</label>
+                        <input type="text" id="add-nama" name="nama" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="add-coa-pendapatan">COA Pendapatan</label>
+                        <input type="text" id="add-coa-pendapatan" name="coa_pendapatan" class="form-control"
+                            required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="add-coa-biaya">COA Biaya</label>
+                        <input type="text" id="add-coa-biaya" name="coa_biaya" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Status</label>
+                        <div>
+                            <div class="custom-control custom-radio custom-control-inline">
+                                <input type="radio" class="custom-control-input" id="add-aktif-true" name="aktif"
+                                    value="1" checked>
+                                <label class="custom-control-label" for="add-aktif-true">Aktif</label>
+                            </div>
+                            <div class="custom-control custom-radio custom-control-inline">
+                                <input type="radio" class="custom-control-input" id="add-aktif-false" name="aktif"
+                                    value="0">
+                                <label class="custom-control-label" for="add-aktif-false">Non Aktif</label>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-primary">
-                        <span class="fal fa-plus mr-1"></span>
-                        Simpan
-                    </button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
+                    <button type="submit" class="btn btn-primary">Simpan</button>
                 </div>
             </form>
         </div>

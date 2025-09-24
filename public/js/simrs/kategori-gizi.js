@@ -1,93 +1,94 @@
-// @ts-check
-/// <reference types="jquery" />
-/// <reference path="../types.d.ts" />
-
-// @ts-ignore
-const Swal = /** @type {import("sweetalert2").default} */ (window.Swal);
-
-class KategoriGiziHandler {
-    constructor() {
-        document.addEventListener("DOMContentLoaded", this.#init.bind(this));
-    }
-
-    #init() {
-        this.#addEventListeners("a.delete-btn", this.#handleDeleteButtonClick);
-    }
-
-    /**
-     * Add event listeners
-     * @param {string} selector
-     * @param {Function} handler
-     * @param {string} event
-     */
-    #addEventListeners(selector, handler, event = "click") {
-        const buttons = document.querySelectorAll(selector);
-        buttons.forEach((button) => {
-            button.addEventListener(event, handler.bind(this));
-        });
-    }
-
-    /**
-     * Handle tambah button click
-     * @param {Event} event
-     */
-    #handleDeleteButtonClick(event) {
-        event.preventDefault();
-        const button = /** @type {HTMLButtonElement} */ (event.target);
-        const id = parseInt(button.getAttribute("data-id") || "0");
-        if (!id) return;
-
-        Swal.fire({
-            title: "Hapus kategori gizi?",
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#3085d6",
-            cancelButtonColor: "#d33",
-            confirmButtonText: "Ya, hapus!",
-            cancelButtonText: "Batal",
-        }).then((result) => {
-            if (result.isConfirmed) {
-                this.#deleteKategori(id);
-            }
-        });
-    }
-
-    /**
-     * Delete kategori after confirmation
-     * @param {number} id
-     */
-    #deleteKategori(id) {
-        const formData = new FormData();
-        formData.append("id", String(id));
-        formData.append(
-            "csrf-token",
-            document
-                .querySelector('meta[name="csrf-token"]')
-                ?.getAttribute("content") || ""
-        );
-
-        fetch("/api/simrs/gizi/kategori/destroy/" + id, {
-            method: "DELETE",
-            body: formData,
-            headers: {
-                "X-CSRF-TOKEN":
-                    document
-                        .querySelector('meta[name="csrf-token"]')
-                        ?.getAttribute("content") || "",
+$(document).ready(function () {
+    // --- DATATABLES ---
+    var table = $("#dt-kategori").DataTable({
+        processing: true,
+        serverSide: true,
+        responsive: true,
+        ajax: {
+            url: "/api/simrs/gizi/kategori/datatable",
+            data: function (d) {
+                d.nama_kategori = $("#nama_kategori_filter").val();
             },
-        })
-            .then((response) => {
-                if (response.status != 200) {
-                    throw new Error("Error: " + response.statusText);
-                }
-                showSuccessAlert("Data berhasil dihapus!");
-                setTimeout(() => window.location.reload(), 2000);
-            })
-            .catch((error) => {
-                console.log("Error:", error);
-                showErrorAlertNoRefresh(`Error: ${error}`);
-            });
-    }
-}
+        },
+        columns: [
+            {
+                data: "DT_RowIndex",
+                name: "DT_RowIndex",
+                orderable: false,
+                searchable: false,
+                className: "text-center",
+            },
+            { data: "nama", name: "nama" },
+            { data: "coa_pendapatan", name: "coa_pendapatan" },
+            { data: "coa_biaya", name: "coa_biaya" },
+            { data: "status", name: "status", className: "text-center" },
+            {
+                data: "action",
+                name: "action",
+                orderable: false,
+                searchable: false,
+                className: "text-center",
+            },
+        ],
+        dom:
+            "<'row mb-3'<'col-sm-12 col-md-6 d-flex align-items-center justify-content-start'f><'col-sm-12 col-md-6 d-flex align-items-center justify-content-end'lB>>" +
+            "<'row'<'col-sm-12'tr>>" +
+            "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+        buttons: [
+            {
+                extend: "pdfHtml5",
+                text: "PDF",
+                titleAttr: "Generate PDF",
+                className: "btn-outline-danger btn-sm mr-1",
+            },
+            {
+                extend: "excelHtml5",
+                text: "Excel",
+                titleAttr: "Generate Excel",
+                className: "btn-outline-success btn-sm mr-1",
+            },
+            {
+                extend: "print",
+                text: "Print",
+                titleAttr: "Print Table",
+                className: "btn-outline-primary btn-sm",
+            },
+        ],
+    });
 
-const KategoriGiziHandlerClass = new KategoriGiziHandler();
+    // Handle form filter
+    $("#filter-form").on("submit", function (e) {
+        e.preventDefault();
+        table.draw();
+    });
+
+    // --- DELETE ACTION ---
+    $("#dt-kategori tbody").on("click", ".delete-btn", function () {
+        var id = $(this).data("id");
+        showDeleteConfirmation(function () {
+            $.ajax({
+                url: "/api/simrs/gizi/kategori/" + id,
+                type: "DELETE",
+                // CSRF token sudah di-handle oleh $.ajaxSetup di layout utama
+                success: function (response) {
+                    if (response.success) {
+                        showSuccessAlert(response.message);
+                        table.ajax.reload();
+                    } else {
+                        showErrorAlert(
+                            response.message || "Gagal menghapus data."
+                        );
+                    }
+                },
+                error: function (xhr) {
+                    let errorMsg =
+                        "Terjadi kesalahan. Tidak dapat menghapus data.";
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        errorMsg = xhr.responseJSON.message;
+                    }
+                    showErrorAlert(errorMsg);
+                },
+            });
+        });
+    });
+});

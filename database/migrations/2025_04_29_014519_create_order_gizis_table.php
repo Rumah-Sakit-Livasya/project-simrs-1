@@ -21,7 +21,7 @@ return new class extends Migration {
             $table->foreignId('registration_id')->constrained("registrations")->onDelete("cascade");
             $table->foreignId('kategori_id')->constrained(table: 'kategori_gizi')->onDelete('cascade');
             $table->string('nama_pemesan');
-            $table->enum('untuk', ['pasien','keluarga'])->default('pasien');
+            $table->enum('untuk', ['pasien', 'keluarga'])->default('pasien');
             $table->dateTime('tanggal_order');
             $table->string('waktu_makan')->nullable();
             $table->boolean('ditagihkan')->default(true);
