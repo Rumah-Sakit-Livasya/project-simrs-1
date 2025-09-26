@@ -135,17 +135,18 @@
         $tanda_vital = json_decode($tanda_vital_raw, true) ?? [];
     }
 @endphp
-        Nadi (PR): {{ $tanda_vital['pr'] ?? '' }}
-        Respirasi (RR): {{ $tanda_vital['rr'] ?? '' }}
-        Tensi (BP): {{ $tanda_vital['bp'] ?? '' }}
-        Suhu (T): {{ $tanda_vital['temperatur'] ?? '' }}
-        Tinggi Badan: {{ $tanda_vital['height_badan'] ?? '' }}
-        Berat Badan: {{ $tanda_vital['weight_badan'] ?? '' }}
-        BMI: {{ $tanda_vital['bmi'] ?? '' }}{{ isset($tanda_vital['kat_bmi']) ? ' (' . $tanda_vital['kat_bmi'] . ')' : '' }}
-        SpO2: {{ $tanda_vital['spo2'] ?? '' }}
-        Lingkar Kepala:
-        Pemeriksaan Fisik: {{ $assesment->pemeriksaan_fisik ?? '' }}
-        Pemeriksaan Penunjang: {{ $assesment->pemeriksaan_penunjang ?? '' }}
+Keluhan Utama: {{ $keluhan_utama }}
+Nadi (PR): {{ $tanda_vital['pr'] ?? '' }}
+Respirasi (RR): {{ $tanda_vital['rr'] ?? '' }}
+Tensi (BP): {{ $tanda_vital['bp'] ?? '' }}
+Suhu (T): {{ $tanda_vital['temperatur'] ?? '' }}
+Tinggi Badan: {{ $tanda_vital['height_badan'] ?? '' }}
+Berat Badan: {{ $tanda_vital['weight_badan'] ?? '' }}
+BMI: {{ $tanda_vital['bmi'] ?? '' }}{{ isset($tanda_vital['kat_bmi']) ? ' (' . $tanda_vital['kat_bmi'] . ')' : '' }}
+SpO2: {{ $tanda_vital['spo2'] ?? '' }}
+Lingkar Kepala:
+Pemeriksaan Fisik: {{ $assesment->pemeriksaan_fisik ?? '' }}
+Pemeriksaan Penunjang: {{ $assesment->pemeriksaan_penunjang ?? '' }}
 @endif
 @else
 {{ $pengkajian->anamnesa ?? '' }}
@@ -167,7 +168,13 @@
                                                     <div class="form-group">
                                                         <label for="diagnosa_utama" class="form-label">DIAGNOSA UTAMA
                                                             *</label>
-                                                        <textarea class="form-control" id="diagnosa_utama" name="diagnosa_utama" rows="4" required>{{ $pengkajian?->diagnosa_utama ?? '' }}</textarea>
+                                                        <textarea class="form-control" id="diagnosa_utama" name="diagnosa_utama" rows="4" required>
+@if (empty($pengkajian) && !empty($diagnosa_utama))
+{{ $diagnosa_utama }}
+@else
+{{ $pengkajian?->diagnosa_utama ?? '' }}
+@endif
+</textarea>
                                                     </div>
                                                 </td>
                                                 <td style="width: 30%">
@@ -184,7 +191,13 @@
                                                     <div class="form-group">
                                                         <label for="diagnosa_tambahan" class="form-label">DIAGNOSA
                                                             TAMBAHAN</label>
-                                                        <textarea class="form-control" id="diagnosa_tambahan" name="diagnosa_tambahan" rows="4">{{ $pengkajian?->diagnosa_tambahan ?? '' }}</textarea>
+                                                        <textarea class="form-control" id="diagnosa_utama" name="diagnosa_utama" rows="4" required>
+@if (empty($pengkajian) && !empty($diagnosa_tambahan))
+{{ $diagnosa_tambahan }}
+@else
+{{ $pengkajian?->diagnosa_tambahan ?? '' }}
+@endif
+</textarea>
                                                     </div>
                                                 </td>
                                                 <td>
