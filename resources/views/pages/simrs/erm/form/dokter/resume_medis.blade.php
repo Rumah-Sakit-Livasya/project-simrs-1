@@ -82,7 +82,7 @@
                                 <td><label>:</label></td>
                                 <td>
                                     <input type="text" class="form-control" id="tgl_masuk" name="tgl_masuk"
-                                        value="{{ $pengkajian?->tgl_masuk ? \Carbon\Carbon::parse($pengkajian->tgl_masuk)->format('d-m-Y') : \Carbon\Carbon::parse($registration->registration_date)->format('Y-m-d') }}">
+                                        value="{{ $pengkajian?->tgl_masuk ? \Carbon\Carbon::parse($pengkajian->tgl_masuk)->format('Y-m-d') : \Carbon\Carbon::parse($registration->registration_date)->format('Y-m-d') }}">
                                 </td>
                             </tr>
 
