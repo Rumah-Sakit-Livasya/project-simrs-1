@@ -1,7 +1,10 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
-<head> @include('inc.header') </head>
+<head>
+    @include('inc.header')
+    @yield('extended-css')
+</head>
 
 {{-- <body class="mod-bg-1 mod-nav-link header-function-fixed nav-function-fixed @yield('tmp_body')"> --}}
 

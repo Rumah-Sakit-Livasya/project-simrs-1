@@ -4,108 +4,105 @@ namespace App\Http\Controllers;
 
 use App\Models\MakananGizi;
 use Illuminate\Http\Request;
+use Yajra\DataTables\Facades\DataTables; // Pastikan Anda sudah install yajra/laravel-datatables-oracle
 
 class MakananGiziController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Menampilkan halaman utama manajemen makanan.
      */
-    public function index(Request $request)
+    public function index()
+    {
+        return view('pages.simrs.gizi.makanan');
+    }
+
+    /**
+     * Menyediakan data untuk DataTables.
+     */
+    public function datatable(Request $request)
     {
         $query = MakananGizi::query();
-        $filterApplied = false;
 
         if ($request->filled('nama_makanan')) {
-            $query->where("nama", "like", "%" . $request->get("nama_makanan") . "%");
-            $filterApplied = true;
+            $query->where('nama', 'like', '%' . $request->nama_makanan . '%');
         }
 
-        if ($filterApplied) {
-            $result = $query->get();
-        } else {
-            $result = MakananGizi::all();
-        }
+        return DataTables::of($query)
+            ->addIndexColumn() // FIX: Tambahkan baris ini untuk membuat kolom DT_RowIndex
+            ->addColumn('harga', function ($row) {
+                return 'Rp ' . number_format($row->harga, 0, ',', '.');
+            })
+            ->addColumn('status', function ($row) {
+                return $row->aktif ?
+                    '<span class="badge badge-success">Aktif</span>' :
+                    '<span class="badge badge-danger">Non Aktif</span>';
+            })
+            ->addColumn('action', function ($row) {
+                // Tombol Edit
+                $editBtn = '<button type="button" class="btn btn-sm btn-outline-primary waves-effect waves-themed" data-toggle="modal" data-target="#editModal' . $row->id . '">
+                                <i class="fal fa-pencil"></i>
+                           </button>';
 
-        return view('pages.simrs.gizi.makanan', [
-            'foods' => $result
-        ]);
+                // Tombol Hapus
+                $deleteBtn = '<button type="button" class="btn btn-sm btn-outline-danger waves-effect waves-themed delete-btn" data-id="' . $row->id . '">
+                                 <i class="fal fa-trash-alt"></i>
+                              </button>';
+
+                // Include modal edit
+                $editModal = view('pages.simrs.gizi.partials.edit-makanan-modal', ['food' => $row])->render();
+
+                return $editBtn . ' ' . $deleteBtn . $editModal;
+            })
+            ->rawColumns(['status', 'action'])
+            ->make(true);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
 
     /**
-     * Store a newly created resource in storage.
+     * Menyimpan data makanan baru.
      */
     public function store(Request $request)
     {
         $validatedData = $request->validate([
-            'nama' => 'required|string|max:255',
+            'nama' => 'required|string|max:255|unique:makanan_gizi,nama',
+            'harga' => 'required|numeric|min:0',
             'aktif' => 'required|boolean',
-            'harga' => 'required|integer'
         ]);
 
         MakananGizi::create($validatedData);
-        return redirect()->back()->with('success', 'Makanan berhasil ditambahkan!');
+        return redirect()->route('gizi.makanan.index')->with('success', 'Data makanan berhasil ditambahkan!');
     }
 
     /**
-     * Display the specified resource.
-     */
-    public function show(MakananGizi $makananGizi)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(MakananGizi $makananGizi)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
+     * Mengupdate data makanan.
      */
     public function update(Request $request, $id)
     {
         $validatedData = $request->validate([
-            'nama' => 'required|string|max:255',
+            'nama' => 'required|string|max:255|unique:makanan_gizi,nama,' . $id,
+            'harga' => 'required|numeric|min:0',
             'aktif' => 'required|boolean',
-            'harga' => 'required|integer'
         ]);
 
         try {
-            $kategori = MakananGizi::findOrFail($id);
-            $kategori->update($validatedData);
-            return redirect()->back()->with('success', 'Makanan berhasil diedit!');
+            $makanan = MakananGizi::findOrFail($id);
+            $makanan->update($validatedData);
+            return redirect()->route('gizi.makanan.index')->with('success', 'Data makanan berhasil diperbarui!');
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+            return redirect()->route('gizi.makanan.index')->with('error', 'Gagal memperbarui data: ' . $e->getMessage());
         }
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Menghapus data makanan.
      */
-    public function destroy(MakananGizi $makananGizi, $id)
+    public function destroy($id)
     {
         try {
             MakananGizi::destroy($id);
-            return response()->json([
-                'success'=> true,
-                'message'=> 'Makanan berhasil dihapus!'
-            ]);
-        }catch (\Exception $e) {
-            return response()->json([
-                'success'=> false,
-                'message'=> $e->getMessage()
-            ]);
+            return response()->json(['success' => true, 'message' => 'Data makanan berhasil dihapus.']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
 }

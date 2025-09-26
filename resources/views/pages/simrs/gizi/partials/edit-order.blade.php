@@ -39,7 +39,7 @@
                     </div>
                     <div class="panel-container show">
                         <div class="panel-content">
-                            <form id="form-order-gizi" name="form-order-gizi" action="{{ route("order.gizi.update") }}"
+                            <form id="form-order-gizi" name="form-order-gizi" action="{{ route('gizi.order.update') }}"
                                 method="post">
                                 @csrf
                                 <input type="hidden" name="user_id" value="{{ auth()->user()->id }}">
@@ -136,7 +136,8 @@
 
                                                             <select name="habis_{{ $food->id }}"
                                                                 id="habis_{{ $food->id }}" class="form-control">
-                                                                <option value="0" {{ $x <= 0 ? 'selected' : '' }}>Tidak
+                                                                <option value="0" {{ $x <= 0 ? 'selected' : '' }}>
+                                                                    Tidak
                                                                     Disentuh (utuh)</option>
                                                                 <option value="25"
                                                                     {{ $x >= 1 && $x <= 25 ? 'selected' : '' }}>Sisa 3/4
@@ -157,7 +158,8 @@
                                             <tfoot>
                                                 <tr>
                                                     <td colspan="3" class="text-right">Total
-                                                        <input type="hidden" value="{{ $order->total_harga }}" name="total_harga">
+                                                        <input type="hidden" value="{{ $order->total_harga }}"
+                                                            name="total_harga">
                                                     </td>
                                                     <td id="harga-display">{{ rp($order->total_harga) }}</td>
                                                 </tr>

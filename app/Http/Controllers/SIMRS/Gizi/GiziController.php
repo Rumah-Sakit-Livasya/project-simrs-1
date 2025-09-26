@@ -5,80 +5,100 @@ namespace App\Http\Controllers\SIMRS\Gizi;
 use App\Http\Controllers\Controller;
 use App\Models\KategoriGizi;
 use App\Models\MakananGizi;
-use App\Models\MakananMenuGizi;
 use App\Models\MenuGizi;
 use App\Models\OrderGizi;
-use App\Models\OrderMakananGizi;
 use App\Models\SIMRS\KelasRawat;
 use App\Models\SIMRS\Penjamin;
 use App\Models\SIMRS\Registration;
 use App\Models\SIMRS\Room;
 use Illuminate\Http\Request;
+use Yajra\DataTables\Facades\DataTables;
 
 class GiziController extends Controller
 {
-    public function index(Request $request)
+    /**
+     * Menampilkan halaman Daftar Pasien Gizi.
+     * Method ini hanya menyiapkan view dan data untuk filter.
+     */
+    public function index()
     {
-        $query = Registration::query()->with(["patient", "penjamin", "patient.bed", "patient.bed.room", "patient.family", "kelas_rawat"]);
-        $filters = ['medical_record_number', 'registration_number', 'no_order'];
+        $penjamins = Penjamin::all();
+        $kelasRawats = KelasRawat::all();
+        $rooms = Room::all(); // Menggunakan nama model Ruangan
 
-        foreach ($filters as $filter) {
-            if ($request->filled($filter)) {
-                $query->where($filter, 'like', '%' . $request->$filter . '%');
-            }
-        }
-
-        $query->where("status", "aktif");
-        $query->where("registration_type", "rawat-inap");
-
-        if ($request->filled('patient_name')) {
-            $query->whereHas('patient', function ($q) use ($request) {
-                $q->where('name', 'like', '%' . $request->patient_name . '%');
-            });
-        }
-
-        if ($request->filled('penjamin_id')) {
-            $query->whereHas('penjamin', function ($q) use ($request) {
-                $q->where('id', '%' . $request->penjamin_id . '%');
-            });
-        }
-
-        if ($request->filled('kelas_id')) {
-            $query->whereHas('kelas_rawat', function ($q) use ($request) {
-                $q->where('id', '%' . $request->kelas_id . '%');
-            });
-        }
-
-        if ($request->filled('room_id')) {
-            $query->whereHas('patient.bed.room', function ($q) use ($request) {
-                $q->where('id', '%' . $request->room_id . '%');
-            });
-        }
-
-        if ($request->filled('keluarga_pj')) {
-            $query->whereHas('patient.family', function ($q) use ($request) {
-                $q->where('family_name', 'like', '%' . $request->keluarga_pj . '%');
-            });
-        }
-
-        if ($request->filled('address')) {
-            $query->whereHas('patient', function ($q) use ($request) {
-                $q->where('address', 'like', '%' . $request->address . '%');
-            });
-        }
-
-        // Get the filtered results if any filter is applied
-        $registrations = $query->orderBy('date', 'asc')->get();
-
-
-        return view('pages.simrs.gizi.list-pasien', [
-            'registrations' => $registrations,
-            'penjamins' => Penjamin::all(),
-            'kelasRawats' => KelasRawat::all(),
-            'rooms' => Room::all()
-        ]);
+        return view('pages.simrs.gizi.list-pasien', compact('penjamins', 'kelasRawats', 'rooms'));
     }
 
+    /**
+     * Menyediakan data pasien untuk DataTables.
+     * Method ini menangani request AJAX dari DataTables.
+     */
+    public function datatable(Request $request)
+    {
+        // Query dasar: Hanya pasien Rawat Inap yang masih aktif
+        $query = Registration::with([
+            'patient.bed.room',
+            'kelas_rawat',
+            'doctor.employee',
+            'diet_gizi.category',
+            'penjamin'
+        ])
+            ->where('status', 'aktif')
+            ->where('registration_type', 'rawat-inap') // Sesuaikan dengan nilai di database Anda
+            ->select('registrations.*');
+
+        // --- Menerapkan Filter dari request AJAX ---
+        if ($request->filled('medical_record_number')) {
+            $query->whereHas('patient', fn($q) => $q->where('medical_record_number', 'like', '%' . $request->medical_record_number . '%'));
+        }
+        if ($request->filled('registration_number')) {
+            $query->where('registration_number', 'like', '%' . $request->registration_number . '%');
+        }
+        if ($request->filled('patient_name')) {
+            $query->whereHas('patient', fn($q) => $q->where('name', 'like', '%' . $request->patient_name . '%'));
+        }
+        if ($request->filled('penjamin_id')) {
+            $query->where('penjamin_id', $request->penjamin_id);
+        }
+        if ($request->filled('kelas_id')) {
+            $query->where('kelas_id', $request->kelas_id);
+        }
+        if ($request->filled('room_id')) {
+            // Pastikan relasi ini benar: Registration -> Patient -> Bed -> Room
+            $query->whereHas('patient.bed', fn($q) => $q->where('ruangan_id', $request->room_id));
+        }
+        // Filter-filter dari kode asli Anda yang mungkin tidak terpakai di form
+        if ($request->filled('keluarga_pj')) {
+            $query->whereHas('patient.family', fn($q) => $q->where('family_name', 'like', '%' . $request->keluarga_pj . '%'));
+        }
+        if ($request->filled('address')) {
+            $query->whereHas('patient', fn($q) => $q->where('address', 'like', '%' . $request->address . '%'));
+        }
+
+        return DataTables::of($query)
+            ->addIndexColumn()
+            ->addColumn('kelas', fn($row) => $row->kelas_rawat->kelas ?? 'N/A')
+            ->addColumn('ruang', fn($row) => $row->patient->bed->room->ruangan ?? 'N/A')
+            ->addColumn('tempat_tidur', fn($row) => $row->patient->bed->nama_tt ?? 'N/A')
+            ->addColumn('pasien_info', function ($row) {
+                $mrn = $row->patient->medical_record_number ?? 'N/A';
+                $nama = $row->patient->name ?? 'N/A';
+                return "[$mrn] $nama";
+            })
+            ->addColumn('dokter', fn($row) => $row->doctor->employee->fullname ?? 'N/A')
+            ->addColumn('kategori_diet', fn($row) => $row->diet_gizi->category->nama ?? '<span class="badge badge-warning">Belum Dipilih</span>')
+            ->addColumn('asuransi', fn($row) => $row->penjamin->penjamin ?? '-')
+            ->addColumn('action', function ($row) {
+                return view('pages.simrs.gizi.partials.list-pasien-actions', ['registration' => $row])->render();
+            })
+            ->rawColumns(['kategori_diet', 'action'])
+            ->make(true);
+    }
+
+
+    /**
+     * Menampilkan halaman Laporan.
+     */
     public function reports()
     {
         return view("pages.simrs.gizi.laporan", [
@@ -88,34 +108,29 @@ class GiziController extends Controller
         ]);
     }
 
+    /**
+     * Menampilkan hasil Laporan dalam view terpisah.
+     */
     public function reports_view($fromDate, $endDate, $kategori_id, $food_id, $status_payment, $waktu_makan, $untuk)
     {
+        // Query Anda sudah cukup baik, hanya perlu penyederhanaan sedikit
+        $query = OrderGizi::query()->with(["foods", "category"])
+            ->whereBetween('tanggal_order', [$fromDate, $endDate]);
 
-        $query = OrderGizi::query()->with(["foods", "category"]);
-        $query->whereBetween('tanggal_order', [$fromDate, $endDate]);
-
-        if ($kategori_id && $kategori_id != '-') {
-            $query->whereHas('category', function ($q) use ($kategori_id) {
-                $q->where('id', 'like', '%' . $kategori_id . '%');
-            });
+        if ($kategori_id != '-') {
+            $query->where('kategori_id', $kategori_id);
         }
-
-        if ($food_id && $food_id != '-') {
-            $query->whereHas('foods', function ($q) use ($food_id) {
-                $q->where('makanan_id', 'like', '%' . $food_id . '%');
-            });
+        if ($food_id != '-') {
+            $query->whereHas('foods', fn($q) => $q->where('makanan_id', $food_id));
         }
-
-        if ($status_payment && $status_payment != '-') {
-            $query->where('status_payment', 'like', '%' . $status_payment . '%');
+        if ($status_payment != '-') {
+            $query->where('status_payment', $status_payment);
         }
-
-        if ($waktu_makan && $waktu_makan != '-') {
-            $query->where('waktu_makan', 'like', '%' . $waktu_makan . '%');
+        if ($waktu_makan != '-') {
+            $query->where('waktu_makan', $waktu_makan);
         }
-
-        if ($untuk && $untuk != '-') {
-            $query->where('untuk', 'like', '%' . $untuk . '%');
+        if ($untuk != '-') {
+            $query->where('untuk', $untuk);
         }
 
         $orders = $query->get();
@@ -126,5 +141,4 @@ class GiziController extends Controller
             'endDate' => $endDate
         ]);
     }
-
 }

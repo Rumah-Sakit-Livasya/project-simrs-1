@@ -288,7 +288,6 @@
         cursor: pointer;
     }
 </style>
-@yield('extended-css')
 
 {{-- INI CARA YANG BENAR UNTUK VITE --}}
 {{-- @vite(['resources/css/app.css', 'resources/js/app.js']) --}}

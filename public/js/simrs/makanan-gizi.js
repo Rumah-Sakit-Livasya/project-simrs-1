@@ -1,93 +1,115 @@
-// @ts-check
-/// <reference types="jquery" />
-/// <reference path="../types.d.ts" />
-
-// @ts-ignore
-const Swal = /** @type {import("sweetalert2").default} */ (window.Swal);
-
-class MakananGiziHandler {
-    constructor() {
-        document.addEventListener("DOMContentLoaded", this.#init.bind(this));
-    }
-
-    #init() {
-        this.#addEventListeners("a.delete-btn", this.#handleDeleteButtonClick);
-    }
-
-    /**
-     * Add event listeners
-     * @param {string} selector
-     * @param {Function} handler
-     * @param {string} event
-     */
-    #addEventListeners(selector, handler, event = "click") {
-        const buttons = document.querySelectorAll(selector);
-        buttons.forEach((button) => {
-            button.addEventListener(event, handler.bind(this));
-        });
-    }
-
-    /**
-     * Handle tambah button click
-     * @param {Event} event
-     */
-    #handleDeleteButtonClick(event) {
-        event.preventDefault();
-        const button = /** @type {HTMLButtonElement} */ (event.target);
-        const id = parseInt(button.getAttribute("data-id") || "0");
-        if (!id) return;
-
-        Swal.fire({
-            title: "Hapus makanan gizi?",
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#3085d6",
-            cancelButtonColor: "#d33",
-            confirmButtonText: "Ya, hapus!",
-            cancelButtonText: "Batal",
-        }).then((result) => {
-            if (result.isConfirmed) {
-                this.#deleteMakanan(id);
-            }
-        });
-    }
-
-    /**
-     * Delete makanan after confirmation
-     * @param {number} id
-     */
-    #deleteMakanan(id) {
-        const formData = new FormData();
-        formData.append("id", String(id));
-        formData.append(
-            "csrf-token",
-            document
-                .querySelector('meta[name="csrf-token"]')
-                ?.getAttribute("content") || ""
-        );
-
-        fetch("/api/simrs/gizi/makanan/destroy/" + id, {
-            method: "DELETE",
-            body: formData,
-            headers: {
-                "X-CSRF-TOKEN":
-                    document
-                        .querySelector('meta[name="csrf-token"]')
-                        ?.getAttribute("content") || "",
+/**
+ * Script untuk halaman Manajemen Makanan Gizi
+ * Menggunakan jQuery, DataTables, dan SweetAlert2
+ */
+$(document).ready(function () {
+    // 1. Inisialisasi DataTables
+    // ----------------------------------------------------------------
+    var table = $("#dt-makanan").DataTable({
+        processing: true, // Menampilkan indikator loading
+        serverSide: true, // Memproses data di sisi server
+        responsive: true, // Membuat tabel responsif
+        ajax: {
+            url: "/api/simrs/gizi/makanan/datatable",
+            // Mengirim data filter tambahan saat request AJAX
+            data: function (d) {
+                d.nama_makanan = $("#nama_makanan_filter").val();
             },
-        })
-            .then((response) => {
-                if (response.status != 200) {
-                    throw new Error("Error: " + response.statusText);
-                }
-                showSuccessAlert("Data berhasil dihapus!");
-                setTimeout(() => window.location.reload(), 2000);
-            })
-            .catch((error) => {
-                console.log("Error:", error);
-                showErrorAlertNoRefresh(`Error: ${error}`);
-            });
-    }
-}
+        },
+        columns: [
+            // Kolom Nomor (bukan dari database)
+            {
+                data: "DT_RowIndex",
+                name: "DT_RowIndex",
+                orderable: false,
+                searchable: false,
+                className: "text-center",
+            },
+            // Kolom dari database
+            { data: "nama", name: "nama" },
+            { data: "harga", name: "harga" },
+            { data: "status", name: "status", className: "text-center" },
+            // Kolom Aksi (tombol edit & hapus)
+            {
+                data: "action",
+                name: "action",
+                orderable: false,
+                searchable: false,
+                className: "text-center",
+            },
+        ],
+        // Konfigurasi tombol ekspor (PDF, Excel, dll)
+        dom:
+            "<'row mb-3'<'col-sm-12 col-md-6 d-flex align-items-center justify-content-start'f><'col-sm-12 col-md-6 d-flex align-items-center justify-content-end'lB>>" +
+            "<'row'<'col-sm-12'tr>>" +
+            "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+        buttons: [
+            {
+                extend: "pdfHtml5",
+                text: "PDF",
+                titleAttr: "Generate PDF",
+                className: "btn-outline-danger btn-sm mr-1",
+            },
+            {
+                extend: "excelHtml5",
+                text: "Excel",
+                titleAttr: "Generate Excel",
+                className: "btn-outline-success btn-sm mr-1",
+            },
+            {
+                extend: "print",
+                text: "Print",
+                titleAttr: "Print Table",
+                className: "btn-outline-primary btn-sm",
+            },
+        ],
+    });
 
-const MakananGiziHandlerClass = new MakananGiziHandler();
+    // 2. Logika untuk Filter
+    // ----------------------------------------------------------------
+    $("#filter-form").on("submit", function (e) {
+        e.preventDefault(); // Mencegah form submit default
+        table.draw(); // Menggambar ulang tabel dengan filter baru
+    });
+
+    // 3. Logika untuk Tombol Hapus (Event Delegation)
+    // ----------------------------------------------------------------
+    // Kita menggunakan event delegation pada '#dt-makanan tbody'
+    // karena tombol '.delete-btn' dibuat secara dinamis oleh DataTables.
+    $("#dt-makanan tbody").on("click", ".delete-btn", function () {
+        var id = $(this).data("id"); // Ambil ID dari atribut data-id
+
+        // Ambil CSRF token dari meta tag (pastikan ada <meta name="csrf-token" content="..."> di layout)
+        var csrfToken = $('meta[name="csrf-token"]').attr("content");
+
+        showDeleteConfirmation(function () {
+            $.ajax({
+                url: "/api/simrs/gizi/makanan/" + id,
+                type: "DELETE",
+                headers: {
+                    "X-CSRF-TOKEN": csrfToken,
+                },
+                success: function (response) {
+                    if (response.success) {
+                        showSuccessAlert(response.message);
+                        table.ajax.reload();
+                    } else {
+                        showErrorAlert(response.message);
+                    }
+                },
+                error: function (xhr) {
+                    if (xhr.status === 419) {
+                        showErrorAlert(
+                            "Session expired. Silakan refresh halaman dan coba lagi."
+                        );
+                    } else {
+                        showErrorAlert(
+                            "Terjadi kesalahan. Tidak dapat menghapus data."
+                        );
+                    }
+                    console.error("AJAX Error:", xhr.responseText);
+                },
+            });
+        });
+    });
+});

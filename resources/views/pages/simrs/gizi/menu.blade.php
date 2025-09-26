@@ -1,162 +1,127 @@
 @extends('inc.layout')
-@section('title', 'List Menu')
+@section('title', 'Daftar Menu Gizi')
+
+@section('extended-css')
+    <link rel="stylesheet" media="screen, print" href="/css/datagrid/datatables/datatables.bundle.css">
+    <link rel="stylesheet" media="screen, print" href="/css/formplugins/select2/select2.bundle.css">
+
+    {{-- CSS BARU UNTUK CHILD ROW DENGAN BOXICONS --}}
+    <style>
+        td.details-control {
+            text-align: center;
+            cursor: pointer;
+            width: 25px;
+            /* Beri lebar tetap agar rapi */
+        }
+
+        /* Menggunakan pseudo-element untuk ikon Boxicons */
+        td.details-control::before {
+            font-family: "Boxicons" !important;
+            /* Nama font untuk Boxicons */
+            font-weight: normal;
+            /* Bobot font standar untuk Boxicons */
+            content: "\ebc1";
+            /* Unicode untuk ikon bx-plus-square */
+            color: #28a745;
+            /* Warna hijau untuk "buka" */
+            font-size: 1.5rem;
+            /* Ukuran ikon bisa disesuaikan */
+            line-height: 1;
+            vertical-align: middle;
+        }
+
+        tr.shown td.details-control::before {
+            content: "\eb8d";
+            /* Unicode untuk ikon bx-minus-square */
+            color: #dc3545;
+            /* Warna merah untuk "tutup" */
+        }
+
+        /* Style untuk konten child row (tetap sama) */
+        .child-row-content {
+            padding: 10px 15px;
+            background-color: #f8f9fa;
+            border-top: 1px solid #dee2e6;
+        }
+    </style>
+@endsection
+
 @section('content')
     <main id="js-page-content" role="main" class="page-content">
-
-        @include('pages.simrs.gizi.partials.menu-form')
-
-        @include('pages.simrs.gizi.partials.menu-datatable')
-
-        @include('pages.simrs.gizi.partials.add-menu-modal')
+        <div class="row">
+            <div class="col-xl-12">
+                <div id="panel-1" class="panel">
+                    <div class="panel-hdr">
+                        <h2>Filter Pencarian Menu</h2>
+                    </div>
+                    <div class="panel-container show">
+                        <div class="panel-content">
+                            <form id="filter-form">
+                                <div class="form-group row align-items-center">
+                                    <label class="col-md-2 col-form-label text-right" for="nama_menu_filter">Nama
+                                        Menu</label>
+                                    <div class="col-md-4">
+                                        <input type="text" class="form-control" id="nama_menu_filter" name="nama_menu">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <button type="submit" class="btn btn-primary waves-effect waves-themed">
+                                            <i class="fal fa-search mr-1"></i> Cari
+                                        </button>
+                                        <button type="button" class="btn btn-success waves-effect waves-themed"
+                                            data-toggle="modal" data-target="#addMenuModal">
+                                            <i class="fal fa-plus mr-1"></i> Tambah Menu
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xl-12">
+                <div id="panel-2" class="panel">
+                    <div class="panel-hdr">
+                        <h2>Daftar Menu Gizi</h2>
+                    </div>
+                    <div class="panel-container show">
+                        <div class="panel-content">
+                            <table id="dt-menu" class="table table-bordered table-hover table-striped w-100">
+                                <thead class="bg-primary-600">
+                                    <tr>
+                                        <th></th> {{-- Kolom kosong untuk tombol expander --}}
+                                        <th>No</th>
+                                        <th>Nama Menu</th>
+                                        <th>Kategori</th>
+                                        <th>Harga</th>
+                                        <th>Status</th>
+                                        <th>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </main>
+
+    {{-- Render modal tambah di sini --}}
+    @include('pages.simrs.gizi.partials.add-menu-modal', ['foods' => $foods, 'categories' => $categories])
+
 @endsection
+
 @section('plugin')
     <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
-    <script src="/js/datagrid/datatables/datatables.export.js"></script>
-    {{-- Select 2 --}}
     <script src="/js/formplugins/select2/select2.bundle.js"></script>
-    {{-- Datepicker --}}
-    <script src="/js/formplugins/bootstrap-datepicker/bootstrap-datepicker.js"></script>
-    {{-- Datepicker Range --}}
-    <script src="/js/dependency/moment/moment.js"></script>
-    <script src="/js/formplugins/bootstrap-daterangepicker/bootstrap-daterangepicker.js"></script>
-    <script src="/js/bootstrap.js"></script>
-
+    {{-- Penting! Kirim data makanan ke JS untuk dipakai di modal --}}
     <script>
-        var controls = {
-            leftArrow: '<i class="fal fa-angle-left" style="font-size: 1.25rem"></i>',
-            rightArrow: '<i class="fal fa-angle-right" style="font-size: 1.25rem"></i>'
-        }
-
-        var runDatePicker = function() {
-
-            // minimum setup
-            $('#date_of_birth').datepicker({
-                todayHighlight: true,
-                orientation: "bottom left",
-                templates: controls
-            });
-
-        }
-
-        $(document).ready(function() {
-            console.log("ready");
-
-
-            // Datepciker
-            runDatePicker();
-
-            // Select 2
-            // $(".edit-modal #search-food").each(function() {
-            //     $(this).select2({
-            //         dropdownParent: $(this).closest("td")
-            //     });
-            // });
-            // $("#addModal #search-food").each(function() {
-            //     $(this).select2({
-            //         dropdownParent: $(this).closest("td")
-            //     });
-            // });
-
-            // $(".select2").select2({
-            //     dropdownParent: $(this).closest(".modal")
-            // });
-            $(".select2").on("select2:open", function() {
-                // Mengambil elemen kotak pencarian
-                var searchField = $(".select2-search__field");
-
-                // Mengubah urutan elemen untuk memindahkannya ke atas
-                searchField.insertBefore(searchField.prev());
-            });
-
-            /// Get the current date and time
-            var today = new Date();
-
-            // Format it as "YYYY-MM-DD"
-            var formattedToday = today.getFullYear() + '-' +
-                ('0' + (today.getMonth() + 1)).slice(-2) + '-' +
-                ('0' + today.getDate()).slice(-2) + ' ' +
-                ('0' + today.getHours()).slice(-2) + ':' +
-                ('0' + today.getMinutes()).slice(-2) + ':' +
-                ('0' + today.getSeconds()).slice(-2);
-
-            // Set the default date for the datepicker
-            $('#datepicker-1').daterangepicker({
-                opens: 'left',
-                startDate: moment(today).format('YYYY-MM-DD'),
-                endDate: moment(today).format('YYYY-MM-DD'),
-                // timePicker: true, // Enable time selection
-                // timePicker24Hour: true, // 24-hour format
-                // timePickerSeconds: true, // Include seconds in time selection
-                locale: {
-                    format: 'YYYY-MM-DD' // Display format for the picker
-                }
-            }, function(start, end, label) {
-                console.log("A new date selection was made: " + start.format('YYYY-MM-DD') +
-                    ' to ' + end.format('YYYY-MM-DD'));
-            });
-
-
-            $('#loading-spinner').show();
-            // initialize datatable
-            $('#dt-basic-example').dataTable({
-                "drawCallback": function(settings) {
-                    // Menyembunyikan preloader setelah data berhasil dimuat
-                    $('#loading-spinner').hide();
-                },
-                responsive: true,
-                lengthChange: false,
-                dom: "<'row mb-3'<'col-sm-12 col-md-6 d-flex align-items-center justify-content-start'f><'col-sm-12 col-md-6 d-flex align-items-center justify-content-end'lB>>" +
-                    "<'row'<'col-sm-12'tr>>" +
-                    "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
-                buttons: [{
-                        extend: 'pdfHtml5',
-                        text: 'PDF',
-                        titleAttr: 'Generate PDF',
-                        className: 'btn-outline-danger btn-sm mr-1'
-                    },
-                    {
-                        extend: 'excelHtml5',
-                        text: 'Excel',
-                        titleAttr: 'Generate Excel',
-                        className: 'btn-outline-success btn-sm mr-1'
-                    },
-                    {
-                        extend: 'csvHtml5',
-                        text: 'CSV',
-                        titleAttr: 'Generate CSV',
-                        className: 'btn-outline-primary btn-sm mr-1'
-                    },
-                    {
-                        extend: 'copyHtml5',
-                        text: 'Copy',
-                        titleAttr: 'Copy to clipboard',
-                        className: 'btn-outline-primary btn-sm mr-1'
-                    },
-                    {
-                        extend: 'print',
-                        text: 'Print',
-                        titleAttr: 'Print Table',
-                        className: 'btn-outline-primary btn-sm'
-                    }
-                ]
-            });
-
-        });
-
-
-        function formatAngka(input) {
-            var value = input.value.replace(/\D/g, '');
-            var formattedValue = '';
-
-            formattedValue = value.replace(/\B(?=(\d{3})+(?!\d))/g, '');
-
-            input.value = formattedValue;
-        }
+        window.allFoods = @json(
+            $foods->mapWithKeys(function ($item) {
+                return [$item['id'] => $item];
+            }));
     </script>
-
-    <script>
-        window._foods = @json($foods);
-    </script>
-    <script src="{{ asset('js/simrs/menu-gizi.js') }}?v={{ time() }}"></script>
+    <script src="/js/simrs/menu-gizi.js"></script>
 @endsection

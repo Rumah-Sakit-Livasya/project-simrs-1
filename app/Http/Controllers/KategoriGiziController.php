@@ -4,80 +4,76 @@ namespace App\Http\Controllers;
 
 use App\Models\KategoriGizi;
 use Illuminate\Http\Request;
+use Yajra\DataTables\Facades\DataTables;
 
 class KategoriGiziController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Menampilkan halaman utama.
      */
-    public function index(Request $request)
+    public function index()
+    {
+        return view('pages.simrs.gizi.kategori-menu');
+    }
+
+    /**
+     * Menyediakan data untuk DataTables.
+     */
+    public function datatable(Request $request)
     {
         $query = KategoriGizi::query();
-        $filterApplied = false;
 
         if ($request->filled('nama_kategori')) {
-            $query->where("nama", "like", "%" . $request->get("nama_kategori") . "%");
-            $filterApplied = true;
+            $query->where('nama', 'like', '%' . $request->nama_kategori . '%');
         }
 
-        if ($filterApplied) {
-            $result = $query->get();
-        } else {
-            $result = KategoriGizi::all();
-        }
+        return DataTables::of($query)
+            ->addIndexColumn()
+            ->addColumn('status', function ($row) {
+                return $row->aktif ?
+                    '<span class="badge badge-success">Aktif</span>' :
+                    '<span class="badge badge-danger">Non Aktif</span>';
+            })
+            ->addColumn('action', function ($row) {
+                $editBtn = '<button type="button" class="btn btn-sm btn-outline-primary waves-effect waves-themed" data-toggle="modal" data-target="#editModal' . $row->id . '">
+                                <i class="fal fa-pencil"></i>
+                           </button>';
+                $deleteBtn = '<button type="button" class="btn btn-sm btn-outline-danger waves-effect waves-themed delete-btn" data-id="' . $row->id . '">
+                                 <i class="fal fa-trash-alt"></i>
+                              </button>';
 
-        return view('pages.simrs.gizi.kategori-menu', [
-            'categories' => $result
-        ]);
+                // Render modal edit secara dinamis
+                $editModal = view('pages.simrs.gizi.partials.edit-kategori-modal', ['kategori' => $row])->render();
+
+                return $editBtn . ' ' . $deleteBtn . $editModal;
+            })
+            ->rawColumns(['status', 'action'])
+            ->make(true);
     }
 
     /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
+     * Menyimpan kategori baru.
      */
     public function store(Request $request)
     {
         $validatedData = $request->validate([
-            'nama' => 'required|string|max:255',
+            'nama' => 'required|string|max:255|unique:kategori_gizi,nama',
             'aktif' => 'required|boolean',
             'coa_pendapatan' => 'required|string|max:255',
             'coa_biaya' => 'required|string|max:255'
         ]);
 
         KategoriGizi::create($validatedData);
-        return redirect()->back()->with('success', 'Kategori Gizi berhasil ditambahkan!');
+        return redirect()->route('gizi.kategori.index')->with('success', 'Kategori Gizi berhasil ditambahkan!');
     }
 
     /**
-     * Display the specified resource.
-     */
-    public function show(KategoriGizi $kategoriGizi)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(KategoriGizi $kategoriGizi)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
+     * Mengupdate kategori.
      */
     public function update(Request $request, $id)
     {
         $validatedData = $request->validate([
-            'nama' => 'required|string|max:255',
+            'nama' => 'required|string|max:255|unique:kategori_gizi,nama,' . $id,
             'aktif' => 'required|boolean',
             'coa_pendapatan' => 'required|string|max:255',
             'coa_biaya' => 'required|string|max:255'
@@ -86,28 +82,27 @@ class KategoriGiziController extends Controller
         try {
             $kategori = KategoriGizi::findOrFail($id);
             $kategori->update($validatedData);
-            return redirect()->back()->with('success', 'Kategori Gizi berhasil diedit!');
+            return redirect()->route('gizi.kategori.index')->with('success', 'Kategori Gizi berhasil diperbarui!');
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+            return redirect()->route('gizi.kategori.index')->with('error', 'Gagal memperbarui data: ' . $e->getMessage());
         }
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Menghapus kategori.
      */
-    public function destroy(KategoriGizi $kategoriGizi, $id)
+    public function destroy($id)
     {
         try {
-            KategoriGizi::destroy($id);
-            return response()->json([
-                'success'=> true,
-                'message'=> 'Kategori Gizi berhasil dihapus!'
-            ]);
-        }catch (\Exception $e) {
-            return response()->json([
-                'success'=> false,
-                'message'=> $e->getMessage()
-            ]);
+            $kategori = KategoriGizi::findOrFail($id);
+            // Optional: Cek relasi sebelum menghapus
+            if ($kategori->menus()->count() > 0) {
+                return response()->json(['success' => false, 'message' => 'Gagal menghapus! Kategori ini masih digunakan oleh beberapa menu.'], 409);
+            }
+            $kategori->delete();
+            return response()->json(['success' => true, 'message' => 'Kategori Gizi berhasil dihapus.']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
 }

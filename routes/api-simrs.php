@@ -43,6 +43,7 @@ use App\Http\Controllers\SIMRS\EthnicController;
 use App\Http\Controllers\SIMRS\EWSAnakController;
 use App\Http\Controllers\SIMRS\EWSDewasaController;
 use App\Http\Controllers\SIMRS\EWSObstetriController;
+use App\Http\Controllers\SIMRS\Gizi\GiziController;
 use App\Http\Controllers\SIMRS\GrupParameterRadiologiController;
 use App\Http\Controllers\SIMRS\GrupSuplier\GrupSuplierController;
 use App\Http\Controllers\SIMRS\GrupTindakanMedisController;
@@ -159,30 +160,66 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
         Route::post('/parameter-delete', [OrderLaboratoriumController::class, 'deleteParameter'])->name('order.laboratorium.delete-parameter');
     });
 
-    Route::prefix('gizi')->group(function () {
+    Route::prefix('gizi')->name('gizi.')->group(function () {
 
-        Route::prefix('order')->group(function () {
-            Route::get('/store', [OrderGiziController::class, 'store'])->name('order.gizi.store');
-            Route::post('/update/status', [OrderGiziController::class, 'update_status'])->name('order.gizi.update.status');
-            Route::post('/update', [OrderGiziController::class, 'update'])->name('order.gizi.update');
+        Route::prefix('order')->name('order.')->group(function () {
+            // Rute untuk Order Gizi
+            Route::get('/', [OrderGiziController::class, 'index'])->name('index');
+            Route::get('/datatable', [OrderGiziController::class, 'datatable'])->name('datatable');
+            Route::put('/status/{id}', [OrderGiziController::class, 'updateStatus'])->name('update_status');
+            Route::post('/bulk-status', [OrderGiziController::class, 'bulkUpdateStatus'])->name('bulk_update_status');
+
+            Route::post('/store', [OrderGiziController::class, 'store'])->name('store');
+            Route::post('/update/status', [OrderGiziController::class, 'update_status'])->name('update.status');
+            Route::post('/update', [OrderGiziController::class, 'update'])->name('update');
         });
 
-        Route::prefix('kategori')->group(function () {
-            Route::post('/store', [KategoriGiziController::class, 'store'])->name('kategori.gizi.store');
-            Route::put('/update/{id}/', [KategoriGiziController::class, 'update'])->name('kategori.gizi.update');
-            Route::delete('/destroy/{id}/', [KategoriGiziController::class, 'destroy'])->name('kategori.gizi.destroy');
+        // Rute untuk Daftar Pasien Gizi
+        Route::prefix('pasien')->name('pasien.')->group(function () {
+            Route::get('/', [GiziController::class, 'index'])->name('index');
+            Route::get('/datatable', [GiziController::class, 'datatable'])->name('datatable');
         });
 
-        Route::prefix('makanan')->group(function () {
-            Route::post('/store', [MakananGiziController::class, 'store'])->name('makanan.gizi.store');
-            Route::put('/update/{id}/', [MakananGiziController::class, 'update'])->name('makanan.gizi.update');
-            Route::delete('/destroy/{id}/', [MakananGiziController::class, 'destroy'])->name('makanan.gizi.destroy');
+        Route::prefix('kategori')->name('kategori.')->group(function () {
+            // Rute untuk Kategori Gizi
+            Route::get('/', [KategoriGiziController::class, 'index'])->name('index');
+            Route::get('/datatable', [KategoriGiziController::class, 'datatable'])->name('datatable');
+            Route::post('/', [KategoriGiziController::class, 'store'])->name('store');
+            Route::put('/{id}', [KategoriGiziController::class, 'update'])->name('update');
+            Route::delete('/{id}', [KategoriGiziController::class, 'destroy'])->name('destroy');
+
+            // Route::post('/store', [KategoriGiziController::class, 'store'])->name('kategori.gizi.store');
+            // Route::put('/update/{id}/', [KategoriGiziController::class, 'update'])->name('kategori.gizi.update');
+            // Route::delete('/destroy/{id}/', [KategoriGiziController::class, 'destroy'])->name('kategori.gizi.destroy');
         });
 
-        Route::prefix('menu')->group(function () {
-            Route::post('/store', [MenuGiziController::class, 'store'])->name('menu.gizi.store');
-            Route::put('/update/{id}/', [MenuGiziController::class, 'update'])->name('menu.gizi.update');
-            Route::delete('/destroy/{id}/', [MenuGiziController::class, 'destroy'])->name('menu.gizi.destroy');
+        // Route::prefix('makanan')->group(function () {
+        //     Route::post('/store', [MakananGiziController::class, 'store'])->name('makanan.gizi.store');
+        //     Route::put('/update/{id}/', [MakananGiziController::class, 'update'])->name('makanan.gizi.update');
+        //     Route::delete('/destroy/{id}/', [MakananGiziController::class, 'destroy'])->name('makanan.gizi.destroy');
+        // });
+
+        Route::prefix('makanan')->name('makanan.')->group(function () {
+            Route::get('/', [MakananGiziController::class, 'index'])->name('index');
+            Route::get('/datatable', [MakananGiziController::class, 'datatable'])->name('datatable');
+            Route::post('/', [MakananGiziController::class, 'store'])->name('store');
+            Route::put('/{id}', [MakananGiziController::class, 'update'])->name('update');
+            Route::delete('/{id}', [MakananGiziController::class, 'destroy'])->name('destroy');
+        });
+
+        // Route::prefix('menu')->name('menu.')->group(function () {
+        //     Route::post('/store', [MenuGiziController::class, 'store'])->name('store');
+        //     Route::put('/update/{id}/', [MenuGiziController::class, 'update'])->name('update');
+        //     Route::delete('/destroy/{id}/', [MenuGiziController::class, 'destroy'])->name('destroy');
+        // });
+
+        // Rute untuk Menu Gizi
+        Route::prefix('menu')->name('menu.')->group(function () {
+            Route::get('/', [MenuGiziController::class, 'index'])->name('index');
+            Route::get('/datatable', [MenuGiziController::class, 'datatable'])->name('datatable');
+            Route::post('/', [MenuGiziController::class, 'store'])->name('store');
+            Route::put('/{id}', [MenuGiziController::class, 'update'])->name('update');
+            Route::delete('/{id}', [MenuGiziController::class, 'destroy'])->name('destroy');
         });
 
         Route::prefix('jam-makan')->group(function () {
@@ -191,10 +228,10 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
             Route::delete('/destroy/{id}/', [JamMakanGiziController::class, 'destroy'])->name('jam-makan.gizi.destroy');
         });
 
-        Route::prefix('auto-diet')->group(function () {
-            Route::get('/store', [DietGiziController::class, 'store'])->name('auto-diet.gizi.store');
-            Route::put('/update/{id}/', [DietGiziController::class, 'update'])->name('auto-diet.gizi.update');
-            Route::delete('/destroy/{id}/', [DietGiziController::class, 'destroy'])->name('auto-diet.gizi.destroy');
+        Route::prefix('auto-diet')->name('diet.')->group(function () {
+            Route::post('/store', [DietGiziController::class, 'store'])->name('store');
+            Route::put('/update/{id}/', [DietGiziController::class, 'update'])->name('update');
+            Route::delete('/destroy/{id}/', [DietGiziController::class, 'destroy'])->name('destroy');
         });
 
         // Route untuk Skrining Gizi Dewasa

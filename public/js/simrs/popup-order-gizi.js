@@ -1,189 +1,183 @@
-// @ts-check
-/// <reference types="jquery" />
-/// <reference path="../types.d.ts" />
+$(document).ready(function () {
+    // =================================================================
+    // 1. INISIALISASI
+    // =================================================================
 
-// @ts-ignore
-const Swal = /** @type {import("sweetalert2").default} */ (window.Swal);
+    // Inisialisasi plugin Select2
+    $("#kategori_id, #waktu_makan").select2({
+        placeholder: "Pilih...",
+        allowClear: true,
+    });
 
-class PopupOrderGiziHandler {
-    /**
-     * @type {MakananGizi[]}
-     */
-    #Foods = [];
+    $(".select2-food-search").select2({
+        placeholder: "Ketik nama makanan...",
+        allowClear: true,
+    });
 
-    /**
-     * @type {JQuery<HTMLFormElement>}
-     */
-    #FormElement;
-
-    constructor() {
-        document.addEventListener("DOMContentLoaded", this.#init.bind(this));
-        this.#FormElement = $("#form-order-gizi");
-
-        // @ts-ignore
-        this.#Foods = window._foods;
-    }
-
-    #init() {
-        this.#addEventListeners("#searchMenuInput", this.#handleMenuSearchBar, "keyup");
-        this.#addEventListeners("#search-food", this.#onFoodSelect, "change");
-    }
+    // =================================================================
+    // 2. FUNGSI UTAMA (LOGIKA INTI)
+    // =================================================================
 
     /**
-     * Handle on select2 food select
-     * @param {Event} event 
+     * Menghitung ulang total harga pesanan berdasarkan item di tabel.
      */
-    #onFoodSelect(event) {
-        const input = /** @type {HTMLInputElement} */ (event.target);
-        const id = parseInt(input.value);
-        input.value = ""; // reset
-
-        const food = this.#Foods.find(food => food.id === id);
-        if (!food) return alert("Food not found");
-        this.#FormElement
-            .find('#table-food')
-            .append($(this.#getFoodTableCol(food)));
-
-        this.updateHarga();
-    }
-
-    /**
-     * Add event listeners
-     * @param {string} selector 
-     * @param {Function} handler 
-     * @param {string} event
-     */
-    #addEventListeners(selector, handler, event = 'click') {
-        const buttons = document.querySelectorAll(selector);
-        buttons.forEach((button) => {
-            button.addEventListener(event, handler.bind(this));
-        });
-    }
-
-    #handleMenuSearchBar(event) {
-        const searchInput = /** @type {HTMLInputElement} */ (event.target);
-        const menus = document.querySelectorAll(".pointer");
-
-        const value = searchInput.value.toLowerCase();
-        menus.forEach((menu) => {
-            if (!menu) return;
-            const menuNameElement = menu.querySelector(".menu-name");
-            if (!menuNameElement) return;
-            const menuName = menuNameElement.textContent;
-            if (!menuName) return;
-
-            // @ts-ignore
-            menu.style.display = menuName.toLowerCase().includes(value) ? "" : "none";
-        });
-    }
-
-    /**
-     * Update price input and display
-     */
-    updateHarga() {
+    function calculateTotal() {
         let total = 0;
+        $("#table-food tr").each(function () {
+            const qty = parseInt($(this).find(".qty-input").val()) || 0;
+            const harga = parseInt($(this).data("harga")) || 0;
+            const subtotal = qty * harga;
 
-        // first, get foods id from input with name "foods_id[]"
-        const foodsId = document.querySelectorAll('input[name^="foods_id"]');
-        foodsId.forEach((element) => {
-            const input = /** @type {HTMLInputElement} */ (element);
-            const key = input.getAttribute("data-key");
-            const id = parseInt(input.value);
+            // Update tampilan subtotal per baris
+            $(this)
+                .find(".subtotal-display")
+                .text(new Intl.NumberFormat("id-ID").format(subtotal));
 
-            // find from #Foods with id equals to id we got from input.value
-            const food = this.#Foods.find(food => food.id == id);
-            if (!food) return showErrorAlertNoRefresh("Food not found! id: " + id);
-
-            // get input with name "qty[${key}]"
-            const qtyInput = /** @type {HTMLInputElement} */ (document.querySelector(`input[name="qty[${key}]"]`));
-            const qty = parseInt(qtyInput.value);
-
-            // add food price * qty to total
-            total += food.harga * qty;
+            total += subtotal;
         });
 
-        // update price
-        this.#FormElement.find('input[name="total_harga"]').val(total);
-        this.#FormElement.find('#harga-display').text(`Rp ${total.toLocaleString('id-ID')}`);
+        // Update tampilan total keseluruhan
+        $("#harga-display").text(
+            "Rp " + new Intl.NumberFormat("id-ID").format(total)
+        );
+        $("#total_harga_input").val(total);
     }
 
     /**
-     * Handle event when a menu is selected
-     * @param {MakananGizi[]} foods 
+     * Menambahkan baris makanan ke tabel pesanan.
+     * @param {number} foodId - ID makanan yang akan ditambahkan.
+     * @param {number} [qty=1] - Kuantitas awal.
      */
-    menuSelect(foods) {
-        const foodMap = new Map();
+    function addFoodToTable(foodId, qty = 1) {
+        if (!foodId) return;
 
-        foods.forEach(food => {
-            if (foodMap.has(food.id)) {
-                foodMap.get(food.id).quantity += 1;
-            } else {
-                foodMap.set(food.id, { ...food, quantity: 1 });
-            }
-        });
-
-        foodMap.forEach(food => {
-            this.#FormElement
-                .find('#table-food')
-                .append($(this.#getFoodTableCol(food, food.quantity)));
-        });
-
-        this.updateHarga();
-    }
-
-    /**
-     * Generate HTML string for food table collumn
-     * @param {MakananGizi} food 
-     * @param {number} qty
-     * @returns {string} HTML String
-     */
-    #getFoodTableCol(food, qty = 1) {
-        const key = Math.round(Math.random() * 100000);
-
-        return /*html*/`
-                <tr id="food${key}">
-                    <td>${food.nama}</td>
-                    <td>
-                        <input type="hidden" data-key="${key}" name="foods_id[${key}]" value="${food.id}">
-                        <input type="number" data-key="${key}" name="qty[${key}]" value="${qty}" class="qty"
-                            onchange="PopupOrderGiziClass.quantityChange(event)">
-                    </td>
-                    <td id="harga${key}">Rp ${food.harga.toLocaleString('id-ID')}</td>
-                    <td>
-                        <a class="mdi mdi-close pointer mdi-24px text-danger delete-btn"
-                            title="Hapus" onclick="PopupOrderGiziClass.deleteFood(${key})"></a>
-                    </td>
-                </tr>
-            `;
-    }
-
-    /**
-     * Handle quantity change
-     * @param {Event} event 
-     */
-    quantityChange(event) {
-        const input = /** @type {HTMLInputElement} */ (event.target);
-        const qty = parseInt(input.value);
-
-        if (qty < 1) {
-            input.value = "1";
+        // Ambil data makanan dari variabel global yang di-passing dari Blade
+        const food = window._foods[foodId];
+        if (!food) {
+            console.error(
+                "Data makanan dengan ID " + foodId + " tidak ditemukan."
+            );
+            return;
         }
 
-        this.updateHarga();
+        // Cek jika makanan sudah ada di tabel, jika ya, tambahkan kuantitasnya
+        const existingRow = $(`#table-food tr[data-food-id="${food.id}"]`);
+        if (existingRow.length > 0) {
+            const qtyInput = existingRow.find(".qty-input");
+            const currentQty = parseInt(qtyInput.val()) || 0;
+            qtyInput.val(currentQty + qty).trigger("change"); // trigger 'change' untuk kalkulasi ulang
+            return;
+        }
+
+        // Jika belum ada, buat baris baru
+        const rowHtml = `
+            <tr data-food-id="${food.id}" data-harga="${food.harga}">
+                <td>
+                    ${food.nama}
+                    <input type="hidden" name="foods_id[]" value="${food.id}">
+                </td>
+                <td>
+                    <input type="number" name="qty[]" class="form-control form-control-sm qty-input" value="${qty}" min="1" style="width: 70px;">
+                </td>
+                <td class="text-right">Rp <span class="subtotal-display">0</span></td>
+                <td class="text-center">
+                    <button type="button" class="btn btn-xs btn-danger btn-icon rounded-circle remove-food-btn" title="Hapus">
+                        <i class="fal fa-times"></i>
+                    </button>
+                </td>
+            </tr>
+        `;
+        $("#table-food").append(rowHtml);
+        calculateTotal(); // Hitung total setelah baris baru ditambahkan
     }
 
-    /**
-     * Delete food collumn element
-     * @param {number} key element key
-     */
-    deleteFood(key) {
-        // find and delete element inside the form with name "food${index}"
-        // use jquery
-        this.#FormElement.find(`tr[id="food${key}"]`).remove();
+    // =================================================================
+    // 3. EVENT HANDLERS (PENANGANAN AKSI PENGGUNA)
+    // =================================================================
 
-        this.updateHarga();
-    }
+    // Event handler saat memilih makanan dari dropdown pencarian
+    $("#search-food").on("change", function () {
+        const foodId = $(this).val();
+        addFoodToTable(foodId);
+        $(this).val(null).trigger("change"); // Reset dropdown setelah memilih
+    });
 
-}
+    // Event handler untuk menghapus baris makanan dari tabel (menggunakan event delegation)
+    $("#table-food").on("click", ".remove-food-btn", function () {
+        $(this).closest("tr").remove();
+        calculateTotal();
+    });
 
-const PopupOrderGiziClass = new PopupOrderGiziHandler();
+    // Event handler saat kuantitas diubah (input atau panah)
+    $("#table-food").on("input change", ".qty-input", function () {
+        // Validasi agar kuantitas tidak kurang dari 1
+        if (parseInt($(this).val()) < 1) {
+            $(this).val(1);
+        }
+        calculateTotal();
+    });
+
+    // --- LOGIKA UNTUK MODAL PILIH MENU ---
+
+    // Event handler untuk pencarian di dalam modal menu
+    $("#searchMenuInput").on("keyup", function () {
+        const value = $(this).val().toLowerCase();
+        $("#menu-list .menu-item").filter(function () {
+            $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
+        });
+    });
+
+    // Event handler saat mengklik tombol "Pilih" pada sebuah menu di modal (menggunakan delegation)
+    $("#pilihMenuModal").on("click", ".pilih-menu-btn", function () {
+        const menuId = $(this).data("menu-id");
+        const menu = window.giziData.menus[menuId]; // Mengambil data dari objek global
+
+        if (menu && menu.makanan_menu) {
+            // Logika untuk menghitung kuantitas dan menambahkan ke tabel pesanan...
+            const foodCounts = menu.makanan_menu.reduce((acc, item) => {
+                if (item.aktif && item.makanan) {
+                    // Pastikan item aktif dan relasi makanan ada
+                    acc[item.makanan_id] = (acc[item.makanan_id] || 0) + 1;
+                }
+                return acc;
+            }, {});
+
+            for (const foodId in foodCounts) {
+                addFoodToTable(foodId, foodCounts[foodId]);
+            }
+        }
+
+        $("#pilihMenuModal").modal("hide"); // Tutup modal setelah memilih
+    });
+
+    // Event handler saat mengklik tombol "Pilih" pada sebuah menu di modal
+    $(".pilih-menu-btn").on("click", function () {
+        const menuId = $(this).data("menu-id");
+        const menu = window._menus[menuId];
+
+        if (menu && menu.makanan_menu) {
+            // Hitung frekuensi setiap makanan dalam menu
+            const foodCounts = menu.makanan_menu.reduce((acc, item) => {
+                acc[item.makanan_id] = (acc[item.makanan_id] || 0) + 1;
+                return acc;
+            }, {});
+
+            // Tambahkan setiap makanan ke tabel dengan kuantitas yang sesuai
+            for (const foodId in foodCounts) {
+                addFoodToTable(foodId, foodCounts[foodId]);
+            }
+        }
+
+        $("#pilihMenuModal").modal("hide"); // Tutup modal setelah memilih
+    });
+
+    // Event handler untuk validasi form sebelum submit
+    $("#form-order-gizi").on("submit", function (e) {
+        if ($("#table-food tr").length === 0) {
+            e.preventDefault(); // Mencegah form dikirim
+            showErrorAlertNoRefresh(
+                "Harap tambahkan minimal satu makanan ke dalam pesanan."
+            );
+        }
+    });
+});

@@ -7,143 +7,171 @@ use App\Models\MakananGizi;
 use App\Models\MakananMenuGizi;
 use App\Models\MenuGizi;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Yajra\DataTables\Facades\DataTables;
 
 class MenuGiziController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Menampilkan halaman utama.
      */
-    public function index(Request $request)
+    public function index()
     {
-        $query = MenuGizi::query();
-        $filterApplied = false;
-
-        if ($request->filled('nama_menu')) {
-            $query->where("nama", "like", "%" . $request->get("nama_menu") . "%");
-            $filterApplied = true;
-        }
-
-        if ($filterApplied) {
-            $result = $query->get();
-        } else {
-            $result = MenuGizi::all();
-        }
+        // Data ini dibutuhkan untuk mengisi pilihan di modal Tambah dan Edit.
+        $foods = MakananGizi::where('aktif', true)->orderBy('nama')->get();
+        $categories = KategoriGizi::orderBy('nama')->get();
 
         return view('pages.simrs.gizi.menu', [
-            'menus' => $result,
-            'foods' => MakananGizi::all(),
-            'categories' => KategoriGizi::all()
+            'foods' => $foods,
+            'categories' => $categories
         ]);
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Menyediakan data untuk DataTables.
      */
-    public function create()
+    public function datatable(Request $request)
     {
-        //
+        // ... kode query ...
+        $query = MenuGizi::with(['category', 'makanan_menu.makanan']);
+
+        if ($request->filled('nama_menu')) {
+            $query->where('nama', 'like', '%' . $request->nama_menu . '%');
+        }
+
+
+        return DataTables::of($query)
+            ->addIndexColumn()
+            ->addColumn('detail', function ($row) {
+                return '';
+            })
+            // ... addColumn lainnya ...
+            ->addColumn('kategori', function ($row) {
+                return $row->category->nama ?? 'N/A';
+            })
+            ->addColumn('harga', function ($row) {
+                return 'Rp ' . number_format($row->harga, 0, ',', '.');
+            })
+            ->addColumn('status', function ($row) {
+                return $row->aktif ?
+                    '<span class="badge badge-success">Aktif</span>' :
+                    '<span class="badge badge-danger">Non Aktif</span>';
+            })
+            ->addColumn('action', function ($row) {
+                // ... logika tombol ...
+                $editBtn = '<button type="button" class="btn btn-sm btn-outline-primary waves-effect waves-themed" data-toggle="modal" data-target="#editModal' . $row->id . '">
+                                <i class="fal fa-pencil"></i>
+                           </button>';
+                $deleteBtn = '<button type="button" class="btn btn-sm btn-outline-danger waves-effect waves-themed delete-btn" data-id="' . $row->id . '">
+                                 <i class="fal fa-trash-alt"></i>
+                              </button>';
+
+                $editModal = view('pages.simrs.gizi.partials.edit-menu-modal', [
+                    'menu' => $row,
+                    'foods' => MakananGizi::where('aktif', true)->orderBy('nama')->get(),
+                    'categories' => KategoriGizi::orderBy('nama')->get()
+                ])->render();
+
+                return $editBtn . ' ' . $deleteBtn . $editModal;
+            })
+            ->addColumn('detail_makanan', function ($row) {
+                $row->load('makanan_menu.makanan');
+                return view('pages.simrs.gizi.partials.detail-menu-gizi', ['menu' => $row])->render();
+            })
+            // --- FIX DI SINI ---
+            // Tambahkan 'detail_makanan' ke dalam rawColumns
+            ->rawColumns(['status', 'action', 'detail_makanan'])
+            ->make(true);
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Menyimpan menu baru.
      */
     public function store(Request $request)
     {
-        $validatedData = $request->validate([
-            'nama' => 'required|string|max:255',
+        $validated = $request->validate([
+            'nama' => 'required|string|max:255|unique:menu_gizi,nama',
+            'harga' => 'required|numeric|min:0',
             'aktif' => 'required|boolean',
-            'harga' => 'required|integer',
-            'kategori_id' => 'required|integer',
-            'foods_status' => 'required|array',
-            'foods_status.*' => 'required|boolean',
-            'foods_id' => 'required|array',
-            'foods_id.*' => 'required|integer|exists:makanan_gizi,id',
+            'kategori_id' => 'required|exists:kategori_gizi,id',
+            'foods' => 'required|array|min:1',
+            'foods.*.id' => 'required|exists:makanan_gizi,id',
+            'foods.*.status' => 'required|boolean'
         ]);
 
-        $menu = MenuGizi::create($validatedData);
-
-        foreach ($validatedData['foods_id'] as $index => $foodsId) {
-            MakananMenuGizi::create([
-                "menu_gizi_id" => $menu->id,
-                "makanan_id" => $foodsId,
-                "aktif" => isset($validatedData['foods_status'][$index]) ? $validatedData['foods_status'][$index] : false,
+        DB::transaction(function () use ($validated) {
+            $menu = MenuGizi::create([
+                'nama' => $validated['nama'],
+                'harga' => $validated['harga'],
+                'aktif' => $validated['aktif'],
+                'kategori_id' => $validated['kategori_id'],
             ]);
-        }
 
-        return redirect()->back()->with('success', 'Menu berhasil ditambahkan!');
+            foreach ($validated['foods'] as $food) {
+                $menu->makanan_menu()->create([
+                    'makanan_id' => $food['id'],
+                    'aktif' => $food['status'],
+                ]);
+            }
+        });
+
+        return redirect()->route('gizi.menu.index')->with('success', 'Menu gizi berhasil ditambahkan.');
     }
 
     /**
-     * Display the specified resource.
+     * Mengupdate menu.
      */
-    public function show(MenuGizi $menuGizi)
+    public function update(Request $request, $id)
     {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(MenuGizi $menuGizi)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, MenuGizi $menuGizi, $id)
-    {
-        $validatedData = $request->validate([
-            'nama' => 'required|string|max:255',
+        $validated = $request->validate([
+            'nama' => 'required|string|max:255|unique:menu_gizi,nama,' . $id,
+            'harga' => 'required|numeric|min:0',
             'aktif' => 'required|boolean',
-            'harga' => 'required|integer',
-            'kategori_id' => 'required|integer',
-            'foods_status' => 'required|array',
-            'foods_status.*' => 'required|boolean',
-            'foods_id' => 'required|array',
-            'foods_id.*' => 'required|integer|exists:makanan_gizi,id',
+            'kategori_id' => 'required|exists:kategori_gizi,id',
+            'foods' => 'required|array|min:1',
+            'foods.*.id' => 'required|exists:makanan_gizi,id',
+            'foods.*.status' => 'required|boolean'
         ]);
 
-        // update menu gizi
-        // where id == $id
-        $menuGizi->update($validatedData);
+        $menu = MenuGizi::findOrFail($id);
 
-        // delete all data from MakananMenuGizi
-        // where "menu_gizi_id" == $id
-        MakananMenuGizi::where('menu_gizi_id', $id)->delete();
-
-        foreach ($validatedData['foods_id'] as $index => $foodsId) {
-            MakananMenuGizi::create([
-                "menu_gizi_id" => $id,
-                "makanan_id" => $foodsId,
-                "aktif" => isset($validatedData['foods_status'][$index]) ? $validatedData['foods_status'][$index] : false,
+        DB::transaction(function () use ($validated, $menu) {
+            $menu->update([
+                'nama' => $validated['nama'],
+                'harga' => $validated['harga'],
+                'aktif' => $validated['aktif'],
+                'kategori_id' => $validated['kategori_id'],
             ]);
-        }
-        return redirect()->back()->with('success', 'Menu berhasil diedit!');
+
+            // Hapus relasi lama dan buat yang baru (sync)
+            $menu->makanan_menu()->delete();
+            foreach ($validated['foods'] as $food) {
+                $menu->makanan_menu()->create([
+                    'makanan_id' => $food['id'],
+                    'aktif' => $food['status'],
+                ]);
+            }
+        });
+
+        return redirect()->route('gizi.menu.index')->with('success', 'Menu gizi berhasil diperbarui.');
     }
 
+
     /**
-     * Remove the specified resource from storage.
+     * Menghapus menu.
      */
-    public function destroy(MenuGizi $menuGizi, $id)
+    public function destroy($id)
     {
         try {
-            MenuGizi::destroy($id);
-
-            // delete all data from MakananMenuGizi
-            // where "menu_gizi_id" == $id
-            MakananMenuGizi::where('menu_gizi_id', $id)->delete();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Menu berhasil dihapus!'
-            ]);
+            // Transaction untuk memastikan semua data terkait terhapus
+            DB::transaction(function () use ($id) {
+                $menu = MenuGizi::findOrFail($id);
+                $menu->makanan_menu()->delete();
+                $menu->delete();
+            });
+            return response()->json(['success' => true, 'message' => 'Menu gizi berhasil dihapus.']);
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage()
-            ]);
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
 }

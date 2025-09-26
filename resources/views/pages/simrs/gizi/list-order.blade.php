@@ -1,156 +1,88 @@
 @extends('inc.layout')
-@section('title', 'List Order')
+@section('title', 'Daftar Order Gizi')
+
+@section('extended-css')
+    <link rel="stylesheet" media="screen, print" href="/css/datagrid/datatables/datatables.bundle.css">
+    <link rel="stylesheet" media="screen, print" href="/css/formplugins/select2/select2.bundle.css">
+    <style>
+        td.details-control::before {
+            font-family: "Boxicons" !important;
+            font-weight: normal;
+            content: "\ec08";
+            color: #28a745;
+            font-size: 1.5rem;
+            line-height: 1;
+            vertical-align: middle;
+        }
+
+        tr.shown td.details-control::before {
+            content: "\ebc8";
+            color: #dc3545;
+        }
+
+        .dataTables_processing {
+            z-index: 1080 !important;
+        }
+
+        #dt-order thead th {
+            vertical-align: middle;
+        }
+    </style>
+@endsection
+
 @section('content')
     <main id="js-page-content" role="main" class="page-content">
-
         @include('pages.simrs.gizi.partials.list-order-form')
 
-        @include('pages.simrs.gizi.partials.list-order-datatable')
-
+        <div class="row">
+            <div class="col-xl-12">
+                <div id="panel-1" class="panel">
+                    <div class="panel-hdr">
+                        <h2>Daftar Order Gizi</h2>
+                        <div class="panel-toolbar">
+                            <button type="button" class="btn btn-sm btn-primary mr-2" id="bulk-send-btn"
+                                title="Kirim semua pesanan yang dipilih">
+                                <i class="fal fa-truck mr-1"></i> Kirim Terpilih
+                            </button>
+                            <button type="button" class="btn btn-sm btn-info" id="bulk-print-btn"
+                                title="Print label semua pesanan yang dipilih">
+                                <i class="fal fa-tags mr-1"></i> Label Terpilih
+                            </button>
+                        </div>
+                    </div>
+                    <div class="panel-container show">
+                        <div class="panel-content">
+                            <table id="dt-order" class="table table-bordered table-hover table-striped w-100">
+                                <thead class="bg-primary-600">
+                                    <tr>
+                                        <th></th> {{-- Kolom untuk Expander Child Row --}}
+                                        {{-- KOLOM UNTUK CHECKBOX --}}
+                                        <th class="text-center" style="width: 25px;"><input type="checkbox"
+                                                id="select-all-checkbox"></th>
+                                        <th>Pemesan</th>
+                                        <th>Untuk</th>
+                                        <th>Pasien</th>
+                                        <th>No RM / Reg</th>
+                                        <th>Waktu Makan</th>
+                                        <th>Harga</th>
+                                        <th>Ditagihkan</th>
+                                        <th>Pembayaran</th>
+                                        <th>Pesanan</th>
+                                        <th>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </main>
 @endsection
+
 @section('plugin')
     <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
-    <script src="/js/datagrid/datatables/datatables.export.js"></script>
-    {{-- Select 2 --}}
     <script src="/js/formplugins/select2/select2.bundle.js"></script>
-    {{-- Datepicker --}}
-    <script src="/js/formplugins/bootstrap-datepicker/bootstrap-datepicker.js"></script>
-    {{-- Datepicker Range --}}
-    <script src="/js/dependency/moment/moment.js"></script>
-    <script src="/js/formplugins/bootstrap-daterangepicker/bootstrap-daterangepicker.js"></script>
-
-    <script>
-        var controls = {
-            leftArrow: '<i class="fal fa-angle-left" style="font-size: 1.25rem"></i>',
-            rightArrow: '<i class="fal fa-angle-right" style="font-size: 1.25rem"></i>'
-        }
-
-        var runDatePicker = function() {
-
-            // minimum setup
-            $('#date_of_birth').datepicker({
-                todayHighlight: true,
-                orientation: "bottom left",
-                templates: controls
-            });
-
-        }
-
-        $(document).ready(function() {
-
-            // Datepciker
-            runDatePicker();
-
-            // Select 2
-            $(function() {
-                $('.select2').select2({
-                    dropdownCssClass: "move-up"
-                });
-                $(".select2").on("select2:open", function() {
-                    // Mengambil elemen kotak pencarian
-                    var searchField = $(".select2-search__field");
-
-                    // Mengubah urutan elemen untuk memindahkannya ke atas
-                    searchField.insertBefore(searchField.prev());
-                });
-            });
-
-            /// Get the current date and time
-            var today = new Date();
-
-            // Format it as "YYYY-MM-DD"
-            var formattedToday = today.getFullYear() + '-' +
-                ('0' + (today.getMonth() + 1)).slice(-2) + '-' +
-                ('0' + today.getDate()).slice(-2) + ' ' +
-                ('0' + today.getHours()).slice(-2) + ':' +
-                ('0' + today.getMinutes()).slice(-2) + ':' +
-                ('0' + today.getSeconds()).slice(-2);
-
-            // Set the default date for the datepicker
-            $('#datepicker-1').daterangepicker({
-                opens: 'left',
-                startDate: moment(today).format('YYYY-MM-DD'),
-                endDate: moment(today).format('YYYY-MM-DD'),
-                // timePicker: true, // Enable time selection
-                // timePicker24Hour: true, // 24-hour format
-                // timePickerSeconds: true, // Include seconds in time selection
-                locale: {
-                    format: 'YYYY-MM-DD' // Display format for the picker
-                }
-            }, function(start, end, label) {
-                console.log("A new date selection was made: " + start.format('YYYY-MM-DD') +
-                    ' to ' + end.format('YYYY-MM-DD'));
-            });
-
-
-            $('#loading-spinner').show();
-            // initialize datatable
-            $('#dt-basic-example').dataTable({
-                "drawCallback": function(settings) {
-                    // Menyembunyikan preloader setelah data berhasil dimuat
-                    $('#loading-spinner').hide();
-                },
-                responsive: true,
-                lengthChange: false,
-                dom: "<'row mb-3'<'col-sm-12 col-md-6 d-flex align-items-center justify-content-start'f><'col-sm-12 col-md-6 d-flex align-items-center justify-content-end'lB>>" +
-                    "<'row'<'col-sm-12'tr>>" +
-                    "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
-                buttons: [{
-                        extend: 'pdfHtml5',
-                        text: 'PDF',
-                        titleAttr: 'Generate PDF',
-                        className: 'btn-outline-danger btn-sm mr-1'
-                    },
-                    {
-                        extend: 'excelHtml5',
-                        text: 'Excel',
-                        titleAttr: 'Generate Excel',
-                        className: 'btn-outline-success btn-sm mr-1'
-                    },
-                    {
-                        extend: 'csvHtml5',
-                        text: 'CSV',
-                        titleAttr: 'Generate CSV',
-                        className: 'btn-outline-primary btn-sm mr-1'
-                    },
-                    {
-                        extend: 'copyHtml5',
-                        text: 'Copy',
-                        titleAttr: 'Copy to clipboard',
-                        className: 'btn-outline-primary btn-sm mr-1'
-                    },
-                    {
-                        extend: 'print',
-                        text: 'Print',
-                        titleAttr: 'Print Table',
-                        className: 'btn-outline-primary btn-sm'
-                    }
-                ]
-            });
-
-        });
-
-
-        // Input RM
-        function formatAngka(input) {
-            var value = input.value.replace(/\D/g, '');
-            var formattedValue = '';
-
-            if (value.length > 6) {
-                value = value.substr(0, 6);
-            }
-
-            if (value.length > 0) {
-                formattedValue = value.match(/.{1,2}/g).join('-');
-            }
-
-            input.value = formattedValue;
-        }
-    </script>
-
-    <script>
-        window._orders = @json($orders);
-    </script>
-    <script src="{{ asset('js/simrs/order-gizi.js') }}?v={{ time() }}"></script>
+    <script src="/js/simrs/order-gizi.js"></script>
 @endsection

@@ -1491,6 +1491,20 @@ class ERMController extends Controller
                 ));
 
             case 'resume_medis':
+                $cppt = CPPT::firstWhere(['registration_id' => $registration->id, 'tipe_cppt' => 'dokter']);
+                $diagnosa_utama = null;
+                $diagnosa_tambahan = null;
+                if ($cppt && !empty($cppt->assesment)) {
+                    // Cari baris yang mengandung "Diagnosa Kerja:"
+                    if (preg_match('/Diagnosa Kerja:\s*(.*)/i', $cppt->assesment, $matches)) {
+                        $diagnosa_utama = trim($matches[1]);
+                    }
+                    // Cari baris yang mengandung "Diagnosa Banding:"
+                    if (preg_match('/Diagnosa Banding:\s*(.*)/i', $cppt->assesment, $matches_tambahan)) {
+                        $diagnosa_tambahan = trim($matches_tambahan[1]);
+                    }
+                }
+
                 $dokter = Employee::where('is_doctor', 1)->get();
                 $pengkajian = ResumeMedisRajal::firstWhere('registration_id', $registration->id);
                 if ($registration->registration_type == 'rawat-jalan') {
@@ -1505,7 +1519,12 @@ class ERMController extends Controller
                     $showSwal = true;
                 }
 
-                return view('pages.simrs.erm.form.dokter.resume_medis', compact('registration', 'registrations', 'pengkajian', 'assesment', 'menu', 'departements', 'jadwal_dokter', 'dokter', 'path'));
+                $keluhan_utama = null;
+                if (is_array($assesment->anamnesis) && array_key_exists('keluhan_utama', $assesment->anamnesis)) {
+                    $keluhan_utama = $assesment->anamnesis['keluhan_utama'];
+                }
+
+                return view('pages.simrs.erm.form.dokter.resume_medis', compact('registration', 'registrations', 'pengkajian', 'assesment', 'diagnosa_utama', 'diagnosa_tambahan', 'keluhan_utama', 'menu', 'departements', 'jadwal_dokter', 'dokter', 'path'));
 
             case 'rekonsiliasi_obat':
                 $dokter = Employee::where('is_doctor', 1)->get();

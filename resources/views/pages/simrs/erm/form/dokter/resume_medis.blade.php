@@ -82,7 +82,7 @@
                                 <td><label>:</label></td>
                                 <td>
                                     <input type="text" class="form-control" id="tgl_masuk" name="tgl_masuk"
-                                        value="{{ $pengkajian?->tgl_masuk ? \Carbon\Carbon::parse($pengkajian->tgl_masuk)->format('d-m-Y') : \Carbon\Carbon::parse($registration->registration_date)->format('d-m-Y') }}">
+                                        value="{{ $pengkajian?->tgl_masuk ? \Carbon\Carbon::parse($pengkajian->tgl_masuk)->format('d-m-Y') : \Carbon\Carbon::parse($registration->registration_date)->format('Y-m-d') }}">
                                 </td>
                             </tr>
 
@@ -135,17 +135,18 @@
         $tanda_vital = json_decode($tanda_vital_raw, true) ?? [];
     }
 @endphp
-        Nadi (PR): {{ $tanda_vital['pr'] ?? '' }}
-        Respirasi (RR): {{ $tanda_vital['rr'] ?? '' }}
-        Tensi (BP): {{ $tanda_vital['bp'] ?? '' }}
-        Suhu (T): {{ $tanda_vital['temperatur'] ?? '' }}
-        Tinggi Badan: {{ $tanda_vital['height_badan'] ?? '' }}
-        Berat Badan: {{ $tanda_vital['weight_badan'] ?? '' }}
-        BMI: {{ $tanda_vital['bmi'] ?? '' }}{{ isset($tanda_vital['kat_bmi']) ? ' (' . $tanda_vital['kat_bmi'] . ')' : '' }}
-        SpO2: {{ $tanda_vital['spo2'] ?? '' }}
-        Lingkar Kepala:
-        Pemeriksaan Fisik: {{ $assesment->pemeriksaan_fisik ?? '' }}
-        Pemeriksaan Penunjang: {{ $assesment->pemeriksaan_penunjang ?? '' }}
+Keluhan Utama: {{ $keluhan_utama }}
+Nadi (PR): {{ $tanda_vital['pr'] ?? '' }}
+Respirasi (RR): {{ $tanda_vital['rr'] ?? '' }}
+Tensi (BP): {{ $tanda_vital['bp'] ?? '' }}
+Suhu (T): {{ $tanda_vital['temperatur'] ?? '' }}
+Tinggi Badan: {{ $tanda_vital['height_badan'] ?? '' }}
+Berat Badan: {{ $tanda_vital['weight_badan'] ?? '' }}
+BMI: {{ $tanda_vital['bmi'] ?? '' }}{{ isset($tanda_vital['kat_bmi']) ? ' (' . $tanda_vital['kat_bmi'] . ')' : '' }}
+SpO2: {{ $tanda_vital['spo2'] ?? '' }}
+Lingkar Kepala:
+Pemeriksaan Fisik: {{ $assesment->pemeriksaan_fisik ?? '' }}
+Pemeriksaan Penunjang: {{ $assesment->pemeriksaan_penunjang ?? '' }}
 @endif
 @else
 {{ $pengkajian->anamnesa ?? '' }}
@@ -167,7 +168,13 @@
                                                     <div class="form-group">
                                                         <label for="diagnosa_utama" class="form-label">DIAGNOSA UTAMA
                                                             *</label>
-                                                        <textarea class="form-control" id="diagnosa_utama" name="diagnosa_utama" rows="4" required>{{ $pengkajian?->diagnosa_utama ?? '' }}</textarea>
+                                                        <textarea class="form-control" id="diagnosa_utama" name="diagnosa_utama" rows="4" required>
+@if (empty($pengkajian) && !empty($diagnosa_utama))
+{{ $diagnosa_utama }}
+@else
+{{ $pengkajian?->diagnosa_utama ?? '' }}
+@endif
+</textarea>
                                                     </div>
                                                 </td>
                                                 <td style="width: 30%">
@@ -184,7 +191,13 @@
                                                     <div class="form-group">
                                                         <label for="diagnosa_tambahan" class="form-label">DIAGNOSA
                                                             TAMBAHAN</label>
-                                                        <textarea class="form-control" id="diagnosa_tambahan" name="diagnosa_tambahan" rows="4">{{ $pengkajian?->diagnosa_tambahan ?? '' }}</textarea>
+                                                        <textarea class="form-control" id="diagnosa_utama" name="diagnosa_utama" rows="4" required>
+@if (empty($pengkajian) && !empty($diagnosa_tambahan))
+{{ $diagnosa_tambahan }}
+@else
+{{ $pengkajian?->diagnosa_tambahan ?? '' }}
+@endif
+</textarea>
                                                     </div>
                                                 </td>
                                                 <td>
@@ -276,14 +289,14 @@
                                     <div class="card-actionbar">
                                         <div class="card-actionbar-row d-flex justify-content-between align-items-center">
                                             <button type="button"
-                                                class="btn btn-primary waves-effect waves-light save-form d-flex align-items-center"
+                                                class="btn btn-warning bsd-resume-medis-rajal waves-effect waves-light save-form d-flex align-items-center"
                                                 data-status="0">
-                                                <span class="mdi mdi-content-save"></span> Simpan (draft)
+                                                <span class="mdi mdi-content-save mr-1"></span> Simpan (draft)
                                             </button>
                                             <button type="button"
-                                                class="btn btn-primary waves-effect waves-light save-form d-flex align-items-center"
+                                                class="btn btn-primary bsf-resume-medis-rajal waves-effect waves-light save-form d-flex align-items-center"
                                                 data-status="1">
-                                                <span class="mdi mdi-content-save"></span> Simpan (final)
+                                                <span class="mdi mdi-content-save mr-1"></span> Simpan (final)
                                             </button>
                                         </div>
                                     </div>

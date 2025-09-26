@@ -14,55 +14,138 @@ use App\Models\SIMRS\Registration;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Exception;
 use Illuminate\Http\Request;
+use Yajra\DataTables\Facades\DataTables;
 
 class OrderGiziController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index(Request $request)
+    public function index()
     {
-        $query = OrderGizi::query()->with(["registration", "registration.patient", "registration.kelas_rawat"]);
-        $filters = ['nama_pemesan', 'waktu_makan', 'tanggal_order', "status_order"];
+        $kelasRawats = KelasRawat::all();
+        return view('pages.simrs.gizi.list-order', compact('kelasRawats'));
+    }
 
-        foreach ($filters as $filter) {
-            if ($request->filled($filter)) {
-                $query->where($filter, 'like', '%' . $request->$filter . '%');
-            }
-        }
+    public function datatable(Request $request)
+    {
+        $query = OrderGizi::with([
+            'registration.patient',
+            'registration.kelas_rawat',
+            'category'
+        ])->select('order_gizi.*');
 
+        // Filter
         if ($request->filled('medical_record_number')) {
-            $query->whereHas('registration.patient', function ($q) use ($request) {
-                $q->where('medical_record_number', 'like', '%' . $request->medical_record_number . '%');
-            });
+            $query->whereHas('registration.patient', fn($q) => $q->where('medical_record_number', 'like', '%' . $request->medical_record_number . '%'));
         }
-
         if ($request->filled('registration_number')) {
-            $query->whereHas('registration', function ($q) use ($request) {
-                $q->where('registration_number', 'like', '%' . $request->registration_number . '%');
-            });
+            $query->whereHas('registration', fn($q) => $q->where('registration_number', 'like', '%' . $request->registration_number . '%'));
         }
-
         if ($request->filled('patient_name')) {
-            $query->whereHas('registration.patient', function ($q) use ($request) {
-                $q->where('name', 'like', '%' . $request->patient_name . '%');
-            });
+            $query->whereHas('registration.patient', fn($q) => $q->where('name', 'like', '%' . $request->patient_name . '%'));
         }
-
+        if ($request->filled('nama_pemesan')) {
+            $query->where('nama_pemesan', 'like', '%' . $request->nama_pemesan . '%');
+        }
+        if ($request->filled('tanggal_order')) {
+            $query->whereDate('tanggal_order', $request->tanggal_order);
+        }
+        if ($request->filled('waktu_makan')) {
+            $query->where('waktu_makan', $request->waktu_makan);
+        }
         if ($request->filled('kelas_id')) {
-            $query->whereHas('registration.kelas_rawat', function ($q) use ($request) {
-                $q->where('id', $request->kelas_id);
-            });
+            $query->whereHas('registration', fn($q) => $q->where('kelas_id', $request->kelas_id));
+        }
+        if ($request->filled('status_order') && in_array($request->status_order, ['0', '1'])) {
+            $query->where('status_order', $request->status_order);
         }
 
-        // Get the filtered results if any filter is applied
-        $orders = $query->orderBy('tanggal_order', 'asc')->get();
+        return DataTables::of($query)
+            ->addIndexColumn()
+            ->addColumn('detail', '') // Placeholder for expander
+            ->addColumn('pasien_info', function ($row) {
+                $kelas = $row->registration->kelas_rawat->kelas ?? 'N/A';
+                $nama = $row->registration->patient->name ?? 'N/A';
+                return "[$kelas] $nama";
+            })
+            ->addColumn('no_reg_rm', function ($row) {
+                $rm = $row->registration->patient->medical_record_number ?? 'N/A';
+                $reg = $row->registration->registration_number ?? 'N/A';
+                return "$rm / $reg";
+            })
+            ->addColumn('harga_formatted', function ($row) {
+                return 'Rp ' . number_format($row->total_harga);
+            })
+            ->addColumn('ditagihkan_formatted', function ($row) {
+                return $row->ditagihkan ? 'Ya' : 'Tidak';
+            })
+            ->addColumn('status_payment_formatted', function ($row) {
+                if ($row->status_order) {
+                    return $row->status_payment ?
+                        '<span class="badge badge-success">Payment (Closed)</span>' :
+                        '<span class="badge badge-warning">Not Billed</span>';
+                }
+                return '<span class="badge badge-info">Deliver First</span>';
+            })
+            ->addColumn('status_order_formatted', function ($row) {
+                return $row->status_order ?
+                    '<span class="badge badge-success">Delivered</span>' :
+                    '<span class="badge badge-info">Process</span>';
+            })
+            ->addColumn('action', function ($row) {
+                return view('pages.simrs.gizi.partials.list-order-actions', ['order' => $row])->render();
+            })
+            ->addColumn('detail_makanan', function ($row) {
+                $row->load('foods');
+                return view('pages.simrs.gizi.partials.detail-order-gizi', ['order' => $row])->render();
+            })
+            ->rawColumns(['status_payment_formatted', 'status_order_formatted', 'action', 'detail_makanan'])
+            ->make(true);
+    }
 
+    public function updateStatus(Request $request, $id)
+    {
+        try {
+            $order = OrderGizi::findOrFail($id);
+            $order->status_order = true;
+            $order->save();
+            return response()->json(['success' => true, 'message' => 'Status order berhasil diubah menjadi Terkirim.']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
 
-        return view('pages.simrs.gizi.list-order', [
-            'orders' => $orders,
-            'kelasRawats' => KelasRawat::all()
+    public function bulkUpdateStatus(Request $request)
+    {
+        $validated = $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'integer'
         ]);
+
+        try {
+            OrderGizi::whereIn('id', $validated['ids'])->where('status_order', false)->update(['status_order' => true]);
+            return response()->json(['success' => true, 'message' => 'Status order terpilih berhasil diubah.']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    public function bulkLabel(Request $request)
+    {
+        $order_ids = $request->query('ids');
+        if (is_string($order_ids)) {
+            $order_ids = json_decode($order_ids, true);
+        }
+
+        if (empty($order_ids) || !is_array($order_ids)) {
+            return response('Tidak ada ID order yang valid.', 400);
+        }
+
+        $orders = OrderGizi::whereIn('id', $order_ids)->get();
+        if ($orders->isEmpty()) {
+            return response('Data order tidak ditemukan.', 404);
+        }
+
+        $pdf = Pdf::loadView('pages.simrs.gizi.partials.bulk-pdf-label-order', compact('orders'));
+        return $pdf->stream('bulk-label-order-' . now()->format('Y-m-d_Hi') . '.pdf');
     }
 
     public function edit($id)
@@ -135,7 +218,6 @@ class OrderGiziController extends Controller
             }
 
             return redirect()->back()->with('success', 'Order berhasil dibuat!');
-
         } catch (Exception $e) {
             return back()->with("error", $e->getMessage());
         }
