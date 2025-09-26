@@ -6,20 +6,19 @@
 const Swal = /** @type {import("sweetalert2").default} */ (window.Swal);
 
 class SMMSHandler {
-
     /**
      * @type {MasterGudang[]}
      */
     #Gudang;
 
     /**
-    * @type {Satuan[]}
-    */
+     * @type {Satuan[]}
+     */
     #Satuan;
 
     /**
-    * @type {MinMaxStock[]}
-    */
+     * @type {MinMaxStock[]}
+     */
     #SMMS;
 
     /**
@@ -48,13 +47,13 @@ class SMMSHandler {
     #$LoadingPage;
 
     /**
-    * @type {JQuery<HTMLElement>}
-    */
+     * @type {JQuery<HTMLElement>}
+     */
     #$GudangSelect;
 
     /**
-    * @type {JQuery<HTMLElement>}
-    */
+     * @type {JQuery<HTMLElement>}
+     */
     #$BarangSelect;
 
     #API_URL = "/api/simrs/warehouse/master-data/setup-min-max-stock";
@@ -79,15 +78,21 @@ class SMMSHandler {
     }
 
     #init() {
-        this.#$GudangSelect.on('select2:select', this.handleGudangChange.bind(this));
-        this.#$BarangSelect.on('select2:select', this.#handleBarangChange.bind(this));
+        this.#$GudangSelect.on(
+            "select2:select",
+            this.handleGudangChange.bind(this)
+        );
+        this.#$BarangSelect.on(
+            "select2:select",
+            this.#handleBarangChange.bind(this)
+        );
         this.#refreshTable();
         this.#showLoading(false);
     }
 
     /**
      * Show or hide the loading icon
-     * @param {boolean} show 
+     * @param {boolean} show
      */
     #showLoading(show) {
         this.#$LoadingIcon.toggle(show);
@@ -103,7 +108,7 @@ class SMMSHandler {
         }
 
         const url = "/get/gudang/" + gudangId;
-        this.#SMMS = (await this.#APIfetch(url));
+        this.#SMMS = await this.#APIfetch(url);
         this.#refreshTable();
         this.#showLoading(false);
     }
@@ -116,7 +121,7 @@ class SMMSHandler {
         }
 
         const barangId = parseInt(String(this.#$BarangSelect.val()));
-        const barangType = this.#$BarangSelect.find(':selected').data('type');
+        const barangType = this.#$BarangSelect.find(":selected").data("type");
         if (!barangId) return;
 
         if (barangType == "Farmasi") {
@@ -126,7 +131,7 @@ class SMMSHandler {
                 barang_nf_id: null,
                 gudang_id: gudangId,
                 min: 1,
-                max: 1
+                max: 1,
             });
         } else {
             this.#SMMS.push({
@@ -135,7 +140,7 @@ class SMMSHandler {
                 barang_nf_id: barangId,
                 gudang_id: gudangId,
                 min: 1,
-                max: 1
+                max: 1,
             });
         }
         this.#refreshTable();
@@ -143,8 +148,8 @@ class SMMSHandler {
     }
 
     #setBarangSelectToFirstOption() {
-        const first = this.#$BarangSelect.find('option').first().val();
-        this.#$BarangSelect.val(first ?? 0).trigger('change');
+        const first = this.#$BarangSelect.find("option").first().val();
+        this.#$BarangSelect.val(first ?? 0).trigger("change");
     }
 
     #refreshTable() {
@@ -156,8 +161,7 @@ class SMMSHandler {
                 const $row = $(HTML);
                 this.#$Table.append($row);
             });
-        }
-        else {
+        } else {
             const HTML = this.#getIsEmptyTableCol();
             const $row = $(HTML);
             this.#$Table.append($row);
@@ -165,7 +169,7 @@ class SMMSHandler {
     }
 
     #getIsEmptyTableCol() {
-        return /*html*/`
+        return /*html*/ `
             <tr>
                 <td colspan="7" style="text-align: center;">Pilih gudang lain atau masukkan barang terlebih dahulu!</td>
             </tr>
@@ -174,52 +178,59 @@ class SMMSHandler {
 
     /**
      * Generate HTML string for MMS table collumn
-     * @param {MinMaxStock} mms 
+     * @param {MinMaxStock} mms
      * @param {number} index
      */
     #getMMSTableCol(mms, index) {
-        const Gudang = this.#Gudang.find(g => g.id == mms.gudang_id);
+        const Gudang = this.#Gudang.find((g) => g.id == mms.gudang_id);
         const Barang = mms.barang_f_id
-            ? this.#BarangFarmasi.find(b => b.id == mms.barang_f_id)
-            : this.#BarangNonFarmasi.find(b => b.id == mms.barang_nf_id);
-        const BarangType = mms.barang_f_id
-            ? "Farmasi"
-            : "NonFarmasi";
+            ? this.#BarangFarmasi.find((b) => b.id == mms.barang_f_id)
+            : this.#BarangNonFarmasi.find((b) => b.id == mms.barang_nf_id);
+        const BarangType = mms.barang_f_id ? "Farmasi" : "NonFarmasi";
 
         // make sure both variable is not undefined
         if (!Gudang || !Barang) {
-            return showErrorAlertNoRefresh("Gudang atau Barang tidak ditemukan!");
-        };
+            return showErrorAlertNoRefresh(
+                "Gudang atau Barang tidak ditemukan!"
+            );
+        }
 
-        const Satuan = this.#Satuan.find(s => s.id == Barang.satuan_id);
+        const Satuan = this.#Satuan.find((s) => s.id == Barang.satuan_id);
         // make sure Satuan is not undefined
         if (!Satuan) {
             return showErrorAlertNoRefresh("Satuan tidak ditemukan!");
-        };
+        }
 
         const key = Math.round(Math.random() * 100000);
 
         let id = "";
-        if (mms.id) id = /*html*/`
+        if (mms.id)
+            id = /*html*/ `
             <input type="hidden" name="mms_id[${key}]" value="${mms.id}">
         `;
 
-        return /*html*/`
+        return /*html*/ `
             <tr id="mms${key}">
                 <td>${index + 1}</td>
                 <th>${Barang.kode}
                     <input type="hidden" name="barang_type[${key}]" value="${BarangType}">
-                    <input type="hidden" name="barang_id[${key}]" value="${Barang.id}">
+                    <input type="hidden" name="barang_id[${key}]" value="${
+            Barang.id
+        }">
                     ${id}
                 </th>
                 <th>${Barang.nama}</th>
                 <th>${Satuan.kode}</th>
                 <th>
-                    <input type="number" name="min[${key}]" value="${mms.min}" min="0" step="1" class="form-control" 
+                    <input type="number" name="min[${key}]" value="${
+            mms.min
+        }" min="0" step="1" class="form-control"
                             onkeyup="SMMSClass.minChange(event, ${key}, ${index})" onchange="SMMSClass.minChange(event, ${key}, ${index})" required>
                 </th>
                 <th>
-                    <input type="number" name="max[${key}]" value="${mms.max}" min="1" step="1" class="form-control"
+                    <input type="number" name="max[${key}]" value="${
+            mms.max
+        }" min="1" step="1" class="form-control"
                             onkeyup="SMMSClass.maxChange(event, ${key}, ${index})" onchange="SMMSClass.maxChange(event, ${key}, ${index})" required>
                 </th>
                 <th>
@@ -232,9 +243,9 @@ class SMMSHandler {
 
     /**
      * Handle minimum MMS change
-     * @param {Event} event 
-     * @param {string} key 
-     * @param {number} index 
+     * @param {Event} event
+     * @param {string} key
+     * @param {number} index
      */
     minChange(event, key, index) {
         const input = /** @type {HTMLInputElement} */ (event.target);
@@ -243,9 +254,9 @@ class SMMSHandler {
 
     /**
      * Handle maximum MMS change
-     * @param {Event} event 
-     * @param {string} key 
-     * @param {number} index 
+     * @param {Event} event
+     * @param {string} key
+     * @param {number} index
      */
     maxChange(event, key, index) {
         const input = /** @type {HTMLInputElement} */ (event.target);
@@ -254,8 +265,8 @@ class SMMSHandler {
 
     /**
      * Delete item from table and variable
-     * @param {string} key 
-     * @param {number} index 
+     * @param {string} key
+     * @param {number} index
      */
     deleteItem(key, index) {
         this.#SMMS.splice(index, 1);
@@ -265,8 +276,8 @@ class SMMSHandler {
 
     /**
      * Make a fetch call with API URL as base URL
-     * @param {string} url 
-     * @param {FormData | null} body 
+     * @param {string} url
+     * @param {FormData | null} body
      * @param {"GET" | "POST" | "PATCH" | "PUT" | "DELETE"} method
      */
     #APIfetch(url, body = null, method = "GET") {
@@ -275,23 +286,25 @@ class SMMSHandler {
                 method: method,
                 body: body,
                 headers: {
-                    'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')) || ''
-                }
+                    "X-CSRF-TOKEN":
+                        document
+                            .querySelector('meta[name="csrf-token"]')
+                            ?.getAttribute("content") || "",
+                },
             })
                 .then(async (response) => {
                     if (response.status != 200) {
-                        throw new Error('Error: ' + response.statusText);
+                        throw new Error("Error: " + response.statusText);
                     }
                     resolve(await response.json());
                 })
-                .catch(error => {
-                    console.error('Error:', error);
+                .catch((error) => {
+                    console.log("Error:", error);
                     showErrorAlertNoRefresh(`Error: ${error}`);
                     return reject(error);
                 });
         });
     }
-
 }
 
 const SMMSClass = new SMMSHandler();

@@ -387,7 +387,7 @@
                 },
                 error: function(xhr) {
                     showErrorAlert('Terjadi kesalahan saat menghubungi server.');
-                    console.error(xhr.responseText);
+                    console.log(xhr.responseText);
                 },
                 complete: function() {
                     // Bersihkan ID setelah proses selesai
@@ -538,7 +538,7 @@
                         showErrorAlert(
                             'Terjadi kesalahan. Silakan coba lagi.'
                         ); // Menggunakan fungsi notifikasi Anda
-                        console.error(xhr.responseText);
+                        console.log(xhr.responseText);
                     },
                     complete: function() {
                         button.prop('disabled', false).html('Simpan');
@@ -768,7 +768,7 @@
                                     // Push 'id' property value into idLocation array
                                     idLocation.push(element.id);
                                 } else {
-                                    console.error("Element does not have an 'id' property:", element);
+                                    console.log("Element does not have an 'id' property:", element);
                                     // Handle the case where 'id' property is missing
                                 }
                             });
@@ -1234,5 +1234,22 @@
                 });
             });
         });
+
+        /**
+         * Fungsi untuk membuka popup window setting tarif dokter.
+         * @param {number} doctorId - ID dari dokter.
+         */
+        function openTariffPopup(doctorId) {
+            const url = `/simrs/set-tarif-visite/${doctorId}`;
+            const windowName = `TariffSetting_${doctorId}`;
+            // Atur ukuran popup dan posisikan di tengah layar
+            const width = 1200;
+            const height = 800;
+            const left = (screen.width - width) / 2;
+            const top = (screen.height - height) / 2;
+            const windowFeatures = `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes`;
+
+            window.open(url, windowName, windowFeatures);
+        }
     </script>
 @endsection

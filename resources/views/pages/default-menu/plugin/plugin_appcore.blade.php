@@ -599,7 +599,7 @@ jQuery(document).ready(function() {
         };
 
         /* compile messages to one log */
-        console.error = console.debug = console.info = console.log
+        console.log = console.debug = console.info = console.log
 
 
         $('#eventlog-switch').click(function() {

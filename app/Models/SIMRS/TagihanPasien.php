@@ -5,6 +5,7 @@ namespace App\Models\SIMRS;
 use App\Models\Keuangan\JasaDokter;
 use App\Models\OrderRadiologi;
 use App\Models\SIMRS\Operasi\TindakanOperasi;
+use App\Models\SIMRS\Peralatan\OrderAlatMedis;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -98,5 +99,15 @@ class TagihanPasien extends Model implements AuditableContract
             'registration_id', // Local key on tagihan_pasien table...
             'patient_id' // Local key on registrations table...
         );
+    }
+
+    public function doctor_visit()
+    {
+        return $this->belongsTo(DoctorVisit::class);
+    }
+
+    public function order_alat_medis()
+    {
+        return $this->belongsTo(OrderAlatMedis::class);
     }
 }

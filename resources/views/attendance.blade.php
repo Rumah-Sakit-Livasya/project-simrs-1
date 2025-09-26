@@ -43,7 +43,7 @@
                 console.log('Models loaded successfully');
                 startVideo();
             } catch (error) {
-                console.error('Error loading models:', error);
+                console.log('Error loading models:', error);
                 alert('Error loading models. Check console for details.');
             }
         });
@@ -54,7 +54,7 @@
                 })
                 .then(stream => video.srcObject = stream)
                 .catch(err => {
-                    console.error("Error accessing webcam: ", err);
+                    console.log("Error accessing webcam: ", err);
                     alert('Error accessing webcam. Check console for details.');
                 });
         }
@@ -98,12 +98,12 @@
                             }
                         });
                     } catch (error) {
-                        console.error('Error detecting faces:', error);
+                        console.log('Error detecting faces:', error);
                         alert('Error detecting faces. Check console for details.');
                     }
                 }, 100);
             } catch (error) {
-                console.error('Error loading labeled images:', error);
+                console.log('Error loading labeled images:', error);
                 alert('Error loading labeled images. Check console for details.');
             }
         });
@@ -116,12 +116,12 @@
                 if (detections) {
                     descriptions.push(detections.descriptor);
                 } else {
-                    console.error('No face detected in the image.');
+                    console.log('No face detected in the image.');
                     alert('No face detected in the profile image.');
                 }
                 return [new faceapi.LabeledFaceDescriptors(name, descriptions)];
             } catch (error) {
-                console.error('Error loading labeled images:', error);
+                console.log('Error loading labeled images:', error);
                 alert('Error loading labeled images. Check console for details.');
             }
         }

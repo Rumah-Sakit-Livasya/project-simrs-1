@@ -99,6 +99,7 @@ use App\Http\Controllers\SIMRS\Setup\BiayaAdministrasiRawatInapController;
 use App\Http\Controllers\SIMRS\Setup\BiayaMateraiController;
 use App\Http\Controllers\SIMRS\Setup\TarifRegistrasiController;
 use App\Http\Controllers\SIMRS\TagihanPasienController;
+use App\Http\Controllers\SIMRS\TarifVisiteDokterController;
 use App\Http\Controllers\SIMRS\TindakanMedisController;
 use App\Http\Controllers\SIMRS\TriageController;
 use App\Http\Controllers\SIMRS\UtilityController;
@@ -267,6 +268,10 @@ Route::group(['middleware' => ['auth']], function () {
 
         Route::get('/{registrations:id}', [RegistrationController::class, 'show'])
             ->name('detail.registrasi.pasien');
+
+        Route::get('/{registrations}/{layanan}', [RegistrationController::class, 'layanan'])
+            ->name('detail.registrasi.pasien.layanan');
+
 
         Route::post('/{registrations:id}/batal-register', [RegistrationController::class, 'batal_register'])
             ->name('batal.register');
@@ -1261,6 +1266,12 @@ Route::group(['middleware' => ['auth']], function () {
             Route::get('/', [InsidenController::class, 'index'])
                 ->name('insiden');
         });
+
+        Route::resource('tarif-visite-dokter', TarifVisiteDokterController::class)->except(['create', 'show']);
+        // Route untuk menampilkan halaman popup
+        Route::get('set-tarif-visite/{doctor}', [TarifVisiteDokterController::class, 'setTariffForDoctor'])->name('set.tarif.dokter');
+        // Route API untuk mengambil data tarif per dokter untuk DataTables
+        Route::get('get-tarif-by-doctor/{doctor}', [TarifVisiteDokterController::class, 'getTariffByDoctor'])->name('get.tarif.by.doctor');
 
         // Route::prefix('procurement')->group(function () {
         //     Route::prefix('purchase-request')->group(function () {

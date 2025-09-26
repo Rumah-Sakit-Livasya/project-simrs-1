@@ -151,7 +151,7 @@
                             kategoriTransaksiSelect.prop('disabled', false);
                         },
                         error: function() {
-                            console.error('Error fetching kategori data.');
+                            console.log('Error fetching kategori data.');
                         }
                     });
                 }

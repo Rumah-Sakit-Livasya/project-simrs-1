@@ -567,7 +567,7 @@
                         }
                     },
                     error: function(xhr, status, error) {
-                        console.error('Delete request failed:', {
+                        console.log('Delete request failed:', {
                             status: xhr.status,
                             responseText: xhr.responseText,
                             error: error

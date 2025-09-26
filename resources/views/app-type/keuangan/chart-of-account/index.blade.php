@@ -168,7 +168,7 @@
                         }
                     })
                     .fail(function(xhr) {
-                        console.error("AJAX Gagal:", xhr.responseText);
+                        console.log("AJAX Gagal:", xhr.responseText);
                         $('#coa-table tbody').html(
                             '<tr><td colspan="5" class="text-center text-danger p-5">Gagal memuat data. Silakan coba lagi.</td></tr>'
                         );
@@ -218,7 +218,7 @@
                         selectElement.val(selectedId).trigger('change');
                     }
                 }).fail(function(xhr) {
-                    console.error('Gagal memuat data parent:', xhr.responseText);
+                    console.log('Gagal memuat data parent:', xhr.responseText);
                 });
             }
 
@@ -314,7 +314,7 @@
                         .parent_id);
                     $('#edit-coa').modal('show');
                 }).fail(function(xhr) {
-                    console.error('Gagal memuat data COA:', xhr.responseText);
+                    console.log('Gagal memuat data COA:', xhr.responseText);
                     Swal.fire('Gagal!', 'Gagal memuat data untuk edit.', 'error');
                 });
             });
@@ -397,7 +397,7 @@
                     }
                     $('#group-coa-buttons').html(buttonsHtml);
                 }).fail(function(xhr) {
-                    console.error('Gagal memuat grup COA:', xhr.responseText);
+                    console.log('Gagal memuat grup COA:', xhr.responseText);
                     $('#group-coa-buttons').html(
                         '<div class="alert alert-warning d-inline-block p-2">Gagal memuat grup COA. Silakan coba lagi.</div>'
                     );

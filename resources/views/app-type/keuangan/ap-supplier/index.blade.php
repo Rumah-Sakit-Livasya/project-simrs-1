@@ -409,7 +409,7 @@
                         $('.loading-overlay').hide(); // Sembunyikan loading
                     },
                     error: function(xhr) {
-                        console.error("Error fetching data: ", xhr);
+                        console.log("Error fetching data: ", xhr);
                         toastr.error('Gagal mengambil data dari server.');
                         $('.loading-overlay').hide(); // Sembunyikan loading
                     }
@@ -426,7 +426,7 @@
                     $.each(data, function(index, item) {
 
                         // ================================================================
-                        //                     PERBAIKAN UTAMA DI SINI                      
+                        //                     PERBAIKAN UTAMA DI SINI
                         // ================================================================
                         // Proses data PO dengan rantai objek yang BENAR
                         var po_numbers = item.details.map(function(detail) {
@@ -456,9 +456,9 @@
                             item.notes || '-',
                             item.user_entry ? item.user_entry.name : 'N/A',
                             `<div class="text-center">
-                    <button type="button" 
-                        class="btn btn-xs btn-icon btn-outline-info js-btn-print" 
-                        title="Print Tukar Faktur" 
+                    <button type="button"
+                        class="btn btn-xs btn-icon btn-outline-info js-btn-print"
+                        title="Print Tukar Faktur"
                         data-toggle="tooltip"
                         data-url="/keuangan/ap-supplier/${item.id}/print/invoice">
                         <i class='bx bx-printer'></i>
@@ -485,7 +485,7 @@
                 if (printUrl) {
                     openPrintPopup(printUrl);
                 } else {
-                    console.error('URL untuk print tidak ditemukan pada tombol.');
+                    console.log('URL untuk print tidak ditemukan pada tombol.');
                     toastr.error('URL print tidak ditemukan.');
                 }
             });
@@ -523,7 +523,7 @@
                                 }
                             },
                             error: function(xhr) {
-                                console.error('Error deleting data:', xhr);
+                                console.log('Error deleting data:', xhr);
                                 toastr.error('Terjadi kesalahan saat menghapus data.');
                             }
                         });

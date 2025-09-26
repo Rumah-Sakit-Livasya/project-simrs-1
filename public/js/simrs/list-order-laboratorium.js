@@ -20,11 +20,11 @@ class LaboratoriumOrderHandler {
 
     /**
      * Add event listeners
-     * @param {string} selector 
-     * @param {Function} handler 
+     * @param {string} selector
+     * @param {Function} handler
      * @param {string} event
      */
-    #addEventListeners(selector, handler, event = 'click') {
+    #addEventListeners(selector, handler, event = "click") {
         const buttons = document.querySelectorAll(selector);
         buttons.forEach((button) => {
             button.addEventListener(event, handler.bind(this));
@@ -33,7 +33,7 @@ class LaboratoriumOrderHandler {
 
     /**
      * Handle pay button click
-     * @param {Event} event 
+     * @param {Event} event
      */
     #handlePayClick(event) {
         event.preventDefault();
@@ -51,25 +51,28 @@ class LaboratoriumOrderHandler {
             focusConfirm: true,
             showCancelButton: true,
             confirmButtonText: "Konfirmasi",
-            cancelButtonText: "Batal"
-        }).then(result => {
+            cancelButtonText: "Batal",
+        }).then((result) => {
             if (result.isConfirmed) {
-                fetch('/api/simrs/laboratorium/pay', {
-                    method: 'POST',
+                fetch("/api/simrs/laboratorium/pay", {
+                    method: "POST",
                     body: formData,
                     headers: {
-                        'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')) || ''
-                    }
+                        "X-CSRF-TOKEN":
+                            document
+                                .querySelector('meta[name="csrf-token"]')
+                                ?.getAttribute("content") || "",
+                    },
                 })
-                    .then(response => {
+                    .then((response) => {
                         if (response.status != 200) {
-                            throw new Error('Error: ' + response.statusText);
+                            throw new Error("Error: " + response.statusText);
                         }
-                        showSuccessAlert('Data berhasil disimpan');
+                        showSuccessAlert("Data berhasil disimpan");
                         setTimeout(() => window.location.reload(), 2000);
                     })
-                    .catch(error => {
-                        console.error('Error:', error);
+                    .catch((error) => {
+                        console.log("Error:", error);
                         showErrorAlertNoRefresh(`Error: ${error}`);
                     });
             }
@@ -78,7 +81,7 @@ class LaboratoriumOrderHandler {
 
     /**
      * Handle edit button click
-     * @param {Event} event 
+     * @param {Event} event
      */
     #handleEditClick(event) {
         event.preventDefault();
@@ -91,14 +94,17 @@ class LaboratoriumOrderHandler {
         window.open(
             url,
             "popupWindow_" + new Date().getTime(),
-            "width=" + screen.width + ",height=" + screen.height +
-            ",scrollbars=yes,resizable=yes"
+            "width=" +
+                screen.width +
+                ",height=" +
+                screen.height +
+                ",scrollbars=yes,resizable=yes"
         );
     }
 
     /**
      * Handle print nota button click
-     * @param {Event} event 
+     * @param {Event} event
      */
     #handleNotaClick(event) {
         event.preventDefault();
@@ -111,15 +117,18 @@ class LaboratoriumOrderHandler {
         window.open(
             url,
             "popupWindow_" + new Date().getTime(),
-            "width=" + screen.width + ",height=" + screen.height +
-            ",scrollbars=yes,resizable=yes"
+            "width=" +
+                screen.width +
+                ",height=" +
+                screen.height +
+                ",scrollbars=yes,resizable=yes"
         );
     }
 
     /**
-    * Handle print nota button click
-    * @param {Event} event 
-    */
+     * Handle print nota button click
+     * @param {Event} event
+     */
     #handleResultClick(event) {
         event.preventDefault();
         const target = /** @type {HTMLElement} */ (event.target);
@@ -131,15 +140,18 @@ class LaboratoriumOrderHandler {
         window.open(
             url,
             "popupWindow_" + new Date().getTime(),
-            "width=" + screen.width + ",height=" + screen.height +
-            ",scrollbars=yes,resizable=yes"
+            "width=" +
+                screen.width +
+                ",height=" +
+                screen.height +
+                ",scrollbars=yes,resizable=yes"
         );
     }
 
     /**
-    * Handle print nota button click
-    * @param {Event} event 
-    */
+     * Handle print nota button click
+     * @param {Event} event
+     */
     #handleLabelClick(event) {
         event.preventDefault();
         const target = /** @type {HTMLElement} */ (event.target);
@@ -151,8 +163,11 @@ class LaboratoriumOrderHandler {
         window.open(
             url,
             "popupWindow_" + new Date().getTime(),
-            "width=" + screen.width + ",height=" + screen.height +
-            ",scrollbars=yes,resizable=yes"
+            "width=" +
+                screen.width +
+                ",height=" +
+                screen.height +
+                ",scrollbars=yes,resizable=yes"
         );
     }
 }

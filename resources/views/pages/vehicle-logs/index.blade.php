@@ -199,7 +199,7 @@
                     const data = await response.json();
                     $('#start_odometer').val(data.last_odometer);
                 } catch (error) {
-                    console.error('Gagal mengambil KM terakhir:', error);
+                    console.log('Gagal mengambil KM terakhir:', error);
                     $('#start_odometer').val('');
                 }
             });
@@ -294,7 +294,7 @@
                 logDataTable.ajax.reload();
                 Swal.fire('Sukses', result.message, 'success');
             } catch (error) {
-                console.error(error);
+                console.log(error);
                 const message = error.message || 'Terjadi kesalahan.';
                 Swal.fire('Error', message, 'error');
             } finally {

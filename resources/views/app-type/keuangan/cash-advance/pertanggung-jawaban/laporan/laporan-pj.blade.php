@@ -443,7 +443,7 @@
                         $('.loading-overlay').hide();
                     },
                     error: function(xhr) {
-                        console.error("Error:", xhr);
+                        console.log("Error:", xhr);
                         alert('Gagal mengambil data.');
                         $('.loading-overlay').hide();
                     }
@@ -483,7 +483,7 @@
                         console.log('Data berhasil di-reset');
                     },
                     error: function(xhr) {
-                        console.error("Error:", xhr);
+                        console.log("Error:", xhr);
                         alert('Gagal mereset data.');
                         $('.loading-overlay').hide();
                     }

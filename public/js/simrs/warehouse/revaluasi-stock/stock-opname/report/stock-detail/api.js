@@ -3,7 +3,6 @@
 /// <reference path="../../../../../../types.d.ts" />
 
 class APIHandler {
-
     /**
      * @type {string}
      */
@@ -16,7 +15,7 @@ class APIHandler {
     /**
      * Fetch opname items from API
      * @param {{tanggal: string, nama: string, kategori: string, golongan: string, jenis: string, gudang: string}} filters  Filters to apply to the API call
-     * @returns {Promise<StockDetails[]>} 
+     * @returns {Promise<StockDetails[]>}
      */
     async fetchItems(filters) {
         const url = `/get-items`;
@@ -30,7 +29,7 @@ class APIHandler {
         return result;
     }
 
-    async getPrintTemplate(){
+    async getPrintTemplate() {
         const url = "/get-print-template";
         const result = await this.#APIfetch(url, null, "POST", true);
         return result;
@@ -38,8 +37,8 @@ class APIHandler {
 
     /**
      * Make a fetch call with API URL as base URL
-     * @param {string} url 
-     * @param {FormData | null} body 
+     * @param {string} url
+     * @param {FormData | null} body
      * @param {"GET" | "POST" | "PATCH" | "PUT" | "DELETE"} method
      */
     #APIfetch(url, body = null, method = "GET", raw = false) {
@@ -48,18 +47,21 @@ class APIHandler {
                 method: method,
                 body: body,
                 headers: {
-                    'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')) || '',
-                    'Accept': 'application/json'
-                }
+                    "X-CSRF-TOKEN":
+                        document
+                            .querySelector('meta[name="csrf-token"]')
+                            ?.getAttribute("content") || "",
+                    Accept: "application/json",
+                },
             })
                 .then(async (response) => {
                     if (response.status != 200) {
-                        throw new Error('Error: ' + response.statusText);
+                        throw new Error("Error: " + response.statusText);
                     }
                     resolve(!raw ? await response.json() : response);
                 })
-                .catch(error => {
-                    console.error('Error:', error);
+                .catch((error) => {
+                    console.log("Error:", error);
 
                     showErrorAlertNoRefresh(`Error: ${error}`);
                     return reject(error);

@@ -6,7 +6,6 @@
 const Swal = /** @type {import("sweetalert2").default} */ (window.Swal);
 
 class PopupSRPharmacyHandler {
-
     /**
      * @type {JQuery<HTMLElement>}
      */
@@ -53,8 +52,8 @@ class PopupSRPharmacyHandler {
     #$ItemSearch;
 
     /**
-    * @type {string[]}
-    */
+     * @type {string[]}
+     */
     // @ts-ignore
     #KeyCache = window._key_caches ?? [];
 
@@ -76,12 +75,32 @@ class PopupSRPharmacyHandler {
 
     #init() {
         this.#addEventListeners("#add-btn", this.#handleAddButtonClick);
-        this.#addEventListeners("#searchItemInput", this.#handleItemSearchBar, "keyup");
-        this.#addEventListeners("#order-submit-draft", this.#handleDraftButtonClick);
-        this.#addEventListeners("#order-submit-final", this.#handleFinalButtonClick);
-        this.#addEventListeners("#itemSourceSelect", this.#handleItemSearchBar.bind(this, null), "change");
-        $("#asal-gudang").on("select2:select", this.#handleGudangChange.bind(this));
-        $("#tujuan-gudang").on("select2:select", this.#handleGudangChange.bind(this));
+        this.#addEventListeners(
+            "#searchItemInput",
+            this.#handleItemSearchBar,
+            "keyup"
+        );
+        this.#addEventListeners(
+            "#order-submit-draft",
+            this.#handleDraftButtonClick
+        );
+        this.#addEventListeners(
+            "#order-submit-final",
+            this.#handleFinalButtonClick
+        );
+        this.#addEventListeners(
+            "#itemSourceSelect",
+            this.#handleItemSearchBar.bind(this, null),
+            "change"
+        );
+        $("#asal-gudang").on(
+            "select2:select",
+            this.#handleGudangChange.bind(this)
+        );
+        $("#tujuan-gudang").on(
+            "select2:select",
+            this.#handleGudangChange.bind(this)
+        );
         this.#showLoading(false);
     }
 
@@ -92,7 +111,7 @@ class PopupSRPharmacyHandler {
 
     /**
      * Handle save order final button click
-     * @param {Event} event 
+     * @param {Event} event
      */
     #handleFinalButtonClick(event) {
         const button = /** @type {HTMLButtonElement} */ (event.target);
@@ -108,7 +127,7 @@ class PopupSRPharmacyHandler {
 
     /**
      * Handle save order draft button click
-     * @param {Event} event 
+     * @param {Event} event
      */
     #handleDraftButtonClick(event) {
         const button = /** @type {HTMLButtonElement} */ (event.target);
@@ -132,11 +151,14 @@ class PopupSRPharmacyHandler {
             const searchInput = /** @type {HTMLInputElement} */ (event.target);
             value = searchInput.value.toLowerCase();
         } else {
-            value = (/** @type {string} */(this.#$ItemSearch.val()) || "").toLowerCase();
+            value = /** @type {string} */ (
+                (this.#$ItemSearch.val()) || ""
+            ).toLowerCase();
         }
         const items = document.querySelectorAll("tr.item");
-        const source = /** @type {"stock" | "barang"} */ (this.#$ItemSource.val());
-
+        const source = /** @type {"stock" | "barang"} */ (
+            this.#$ItemSource.val()
+        );
 
         items.forEach((item) => {
             if (!item) return;
@@ -155,7 +177,9 @@ class PopupSRPharmacyHandler {
             }
 
             // @ts-ignore
-            item.style.display = itemName.toLowerCase().includes(value) ? "" : "none";
+            item.style.display = itemName.toLowerCase().includes(value)
+                ? ""
+                : "none";
         });
     }
 
@@ -184,7 +208,9 @@ class PopupSRPharmacyHandler {
         }
 
         const Item = /** @type {BarangFarmasi} */ (row.data("item"));
-        const selectedOption = row.find("select[name='satuan" + Item.id + "']").find("option:selected");
+        const selectedOption = row
+            .find("select[name='satuan" + Item.id + "']")
+            .find("option:selected");
         const Satuan = /** @type {Satuan} */ (selectedOption.data("satuan"));
 
         const Key = `${Item.id}/${Satuan.id}`;
@@ -197,24 +223,28 @@ class PopupSRPharmacyHandler {
 
     /**
      * Generate HTML string for Item table collumn
-     * @param {BarangFarmasi} item 
+     * @param {BarangFarmasi} item
      * @param {Satuan} satuan
-     * @param {string} key_cache 
-     * @param {number} qty 
-     * @param {number?} stock 
+     * @param {string} key_cache
+     * @param {number} qty
+     * @param {number?} stock
      */
     #getItemTableCol(item, satuan, key_cache, qty, stock = null) {
         const key = Math.round(Math.random() * 100000);
 
-        return /*html*/`
+        return /*html*/ `
             <tr id="item${key}">
-                <input type="hidden" name="barang_id[${key}]" value="${item.id}">
-                <input type="hidden" name="satuan_id[${key}]" value="${satuan.id}">
+                <input type="hidden" name="barang_id[${key}]" value="${
+            item.id
+        }">
+                <input type="hidden" name="satuan_id[${key}]" value="${
+            satuan.id
+        }">
 
                 <td>${item.kode}</td>
                 <td>${item.nama}</td>
                 <td>${satuan.nama}</td>
-                <td>${stock ? stock : '-'}</td>
+                <td>${stock ? stock : "-"}</td>
                 <td><input type="number" name="qty[${key}]" min="1" step="1" class="form-control" value="${qty}"></td>
                 <td><input type="text" name="keterangan_item[${key}]" class="form-control"></td>
                 <td><a class="mdi mdi-close pointer mdi-24px text-danger delete-btn"
@@ -225,32 +255,36 @@ class PopupSRPharmacyHandler {
 
     /**
      * Delete item from table and variable
-     * @param {string} key 
+     * @param {string} key
      * @param {string} key_cache
      */
     deleteItem(key, key_cache) {
         this.#$Table.find("#item" + key).remove();
         // remove from this.#KeyCache with value key_cache
-        this.#KeyCache = this.#KeyCache.filter(item => item !== key_cache);
+        this.#KeyCache = this.#KeyCache.filter((item) => item !== key_cache);
     }
 
     /**
-    * Handle add button click
-    * @param {Event} event 
-    */
+     * Handle add button click
+     * @param {Event} event
+     */
     async #handleAddButtonClick(event) {
         event.preventDefault();
         this.#$AddModal.modal("hide");
         const gudangAsalId = this.#$AsalGudangId.val();
         const gudangTujuanId = this.#$TujuanGudangId.val();
         if (!gudangAsalId || !gudangTujuanId) {
-            showErrorAlertNoRefresh("Pilih gudang asal dan gudang tujuan terlebih dahulu!");
+            showErrorAlertNoRefresh(
+                "Pilih gudang asal dan gudang tujuan terlebih dahulu!"
+            );
             return;
         }
 
         this.#showLoading(true);
         const url = `/get/item-gudang/${gudangAsalId}/${gudangTujuanId}`;
-        const HTML = await (await this.#APIfetch(url, null, "GET", true)).text();
+        const HTML = await (
+            await this.#APIfetch(url, null, "GET", true)
+        ).text();
         this.#showLoading(false);
 
         this.#$ModalTable.html(HTML);
@@ -260,11 +294,11 @@ class PopupSRPharmacyHandler {
 
     /**
      * Add event listeners
-     * @param {string} selector 
-     * @param {Function} handler 
+     * @param {string} selector
+     * @param {Function} handler
      * @param {string} event
      */
-    #addEventListeners(selector, handler, event = 'click') {
+    #addEventListeners(selector, handler, event = "click") {
         const buttons = document.querySelectorAll(selector);
         buttons.forEach((button) => {
             button.addEventListener(event, handler.bind(this));
@@ -273,7 +307,7 @@ class PopupSRPharmacyHandler {
 
     /**
      * Show or hide the loading icon
-     * @param {boolean} show 
+     * @param {boolean} show
      */
     #showLoading(show) {
         this.#$LoadingIcon.toggle(show);
@@ -282,8 +316,8 @@ class PopupSRPharmacyHandler {
 
     /**
      * Make a fetch call with API URL as base URL
-     * @param {string} url 
-     * @param {FormData | null} body 
+     * @param {string} url
+     * @param {FormData | null} body
      * @param {"GET" | "POST" | "PATCH" | "PUT" | "DELETE"} method
      */
     #APIfetch(url, body = null, method = "GET", raw = false) {
@@ -292,21 +326,23 @@ class PopupSRPharmacyHandler {
                 method: method,
                 body: body,
                 headers: {
-                    'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')) || ''
-                }
+                    "X-CSRF-TOKEN":
+                        document
+                            .querySelector('meta[name="csrf-token"]')
+                            ?.getAttribute("content") || "",
+                },
             })
                 .then(async (response) => {
                     if (response.status != 200) {
-                        throw new Error('Error: ' + response.statusText);
+                        throw new Error("Error: " + response.statusText);
                     }
                     resolve(!raw ? await response.json() : response);
                 })
-                .catch(error => {
-                    console.error('Error:', error);
+                .catch((error) => {
+                    console.log("Error:", error);
 
                     // @ts-ignore
-                    if (this.#showLoading)
-                        this.#showLoading(false); // assert
+                    if (this.#showLoading) this.#showLoading(false); // assert
 
                     showErrorAlertNoRefresh(`Error: ${error}`);
                     return reject(error);
@@ -316,14 +352,13 @@ class PopupSRPharmacyHandler {
 
     /**
      * Format angka menjadi mata uang rupiah
-     * @param {number} amount 
-     * @returns 
+     * @param {number} amount
+     * @returns
      */
     #rp(amount) {
-        const formattedAmount = 'Rp ' + amount.toLocaleString('id-ID');
+        const formattedAmount = "Rp " + amount.toLocaleString("id-ID");
         return formattedAmount;
     }
-
 }
 
 const PopupSRPharmacyClass = new PopupSRPharmacyHandler();

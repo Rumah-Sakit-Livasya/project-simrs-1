@@ -271,7 +271,7 @@ jQuery(function ($) {
                     if (parameter) {
                         const tarif = self._findApplicableTarif(parameter);
                         if (!tarif) {
-                            console.error(
+                            console.log(
                                 `Tarif tidak ditemukan untuk Parameter ID: ${parameter.id}`
                             );
                             showErrorAlertNoRefresh(
@@ -430,7 +430,7 @@ jQuery(function ($) {
                     ); // Ganti dengan URL redirect yang sesuai
                 },
                 error: function (jqXHR, textStatus, errorThrown) {
-                    console.error("AJAX Error:", textStatus, errorThrown);
+                    console.log("AJAX Error:", textStatus, errorThrown);
                     showErrorAlertNoRefresh(
                         `Gagal mengirim data: ${errorThrown}`
                     );

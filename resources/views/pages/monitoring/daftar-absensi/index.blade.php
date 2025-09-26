@@ -744,7 +744,7 @@
                     const result = await response.json();
                     return result;
                 } catch (error) {
-                    console.error('Error fetching attendance details:', error);
+                    console.log('Error fetching attendance details:', error);
                     showErrorAlert(error.message);
                     throw error;
                 }
@@ -846,7 +846,7 @@
                         alert(result.message);
                     }
                 } catch (error) {
-                    console.error('Error handling detail-absensi click:', error.message);
+                    console.log('Error handling detail-absensi click:', error.message);
                     alert('Terjadi kesalahan saat mengambil data absensi.');
                 }
             });

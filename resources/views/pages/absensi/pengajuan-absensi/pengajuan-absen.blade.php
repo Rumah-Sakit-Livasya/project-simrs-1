@@ -37,7 +37,8 @@
                                                     <div class="input-group">
                                                         <input type="date" name="tanggal[]"
                                                             class="form-control @error('date') is-invalid @enderror"
-                                                            placeholder="Tanggal" id="date" value="{{ now()->format('Y-m-d') }}">
+                                                            placeholder="Tanggal" id="date"
+                                                            value="{{ now()->format('Y-m-d') }}">
                                                         <div class="input-group-append">
                                                             <span class="input-group-text fs-xl">
                                                                 <i class="fal fa-calendar-alt"></i>
@@ -113,7 +114,7 @@
                     if ($(this).attr('name') === 'tanggal[]') {
                         // Pastikan input tanggal tetap readonly, clone value, dan tipe text
                         $(this).attr('type', 'date'); // Pastikan tipe tetap text
-                        $(this).val("{{now()->format('Y-m-d')}}"); // Pertahankan nilai
+                        $(this).val("{{ now()->format('Y-m-d') }}"); // Pertahankan nilai
                         return; // Skip iterasi untuk input tanggal
                     }
                     $(this).val(''); // Kosongkan nilai input lainnya
@@ -208,14 +209,15 @@
 
                                 // Tampilkan pesan error pertama
                                 alert(
-                                firstError); // Bisa diganti dengan menampilkan di elemen tertentu
+                                    firstError
+                                    ); // Bisa diganti dengan menampilkan di elemen tertentu
                             } else {
-                                console.error('Terjadi kesalahan:', xhr.responseText);
+                                console.log('Terjadi kesalahan:', xhr.responseText);
                             }
                         }
                     });
                 } else {
-                    console.error('Form tidak ditemukan!');
+                    console.log('Form tidak ditemukan!');
                 }
             });
 
@@ -235,7 +237,7 @@
             //         },
             //         error: function(xhr, status, error) {
             //             alert('Gagal mengajukan form. Silakan coba lagi.');
-            //             console.error(xhr.responseText);
+            //             console.log(xhr.responseText);
             //         }
             //     });
             // });
@@ -265,7 +267,7 @@
         //                     // Handle the response data, e.g., update the form fields
         //                 },
         //                 error: function(error) {
-        //                     console.error('AJAX request failed:', error);
+        //                     console.log('AJAX request failed:', error);
         //                 }
         //             });
         //         }

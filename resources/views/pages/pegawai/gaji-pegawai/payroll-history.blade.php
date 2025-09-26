@@ -364,7 +364,7 @@
                         },
                         error: function(xhr, status, error) {
                             // Penanganan kesalahan saat melakukan permintaan
-                            console.error(xhr.responseText);
+                            console.log(xhr.responseText);
                         }
                     });
                 });

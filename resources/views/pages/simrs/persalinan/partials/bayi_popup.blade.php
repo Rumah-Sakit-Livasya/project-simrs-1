@@ -259,7 +259,7 @@
                         $('#select-dokter-bayi').append(new Option(data.doctor.employee.fullname,
                             data.doctor_id, true, true)).trigger('change');
                     } else {
-                        console.error('Data dokter tidak lengkap:', data.doctor);
+                        console.log('Data dokter tidak lengkap:', data.doctor);
                     }
 
                     if (data.bed && data.bed.room && data.bed.room.kelas_rawat) {
@@ -269,7 +269,7 @@
                         $('#bayi_bed_id_input').val(data.bed_id);
                         $('#bayi_kelas_rawat_id_input').val(data.bed.room.kelas_rawat_id);
                     } else {
-                        console.error('Data bed tidak lengkap:', data.bed);
+                        console.log('Data bed tidak lengkap:', data.bed);
                     }
 
                     $('#bayi_id').val(data.id);

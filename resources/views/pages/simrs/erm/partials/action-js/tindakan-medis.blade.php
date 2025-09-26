@@ -309,7 +309,7 @@
         // Fungsi untuk membuka modal dan memuat data berdasarkan ID
         $('#modal-tambah-tindakan').on('shown.bs.modal', function(event) {
             let button = $(event.relatedTarget);
-            let registrasiId = "{{$registration->id}}"; // Ambil ID dari data-id
+            let registrasiId = "{{ $registration->id }}"; // Ambil ID dari data-id
 
             $('#store-form select').val(null).trigger('change');
 
@@ -330,10 +330,14 @@
                             $('#kelas').val(data.kelas_id).trigger('change');
                             $('#qty').val(data.qty || 1);
                             $('#diskonDokter').prop('checked', data.diskon_dokter || false);
-                            $('#tindakanMedis').empty().append('<option value="" selected>Pilih Tindakan Medis</option>');
+                            $('#tindakanMedis').empty().append(
+                                '<option value="" selected>Pilih Tindakan Medis</option>'
+                                );
 
                             data.tindakan_medis.forEach(item => {
-                                $('#tindakanMedis').append(`<option value="${item.id}">${item.nama_tindakan}</option>`);
+                                $('#tindakanMedis').append(
+                                    `<option value="${item.id}">${item.nama_tindakan}</option>`
+                                    );
                             });
 
                             $('#tindakanMedis').trigger('change');
@@ -346,7 +350,7 @@
                         }
                     },
                     error: function(xhr) {
-                        console.error('Gagal memuat data registrasi:', xhr);
+                        console.log('Gagal memuat data registrasi:', xhr);
                         $('#modal-tambah-tindakan').modal('hide');
 
                         let errorMessage =

@@ -6,7 +6,6 @@
 const Swal = /** @type {import("sweetalert2").default} */ (window.Swal);
 
 class PopupReturBarangHandler {
-
     /**
      * @type {JQuery<HTMLElement>}
      */
@@ -91,17 +90,33 @@ class PopupReturBarangHandler {
 
     #init() {
         this.#addEventListeners("#add-btn", this.#handleAddButtonClick);
-        this.#addEventListeners("#searchItemInput", this.#handleItemSearchBar, "keyup");
-        this.#addEventListeners("#searchPBInput", this.#handleItemSearchBar, "keyup");
-        this.#addEventListeners("#searchNoFakturInput", this.#handleItemSearchBar, "keyup");
-        this.#addEventListeners("input[name='ppn']", this.refreshTotal, "keyup");
-        this.#$SupplierId.on('select2:select', this.#reset.bind(this));
+        this.#addEventListeners(
+            "#searchItemInput",
+            this.#handleItemSearchBar,
+            "keyup"
+        );
+        this.#addEventListeners(
+            "#searchPBInput",
+            this.#handleItemSearchBar,
+            "keyup"
+        );
+        this.#addEventListeners(
+            "#searchNoFakturInput",
+            this.#handleItemSearchBar,
+            "keyup"
+        );
+        this.#addEventListeners(
+            "input[name='ppn']",
+            this.refreshTotal,
+            "keyup"
+        );
+        this.#$SupplierId.on("select2:select", this.#reset.bind(this));
         this.#showLoading(false);
     }
 
     /**
      * Handle item search bar on key up
-     * @param {Event} event 
+     * @param {Event} event
      */
     #handleItemSearchBar(event) {
         const searchInput = /** @type {HTMLInputElement} */ (event.target);
@@ -127,9 +142,11 @@ class PopupReturBarangHandler {
             if (!noFakturElement) return;
             no_faktur = noFakturElement.textContent || "";
 
-            if (kode_pb.toLowerCase().includes(value) ||
+            if (
+                kode_pb.toLowerCase().includes(value) ||
                 no_faktur.toLowerCase().includes(value) ||
-                item_name.toLowerCase().includes(value)) {
+                item_name.toLowerCase().includes(value)
+            ) {
                 // @ts-ignore
                 item.style.display = "";
             } else {
@@ -141,16 +158,14 @@ class PopupReturBarangHandler {
 
     /**
      * Add selected item from modal to table
-     * @param {StoredItem} Item 
+     * @param {StoredItem} Item
      * @returns void
      */
     addItem(Item) {
-        if (!Item.pbi || !Item.pbi.pb)
-            return alert("PBI or PB not found!");
+        if (!Item.pbi || !Item.pbi.pb) return alert("PBI or PB not found!");
 
         const PBCode = Item.pbi.pb.kode_penerimaan + Item.pbi.batch_no;
-        if (!PBCode)
-            return alert("PB Code not found!");
+        if (!PBCode) return alert("PB Code not found!");
 
         if (this.#SelectedItems.includes(PBCode)) {
             this.#$AddModal.modal("hide");
@@ -162,7 +177,6 @@ class PopupReturBarangHandler {
             tipe = "non_farmasi";
         console.log(tipe, PBCode);
 
-
         const HTML = this.#getItemTableCol(Item, tipe, PBCode);
         if (!HTML) return; // error occured and alerted
 
@@ -173,16 +187,15 @@ class PopupReturBarangHandler {
 
     /**
      * Generate HTML string for Item table collumn
-     * @param {StoredItem} item 
-     * @param {"farmasi" | "non_farmasi"} tipe 
-     * @param {string} code 
+     * @param {StoredItem} item
+     * @param {"farmasi" | "non_farmasi"} tipe
+     * @param {string} code
      */
     #getItemTableCol(item, tipe, code) {
         const key = Math.round(Math.random() * 100000);
 
         let type_column = "si_f_id";
-        if (tipe == "non_farmasi")
-            type_column = "si_nf_id";
+        if (tipe == "non_farmasi") type_column = "si_nf_id";
 
         if (!item.pbi) return alert("PBI Not Found!");
 
@@ -193,7 +206,8 @@ class PopupReturBarangHandler {
             // we only know the total of the discount in nominal
             // we need to know what's the discount percentage
             let full_price = item.pbi.subtotal + item.pbi.diskon_nominal;
-            let discount_percentage = (item.pbi.diskon_nominal / full_price) * 100;
+            let discount_percentage =
+                (item.pbi.diskon_nominal / full_price) * 100;
             harga = item.pbi.harga - harga * (discount_percentage / 100);
         }
 
@@ -211,23 +225,36 @@ class PopupReturBarangHandler {
         // <th>Subtotal</th>
         // <th>Aksi</th>
 
-        return /*html*/`
+        return /*html*/ `
             <tr id="item${key}">
                 <input type="hidden" name="item_type[${key}]" value="${type_column}">
-                <input type="hidden" name="item_si_id[${key}]" value="${item.id}">
+                <input type="hidden" name="item_si_id[${key}]" value="${
+            item.id
+        }">
                 <input type="hidden" name="item_harga[${key}]" value="${harga}">
-                <input type="hidden" name="item_subtotal[${key}]" value="${item.pbi.qty * harga}">
+                <input type="hidden" name="item_subtotal[${key}]" value="${
+            item.pbi.qty * harga
+        }">
 
                 <td>${item.pbi.kode_barang}</td>
                 <td>${item.pbi.nama_barang}</td>
                 <td>${item.pbi.pb?.no_faktur}</td>
-                <td>${item.pbi.tanggal_exp ? new Date(item.pbi.tanggal_exp).toLocaleDateString("id-ID", { day: "2-digit", month: "long", year: "numeric" }) : "-"}</td>
+                <td>${
+                    item.pbi.tanggal_exp
+                        ? new Date(item.pbi.tanggal_exp).toLocaleDateString(
+                              "id-ID",
+                              { day: "2-digit", month: "long", year: "numeric" }
+                          )
+                        : "-"
+                }</td>
                 <td>${item.pbi.batch_no}</td>
                 <td>${item.pbi.unit_barang}</td>
                 <td>${item.pbi.qty}</td>
                 <td>Coming Soon!</td>
                 <td>${item.qty}</td>
-                <td><input type="number" name="item_qty[${key}]" min="0" step="1" max="${item.qty}" class="form-control" value="${item.qty}"
+                <td><input type="number" name="item_qty[${key}]" min="0" step="1" max="${
+            item.qty
+        }" class="form-control" value="${item.qty}"
                     onkeyup="PopupReturBarangClass.enforceNumberLimit(event).refreshTotal()" onchange="PopupReturBarangClass.enforceNumberLimit(event).refreshTotal()"></td>
                 <td>${this.#rp(harga)}</td>
                 <td class="subtotal">${this.#rp(item.pbi.qty * harga)}</td>
@@ -239,23 +266,23 @@ class PopupReturBarangHandler {
 
     /**
      * Enforce number input min max limit on manual input
-     * @param {Event} event 
+     * @param {Event} event
      */
     enforceNumberLimit(event) {
         const inputField = /** @type {HTMLInputElement} */ (event.target);
         let value = parseFloat(inputField.value);
-        let min = parseInt(String(inputField.min || 0));  // Default to 0 if not set
-        let max = parseInt(String(inputField.max || Number.MAX_SAFE_INTEGER));  // Set default to a large number
+        let min = parseInt(String(inputField.min || 0)); // Default to 0 if not set
+        let max = parseInt(String(inputField.max || Number.MAX_SAFE_INTEGER)); // Set default to a large number
 
         if (isNaN(value)) {
-            inputField.value = '';  // Reset to empty on invalid input
+            inputField.value = ""; // Reset to empty on invalid input
             return this;
         }
 
         if (value < min) {
-            inputField.value = String(min);  // Clamp value at min
+            inputField.value = String(min); // Clamp value at min
         } else if (value > max) {
-            inputField.value = String(max);  // Clamp value at max
+            inputField.value = String(max); // Clamp value at max
         }
 
         return this;
@@ -272,7 +299,8 @@ class PopupReturBarangHandler {
 
             const qty = parseInt(String(qtyEl.val()));
             const hna = parseInt(String(hnaEl.val()));
-            if (isNaN(qty) || isNaN(hna)) return alert("Qty or HNA is not a number!");
+            if (isNaN(qty) || isNaN(hna))
+                return alert("Qty or HNA is not a number!");
 
             let subtotal = qty * hna;
             console.log(qty, hna, subtotal);
@@ -292,22 +320,24 @@ class PopupReturBarangHandler {
 
     /**
      * Delete item from table and variable
-     * @param {string} key 
-     * @param {string} code 
+     * @param {string} key
+     * @param {string} code
      */
     deleteItem(key, code) {
         this.#$Table.find("#item" + key).remove();
         // remove an item from this.#SelectedItems
         // where value is code
-        this.#SelectedItems = this.#SelectedItems.filter(item => item !== code);
+        this.#SelectedItems = this.#SelectedItems.filter(
+            (item) => item !== code
+        );
 
         this.refreshTotal();
     }
 
     /**
-    * Handle add button click
-    * @param {Event} event 
-    */
+     * Handle add button click
+     * @param {Event} event
+     */
     async #handleAddButtonClick(event) {
         event.preventDefault();
         const supplierId = /** @type {string} */ (this.#$SupplierId.val());
@@ -319,7 +349,9 @@ class PopupReturBarangHandler {
         this.#showLoading(true);
         const url = "/get/item-supplier/" + supplierId;
 
-        const HTML = await (await this.#APIfetch(url, null, "GET", true)).text();
+        const HTML = await (
+            await this.#APIfetch(url, null, "GET", true)
+        ).text();
         this.#showLoading(false);
 
         this.#$ModalTable.html(HTML);
@@ -328,11 +360,11 @@ class PopupReturBarangHandler {
 
     /**
      * Add event listeners
-     * @param {string} selector 
-     * @param {Function} handler 
+     * @param {string} selector
+     * @param {Function} handler
      * @param {string} event
      */
-    #addEventListeners(selector, handler, event = 'click') {
+    #addEventListeners(selector, handler, event = "click") {
         const buttons = document.querySelectorAll(selector);
         buttons.forEach((button) => {
             button.addEventListener(event, handler.bind(this));
@@ -341,7 +373,7 @@ class PopupReturBarangHandler {
 
     /**
      * Show or hide the loading icon
-     * @param {boolean} show 
+     * @param {boolean} show
      */
     #showLoading(show) {
         this.#$LoadingIcon.toggle(show);
@@ -350,8 +382,8 @@ class PopupReturBarangHandler {
 
     /**
      * Make a fetch call with API URL as base URL
-     * @param {string} url 
-     * @param {FormData | null} body 
+     * @param {string} url
+     * @param {FormData | null} body
      * @param {"GET" | "POST" | "PATCH" | "PUT" | "DELETE"} method
      */
     #APIfetch(url, body = null, method = "GET", raw = false) {
@@ -360,21 +392,23 @@ class PopupReturBarangHandler {
                 method: method,
                 body: body,
                 headers: {
-                    'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')) || ''
-                }
+                    "X-CSRF-TOKEN":
+                        document
+                            .querySelector('meta[name="csrf-token"]')
+                            ?.getAttribute("content") || "",
+                },
             })
                 .then(async (response) => {
                     if (response.status != 200) {
-                        throw new Error('Error: ' + response.statusText);
+                        throw new Error("Error: " + response.statusText);
                     }
                     resolve(!raw ? await response.json() : response);
                 })
-                .catch(error => {
-                    console.error('Error:', error);
+                .catch((error) => {
+                    console.log("Error:", error);
 
                     // @ts-ignore
-                    if (this.#showLoading)
-                        this.#showLoading(false); // assert
+                    if (this.#showLoading) this.#showLoading(false); // assert
 
                     showErrorAlertNoRefresh(`Error: ${error}`);
                     return reject(error);
@@ -384,14 +418,13 @@ class PopupReturBarangHandler {
 
     /**
      * Format angka menjadi mata uang rupiah
-     * @param {number} amount 
-     * @returns 
+     * @param {number} amount
+     * @returns
      */
     #rp(amount) {
-        const formattedAmount = 'Rp ' + amount.toLocaleString('id-ID');
+        const formattedAmount = "Rp " + amount.toLocaleString("id-ID");
         return formattedAmount;
     }
-
 }
 
 const PopupReturBarangClass = new PopupReturBarangHandler();

@@ -212,7 +212,7 @@
                     adjustCanvasSize();
                 });
             } catch (error) {
-                console.error('Error accessing the camera:', error);
+                console.log('Error accessing the camera:', error);
                 alert('Error accessing the camera: ' + error.message);
             }
         }
@@ -230,11 +230,11 @@
                         longitude = position.coords.longitude;
                         resolve(position);
                     }, error => {
-                        console.error("Geolocation failed: " + error.message);
+                        console.log("Geolocation failed: " + error.message);
                         reject(error);
                     });
                 } else {
-                    console.error("Geolocation is not supported by this browser.");
+                    console.log("Geolocation is not supported by this browser.");
                     reject(new Error("Geolocation not supported"));
                 }
             });
@@ -258,7 +258,7 @@
                     .bindPopup('You are here.<br> Accuracy: ' + accuracy + ' meters.')
                     .openPopup();
             } catch (error) {
-                console.error("Error initializing map: ", error);
+                console.log("Error initializing map: ", error);
             }
         }
 
@@ -407,7 +407,7 @@
                         window.location.reload();
                     }, 1000);
                 } else {
-                    console.error('Error:', result);
+                    console.log('Error:', result);
                     $('#clockin-modal').modal('hide');
                     showErrorAlert(result.error);
                 }

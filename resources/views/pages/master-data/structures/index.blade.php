@@ -288,7 +288,7 @@
 
                 },
                 error: function(error) {
-                    console.error('Error loading hierarchy:', error);
+                    console.log('Error loading hierarchy:', error);
                 }
             });
 

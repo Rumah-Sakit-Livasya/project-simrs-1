@@ -198,7 +198,7 @@
                     beforeSend: () => $('#filterBtn').prop('disabled', true).html('Memuat...'),
                     success: (response) => updateUI(response.data),
                     error: (xhr) => {
-                        console.error("Gagal memuat data:", xhr);
+                        console.log("Gagal memuat data:", xhr);
                         alert("Gagal memuat data laporan.");
                     },
                     complete: () => $('#filterBtn').prop('disabled', false).html(

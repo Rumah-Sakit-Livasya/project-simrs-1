@@ -246,7 +246,7 @@ class RadiologiRegistrasiForm {
                 this.#submit2(formData, id);
             })
             .catch((error) => {
-                console.error("Error:", error);
+                console.log("Error:", error);
                 showErrorAlertNoRefresh(`Error: ${error}`);
             });
     }
@@ -283,7 +283,7 @@ class RadiologiRegistrasiForm {
                 setTimeout(() => window.location.reload(), 2000);
             })
             .catch((error) => {
-                console.error("Error:", error);
+                console.log("Error:", error);
                 showErrorAlertNoRefresh(`Error: ${error}`);
             });
     }
@@ -327,7 +327,7 @@ class RadiologiRegistrasiForm {
                             currency: "IDR",
                         });
                 } else {
-                    console.error(
+                    console.log(
                         "Tarif belum di set atau tidak ditemukan! ID Parameter: " +
                             ParameterRadiologi.id
                     );

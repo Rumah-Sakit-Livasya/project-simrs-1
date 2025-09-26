@@ -400,7 +400,7 @@
                         })
                         .catch(error => {
                             // Ini akan dieksekusi jika browser memblokir autoplay!
-                            console.error("GAGAL MEMUTAR AUDIO SECARA OTOMATIS:", error);
+                            console.log("GAGAL MEMUTAR AUDIO SECARA OTOMATIS:", error);
                             alert(
                                 "Browser memblokir pemutaran suara. Pastikan situs ini diizinkan untuk memutar audio."
                             );
@@ -415,7 +415,7 @@
                 };
                 audio.onerror = () => {
                     isPlaying = false;
-                    console.error("Error saat memuat file audio.");
+                    console.log("Error saat memuat file audio.");
                 };
             }
 
@@ -454,7 +454,7 @@
                             const pat = reg.patient;
 
                             if (!reg || !reg.departement) {
-                                console.error("Data event tidak lengkap:", e);
+                                console.log("Data event tidak lengkap:", e);
                                 return;
                             }
 
@@ -486,7 +486,7 @@
                             }
                         });
                 } catch (e) {
-                    console.error("GAGAL menginisialisasi Echo:", e);
+                    console.log("GAGAL menginisialisasi Echo:", e);
                 }
             }
 

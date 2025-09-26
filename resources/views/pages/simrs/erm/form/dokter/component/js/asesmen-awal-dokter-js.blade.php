@@ -1,6 +1,6 @@
 <script>
     $(document).ready(function() {
-                // Fungsi ini dipanggil dari window popup untuk mengupdate halaman utama
+        // Fungsi ini dipanggil dari window popup untuk mengupdate halaman utama
         window.updateSignature = function(targetInputId, targetPreviewId, dataURL) {
             // Cari elemen di halaman utama dan isi nilainya
             const inputField = document.getElementById(targetInputId);
@@ -69,37 +69,39 @@
         $('.calc-bmi').on('keyup change', calculateBmi);
         calculateBmi(); // Panggil saat pertama kali load
         const initPainterro = (id, inputId, defaultImgUrl) => {
-    // 1. Tentukan sumber gambar DULUAN
-    const existingImage = $(inputId).val();
-    // Jika 'existingImage' punya isi (bukan string kosong), gunakan itu. Jika tidak, gunakan 'defaultImgUrl'.
-    const imageSource = existingImage || defaultImgUrl;
+            // 1. Tentukan sumber gambar DULUAN
+            const existingImage = $(inputId).val();
+            // Jika 'existingImage' punya isi (bukan string kosong), gunakan itu. Jika tidak, gunakan 'defaultImgUrl'.
+            const imageSource = existingImage || defaultImgUrl;
 
-    // 2. Inisialisasi instance Painterro
-    const painterroInstance = Painterro({
-        id: id,
-        defaultTool: 'brush',
-        defaultLineWidth: 2,
-        hiddenTools: ['rotate', 'close', 'select', 'crop', 'pixelize', 'resize', 'settings', 'save'],
-        onChange: (ptro) => {
-            // Handler ini sudah benar dan akan tetap berfungsi
-            $(inputId).val(ptro.image.asDataURL());
-        }
-    });
+            // 2. Inisialisasi instance Painterro
+            const painterroInstance = Painterro({
+                id: id,
+                defaultTool: 'brush',
+                defaultLineWidth: 2,
+                hiddenTools: ['rotate', 'close', 'select', 'crop', 'pixelize', 'resize', 'settings',
+                    'save'
+                ],
+                onChange: (ptro) => {
+                    // Handler ini sudah benar dan akan tetap berfungsi
+                    $(inputId).val(ptro.image.asDataURL());
+                }
+            });
 
-    // 3. Tampilkan Painterro dengan sumber gambar yang sudah ditentukan
-    //    Ini cara yang paling andal. Painterro akan menangani sisanya.
-    painterroInstance.show(imageSource, (img) => {
-        // Kita bisa gunakan callback ini untuk memeriksa jika ada error saat memuat gambar
-        if (!img) {
-            console.error('Painterro gagal memuat gambar. Sumber:', imageSource);
-            // Anda bisa menampilkan pesan error ke pengguna di sini jika perlu
-        }
-    });
-};
+            // 3. Tampilkan Painterro dengan sumber gambar yang sudah ditentukan
+            //    Ini cara yang paling andal. Painterro akan menangani sisanya.
+            painterroInstance.show(imageSource, (img) => {
+                // Kita bisa gunakan callback ini untuk memeriksa jika ada error saat memuat gambar
+                if (!img) {
+                    console.log('Painterro gagal memuat gambar. Sumber:', imageSource);
+                    // Anda bisa menampilkan pesan error ke pengguna di sini jika perlu
+                }
+            });
+        };
 
-// Pastikan sekali lagi path dan ekstensi file sudah benar di sini
-initPainterro('img-tubuh', '#myimage-tubuh', '{{ asset('img/simrs/tubuh.png') }}');
-initPainterro('img-kepala', '#myimage-kepala', '{{ asset('img/simrs/kepala.png') }}');
+        // Pastikan sekali lagi path dan ekstensi file sudah benar di sini
+        initPainterro('img-tubuh', '#myimage-tubuh', '{{ asset('img/simrs/tubuh.png') }}');
+        initPainterro('img-kepala', '#myimage-kepala', '{{ asset('img/simrs/kepala.png') }}');
 
         // Aksi Simpan Form (Draft & Final)
         $('.save-form').on('click', function(e) {
@@ -114,7 +116,8 @@ initPainterro('img-kepala', '#myimage-kepala', '{{ asset('img/simrs/kepala.png')
                 if (value && !$(this).prop('readonly') && isNaN(parseFloat(value))) {
                     isValid = false;
                     // Dapatkan label atau nama untuk pesan error
-                    const fieldName = $(this).closest('.form-group').find('label').text() || $(this).attr('name');
+                    const fieldName = $(this).closest('.form-group').find('label').text() || $(
+                        this).attr('name');
                     errorMessages.push(`Input '${fieldName}' harus berupa angka.`);
                     $(this).addClass('is-invalid'); // Beri highlight merah
                 } else {
@@ -152,7 +155,7 @@ initPainterro('img-kepala', '#myimage-kepala', '{{ asset('img/simrs/kepala.png')
                         timer: 2000,
                         showConfirmButton: false
                     });
-                     // Opsional: reload atau redirect jika perlu
+                    // Opsional: reload atau redirect jika perlu
                 },
                 error: function(xhr) {
                     Swal.fire({
@@ -162,7 +165,7 @@ initPainterro('img-kepala', '#myimage-kepala', '{{ asset('img/simrs/kepala.png')
                     });
                 },
                 complete: function() {
-                     $('.save-form').prop('disabled', false);
+                    $('.save-form').prop('disabled', false);
                 }
             });
         });

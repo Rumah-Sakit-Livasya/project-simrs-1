@@ -26,10 +26,10 @@
                     <div class="form-group">
                         <div class="row">
                             <div class="col-xl-3 text-right">
-                                <label class="form-label font-weight-normal" for="alasan">Alasan</label>
+                                <label class="form-label font-weight-normal" for="alasan-batal-keluar">Alasan</label>
                             </div>
                             <div class="col-xl text-right">
-                                <textarea class="form-control" id="alasan" rows="5" name="alasan"></textarea>
+                                <textarea class="form-control" id="alasan-batal-keluar" rows="5" name="alasan"></textarea>
                             </div>
                         </div>
                     </div>

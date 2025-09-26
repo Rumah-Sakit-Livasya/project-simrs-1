@@ -6,7 +6,6 @@
 const Swal = /** @type {import("sweetalert2").default} */ (window.Swal);
 
 class PopupDBPharmacyHandler {
-
     /**
      * @type {JQuery<HTMLElement>}
      */
@@ -63,8 +62,8 @@ class PopupDBPharmacyHandler {
     #$SRId;
 
     /**
-    * @type {string[]}
-    */
+     * @type {string[]}
+     */
     // @ts-ignore
     #KeyCache = window._key_caches ?? [];
 
@@ -88,15 +87,47 @@ class PopupDBPharmacyHandler {
 
     #init() {
         this.#addEventListeners("#add-btn", this.#handleAddButtonClick);
-        this.#addEventListeners("#searchItemInput", this.#handleItemSearchBar, "keyup");
-        this.#addEventListeners("#searchSRInput", this.#handleSRSearch, "keyup");
-        this.#addEventListeners("#searchSRAsalInput", this.#handleSRSearch, "keyup");
-        this.#addEventListeners("#searchSRTujuanInput", this.#handleSRSearch, "keyup");
-        this.#addEventListeners("#order-submit-draft", this.#handleDraftButtonClick);
-        this.#addEventListeners("#order-submit-final", this.#handleFinalButtonClick);
-        this.#addEventListeners("input[type='number']", this.enforceNumberLimit, "input")
-        $("#asal-gudang").on("select2:select", this.#handleGudangChange.bind(this));
-        $("#tujuan-gudang").on("select2:select", this.#handleGudangChange.bind(this));
+        this.#addEventListeners(
+            "#searchItemInput",
+            this.#handleItemSearchBar,
+            "keyup"
+        );
+        this.#addEventListeners(
+            "#searchSRInput",
+            this.#handleSRSearch,
+            "keyup"
+        );
+        this.#addEventListeners(
+            "#searchSRAsalInput",
+            this.#handleSRSearch,
+            "keyup"
+        );
+        this.#addEventListeners(
+            "#searchSRTujuanInput",
+            this.#handleSRSearch,
+            "keyup"
+        );
+        this.#addEventListeners(
+            "#order-submit-draft",
+            this.#handleDraftButtonClick
+        );
+        this.#addEventListeners(
+            "#order-submit-final",
+            this.#handleFinalButtonClick
+        );
+        this.#addEventListeners(
+            "input[type='number']",
+            this.enforceNumberLimit,
+            "input"
+        );
+        $("#asal-gudang").on(
+            "select2:select",
+            this.#handleGudangChange.bind(this)
+        );
+        $("#tujuan-gudang").on(
+            "select2:select",
+            this.#handleGudangChange.bind(this)
+        );
         this.#showLoading(false);
     }
 
@@ -118,7 +149,9 @@ class PopupDBPharmacyHandler {
     #handleSRSearch() {
         let kode_sr = String($("#searchSRInput").val()).toLowerCase();
         let gudang_asal = String($("#searchSRAsalInput").val()).toLowerCase();
-        let gudang_tujuan = String($("#searchSRTujuanInput").val()).toLowerCase();
+        let gudang_tujuan = String(
+            $("#searchSRTujuanInput").val()
+        ).toLowerCase();
 
         const items = document.querySelectorAll("tr.sr-row");
         items.forEach((item) => {
@@ -138,17 +171,20 @@ class PopupDBPharmacyHandler {
             if (!GudangTujuan) return;
 
             // @ts-ignore
-            item.style.display = KodeSR.toLowerCase().includes(kode_sr) &&
+            item.style.display =
+                KodeSR.toLowerCase().includes(kode_sr) &&
                 GudangAsal.toLowerCase().includes(gudang_asal) &&
-                GudangTujuan.toLowerCase().includes(gudang_tujuan) ? "" : "none";
+                GudangTujuan.toLowerCase().includes(gudang_tujuan)
+                    ? ""
+                    : "none";
         });
     }
 
     /**
-     * 
+     *
      * @param {string} selector
-     * @param {any} value 
-     * @returns 
+     * @param {any} value
+     * @returns
      */
     #select2HasOptionWithValue(selector, value) {
         // Check if the option with the specific value exists
@@ -157,20 +193,31 @@ class PopupDBPharmacyHandler {
 
     /**
      * Handle stock request select from modal selection
-     * @param {StockRequest} sr 
+     * @param {StockRequest} sr
      */
     async SelectSR(sr) {
         // ensure the warehouse option exists in the current element
-        if (!this.#select2HasOptionWithValue("#asal-gudang", sr.asal_gudang_id)) {
-            return showErrorAlertNoRefresh("Maaf, gudang asal tidak ada di pilihan saat ini.");
+        if (
+            !this.#select2HasOptionWithValue("#asal-gudang", sr.asal_gudang_id)
+        ) {
+            return showErrorAlertNoRefresh(
+                "Maaf, gudang asal tidak ada di pilihan saat ini."
+            );
         }
         // do the same with sr.tujuan_gudang_id
-        if (!this.#select2HasOptionWithValue("#tujuan-gudang", sr.tujuan_gudang_id)) {
-            return showErrorAlertNoRefresh("Maaf, gudang tujuan tidak ada di pilihan saat ini.");
+        if (
+            !this.#select2HasOptionWithValue(
+                "#tujuan-gudang",
+                sr.tujuan_gudang_id
+            )
+        ) {
+            return showErrorAlertNoRefresh(
+                "Maaf, gudang tujuan tidak ada di pilihan saat ini."
+            );
         }
 
         this.#reset();
-        if (!sr.items) throw alert("Items not found!") // dev error
+        if (!sr.items) throw alert("Items not found!"); // dev error
 
         this.#showLoading(true, "Fetching item stocks...");
         for (let i = 0; i < sr.items.length; i++) {
@@ -185,7 +232,9 @@ class PopupDBPharmacyHandler {
 
             // fetch stock with url api_base + /get/stock/{gudang_id}/{barang_id}/{satuan_id}
             const url = `/get/stock/${sr.asal_gudang_id}/${Item.id}/${Satuan.id}`;
-            const stock = /** @type {{sis: StoredItem[], qty: number}} */ (await this.#APIfetch(url)); // fetch stock from server
+            const stock = /** @type {{sis: StoredItem[], qty: number}} */ (
+                await this.#APIfetch(url)
+            ); // fetch stock from server
 
             let qty = sri.qty;
             if (stock.qty < sri.qty) {
@@ -193,7 +242,14 @@ class PopupDBPharmacyHandler {
             }
 
             this.#KeyCache.push(Key); // add key to cache
-            const HTML = this.#getItemTableCol(Item, Satuan, Key, qty, stock.qty, sri);
+            const HTML = this.#getItemTableCol(
+                Item,
+                Satuan,
+                Key,
+                qty,
+                stock.qty,
+                sri
+            );
             this.#$Table.append(HTML);
         }
         this.#showLoading(false);
@@ -203,31 +259,29 @@ class PopupDBPharmacyHandler {
         this.#$KodeSR.val(sr.kode_sr);
         this.#$SRId.val(sr.id);
         // trigger change jquery
-        this.#$AsalGudangId.trigger('change');
-        this.#$TujuanGudangId.trigger('change');
-
-
+        this.#$AsalGudangId.trigger("change");
+        this.#$TujuanGudangId.trigger("change");
     }
 
     /**
      * Enforce number input min max limit on manual input
-     * @param {Event} event 
+     * @param {Event} event
      */
     enforceNumberLimit(event) {
         const inputField = /** @type {HTMLInputElement} */ (event.target);
         let value = parseFloat(inputField.value);
-        let min = parseInt(String(inputField.min || 0));  // Default to 0 if not set
-        let max = parseInt(String(inputField.max || Number.MAX_SAFE_INTEGER));  // Set default to a large number
+        let min = parseInt(String(inputField.min || 0)); // Default to 0 if not set
+        let max = parseInt(String(inputField.max || Number.MAX_SAFE_INTEGER)); // Set default to a large number
 
         if (isNaN(value)) {
-            inputField.value = '';  // Reset to empty on invalid input
+            inputField.value = ""; // Reset to empty on invalid input
             return;
         }
 
         if (value < min) {
-            inputField.value = String(min);  // Clamp value at min
+            inputField.value = String(min); // Clamp value at min
         } else if (value > max) {
-            inputField.value = String(max);  // Clamp value at max
+            inputField.value = String(max); // Clamp value at max
         }
     }
 
@@ -240,7 +294,7 @@ class PopupDBPharmacyHandler {
 
     /**
      * Handle save order final button click
-     * @param {Event} event 
+     * @param {Event} event
      */
     #handleFinalButtonClick(event) {
         const button = /** @type {HTMLButtonElement} */ (event.target);
@@ -256,7 +310,7 @@ class PopupDBPharmacyHandler {
 
     /**
      * Handle save order draft button click
-     * @param {Event} event 
+     * @param {Event} event
      */
     #handleDraftButtonClick(event) {
         const button = /** @type {HTMLButtonElement} */ (event.target);
@@ -280,10 +334,11 @@ class PopupDBPharmacyHandler {
             const searchInput = /** @type {HTMLInputElement} */ (event.target);
             value = searchInput.value.toLowerCase();
         } else {
-            value = (/** @type {string} */(this.#$ItemSearch.val()) || "").toLowerCase();
+            value = /** @type {string} */ (
+                (this.#$ItemSearch.val()) || ""
+            ).toLowerCase();
         }
         const items = document.querySelectorAll("tr.item");
-
 
         items.forEach((item) => {
             if (!item) return;
@@ -293,7 +348,9 @@ class PopupDBPharmacyHandler {
             if (!itemName) return;
 
             // @ts-ignore
-            item.style.display = itemName.toLowerCase().includes(value) ? "" : "none";
+            item.style.display = itemName.toLowerCase().includes(value)
+                ? ""
+                : "none";
         });
     }
 
@@ -322,7 +379,9 @@ class PopupDBPharmacyHandler {
         }
 
         const Item = /** @type {BarangFarmasi} */ (row.data("item"));
-        const selectedOption = row.find("select[name='satuan" + Item.id + "']").find("option:selected");
+        const selectedOption = row
+            .find("select[name='satuan" + Item.id + "']")
+            .find("option:selected");
         const Satuan = /** @type {Satuan} */ (selectedOption.data("satuan"));
 
         const Key = `${Item.id}/${Satuan.id}`;
@@ -335,36 +394,42 @@ class PopupDBPharmacyHandler {
 
     /**
      * Generate HTML string for Item table collumn
-     * @param {BarangFarmasi} item 
+     * @param {BarangFarmasi} item
      * @param {Satuan} satuan
-     * @param {string} key_cache 
-     * @param {number} qty 
-     * @param {number?} stock 
-     * @param {StockRequestItem?} sri 
+     * @param {string} key_cache
+     * @param {number} qty
+     * @param {number?} stock
+     * @param {StockRequestItem?} sri
      */
     #getItemTableCol(item, satuan, key_cache, qty, stock = null, sri = null) {
         const key = Math.round(Math.random() * 100000);
 
         let SR_HTML_HIDDEN = "";
         if (sri) {
-            SR_HTML_HIDDEN = /*html*/`
+            SR_HTML_HIDDEN = /*html*/ `
                 <input type="hidden" name="sri_id[${key}]" value="${sri.id}">
             `;
         }
 
-        return /*html*/`
+        return /*html*/ `
             <tr id="item${key}">
-                <input type="hidden" name="barang_id[${key}]" value="${item.id}">
-                <input type="hidden" name="satuan_id[${key}]" value="${satuan.id}">
+                <input type="hidden" name="barang_id[${key}]" value="${
+            item.id
+        }">
+                <input type="hidden" name="satuan_id[${key}]" value="${
+            satuan.id
+        }">
                 ${SR_HTML_HIDDEN}
 
                 <td>${item.kode}</td>
                 <td>${item.nama}</td>
                 <td>${satuan.nama}</td>
-                <td>${stock ? stock : '-'}</td>
-                <td><input type="number" name="qty[${key}]" min="1" ${stock ? `max="${stock}"` : ''} step="1" class="form-control" value="${qty}"
+                <td>${stock ? stock : "-"}</td>
+                <td><input type="number" name="qty[${key}]" min="1" ${
+            stock ? `max="${stock}"` : ""
+        } step="1" class="form-control" value="${qty}"
                     onkeyup="PopupDBPharmacyClass.enforceNumberLimit(event)" onchange="PopupDBPharmacyClass.enforceNumberLimit(event)"></td>
-                <td>${sri ? (sri.keterangan || '') : ''}</td>
+                <td>${sri ? sri.keterangan || "" : ""}</td>
                 <td><input type="text" name="keterangan_item[${key}]" class="form-control"></td>
                 <td><a class="mdi mdi-close pointer mdi-24px text-danger delete-btn"
                         title="Hapus" onclick="PopupDBPharmacyClass.deleteItem(${key}, '${key_cache}')"></a></td>
@@ -374,32 +439,36 @@ class PopupDBPharmacyHandler {
 
     /**
      * Delete item from table and variable
-     * @param {string} key 
+     * @param {string} key
      * @param {string} key_cache
      */
     deleteItem(key, key_cache) {
         this.#$Table.find("#item" + key).remove();
         // remove from this.#KeyCache with value key_cache
-        this.#KeyCache = this.#KeyCache.filter(item => item !== key_cache);
+        this.#KeyCache = this.#KeyCache.filter((item) => item !== key_cache);
     }
 
     /**
-    * Handle add button click
-    * @param {Event} event 
-    */
+     * Handle add button click
+     * @param {Event} event
+     */
     async #handleAddButtonClick(event) {
         event.preventDefault();
         this.#$AddModal.modal("hide");
         const gudangAsalId = this.#$AsalGudangId.val();
         const gudangTujuanId = this.#$TujuanGudangId.val();
         if (!gudangAsalId || !gudangTujuanId) {
-            showErrorAlertNoRefresh("Pilih gudang asal dan gudang tujuan terlebih dahulu!");
+            showErrorAlertNoRefresh(
+                "Pilih gudang asal dan gudang tujuan terlebih dahulu!"
+            );
             return;
         }
 
         this.#showLoading(true, "Fetching warehouse stock...");
         const url = `/get/item-gudang/${gudangAsalId}/${gudangTujuanId}`;
-        const HTML = await (await this.#APIfetch(url, null, "GET", true)).text();
+        const HTML = await (
+            await this.#APIfetch(url, null, "GET", true)
+        ).text();
         this.#showLoading(false);
 
         this.#$ModalTable.html(HTML);
@@ -409,11 +478,11 @@ class PopupDBPharmacyHandler {
 
     /**
      * Add event listeners
-     * @param {string} selector 
-     * @param {Function} handler 
+     * @param {string} selector
+     * @param {Function} handler
      * @param {string} event
      */
-    #addEventListeners(selector, handler, event = 'click') {
+    #addEventListeners(selector, handler, event = "click") {
         const buttons = document.querySelectorAll(selector);
         buttons.forEach((button) => {
             button.addEventListener(event, handler.bind(this));
@@ -422,8 +491,8 @@ class PopupDBPharmacyHandler {
 
     /**
      * Show or hide the loading icon
-     * @param {boolean} show 
-     * @param {string?} message 
+     * @param {boolean} show
+     * @param {string?} message
      */
     #showLoading(show, message = null) {
         this.#$LoadingIcon.toggle(show);
@@ -433,14 +502,14 @@ class PopupDBPharmacyHandler {
         if (message) {
             this.#$LoadingMessage.text(message);
         } else {
-            this.#$LoadingMessage.text('Loading...');
+            this.#$LoadingMessage.text("Loading...");
         }
     }
 
     /**
      * Make a fetch call with API URL as base URL
-     * @param {string} url 
-     * @param {FormData | null} body 
+     * @param {string} url
+     * @param {FormData | null} body
      * @param {"GET" | "POST" | "PATCH" | "PUT" | "DELETE"} method
      */
     #APIfetch(url, body = null, method = "GET", raw = false) {
@@ -449,28 +518,29 @@ class PopupDBPharmacyHandler {
                 method: method,
                 body: body,
                 headers: {
-                    'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')) || ''
-                }
+                    "X-CSRF-TOKEN":
+                        document
+                            .querySelector('meta[name="csrf-token"]')
+                            ?.getAttribute("content") || "",
+                },
             })
                 .then(async (response) => {
                     if (response.status != 200) {
-                        throw new Error('Error: ' + response.statusText);
+                        throw new Error("Error: " + response.statusText);
                     }
                     resolve(!raw ? await response.json() : response);
                 })
-                .catch(error => {
-                    console.error('Error:', error);
+                .catch((error) => {
+                    console.log("Error:", error);
 
                     // @ts-ignore
-                    if (this.#showLoading)
-                        this.#showLoading(false); // assert
+                    if (this.#showLoading) this.#showLoading(false); // assert
 
                     showErrorAlertNoRefresh(`Error: ${error}`);
                     return reject(error);
                 });
         });
     }
-
 }
 
 const PopupDBPharmacyClass = new PopupDBPharmacyHandler();

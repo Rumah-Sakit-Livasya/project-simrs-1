@@ -188,7 +188,7 @@
                         updateReport(response.data);
                     },
                     error: function(xhr) {
-                        console.error("Gagal memuat data laporan:", xhr);
+                        console.log("Gagal memuat data laporan:", xhr);
                         alert("Gagal memuat data laporan.");
                     },
                     complete: function() {

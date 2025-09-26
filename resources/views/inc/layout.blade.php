@@ -80,6 +80,9 @@
     <!-- BEGIN Page Settings -->
     @include('inc.setting')
     <!-- END Page Settings -->
+
+    @stack('modals')
+
     @include('inc.script_footer')
 </body>
 

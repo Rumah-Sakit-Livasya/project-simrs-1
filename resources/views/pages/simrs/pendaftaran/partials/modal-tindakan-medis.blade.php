@@ -52,9 +52,10 @@
                         </div>
 
                         <div class="form-group row">
-                            <label for="departement" class="col-sm-3 col-form-label">Poliklinik</label>
+                            <label for="departement-tindakan-medis" class="col-sm-3 col-form-label">Poliklinik</label>
                             <div class="col-sm-9">
-                                <select class="form-select" id="departement" name="departement_id" style="width: 100%;">
+                                <select class="form-select" id="departement-tindakan-medis" name="departement_id"
+                                    style="width: 100%;">
                                     @foreach ($dTindakan as $departement)
                                         <option value="{{ $departement->id }}"
                                             data-groups="{{ $departement->grup_tindakan_medis ? json_encode($departement->grup_tindakan_medis->toArray()) : '[]' }}">
@@ -66,9 +67,10 @@
                         </div>
 
                         <div class="form-group row">
-                            <label for="kelas" class="col-sm-3 col-form-label">Kelas</label>
+                            <label for="kelas-tindakan-medis" class="col-sm-3 col-form-label">Kelas</label>
                             <div class="col-sm-9">
-                                <select class="form-select" id="kelas" name="kelas" style="width: 100%;">
+                                <select class="form-select" id="kelas-tindakan-medis" name="kelas"
+                                    style="width: 100%;">
                                     @foreach ($kelas_rawats as $kelas)
                                         <option value="{{ $kelas->id }}">
                                             {{ $kelas->kelas }}

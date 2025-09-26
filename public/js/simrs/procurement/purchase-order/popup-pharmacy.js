@@ -6,7 +6,6 @@
 const Swal = /** @type {import("sweetalert2").default} */ (window.Swal);
 
 class PopupPOPharmacyHandler {
-
     /**
      * @type {JQuery<HTMLElement>}
      */
@@ -21,7 +20,6 @@ class PopupPOPharmacyHandler {
      * @type {JQuery<HTMLElement>}
      */
     #$LoadingPage;
-
 
     /**
      * @type {JQuery<HTMLElement>}
@@ -87,42 +85,64 @@ class PopupPOPharmacyHandler {
 
     #init() {
         this.#addEventListeners("#add-btn", this.#handleAddButtonClick);
-        this.#addEventListeners("#searchItemInput", this.#handleItemSearchBar, "keyup");
-        this.#addEventListeners("#order-submit-draft", this.#handleDraftButtonClick);
-        this.#addEventListeners("#order-submit-final", this.#handleFinalButtonClick);
-        this.#addEventListeners("#tipe-pr-select", this.#handleTipePrChange, "change");
-        this.#addEventListeners("#sumber-item-select", this.#handleSumberItemChange, "change");
+        this.#addEventListeners(
+            "#searchItemInput",
+            this.#handleItemSearchBar,
+            "keyup"
+        );
+        this.#addEventListeners(
+            "#order-submit-draft",
+            this.#handleDraftButtonClick
+        );
+        this.#addEventListeners(
+            "#order-submit-final",
+            this.#handleFinalButtonClick
+        );
+        this.#addEventListeners(
+            "#tipe-pr-select",
+            this.#handleTipePrChange,
+            "change"
+        );
+        this.#addEventListeners(
+            "#sumber-item-select",
+            this.#handleSumberItemChange,
+            "change"
+        );
         this.#addEventListeners("#ppn-input", this.refreshTotal, "change");
         this.#addEventListeners("#ppn-input", this.refreshTotal, "keyup");
-        this.#addEventListeners("input[type='number']", this.enforceNumberLimit, "input")
+        this.#addEventListeners(
+            "input[type='number']",
+            this.enforceNumberLimit,
+            "input"
+        );
         this.#showLoading(false);
     }
 
     /**
      * Enforce number input min max limit on manual input
-     * @param {Event} event 
+     * @param {Event} event
      */
     enforceNumberLimit(event) {
         const inputField = /** @type {HTMLInputElement} */ (event.target);
         let value = parseFloat(inputField.value);
-        let min = parseInt(String(inputField.min || 0));  // Default to 0 if not set
-        let max = parseInt(String(inputField.max || Number.MAX_SAFE_INTEGER));  // Set default to a large number
+        let min = parseInt(String(inputField.min || 0)); // Default to 0 if not set
+        let max = parseInt(String(inputField.max || Number.MAX_SAFE_INTEGER)); // Set default to a large number
 
         if (isNaN(value)) {
-            inputField.value = '';  // Reset to empty on invalid input
+            inputField.value = ""; // Reset to empty on invalid input
             return;
         }
 
         if (value < min) {
-            inputField.value = String(min);  // Clamp value at min
+            inputField.value = String(min); // Clamp value at min
         } else if (value > max) {
-            inputField.value = String(max);  // Clamp value at max
+            inputField.value = String(max); // Clamp value at max
         }
     }
 
     /**
      * Handle modal tipe pr change
-     * @param {Event} event 
+     * @param {Event} event
      */
     #handleTipePrChange(event) {
         // get value of the selected option
@@ -135,7 +155,7 @@ class PopupPOPharmacyHandler {
 
     /**
      * Handle modal sumber item change
-     * @param {Event} event 
+     * @param {Event} event
      */
     #handleSumberItemChange(event) {
         // get value of the selected option
@@ -148,7 +168,7 @@ class PopupPOPharmacyHandler {
 
     /**
      * Handle save order final button click
-     * @param {Event} event 
+     * @param {Event} event
      */
     #handleFinalButtonClick(event) {
         const button = /** @type {HTMLButtonElement} */ (event.target);
@@ -164,7 +184,7 @@ class PopupPOPharmacyHandler {
 
     /**
      * Handle save order draft button click
-     * @param {Event} event 
+     * @param {Event} event
      */
     #handleDraftButtonClick(event) {
         const button = /** @type {HTMLButtonElement} */ (event.target);
@@ -180,7 +200,7 @@ class PopupPOPharmacyHandler {
 
     /**
      * Handle item search bar on key up
-     * @param {Event} event 
+     * @param {Event} event
      */
     #handleItemSearchBar(event) {
         const searchInput = /** @type {HTMLInputElement} */ (event.target);
@@ -195,7 +215,9 @@ class PopupPOPharmacyHandler {
             if (!itemName) return;
 
             // @ts-ignore
-            item.style.display = itemName.toLowerCase().includes(value) ? "" : "none";
+            item.style.display = itemName.toLowerCase().includes(value)
+                ? ""
+                : "none";
         });
     }
 
@@ -217,41 +239,60 @@ class PopupPOPharmacyHandler {
         const KodePR = row.data("kode_pr");
         const IdPR = row.data("id_pr");
         const MaxQTy = parseInt(row.data("max_qty")) || 999999999;
-        const selectedOption = row.find("select[name='satuan" + trId + "']").find("option:selected");
+        const selectedOption = row
+            .find("select[name='satuan" + trId + "']")
+            .find("option:selected");
         const Satuan = /** @type {Satuan} */ (selectedOption.data("satuan"));
-        const HTML = this.#getItemTableCol(Item, Satuan, Qty, MaxQTy, KodePR, IdPR);
+        const HTML = this.#getItemTableCol(
+            Item,
+            Satuan,
+            Qty,
+            MaxQTy,
+            KodePR,
+            IdPR
+        );
         this.#$Table.append(HTML);
         this.refreshTotal();
     }
 
     /**
      * Generate HTML string for Item table collumn
-     * @param {BarangFarmasi} item 
+     * @param {BarangFarmasi} item
      * @param {Satuan} satuan
-     * @param {number} qty 
-     * @param {number} max_qty 
-     * @param {string} kode_pr 
-     * @param {string} IdPR 
+     * @param {number} qty
+     * @param {number} max_qty
+     * @param {string} kode_pr
+     * @param {string} IdPR
      */
     #getItemTableCol(item, satuan, qty, max_qty, kode_pr, IdPR) {
         const key = Math.round(Math.random() * 100000);
 
-        return /*html*/`
+        return /*html*/ `
             <tr id="item${key}">
-                <input type="hidden" name="kode_barang[${key}]" value="${item.kode}">
-                <input type="hidden" name="nama_barang[${key}]" value="${item.nama}">
-                <input type="hidden" name="barang_id[${key}]" value="${item.id}">
-                <input type="hidden" name="unit_barang[${key}]" value="${satuan.nama}">
+                <input type="hidden" name="kode_barang[${key}]" value="${
+            item.kode
+        }">
+                <input type="hidden" name="nama_barang[${key}]" value="${
+            item.nama
+        }">
+                <input type="hidden" name="barang_id[${key}]" value="${
+            item.id
+        }">
+                <input type="hidden" name="unit_barang[${key}]" value="${
+            satuan.nama
+        }">
                 <input type="hidden" name="hna[${key}]" value="${item.hna}">
-                <input type="hidden" name="pri_id[${key}]" value="${IdPR || ''}">
+                <input type="hidden" name="pri_id[${key}]" value="${
+            IdPR || ""
+        }">
 
-                <td>${kode_pr || ''}</td>
+                <td>${kode_pr || ""}</td>
                 <td>${item.nama}</td>
                 <td>${satuan.nama}</td>
                 <td><input type="number" name="qty[${key}]" min="0" step="1" class="form-control" value="${qty}" max="${max_qty}"
                     onkeyup="PopupPOPharmacyClass.refreshTotal()" onchange="PopupPOPharmacyClass.refreshTotal()"></td>
                 <td><input type="number" name="qty_bonus[${key}]" min="0" step="1" class="form-control" value="0"
-                    onkeyup="PopupPOPharmacyClass.refreshTotal()" onchange="PopupPOPharmacyClass.refreshTotal()"></td>                
+                    onkeyup="PopupPOPharmacyClass.refreshTotal()" onchange="PopupPOPharmacyClass.refreshTotal()"></td>
                 <td class="harga_total">${this.#rp(item.hna * qty)}</td>
                 <td class="discount_percent">
                     <input type="number" name="discount_percent[${key}]" min="0" step="1" class= "form-control" value="0"
@@ -268,7 +309,7 @@ class PopupPOPharmacyHandler {
 
     /**
      * Handle discount percent input change
-     * @param {Event} event 
+     * @param {Event} event
      */
     discountPercentChange(event) {
         const input = /** @type {HTMLInputElement} */ (event.target);
@@ -283,7 +324,9 @@ class PopupPOPharmacyHandler {
 
         const hargaEl = $(tr).find("td.harga_total");
         if (!hargaEl) return alert("Harga Not found!");
-        const harga = parseInt(hargaEl.text().replaceAll("Rp", "").replaceAll(".", ""));
+        const harga = parseInt(
+            hargaEl.text().replaceAll("Rp", "").replaceAll(".", "")
+        );
 
         dscnEl.val((discountPercent * harga) / 100);
 
@@ -292,7 +335,7 @@ class PopupPOPharmacyHandler {
 
     /**
      * Handle discount nominal input change
-     * @param {Event} event 
+     * @param {Event} event
      */
     discountNominalChange(event) {
         const input = /** @type {HTMLInputElement} */ (event.target);
@@ -307,7 +350,9 @@ class PopupPOPharmacyHandler {
 
         const hargaEl = $(tr).find("td.harga_total");
         if (!hargaEl) return alert("Harga Not found!");
-        const harga = parseInt(hargaEl.text().replaceAll("Rp", "").replaceAll(".", ""));
+        const harga = parseInt(
+            hargaEl.text().replaceAll("Rp", "").replaceAll(".", "")
+        );
 
         dscpEl.val((discountNominal / harga) * 100);
 
@@ -331,7 +376,14 @@ class PopupPOPharmacyHandler {
             const qtyb = parseInt(String(qtybEl.val()));
             const dscn = parseInt(String(dscnEl.val()));
             const dscnp = parseInt(String(dscnpEl.val()));
-            if (isNaN(qty) || isNaN(hna) || isNaN(qtyb) || isNaN(dscn) || isNaN(dscnp)) return;
+            if (
+                isNaN(qty) ||
+                isNaN(hna) ||
+                isNaN(qtyb) ||
+                isNaN(dscn) ||
+                isNaN(dscnp)
+            )
+                return;
 
             const harga = qty * hna;
 
@@ -348,7 +400,7 @@ class PopupPOPharmacyHandler {
             $(tr).find("td.subtotal").text(this.#rp(subtotal));
         });
         const PPN = parseInt(String(this.#$PPN.val()));
-        grandtotal += (grandtotal * PPN) / 100
+        grandtotal += (grandtotal * PPN) / 100;
 
         this.#$Total.text(this.#rp(total));
         this.#$DiscountTotal.text(this.#rp(discount_total));
@@ -358,7 +410,7 @@ class PopupPOPharmacyHandler {
 
     /**
      * Delete item from table and variable
-     * @param {string} key 
+     * @param {string} key
      */
     deleteItem(key) {
         this.#$Table.find("#item" + key).remove();
@@ -366,9 +418,9 @@ class PopupPOPharmacyHandler {
     }
 
     /**
-    * Handle add button click
-    * @param {Event} event 
-    */
+     * Handle add button click
+     * @param {Event} event
+     */
     #handleAddButtonClick(event) {
         event.preventDefault();
         this.#loadAddItemModal();
@@ -394,11 +446,11 @@ class PopupPOPharmacyHandler {
 
     /**
      * Add event listeners
-     * @param {string} selector 
-     * @param {Function} handler 
+     * @param {string} selector
+     * @param {Function} handler
      * @param {string} event
      */
-    #addEventListeners(selector, handler, event = 'click') {
+    #addEventListeners(selector, handler, event = "click") {
         const buttons = document.querySelectorAll(selector);
         buttons.forEach((button) => {
             button.addEventListener(event, handler.bind(this));
@@ -407,7 +459,7 @@ class PopupPOPharmacyHandler {
 
     /**
      * Show or hide the loading icon
-     * @param {boolean} show 
+     * @param {boolean} show
      */
     #showLoading(show) {
         this.#$LoadingIcon.toggle(show);
@@ -416,8 +468,8 @@ class PopupPOPharmacyHandler {
 
     /**
      * Make a fetch call with API URL as base URL
-     * @param {string} url 
-     * @param {any | null} body 
+     * @param {string} url
+     * @param {any | null} body
      * @param {"GET" | "POST" | "PATCH" | "PUT" | "DELETE"} method
      */
     #APIfetch(url, body = null, method = "GET", raw = false) {
@@ -426,22 +478,24 @@ class PopupPOPharmacyHandler {
                 method: method,
                 body: body,
                 headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')) || ''
-                }
+                    "Content-Type": "application/json",
+                    "X-CSRF-TOKEN":
+                        document
+                            .querySelector('meta[name="csrf-token"]')
+                            ?.getAttribute("content") || "",
+                },
             })
                 .then(async (response) => {
                     if (response.status != 200) {
-                        throw new Error('Error: ' + response.statusText);
+                        throw new Error("Error: " + response.statusText);
                     }
                     resolve(!raw ? await response.json() : response);
                 })
-                .catch(error => {
-                    console.error('Error:', error);
+                .catch((error) => {
+                    console.log("Error:", error);
 
                     // @ts-ignore
-                    if (this.#showLoading)
-                        this.#showLoading(false); // assert
+                    if (this.#showLoading) this.#showLoading(false); // assert
 
                     showErrorAlertNoRefresh(`Error: ${error}`);
                     return reject(error);
@@ -451,14 +505,13 @@ class PopupPOPharmacyHandler {
 
     /**
      * Format angka menjadi mata uang rupiah
-     * @param {number} amount 
-     * @returns 
+     * @param {number} amount
+     * @returns
      */
     #rp(amount) {
-        const formattedAmount = 'Rp ' + amount.toLocaleString('id-ID');
+        const formattedAmount = "Rp " + amount.toLocaleString("id-ID");
         return formattedAmount;
     }
-
 }
 
 const PopupPOPharmacyClass = new PopupPOPharmacyHandler();

@@ -37,6 +37,7 @@ use App\Http\Controllers\SIMRS\BedController;
 use App\Http\Controllers\SIMRS\BPJS\WsBPJSController;
 use App\Http\Controllers\SIMRS\CPPT\CPPTController;
 use App\Http\Controllers\SIMRS\DepartementController;
+use App\Http\Controllers\SIMRS\DoctorVisitController;
 use App\Http\Controllers\SIMRS\ERMController;
 use App\Http\Controllers\SIMRS\EthnicController;
 use App\Http\Controllers\SIMRS\EWSAnakController;
@@ -522,6 +523,7 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
         Route::prefix('rawat-jalan')->group(function () {
             Route::prefix('pemakaian_alat')->group(function () {
                 Route::post('/store', [LayananController::class, 'storePemakaianAlat'])->name('layanan.rajal.pemakaian_alat.store');
+                Route::delete('/{id}', [LayananController::class, 'destroyPemakaianAlat'])->name('layanan.rajal.pemakaian_alat.destroy');
             });
         });
     });
@@ -950,6 +952,21 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
         Route::get('/edit/{encryptedId}', [KepustakaanController::class, 'getKepustakaan'])->name('kepustakaan.get');
         Route::patch('/update/{encryptedId}', [KepustakaanController::class, 'update'])->name('kepustakaan.update');
         Route::delete('/delete/{encryptedId}', [KepustakaanController::class, 'delete'])->name('kepustakaan.delete');
+    });
+
+    Route::prefix('pemakaian-alat')->name('pemakaian-alat.')->group(function () {
+        Route::get('/data/{registration}', [LayananController::class, 'getDataPemakaianAlat'])->name('getData');
+    });
+
+    Route::prefix('visite')->name('visite.')->group(function () {
+        // URL untuk mengambil data Server-Side DataTables
+        Route::get('/get-data/{registration}', [DoctorVisitController::class, 'getData'])->name('getData');
+        // URL untuk menyimpan data visite baru
+        Route::post('/store/{registration}', [DoctorVisitController::class, 'store'])->name('store');
+        // URL untuk menghapus visite (menggunakan metode DELETE)
+        Route::delete('/destroy/{registration}/{visit}', [DoctorVisitController::class, 'destroy'])->name('destroy');
+        // Rute baru untuk mengambil konten modal
+        Route::get('/create/{registration}', [DoctorVisitController::class, 'create'])->name('create');
     });
 
     Route::get('/getKabupaten', [LocationController::class, 'getKabupaten'])->name('getKabupaten');

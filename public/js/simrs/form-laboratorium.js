@@ -176,7 +176,9 @@ jQuery(function ($) {
                     if (parameter) {
                         const tarif = self._findApplicableTarif(parameter);
                         if (tarif) {
-                            const $jumlahInput = $(`#jumlah_${parameter.id}`);
+                            const $jumlahInput = $(
+                                `#jumlah_${parameter.id}_lab`
+                            );
                             const jumlah = parseInt($jumlahInput.val()) || 1;
                             if (jumlah < 1) $jumlahInput.val(1);
                             let price = tarif.total * jumlah;
@@ -300,7 +302,7 @@ jQuery(function ($) {
                     setTimeout(() => window.location.reload(), 2000);
                 },
                 error: function (jqXHR, textStatus, errorThrown) {
-                    console.error(
+                    console.log(
                         "AJAX Error:",
                         jqXHR.responseJSON || textStatus
                     );

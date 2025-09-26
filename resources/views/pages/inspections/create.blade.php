@@ -332,7 +332,7 @@
                     window.location.href = "{{ route('vehicles.inspections') }}";
                 });
             } catch (error) {
-                console.error(error);
+                console.log(error);
                 let errorHtml = '<ul>';
                 if (error.errors) {
                     for (const key in error.errors) {

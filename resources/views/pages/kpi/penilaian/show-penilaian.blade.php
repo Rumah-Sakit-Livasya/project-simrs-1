@@ -878,7 +878,7 @@
                     clearCanvas();
                 },
                 error: function(xhr, status, error) {
-                    console.error(xhr.responseText);
+                    console.log(xhr.responseText);
                 },
                 complete: function() {
                     btn.prop('disabled', false).text('Save'); // Aktifkan kembali tombol

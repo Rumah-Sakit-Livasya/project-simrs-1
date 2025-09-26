@@ -7,8 +7,8 @@ class ApiHandler {
 
     /**
      * Make a fetch call with API URL as base URL
-     * @param {string} url 
-     * @param {any | null} body 
+     * @param {string} url
+     * @param {any | null} body
      * @param {"GET" | "POST" | "PATCH" | "PUT" | "DELETE"} method
      * @param {boolean} raw
      * @returns {Promise<any>}
@@ -19,21 +19,24 @@ class ApiHandler {
                 method: method,
                 body: body,
                 headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')) || ''
-                }
+                    "Content-Type": "application/json",
+                    "X-CSRF-TOKEN":
+                        document
+                            .querySelector('meta[name="csrf-token"]')
+                            ?.getAttribute("content") || "",
+                },
             })
-            .then(async (response) => {
-                if (response.status != 200) {
-                    throw new Error('Error: ' + response.statusText);
-                }
-                resolve(!raw ? await response.json() : response);
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                showErrorAlertNoRefresh(`Error: ${error}`);
-                return reject(error);
-            });
+                .then(async (response) => {
+                    if (response.status != 200) {
+                        throw new Error("Error: " + response.statusText);
+                    }
+                    resolve(!raw ? await response.json() : response);
+                })
+                .catch((error) => {
+                    console.log("Error:", error);
+                    showErrorAlertNoRefresh(`Error: ${error}`);
+                    return reject(error);
+                });
         });
     }
 }

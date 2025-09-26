@@ -3,7 +3,6 @@
 /// <reference path="../../../../../types.d.ts" />
 
 class APIHandler {
-
     /**
      * @type {string}
      */
@@ -15,8 +14,8 @@ class APIHandler {
 
     /**
      * Fetch opname items from API
-     * @param {number} StockOpnameGudangId 
-     * @returns {Promise<StoredItemOpname[]>} 
+     * @param {number} StockOpnameGudangId
+     * @returns {Promise<StoredItemOpname[]>}
      */
     async fetchItems(StockOpnameGudangId) {
         const url = `/get/opname-items/${StockOpnameGudangId}`;
@@ -26,10 +25,10 @@ class APIHandler {
 
     /**
      * Fetch latest opname item movement
-     * @param {"f" | "nf"} type 
-     * @param {number} opname_id 
-     * @param {number} si_id 
-     * @returns 
+     * @param {"f" | "nf"} type
+     * @param {number} opname_id
+     * @param {number} si_id
+     * @returns
      */
     async fetchItemMovement(type, opname_id, si_id) {
         const url = `/get/opname-item-movement/${type}/${opname_id}/${si_id}`;
@@ -39,7 +38,7 @@ class APIHandler {
 
     /**
      * Store stock opname draft of an item
-     * @param {FormData} body 
+     * @param {FormData} body
      */
     async storeFinal(body) {
         const url = `/store`;
@@ -48,8 +47,8 @@ class APIHandler {
 
     /**
      * Make a fetch call with API URL as base URL
-     * @param {string} url 
-     * @param {FormData | null} body 
+     * @param {string} url
+     * @param {FormData | null} body
      * @param {"GET" | "POST" | "PATCH" | "PUT" | "DELETE"} method
      */
     #APIfetch(url, body = null, method = "GET", raw = false) {
@@ -58,19 +57,22 @@ class APIHandler {
                 method: method,
                 body: body,
                 headers: {
-                    'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')) || '',
+                    "X-CSRF-TOKEN":
+                        document
+                            .querySelector('meta[name="csrf-token"]')
+                            ?.getAttribute("content") || "",
                     // 'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                }
+                    Accept: "application/json",
+                },
             })
                 .then(async (response) => {
                     if (response.status != 200) {
-                        throw new Error('Error: ' + response.statusText);
+                        throw new Error("Error: " + response.statusText);
                     }
                     resolve(!raw ? await response.json() : response);
                 })
-                .catch(error => {
-                    console.error('Error:', error);
+                .catch((error) => {
+                    console.log("Error:", error);
 
                     showErrorAlertNoRefresh(`Error: ${error}`);
                     return reject(error);

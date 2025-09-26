@@ -440,7 +440,7 @@
                         transportTable.draw(false); // `false` agar tetap di halaman saat ini
                     },
                     error: function(xhr) {
-                        console.error('Error:', xhr);
+                        console.log('Error:', xhr);
                         // Ganti alert() dengan notifikasi error yang lebih informatif
                         alert('Terjadi kesalahan. Periksa konsol untuk detail.');
                     },
@@ -465,7 +465,7 @@
                         },
                         error: function(xhr) {
                             alert('Gagal menghapus data.');
-                            console.error('Error:', xhr);
+                            console.log('Error:', xhr);
                         }
                     });
                 }

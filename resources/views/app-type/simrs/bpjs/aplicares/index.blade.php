@@ -350,7 +350,7 @@
                     }
                 })
                 .catch(error => {
-                    console.error('AJAX Error:', error);
+                    console.log('AJAX Error:', error);
                     showErrorAlert(error.message || errorMessage);
                 });
         }
@@ -432,7 +432,7 @@
                     }
                 })
                 .catch(error => {
-                    console.error('Error:', error);
+                    console.log('Error:', error);
                     Swal.fire('Error!', 'Tidak dapat menyimpan mapping.', 'error');
                 });
         }

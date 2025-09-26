@@ -235,7 +235,7 @@
                         }
                     },
                     error: function(xhr) {
-                        console.error(xhr.responseText);
+                        console.log(xhr.responseText);
                         alert('Terjadi kesalahan. Cek console untuk detail.');
                     },
                     complete: function() {

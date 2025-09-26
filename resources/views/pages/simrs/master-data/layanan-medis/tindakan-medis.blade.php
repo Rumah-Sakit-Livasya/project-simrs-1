@@ -349,7 +349,7 @@
                         $('#tarif-inputs').html(inputFields);
                     },
                     error: function(xhr) {
-                        console.error('Error fetching tarif:', xhr);
+                        console.log('Error fetching tarif:', xhr);
                     }
                 });
             }

@@ -385,7 +385,7 @@
                         document.body.removeChild(link);
                     },
                     error: function(xhr, status, error) {
-                        console.error('Error:', error);
+                        console.log('Error:', error);
                         // Handle the error response here
                         showErrorAlert('Export failed. Please try again.');
                     }
@@ -707,7 +707,7 @@
                     },
                     error: function(xhr, status, error) {
                         // Penanganan kesalahan saat melakukan permintaan
-                        console.error(xhr.responseText);
+                        console.log(xhr.responseText);
                     }
                 });
             });

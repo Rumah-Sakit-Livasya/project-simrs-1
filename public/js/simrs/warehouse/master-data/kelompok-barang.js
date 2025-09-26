@@ -6,17 +6,17 @@
 const Swal = /** @type {import("sweetalert2").default} */ (window.Swal);
 
 class KelompokBarangHandler {
-    constructor(){
-        this.#addEventListeners('.delete-btn', this.#handleDeleteButtonClick);
+    constructor() {
+        this.#addEventListeners(".delete-btn", this.#handleDeleteButtonClick);
     }
 
     /**
      * Add event listeners
-     * @param {string} selector 
-     * @param {Function} handler 
+     * @param {string} selector
+     * @param {Function} handler
      * @param {string} event
      */
-    #addEventListeners(selector, handler, event = 'click') {
+    #addEventListeners(selector, handler, event = "click") {
         const buttons = document.querySelectorAll(selector);
         buttons.forEach((button) => {
             button.addEventListener(event, handler.bind(this));
@@ -34,13 +34,13 @@ class KelompokBarangHandler {
         if (!id) return;
 
         Swal.fire({
-            title: 'Hapus kelompok barang?',
-            icon: 'warning',
+            title: "Hapus kelompok barang?",
+            icon: "warning",
             showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Ya, hapus!',
-            cancelButtonText: 'Batal'
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Ya, hapus!",
+            cancelButtonText: "Batal",
         }).then((result) => {
             if (result.isConfirmed) {
                 this.#deleteItem(id);
@@ -50,29 +50,40 @@ class KelompokBarangHandler {
 
     /**
      * Delete zat after confirmation
-     * @param {number} id 
+     * @param {number} id
      */
     #deleteItem(id) {
         const formData = new FormData();
-        formData.append('id', String(id));
-        formData.append('csrf-token', document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '');
+        formData.append("id", String(id));
+        formData.append(
+            "csrf-token",
+            document
+                .querySelector('meta[name="csrf-token"]')
+                ?.getAttribute("content") || ""
+        );
 
-        fetch('/api/simrs/warehouse/master-data/kelompok-barang/destroy/' + id, {
-            method: 'DELETE',
-            body: formData,
-            headers: {
-                'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')) || ''
+        fetch(
+            "/api/simrs/warehouse/master-data/kelompok-barang/destroy/" + id,
+            {
+                method: "DELETE",
+                body: formData,
+                headers: {
+                    "X-CSRF-TOKEN":
+                        document
+                            .querySelector('meta[name="csrf-token"]')
+                            ?.getAttribute("content") || "",
+                },
             }
-        })
-            .then(response => {
+        )
+            .then((response) => {
                 if (response.status != 200) {
-                    throw new Error('Error: ' + response.statusText);
+                    throw new Error("Error: " + response.statusText);
                 }
-                showSuccessAlert('Data berhasil dihapus!');
+                showSuccessAlert("Data berhasil dihapus!");
                 setTimeout(() => window.location.reload(), 2000);
             })
-            .catch(error => {
-                console.error('Error:', error);
+            .catch((error) => {
+                console.log("Error:", error);
                 showErrorAlertNoRefresh(`Error: ${error}`);
             });
     }

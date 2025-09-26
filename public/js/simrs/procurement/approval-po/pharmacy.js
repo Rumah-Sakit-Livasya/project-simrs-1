@@ -7,13 +7,13 @@ const Swal = /** @type {import("sweetalert2").default} */ (window.Swal);
 
 class APOPharmacyHandler {
     constructor() {
-        this.#addEventListeners('.edit-btn', this.#handleEditButtonClick);
-        this.#addEventListeners('#tambah-btn', this.#handleTambahButtonClick);
+        this.#addEventListeners(".edit-btn", this.#handleEditButtonClick);
+        this.#addEventListeners("#tambah-btn", this.#handleTambahButtonClick);
     }
 
     /**
      * Handle edit button click
-     * @param {Event} event 
+     * @param {Event} event
      */
     #handleEditButtonClick(event) {
         event.preventDefault();
@@ -24,23 +24,29 @@ class APOPharmacyHandler {
         const url = "/simrs/procurement/approval-po/pharmacy/edit/" + id;
         const width = screen.width;
         const height = screen.height;
-        const left = width - (width / 2);
-        const top = height - (height / 2);
+        const left = width - width / 2;
+        const top = height - height / 2;
         window.open(
             url,
             "popupWindow_editAPOFarmasi" + id,
-            "width=" + width + ",height=" + height +
-            ",scrollbars=yes,resizable=yes,left=" + left + ",top=" + top
+            "width=" +
+                width +
+                ",height=" +
+                height +
+                ",scrollbars=yes,resizable=yes,left=" +
+                left +
+                ",top=" +
+                top
         );
     }
 
     /**
      * Add event listeners
-     * @param {string} selector 
-     * @param {Function} handler 
+     * @param {string} selector
+     * @param {Function} handler
      * @param {string} event
      */
-    #addEventListeners(selector, handler, event = 'click') {
+    #addEventListeners(selector, handler, event = "click") {
         const buttons = document.querySelectorAll(selector);
         buttons.forEach((button) => {
             button.addEventListener(event, handler.bind(this));
@@ -49,49 +55,63 @@ class APOPharmacyHandler {
 
     /**
      * Handle tambah button click
-     * @param {Event} event 
+     * @param {Event} event
      */
     #handleTambahButtonClick(event) {
         event.preventDefault();
         const url = "/simrs/procurement/approval-po/pharmacy/create";
         const width = screen.width;
         const height = screen.height;
-        const left = width - (width / 2);
-        const top = height - (height / 2);
+        const left = width - width / 2;
+        const top = height - height / 2;
         window.open(
             url,
             "popupWindow_addAPOFarmasi",
-            "width=" + width + ",height=" + height +
-            ",scrollbars=yes,resizable=yes,left=" + left + ",top=" + top
+            "width=" +
+                width +
+                ",height=" +
+                height +
+                ",scrollbars=yes,resizable=yes,left=" +
+                left +
+                ",top=" +
+                top
         );
     }
 
     /**
      * Delete after confirmation
-     * @param {number} id 
+     * @param {number} id
      */
     #deleteItem(id) {
         const formData = new FormData();
-        formData.append('id', String(id));
-        formData.append('csrf-token', document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '');
+        formData.append("id", String(id));
+        formData.append(
+            "csrf-token",
+            document
+                .querySelector('meta[name="csrf-token"]')
+                ?.getAttribute("content") || ""
+        );
 
-        fetch('/api/simrs/procurement/approval-po/pharmacy/destroy/' + id, {
-            method: 'DELETE',
+        fetch("/api/simrs/procurement/approval-po/pharmacy/destroy/" + id, {
+            method: "DELETE",
             body: formData,
             headers: {
-                'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')) || ''
-            }
+                "X-CSRF-TOKEN":
+                    document
+                        .querySelector('meta[name="csrf-token"]')
+                        ?.getAttribute("content") || "",
+            },
         })
-            .then(async(response) => {
+            .then(async (response) => {
                 const data = await response.json();
                 if (!data.success) {
                     throw new Error(data.message);
                 }
-                showSuccessAlert('Data berhasil dihapus!');
+                showSuccessAlert("Data berhasil dihapus!");
                 setTimeout(() => window.location.reload(), 2000);
             })
-            .catch(error => {
-                console.error('Error:', error);
+            .catch((error) => {
+                console.log("Error:", error);
                 showErrorAlertNoRefresh(`Error: ${error}`);
             });
     }

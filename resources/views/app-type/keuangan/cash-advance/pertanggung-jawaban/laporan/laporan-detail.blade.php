@@ -430,7 +430,7 @@
                             $('.loading-overlay').hide();
                         },
                         error: function(xhr) {
-                            console.error("Error fetching data: ", xhr);
+                            console.log("Error fetching data: ", xhr);
                             alert('Gagal mengambil data dari server.');
                             $('.loading-overlay').hide();
                         }

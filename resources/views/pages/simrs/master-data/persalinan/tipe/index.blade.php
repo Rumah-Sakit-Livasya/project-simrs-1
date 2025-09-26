@@ -143,7 +143,7 @@
                     },
                     error: function(xhr, status, error) {
                         // Jika terjadi error
-                        console.error(xhr.responseText);
+                        console.log(xhr.responseText);
                         showErrorAlert('Terjadi kesalahan. Mohon coba lagi.');
                     }
                 });

@@ -121,7 +121,7 @@
 
                     // Jika elemen canvas tidak ditemukan, hentikan dan beri log
                     if (!canvas) {
-                        console.error('Elemen Canvas dengan ID "' + init.canvasId + '" tidak ditemukan!');
+                        console.log('Elemen Canvas dengan ID "' + init.canvasId + '" tidak ditemukan!');
                         return; // Lanjut ke initializer berikutnya
                     }
 

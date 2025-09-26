@@ -58,6 +58,7 @@ class OrderLaboratorium {
      * @type {PatientType}
      */
     #patienType = "rajal";
+    #patienType = "rajal";
 
     #CITO = false;
 
@@ -79,7 +80,14 @@ class OrderLaboratorium {
         const checkboxes = document.querySelectorAll(
             "input[type='checkbox'].parameter_laboratorium_checkbox"
         );
+        const checkboxes = document.querySelectorAll(
+            "input[type='checkbox'].parameter_laboratorium_checkbox"
+        );
         checkboxes.forEach((checkbox) => {
+            checkbox.addEventListener(
+                "change",
+                this.#handleCheckboxChange.bind(this)
+            );
             checkbox.addEventListener(
                 "change",
                 this.#handleCheckboxChange.bind(this)
@@ -90,7 +98,14 @@ class OrderLaboratorium {
         const numberInputs = document.querySelectorAll(
             "input[type='number'].parameter_laboratorium_number"
         );
+        const numberInputs = document.querySelectorAll(
+            "input[type='number'].parameter_laboratorium_number"
+        );
         numberInputs.forEach((input) => {
+            input.addEventListener(
+                "input",
+                this.#handleNumberChange.bind(this)
+            );
             input.addEventListener(
                 "input",
                 this.#handleNumberChange.bind(this)
@@ -104,9 +119,15 @@ class OrderLaboratorium {
                 "keyup",
                 this.#handleSearchBarChange.bind(this)
             );
+            searchBar.addEventListener(
+                "keyup",
+                this.#handleSearchBarChange.bind(this)
+            );
         }
 
         // Harga
+        this.#elementHarga =
+            document.getElementById("laboratorium-total") || undefined;
         this.#elementHarga =
             document.getElementById("laboratorium-total") || undefined;
 
@@ -114,8 +135,15 @@ class OrderLaboratorium {
         const orderType = document.querySelectorAll(
             "input[type='radio'][name='order_type']"
         );
+        const orderType = document.querySelectorAll(
+            "input[type='radio'][name='order_type']"
+        );
         if (orderType) {
             orderType.forEach((radio) => {
+                radio.addEventListener(
+                    "change",
+                    this.#orderTypeChange.bind(this)
+                );
                 radio.addEventListener(
                     "change",
                     this.#orderTypeChange.bind(this)
@@ -129,6 +157,7 @@ class OrderLaboratorium {
             this.#elementForm = /** @type {HTMLFormElement} */ (form);
             form.addEventListener("submit", this.#submit.bind(this));
         } else {
+            alert("FORM NOT FOUND");
             alert("FORM NOT FOUND");
         }
 
@@ -144,6 +173,9 @@ class OrderLaboratorium {
             this.#initialDisabledInputs.push(
                 /** @type {HTMLInputElement} */ (input)
             );
+            this.#initialDisabledInputs.push(
+                /** @type {HTMLInputElement} */ (input)
+            );
         }
 
         // get tipe_pasien select
@@ -154,9 +186,16 @@ class OrderLaboratorium {
                 "change",
                 this.#selectTipePasienChange.bind(this)
             );
+            tipePasienSelect.addEventListener(
+                "change",
+                this.#selectTipePasienChange.bind(this)
+            );
         }
 
         // get pilih passien button
+        const pilihPasienButton = document.querySelector(
+            "button#pilih-pasien-btn"
+        );
         const pilihPasienButton = document.querySelector(
             "button#pilih-pasien-btn"
         );
@@ -165,8 +204,15 @@ class OrderLaboratorium {
             this.#pilihPasienButton = /** @type {HTMLButtonElement} */ (
                 pilihPasienButton
             );
+            this.#pilihPasienButton = /** @type {HTMLButtonElement} */ (
+                pilihPasienButton
+            );
 
             // listen to click
+            pilihPasienButton.addEventListener(
+                "click",
+                this.#handlePilihPasienButtonClick.bind(this)
+            );
             pilihPasienButton.addEventListener(
                 "click",
                 this.#handlePilihPasienButtonClick.bind(this)
@@ -185,6 +231,7 @@ class OrderLaboratorium {
     /**
      * Handle search bar changes
      * @param {Event} event
+     * @param {Event} event
      */
     #handleSearchBarChange(event) {
         const _target = event.target;
@@ -199,6 +246,8 @@ class OrderLaboratorium {
 
         const parameters = document.querySelectorAll(".parameter_laboratorium");
         parameters.forEach((parameter) => {
+            const parameterNameElement =
+                parameter.querySelector(".form-check-label");
             const parameterNameElement =
                 parameter.querySelector(".form-check-label");
             if (!parameterNameElement) return;
@@ -226,6 +275,7 @@ class OrderLaboratorium {
     /**
      * Handle pilih pasien button click
      * @param {Event} event
+     * @param {Event} event
      */
     #handlePilihPasienButtonClick(event) {
         event.preventDefault();
@@ -235,6 +285,11 @@ class OrderLaboratorium {
         if (!this.#pilihPasienButton) return;
 
         // open popup
+        let popup = window.open(
+            "popup/pilih-pasien/" + this.#patienType,
+            "popupPilihPasien",
+            `width=${screen.width},height=${screen.height},top=0,left=0`
+        );
         let popup = window.open(
             "popup/pilih-pasien/" + this.#patienType,
             "popupPilihPasien",
@@ -253,12 +308,16 @@ class OrderLaboratorium {
      * Change registration. \
      * Should be called from pilih pasien popup.
      * @param {Registration} registration
+     * @param {Registration} registration
      */
     changeRegistration(registration) {
         this.#Registration = registration;
         console.log("Change registration called");
 
         // get Penjamin object from Penjamins with id equals to registration.penjamin_id
+        const Penjamin = this.#Penjamins.find(
+            (p) => p.id == registration.penjamin_id
+        );
         const Penjamin = this.#Penjamins.find(
             (p) => p.id == registration.penjamin_id
         );
@@ -269,17 +328,28 @@ class OrderLaboratorium {
         this.#kelasPerawatan = registration.kelas_rawat_id
             ? parseInt(registration.kelas_rawat_id)
             : 1;
+        this.#kelasPerawatan = registration.kelas_rawat_id
+            ? parseInt(registration.kelas_rawat_id)
+            : 1;
 
         // change input with name "nama_pasien"
+        const namaPasienInput = /** @type {HTMLInputElement} */ (
+            document.querySelector("input[name='nama_pasien']")
+        );
         const namaPasienInput = /** @type {HTMLInputElement} */ (
             document.querySelector("input[name='nama_pasien']")
         );
         if (namaPasienInput) {
             namaPasienInput.value =
                 /** @type {HTMLInputElement} */ registration.patient.name;
+            namaPasienInput.value =
+                /** @type {HTMLInputElement} */ registration.patient.name;
         }
 
         // change input with name "date_of_birth"
+        const dateOfBirthInput = /** @type {HTMLInputElement} */ (
+            document.querySelector("input[name='date_of_birth']")
+        );
         const dateOfBirthInput = /** @type {HTMLInputElement} */ (
             document.querySelector("input[name='date_of_birth']")
         );
@@ -291,11 +361,17 @@ class OrderLaboratorium {
         const polyRuangInput = /** @type {HTMLInputElement} */ (
             document.querySelector("input[name='poly_ruang']")
         );
+        const polyRuangInput = /** @type {HTMLInputElement} */ (
+            document.querySelector("input[name='poly_ruang']")
+        );
         if (polyRuangInput) {
             polyRuangInput.value = registration.departement.name;
         }
 
         // change input with name "alamat"
+        const alamatInput = /** @type {HTMLInputElement} */ (
+            document.querySelector("input[name='alamat']")
+        );
         const alamatInput = /** @type {HTMLInputElement} */ (
             document.querySelector("input[name='alamat']")
         );
@@ -307,6 +383,9 @@ class OrderLaboratorium {
         const noTelpInput = /** @type {HTMLInputElement} */ (
             document.querySelector("input[name='no_telp']")
         );
+        const noTelpInput = /** @type {HTMLInputElement} */ (
+            document.querySelector("input[name='no_telp']")
+        );
         if (noTelpInput) {
             noTelpInput.value = registration.patient.mobile_phone_number;
         }
@@ -315,12 +394,20 @@ class OrderLaboratorium {
         const medicalRecordNumberInput = /** @type {HTMLInputElement} */ (
             document.querySelector("input[name='medical_record_number']")
         );
+        const medicalRecordNumberInput = /** @type {HTMLInputElement} */ (
+            document.querySelector("input[name='medical_record_number']")
+        );
         if (medicalRecordNumberInput) {
+            medicalRecordNumberInput.value =
+                registration.patient.medical_record_number;
             medicalRecordNumberInput.value =
                 registration.patient.medical_record_number;
         }
 
         // change input with name "registration_number"
+        const registrationNumberInput = /** @type {HTMLInputElement} */ (
+            document.querySelector("input[name='registration_number']")
+        );
         const registrationNumberInput = /** @type {HTMLInputElement} */ (
             document.querySelector("input[name='registration_number']")
         );
@@ -332,11 +419,23 @@ class OrderLaboratorium {
         const mrnRegistrationNumberInput = /** @type {HTMLInputElement} */ (
             document.querySelector("input[name='mrn_registration_number']")
         );
+        const mrnRegistrationNumberInput = /** @type {HTMLInputElement} */ (
+            document.querySelector("input[name='mrn_registration_number']")
+        );
         if (mrnRegistrationNumberInput) {
             mrnRegistrationNumberInput.value = `${registration.patient.medical_record_number} / ${registration.registration_number}`;
         }
 
         // change radio with name "jenis_kelamin"
+        const jenisKelaminInput = /** @type {HTMLInputElement} */ (
+            document.querySelector(
+                `input[id='gender_${
+                    registration.patient.gender == "Laki-laki"
+                        ? "male"
+                        : "female"
+                }']`
+            )
+        );
         const jenisKelaminInput = /** @type {HTMLInputElement} */ (
             document.querySelector(
                 `input[id='gender_${
@@ -375,6 +474,7 @@ class OrderLaboratorium {
     /**
      * Handle select tipe pasien changes
      * @param {Event} event
+     * @param {Event} event
      */
     #selectTipePasienChange(event) {
         const select = /** @type {HTMLSelectElement | null} */ (event.target);
@@ -393,6 +493,11 @@ class OrderLaboratorium {
                     input.name != "mrn_registration_number" &&
                     input.name != "poly_ruang"
                 ) {
+                if (
+                    input.name != "order_date" &&
+                    input.name != "mrn_registration_number" &&
+                    input.name != "poly_ruang"
+                ) {
                     input.disabled = false;
                 }
             });
@@ -403,8 +508,16 @@ class OrderLaboratorium {
             );
             if (mrnRegistrationNumberInput)
                 mrnRegistrationNumberInput.value = "OTC";
+            const mrnRegistrationNumberInput = /** @type {HTMLInputElement} */ (
+                document.querySelector("input[name='mrn_registration_number']")
+            );
+            if (mrnRegistrationNumberInput)
+                mrnRegistrationNumberInput.value = "OTC";
 
             // set input with name "poly_ruang" value to "LABORATORIUM"
+            const polyRuangInput = /** @type {HTMLInputElement} */ (
+                document.querySelector("input[name='poly_ruang']")
+            );
             const polyRuangInput = /** @type {HTMLInputElement} */ (
                 document.querySelector("input[name='poly_ruang']")
             );
@@ -438,6 +551,7 @@ class OrderLaboratorium {
     /**
      * Handle radio order type changes
      * @param {Event} event
+     * @param {Event} event
      */
     #orderTypeChange(event) {
         const _target = event.target;
@@ -445,6 +559,7 @@ class OrderLaboratorium {
 
         const radio = /** @type {HTMLInputElement} */ (_target);
         let type = radio.value;
+        this.#CITO = type == "cito" ? true : false;
         this.#CITO = type == "cito" ? true : false;
         this.#calculateCost();
     }
@@ -459,14 +574,33 @@ class OrderLaboratorium {
             ) {
                 const ParameterLaboratorium =
                     KategoriLaboratorium.parameter_laboratorium[ii];
+            for (
+                let ii = 0;
+                ii < KategoriLaboratorium.parameter_laboratorium.length;
+                ii++
+            ) {
+                const ParameterLaboratorium =
+                    KategoriLaboratorium.parameter_laboratorium[ii];
 
                 // get span with id "harga_parameter_laboratorium_${ParameterLaboratorium.id}"
+                const hargaParameterLaboratorium = document.getElementById(
+                    `harga_parameter_laboratorium_${ParameterLaboratorium.id}`
+                );
                 const hargaParameterLaboratorium = document.getElementById(
                     `harga_parameter_laboratorium_${ParameterLaboratorium.id}`
                 );
                 if (hargaParameterLaboratorium == null) continue;
 
                 // get tarif from #TarifLaboratorium with equal parameter_laboratorium_id, group_penjamin_id and kelas_rawat_id
+                const tarif = this.#TarifLaboratorium.find((t) => {
+                    if (
+                        t.parameter_laboratorium_id ==
+                            ParameterLaboratorium.id &&
+                        t.group_penjamin_id == this.#groupTarif &&
+                        t.kelas_rawat_id == this.#kelasPerawatan
+                    )
+                        return t;
+                });
                 const tarif = this.#TarifLaboratorium.find((t) => {
                     if (
                         t.parameter_laboratorium_id ==
@@ -483,12 +617,19 @@ class OrderLaboratorium {
                             style: "currency",
                             currency: "IDR",
                         });
+                    hargaParameterLaboratorium.textContent =
+                        tarif.total.toLocaleString("id-ID", {
+                            style: "currency",
+                            currency: "IDR",
+                        });
                 } else {
                     console.error(
                         "Tarif belum di set atau tidak ditemukan! ID Parameter: " +
                             ParameterLaboratorium.id
                     );
-                    // showErrorAlertNoRefresh("Tarif tidak ditemukan atau belum di set! Mohon laporkan ke management. Cek log console!");
+                    showErrorAlertNoRefresh(
+                        "Tarif tidak ditemukan atau belum di set! Mohon laporkan ke management. Cek log console!"
+                    );
                 }
             }
         }
@@ -497,6 +638,9 @@ class OrderLaboratorium {
     #calculateCost() {
         this.#totalHarga = 0;
 
+        const checkboxes = document.querySelectorAll(
+            "input[type='checkbox'].parameter_laboratorium_checkbox"
+        );
         const checkboxes = document.querySelectorAll(
             "input[type='checkbox'].parameter_laboratorium_checkbox"
         );
@@ -515,14 +659,29 @@ class OrderLaboratorium {
                 parameter = parameters.find(
                     (p) => p.id == parseInt(parameterId)
                 );
+                const parameters =
+                    this.#KategoriLaboratorium[nama_kategori]
+                        .parameter_laboratorium;
+                parameter = parameters.find(
+                    (p) => p.id == parseInt(parameterId)
+                );
             }
 
             if (isChecked && parameter) {
                 const Tarif = this.#TarifLaboratorium.find((t) => {
                     const EqualParameterId =
                         t.parameter_laboratorium_id == parameter.id;
+                    const EqualParameterId =
+                        t.parameter_laboratorium_id == parameter.id;
                     let EqualKelasRawatId = true;
                     let EqualGroupPenjaminId = true;
+                    const kelasRajal = this.#KelasRawat.find(
+                        (k) => k.kelas.toLowerCase() == "rawat jalan"
+                    );
+                    if (!kelasRajal)
+                        return showErrorAlertNoRefresh(
+                            "Kelas rawat jalan tidak ditemukan!"
+                        );
                     const kelasRajal = this.#KelasRawat.find(
                         (k) => k.kelas.toLowerCase() == "rawat jalan"
                     );
@@ -539,9 +698,18 @@ class OrderLaboratorium {
                                 ? t.kelas_rawat_id == kelasRajal.id
                                 : t.kelas_rawat_id ==
                                   (this.#Registration.kelas_rawat_id ?? -1);
+                        EqualKelasRawatId =
+                            this.#Registration.registration_type ==
+                            "rawat-jalan"
+                                ? t.kelas_rawat_id == kelasRajal.id
+                                : t.kelas_rawat_id ==
+                                  (this.#Registration.kelas_rawat_id ?? -1);
 
                         // get "group_penjamin_id" which is in Penjamin object
                         // with id equals to "penjamin_id" which is in Registration object
+                        const Penjamin = this.#Penjamins.find(
+                            (p) => p.id == this.#Registration?.penjamin_id
+                        );
                         const Penjamin = this.#Penjamins.find(
                             (p) => p.id == this.#Registration?.penjamin_id
                         );
@@ -549,8 +717,17 @@ class OrderLaboratorium {
                             EqualGroupPenjaminId =
                                 t.group_penjamin_id ==
                                 Penjamin.group_penjamin_id;
+                            EqualGroupPenjaminId =
+                                t.group_penjamin_id ==
+                                Penjamin.group_penjamin_id;
                         }
                     }
+                    if (
+                        EqualParameterId &&
+                        EqualKelasRawatId &&
+                        EqualGroupPenjaminId
+                    )
+                        return t;
                     if (
                         EqualParameterId &&
                         EqualKelasRawatId &&
@@ -564,7 +741,9 @@ class OrderLaboratorium {
                         "Tarif belum di set atau tidak ditemukan! ID Parameter: " +
                             parameter.id
                     );
-                    // showErrorAlertNoRefresh("Tarif tidak ditemukan atau belum di set! Mohon laporkan ke management. Cek log console!");
+                    showErrorAlertNoRefresh(
+                        "Tarif tidak ditemukan atau belum di set! Mohon laporkan ke management. Cek log console!"
+                    );
                 } else {
                     const jumlah = /** @type {HTMLInputElement} */ (
                         document.querySelector(
@@ -578,14 +757,23 @@ class OrderLaboratorium {
                     let Price = Tarif.total * parseInt(jumlah.value);
                     if (this.#CITO) {
                         Price += (Price * 30) / 100;
+                        Price += (Price * 30) / 100;
                     }
 
                     this.#totalHarga += Price;
                 }
             }
         });
+        });
 
         if (this.#elementHarga) {
+            this.#elementHarga.textContent = this.#totalHarga.toLocaleString(
+                "id-ID",
+                {
+                    style: "currency",
+                    currency: "IDR",
+                }
+            );
             this.#elementHarga.textContent = this.#totalHarga.toLocaleString(
                 "id-ID",
                 {
@@ -611,12 +799,19 @@ class OrderLaboratorium {
     /**
      * Submit form
      * @param {Event} event
+     * @param {Event} event
      */
     #submit(event) {
         event.preventDefault();
         const formData = new FormData(this.#elementForm);
         if (!this.#Registration) {
             if (this.#patienType != "otc") {
+                return showErrorAlertNoRefresh(
+                    "Silahkan pilih pasien terlebih dahulu!"
+                );
+            } else {
+                // otc
+                formData.append("is_otc", "1");
                 return showErrorAlertNoRefresh(
                     "Silahkan pilih pasien terlebih dahulu!"
                 );
@@ -630,10 +825,16 @@ class OrderLaboratorium {
                 "registration_type",
                 this.#Registration.registration_type
             );
+            formData.append("registration_id", String(this.#Registration.id));
+            formData.append(
+                "registration_type",
+                this.#Registration.registration_type
+            );
         }
 
         // get parameters
         /**
+         * @typedef {{
          * @typedef {{
          * id: number
          * qty: number
@@ -641,6 +842,9 @@ class OrderLaboratorium {
          *  }} Parameter
          */
         let parameters = /** @type {Parameter[]} */ ([]);
+        const checkboxes = document.querySelectorAll(
+            "input[type='checkbox'].parameter_laboratorium_checkbox"
+        );
         const checkboxes = document.querySelectorAll(
             "input[type='checkbox'].parameter_laboratorium_checkbox"
         );
@@ -658,14 +862,29 @@ class OrderLaboratorium {
                 parameter = parameters.find(
                     (p) => p.id == parseInt(parameterId)
                 );
+                const parameters =
+                    this.#KategoriLaboratorium[nama_kategori]
+                        .parameter_laboratorium;
+                parameter = parameters.find(
+                    (p) => p.id == parseInt(parameterId)
+                );
             }
 
             if (isChecked && parameter) {
                 const Tarif = this.#TarifLaboratorium.find((t) => {
                     const EqualParameterId =
                         t.parameter_laboratorium_id == parameter.id;
+                    const EqualParameterId =
+                        t.parameter_laboratorium_id == parameter.id;
                     let EqualKelasRawatId = true;
                     let EqualGroupPenjaminId = true;
+                    const kelasRajal = this.#KelasRawat.find(
+                        (k) => k.kelas.toLowerCase() == "rawat jalan"
+                    );
+                    if (!kelasRajal)
+                        return showErrorAlertNoRefresh(
+                            "Kelas rawat jalan tidak ditemukan!"
+                        );
                     const kelasRajal = this.#KelasRawat.find(
                         (k) => k.kelas.toLowerCase() == "rawat jalan"
                     );
@@ -682,9 +901,18 @@ class OrderLaboratorium {
                                 ? t.kelas_rawat_id == kelasRajal.id
                                 : t.kelas_rawat_id ==
                                   (this.#Registration.kelas_rawat_id ?? -1);
+                        EqualKelasRawatId =
+                            this.#Registration.registration_type ==
+                            "rawat-jalan"
+                                ? t.kelas_rawat_id == kelasRajal.id
+                                : t.kelas_rawat_id ==
+                                  (this.#Registration.kelas_rawat_id ?? -1);
 
                         // get "group_penjamin_id" which is in Penjamin object
                         // with id equals to "penjamin_id" which is in Registration object
+                        const Penjamin = this.#Penjamins.find(
+                            (p) => p.id == this.#Registration?.penjamin_id
+                        );
                         const Penjamin = this.#Penjamins.find(
                             (p) => p.id == this.#Registration?.penjamin_id
                         );
@@ -692,8 +920,17 @@ class OrderLaboratorium {
                             EqualGroupPenjaminId =
                                 t.group_penjamin_id ==
                                 Penjamin.group_penjamin_id;
+                            EqualGroupPenjaminId =
+                                t.group_penjamin_id ==
+                                Penjamin.group_penjamin_id;
                         }
                     }
+                    if (
+                        EqualParameterId &&
+                        EqualKelasRawatId &&
+                        EqualGroupPenjaminId
+                    )
+                        return t;
                     if (
                         EqualParameterId &&
                         EqualKelasRawatId &&
@@ -707,7 +944,9 @@ class OrderLaboratorium {
                         "Tarif belum di set atau tidak ditemukan! ID Parameter: " +
                             parameter.id
                     );
-                    // showErrorAlertNoRefresh("Tarif tidak ditemukan atau belum di set! Mohon laporkan ke management. Cek log console!");
+                    showErrorAlertNoRefresh(
+                        "Tarif tidak ditemukan atau belum di set! Mohon laporkan ke management. Cek log console!"
+                    );
                 } else {
                     const jumlah = /** @type {HTMLInputElement} */ (
                         document.querySelector(
@@ -721,8 +960,14 @@ class OrderLaboratorium {
                     let Price = Tarif.total;
                     if (this.#CITO) {
                         Price += (Price * 30) / 100;
+                        Price += (Price * 30) / 100;
                     }
 
+                    parameters.push({
+                        id: parameter.id,
+                        qty: parseInt(jumlah.value),
+                        price: Price,
+                    });
                     parameters.push({
                         id: parameter.id,
                         qty: parseInt(jumlah.value),
@@ -731,7 +976,9 @@ class OrderLaboratorium {
                 }
             }
         });
+        });
 
+        formData.append("parameters", JSON.stringify(parameters));
         formData.append("parameters", JSON.stringify(parameters));
 
         for (let [key, value] of formData.entries()) {
@@ -742,20 +989,29 @@ class OrderLaboratorium {
         const CSRF_TOKEN = document.querySelector(
             'meta[name="csrf-token"]'
         )?.content;
+        const CSRF_TOKEN = document.querySelector(
+            'meta[name="csrf-token"]'
+        )?.content;
 
+        fetch("/api/simrs/laboratorium/order", {
+            method: "POST",
         fetch("/api/simrs/laboratorium/order", {
             method: "POST",
             body: formData,
             headers: {
                 "X-CSRF-TOKEN": CSRF_TOKEN,
             },
+                "X-CSRF-TOKEN": CSRF_TOKEN,
+            },
         })
+            .then((response) => response.json())
             .then((response) => response.json())
             .then(async (data) => {
                 console.log(data);
                 if (!data.success) {
                     throw new Error(data.errors);
                 }
+                showSuccessAlert("Data berhasil disimpan");
                 showSuccessAlert("Data berhasil disimpan");
                 setTimeout(() => window.location.reload(), 2000);
             })
@@ -767,3 +1023,4 @@ class OrderLaboratorium {
 }
 
 const OrderLaboratoriumClass = new OrderLaboratorium();
+

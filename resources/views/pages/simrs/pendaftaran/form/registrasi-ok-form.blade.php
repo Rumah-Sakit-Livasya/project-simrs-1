@@ -163,7 +163,7 @@
                         }
                     },
                     error: function(xhr) {
-                        console.error('Error loading operation orders:', xhr);
+                        console.log('Error loading operation orders:', xhr);
                     }
                 });
             }

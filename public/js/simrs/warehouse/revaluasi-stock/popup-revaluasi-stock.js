@@ -7,8 +7,8 @@ const Swal = /** @type {import("sweetalert2").default} */ (window.Swal);
 
 class PopupRevaluasiStockHandler {
     /**
-      * @type {JQuery<HTMLElement>}
-      */
+     * @type {JQuery<HTMLElement>}
+     */
     #$LoadingIcon;
 
     /**
@@ -53,7 +53,7 @@ class PopupRevaluasiStockHandler {
         this.#$LoadingPage = $("#loading-page");
         this.#$LoadingMessage = $("#loading-message");
         this.#$Gudang = $("#gudang");
-        this.#$Datatable = $('#dt-basic-example').DataTable();
+        this.#$Datatable = $("#dt-basic-example").DataTable();
         this.#$TableBody = $("#table-body");
         this.#Token = /** @type {string} */ ($("[name='_token']").val());
 
@@ -89,12 +89,14 @@ class PopupRevaluasiStockHandler {
             const Satuan = StoredItem.pbi?.satuan_id;
 
             let push = true;
-            StoredItemsSortedPharmacy
-                .filter((item) => item.pbi?.barang_id === Barang && item.pbi?.satuan_id === Satuan)
-                .forEach((item) => {
-                    push = false;
-                    item.qty += StoredItem.qty;
-                });
+            StoredItemsSortedPharmacy.filter(
+                (item) =>
+                    item.pbi?.barang_id === Barang &&
+                    item.pbi?.satuan_id === Satuan
+            ).forEach((item) => {
+                push = false;
+                item.qty += StoredItem.qty;
+            });
 
             if (push) StoredItemsSortedPharmacy.push(StoredItem);
         });
@@ -105,12 +107,14 @@ class PopupRevaluasiStockHandler {
             const Satuan = StoredItem.pbi?.satuan_id;
 
             let push = true;
-            StoredItemsSortedNonPharmacy
-                .filter((item) => item.pbi?.barang_id === Barang && item.pbi?.satuan_id === Satuan)
-                .forEach((item) => {
-                    push = false;
-                    item.qty += StoredItem.qty;
-                });
+            StoredItemsSortedNonPharmacy.filter(
+                (item) =>
+                    item.pbi?.barang_id === Barang &&
+                    item.pbi?.satuan_id === Satuan
+            ).forEach((item) => {
+                push = false;
+                item.qty += StoredItem.qty;
+            });
 
             if (push) StoredItemsSortedNonPharmacy.push(StoredItem);
         });
@@ -129,8 +133,8 @@ class PopupRevaluasiStockHandler {
 
     /**
      * Get HTML for a stored item in string
-     * @param {StoredItem} item 
-     * @param {"f" | "nf"} type 
+     * @param {StoredItem} item
+     * @param {"f" | "nf"} type
      * @param {number} index
      */
     #getStoredItemCol(item, type, index) {
@@ -146,7 +150,7 @@ class PopupRevaluasiStockHandler {
         // <th>Stok</th>
         // <th>Aksi</th>
 
-        return /*html*/`
+        return /*html*/ `
             <tr id="item${key}">
                 <td>${index + 1}</td>
                 <td>${type == "f" ? "Farmasi" : "Non Farmasi"}</td>
@@ -157,36 +161,46 @@ class PopupRevaluasiStockHandler {
                 <td>${item.pbi?.item?.kategori?.nama}</td>
                 <td>${item.qty}</td>
                 <td><a class="mdi mdi-pencil pointer mdi-24px text-primary delete-btn"
-                        title="Edit Stock" onclick="PopupRevaluasiStockClass.editStock(${item.pbi?.barang_id}, ${item.pbi?.satuan_id}, '${type}')"></a></td>
+                        title="Edit Stock" onclick="PopupRevaluasiStockClass.editStock(${
+                            item.pbi?.barang_id
+                        }, ${item.pbi?.satuan_id}, '${type}')"></a></td>
             </tr>
         `;
     }
 
     /**
      * Create new popup to edit stock
-     * @param {number} barang_id 
-     * @param {number} satuan_id 
-     * @param {"f" | "nf"} type 
+     * @param {number} barang_id
+     * @param {number} satuan_id
+     * @param {"f" | "nf"} type
      */
     editStock(barang_id, satuan_id, type) {
         console.log(arguments);
-        const url = `/simrs/warehouse/revaluasi-stock/stock-adjustment/edit/${this.#$Gudang.val()}/${barang_id}/${satuan_id}/${type}/${this.#Token}`;
+        const url = `/simrs/warehouse/revaluasi-stock/stock-adjustment/edit/${this.#$Gudang.val()}/${barang_id}/${satuan_id}/${type}/${
+            this.#Token
+        }`;
         const width = screen.width;
         const height = screen.height;
-        const left = width - (width / 2);
-        const top = height - (height / 2);
+        const left = width - width / 2;
+        const top = height - height / 2;
         window.open(
             url,
             "popupWindow_editStockAdjustment",
-            "width=" + width + ",height=" + height +
-            ",scrollbars=yes,resizable=yes,left=" + left + ",top=" + top
+            "width=" +
+                width +
+                ",height=" +
+                height +
+                ",scrollbars=yes,resizable=yes,left=" +
+                left +
+                ",top=" +
+                top
         );
     }
 
     /**
      * Show or hide the loading icon
-     * @param {boolean} show 
-     * @param {string?} message 
+     * @param {boolean} show
+     * @param {string?} message
      */
     #showLoading(show, message = null) {
         this.#$LoadingIcon.toggle(show);
@@ -196,17 +210,17 @@ class PopupRevaluasiStockHandler {
         if (message) {
             this.#$LoadingMessage.text(message);
         } else {
-            this.#$LoadingMessage.text('Loading...');
+            this.#$LoadingMessage.text("Loading...");
         }
     }
 
     /**
      * Add event listeners
-     * @param {string} selector 
-     * @param {Function} handler 
+     * @param {string} selector
+     * @param {Function} handler
      * @param {string} event
      */
-    #addEventListeners(selector, handler, event = 'click') {
+    #addEventListeners(selector, handler, event = "click") {
         const buttons = document.querySelectorAll(selector);
         buttons.forEach((button) => {
             button.addEventListener(event, handler.bind(this));
@@ -215,8 +229,8 @@ class PopupRevaluasiStockHandler {
 
     /**
      * Make a fetch call with API URL as base URL
-     * @param {string} url 
-     * @param {FormData | null} body 
+     * @param {string} url
+     * @param {FormData | null} body
      * @param {"GET" | "POST" | "PATCH" | "PUT" | "DELETE"} method
      */
     #APIfetch(url, body = null, method = "GET", raw = false) {
@@ -227,17 +241,20 @@ class PopupRevaluasiStockHandler {
                 method: method,
                 body: body,
                 headers: {
-                    'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')) || ''
-                }
+                    "X-CSRF-TOKEN":
+                        document
+                            .querySelector('meta[name="csrf-token"]')
+                            ?.getAttribute("content") || "",
+                },
             })
                 .then(async (response) => {
                     if (response.status != 200) {
-                        throw new Error('Error: ' + response.statusText);
+                        throw new Error("Error: " + response.statusText);
                     }
                     resolve(!raw ? await response.json() : response);
                 })
-                .catch(error => {
-                    console.error('Error:', error);
+                .catch((error) => {
+                    console.log("Error:", error);
 
                     // @ts-ignore
                     if (this.#showLoading) this.#showLoading(false); // assert

@@ -68,7 +68,7 @@ $(document).ready(function () {
                 setTimeout(() => window.location.reload(), 2000);
             },
             error: function (jqXHR, textStatus, errorThrown) {
-                console.error("Error:", errorThrown);
+                console.log("Error:", errorThrown);
                 // Diasumsikan showErrorAlertNoRefresh adalah fungsi global
                 showErrorAlertNoRefresh(`Error: ${errorThrown}`);
             },
@@ -123,7 +123,7 @@ $(document).ready(function () {
                         setTimeout(() => window.location.reload(), 2000);
                     },
                     error: function (jqXHR, textStatus, errorThrown) {
-                        console.error("Error:", errorThrown);
+                        console.log("Error:", errorThrown);
                         showErrorAlertNoRefresh(`Error: ${errorThrown}`);
                     },
                 });

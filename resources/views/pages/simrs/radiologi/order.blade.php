@@ -1,401 +1,324 @@
 @extends('inc.layout')
 @section('title', 'Order Baru Radiologi')
+
+{{-- CSS Kustom --}}
 @section('extended-css')
     <style>
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
-        }
-
-        .card {
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            padding: 15px;
-        }
-
-        .card h3 {
-            background-color: #cc33cc;
-            color: white;
-            padding: 10px;
-            margin: -15px -15px 10px -15px;
-            border-top-left-radius: 8px;
-            border-top-right-radius: 8px;
-        }
-
-        .item {
+        .test-item {
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            padding: 5px 0;
-            border-bottom: 1px solid #eee;
+            justify-content: space-between;
+            padding: 0.75rem 1.25rem;
+            border-bottom: 1px solid #dee2e6;
         }
 
-        .item:last-child {
+        .test-item:last-child {
             border-bottom: none;
         }
 
-        .parameter_radiologi_number {
-            width: 60px;
-            margin-left: 10px;
+        .test-item .test-price {
+            min-width: 120px;
+            text-align: right;
+            color: #28a745;
+            font-weight: 500;
+        }
+
+        .quantity-stepper {
+            width: 120px;
+            margin-left: 15px;
+            flex-shrink: 0;
+        }
+
+        .quantity-stepper .quantity-input {
+            -moz-appearance: textfield;
+            appearance: textfield;
+            background-color: #fff !important;
+        }
+
+        .quantity-stepper .quantity-input::-webkit-outer-spin-button,
+        .quantity-stepper .quantity-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .quantity-stepper .btn-quantity-stepper {
+            width: 32px;
+        }
+
+        .total-price-container {
+            text-align: right;
+            padding: 1rem;
+            background-color: #f3f3f3;
+            border-radius: 5px;
+            border-top: 3px solid #1dc9b7;
+        }
+
+        .total-price-container h2 {
+            font-weight: 700;
+            color: #1dc9b7;
+            margin: 0;
+        }
+
+        .total-price-container small {
+            color: #868e96;
+            display: block;
+            margin-bottom: 5px;
         }
     </style>
 @endsection
+
 @section('content')
     <main id="js-page-content" role="main" class="page-content">
-        <div class="row justify-content-center">
+        <div class="row">
             <div class="col-xl-12">
                 <div id="panel-1" class="panel">
                     <div class="panel-hdr">
                         <h2>
-                            Form <span class="fw-300"><i>Order Baru</i></span>
+                            Form <span class="fw-300"><i>Order Baru Radiologi</i></span>
                         </h2>
                     </div>
                     <div class="panel-container show">
                         <div class="panel-content">
-
                             <form method="post" name="form-radiologi" id="form-radiologi">
                                 @csrf
                                 <input type="hidden" name="user_id" value="{{ auth()->user()->id }}">
                                 <input type="hidden" name="employee_id" value="{{ auth()->user()->employee->id }}">
 
-                                <div class="row justify-content-center">
-                                    <div class="col-xl-4">
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-xl-4" style="text-align: right">
-                                                    <label for="order_date">Tanggal</label>
-                                                </div>
-                                                <div class="col-xl">
-                                                    <div class="form-group row">
-                                                        <div class="col-xl ">
-                                                            <input disabled type="date" class="form-control"
-                                                                id="datepicker-1"
-                                                                style="border: 0; border-bottom: 1.9px solid #eaeaea; margin-top: -.5rem; border-radius: 0"
-                                                                placeholder="Select date" name="order_date"
-                                                                value="{{ \Carbon\Carbon::now()->toDateString() }}">
+                                {{-- BAGIAN 1: INFORMASI PASIEN & ORDER --}}
+                                <div class="card border mb-4">
+                                    <div class="card-header bg-primary-50">
+                                        <h5 class="card-title text-white">Informasi Pasien & Order</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            {{-- Kolom Kiri --}}
+                                            <div class="col-lg-6">
+                                                <div class="form-group row">
+                                                    <label class="col-sm-4 col-form-label" for="nama_pasien">Nama
+                                                        Pasien</label>
+                                                    <div class="col-sm-8">
+                                                        <div class="input-group">
+                                                            <input type="text" readonly class="form-control"
+                                                                id="nama_pasien" name="nama_pasien"
+                                                                placeholder="Pilih pasien...">
+                                                            <div class="input-group-append">
+                                                                <button class="btn btn-primary" id="pilih-pasien-btn"
+                                                                    title="Cari Pasien"><i
+                                                                        class="fal fa-search"></i></button>
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                    @error('order_date')
-                                                        <div class="invalid-feedback">{{ $message }}</div>
-                                                    @enderror
+                                                </div>
+                                                <div class="form-group row">
+                                                    <label class="col-sm-4 col-form-label" for="mrn_registration_number">No
+                                                        RM / Registrasi</label>
+                                                    <div class="col-sm-8">
+                                                        <input type="text" readonly class="form-control"
+                                                            id="mrn_registration_number" name="mrn_registration_number">
+                                                    </div>
+                                                </div>
+                                                {{-- ... form input lainnya ... --}}
+                                                <div class="form-group row">
+                                                    <label class="col-sm-4 col-form-label" for="date_of_birth">Tanggal
+                                                        Lahir</label>
+                                                    <div class="col-sm-8">
+                                                        <input type="date" readonly class="form-control"
+                                                            id="date_of_birth" name="date_of_birth">
+                                                    </div>
+                                                </div>
+                                                <div class="form-group row">
+                                                    <label class="col-sm-4 col-form-label">Jenis Kelamin</label>
+                                                    <div class="col-sm-8">
+                                                        <div class="custom-control custom-radio custom-control-inline">
+                                                            <input type="radio" id="gender_male" name="jenis_kelamin"
+                                                                class="custom-control-input" value="Laki-laki" disabled>
+                                                            <label class="custom-control-label"
+                                                                for="gender_male">Laki-laki</label>
+                                                        </div>
+                                                        <div class="custom-control custom-radio custom-control-inline">
+                                                            <input type="radio" id="gender_female" name="jenis_kelamin"
+                                                                class="custom-control-input" value="Perempuan" disabled>
+                                                            <label class="custom-control-label"
+                                                                for="gender_female">Perempuan</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group row">
+                                                    <label class="col-sm-4 col-form-label" for="no_telp">No. Telp /
+                                                        HP</label>
+                                                    <div class="col-sm-8">
+                                                        <input type="text" class="form-control" id="no_telp"
+                                                            name="no_telp">
+                                                    </div>
+                                                </div>
+                                                <div class="form-group row">
+                                                    <label class="col-sm-4 col-form-label" for="alamat">Alamat</label>
+                                                    <div class="col-sm-8">
+                                                        <textarea class="form-control" id="alamat" name="alamat" rows="2"></textarea>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-xl-4">
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-xl-5" style="text-align: right">
-                                                    <label class="form-label text-end" for="nama_pasien">
-                                                        Nama Pasien
-                                                    </label>
-                                                    <button onclick="event.preventDefault()" class="btn btn-primary"
-                                                        id="pilih-pasien-btn"><span
-                                                            class="fal fa-search mr-1"></span></button>
+                                            {{-- Kolom Kanan --}}
+                                            <div class="col-lg-6">
+                                                <div class="form-group row">
+                                                    <label class="col-sm-4 col-form-label" for="order_date">Tanggal
+                                                        Order</label>
+                                                    <div class="col-sm-8">
+                                                        <input type="date" class="form-control" id="order_date"
+                                                            name="order_date"
+                                                            value="{{ \Carbon\Carbon::now()->toDateString() }}">
+                                                    </div>
                                                 </div>
-                                                <div class="col-xl">
-                                                    <input type="text" disabled value=""
-                                                        style="border: 0; border-bottom: 1.9px solid #eaeaea; margin-top: -.5rem; border-radius: 0"
-                                                        class="form-control" id="nama_pasien" name="nama_pasien">
-                                                    @error('nama_pasien')
-                                                        <div class="invalid-feedback">{{ $message }}</div>
-                                                    @enderror
+                                                <div class="form-group row">
+                                                    <label class="col-sm-4 col-form-label" for="tipe_pasien">Tipe
+                                                        Pasien</label>
+                                                    <div class="col-sm-8">
+                                                        <select class="form-control" name="tipe_pasien" id="tipe_pasien">
+                                                            <option value="rajal" selected>Rawat Jalan</option>
+                                                            <option value="ranap">Rawat Inap</option>
+                                                            <option value="otc">OTC</option>
+                                                        </select>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-xl-4">
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-xl-5" style="text-align: right">
-                                                    <label class="form-label text-end" for="mrn_registration_number">
-                                                        No RM / Registrasi
-                                                    </label>
+                                                <div class="form-group row">
+                                                    <label class="col-sm-4 col-form-label"
+                                                        for="poly_ruang">Poly/Ruang</label>
+                                                    <div class="col-sm-8">
+                                                        <input type="text" readonly class="form-control"
+                                                            id="poly_ruang" name="poly_ruang">
+                                                    </div>
                                                 </div>
-                                                <div class="col-xl">
-                                                    <input type="text" disabled value=""
-                                                        style="border: 0; border-bottom: 1.9px solid #eaeaea; margin-top: -.5rem; border-radius: 0"
-                                                        class="form-control" id="mrn_registration_number"
-                                                        name="mrn_registration_number">
-
-                                                    <input type="hidden" name="medical_record_number" value=""
-                                                        disabled>
-                                                    <input type="hidden" name="registration_number" value=""
-                                                        disabled>
-                                                    @error('mrn_registration_number')
-                                                        <div class="invalid-feedback">{{ $message }}</div>
-                                                    @enderror
+                                                <div class="form-group row">
+                                                    <label class="col-sm-4 col-form-label" for="doctor_id">Dokter
+                                                        Radiologi</label>
+                                                    <div class="col-sm-8">
+                                                        <select class="select2 form-control w-100" id="doctor_id"
+                                                            name="doctor_id">
+                                                            <option value="">-- Pilih Dokter --</option>
+                                                            @foreach ($radiologyDoctors as $doctor)
+                                                                <option value="{{ $doctor->id }}">
+                                                                    {{ $doctor->employee->fullname }}</option>
+                                                            @endforeach
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group row">
+                                                    <label class="col-sm-4 col-form-label" for="diagnosa_awal">Diagnosa
+                                                        Klinis</label>
+                                                    <div class="col-sm-8">
+                                                        <input type="text" class="form-control" id="diagnosa_awal"
+                                                            name="diagnosa_awal">
+                                                    </div>
+                                                </div>
+                                                <div class="form-group row">
+                                                    <label class="col-sm-4 col-form-label">Tipe Order</label>
+                                                    <div class="col-sm-8">
+                                                        <div class="custom-control custom-radio custom-control-inline">
+                                                            <input type="radio" id="order_type_normal"
+                                                                name="order_type" class="custom-control-input"
+                                                                value="normal" checked>
+                                                            <label class="custom-control-label"
+                                                                for="order_type_normal">Normal</label>
+                                                        </div>
+                                                        <div class="custom-control custom-radio custom-control-inline">
+                                                            <input type="radio" id="order_type_cito" name="order_type"
+                                                                class="custom-control-input" value="cito">
+                                                            <label class="custom-control-label" for="order_type_cito">CITO
+                                                                <small>(+30%)</small></label>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div class="row justify-content-center mt-4">
-                                    <div class="col-xl-4">
-
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-xl-5" style="text-align: right">
-                                                    <label class="form-label text-end" for="tipe_pasien">
-                                                        Tipe Pasien
-                                                    </label>
-                                                </div>
-                                                <div class="col-xl">
-                                                    <select class="form-control" name="tipe_pasien" id="tipe_pasien">
-                                                        <option value="rajal">Rawat Jalan</option>
-                                                        <option value="ranap">Rawat Inap</option>
-                                                        <option value="otc">OTC</option>
-                                                    </select>
-                                                    @error('tipe_pasien')
-                                                        <div class="invalid-feedback">{{ $message }}</div>
-                                                    @enderror
-                                                </div>
-                                            </div>
-                                        </div>
+                                {{-- BAGIAN 2: PEMILIHAN TINDAKAN RADIOLOGI --}}
+                                <div class="card border mb-4">
+                                    <div class="card-header bg-success-50">
+                                        <h5 class="card-title text-white">Pilihan Pemeriksaan Radiologi</h5>
                                     </div>
-
-                                    <div class="col-xl-4">
+                                    <div class="card-body">
                                         <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-xl-4" style="text-align: right">
-                                                    <label for="date_of_birth">Tanggal Lahir</label>
-                                                </div>
-                                                <div class="col-xl">
-                                                    <input type="date" disabled value=""
-                                                        style="border: 0; border-bottom: 1.9px solid #eaeaea; margin-top: -.5rem; border-radius: 0"
-                                                        class="form-control" id="date_of_birth" name="date_of_birth">
-                                                    @error('date_of_birth')
-                                                        <div class="invalid-feedback">{{ $message }}</div>
-                                                    @enderror
-                                                </div>
-                                            </div>
+                                            <input type="text" class="form-control" id="searchRadiology"
+                                                placeholder="Cari nama pemeriksaan...">
                                         </div>
-                                    </div>
-
-                                    <div class="col-xl-4">
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-xl-4" style="text-align: right">
-                                                    <label for="poly_ruang">Poly/Ruang</label>
+                                        <div class="row" id="radiology-grid-container">
+                                            @foreach ($radiology_categories as $category)
+                                                {{-- Kunci Layout: Menggunakan col-md-6 untuk 2 kolom per baris --}}
+                                                <div class="col-md-6 category-column">
+                                                    <div class="card border mb-4">
+                                                        <div class="card-header bg-primary-50">
+                                                            <h6 class="card-title text-white mb-0">
+                                                                {{ $category->nama_kategori }}</h6>
+                                                        </div>
+                                                        <div class="card-body p-0"
+                                                            style="max-height: 350px; overflow-y: auto;">
+                                                            @forelse ($category->parameter_radiologi as $parameter)
+                                                                <div class="test-item parameter_radiologi">
+                                                                    <div
+                                                                        class="custom-control custom-checkbox flex-grow-1">
+                                                                        <input type="checkbox"
+                                                                            class="custom-control-input parameter_radiologi_checkbox"
+                                                                            value="{{ $parameter->id }}"
+                                                                            id="parameter_radiologi_{{ $parameter->id }}">
+                                                                        <label class="custom-control-label"
+                                                                            for="parameter_radiologi_{{ $parameter->id }}">{{ $parameter->parameter }}</label>
+                                                                    </div>
+                                                                    <div class="test-price"
+                                                                        id="harga_parameter_radiologi_{{ $parameter->id }}">
+                                                                    </div>
+                                                                    <div class="input-group quantity-stepper">
+                                                                        <div class="input-group-prepend">
+                                                                            <button
+                                                                                class="btn btn-primary btn-sm btn-quantity-stepper"
+                                                                                type="button" data-action="decrement"><i
+                                                                                    class="fal fa-minus"></i></button>
+                                                                        </div>
+                                                                        <input type="number" value="1"
+                                                                            min="1"
+                                                                            class="form-control form-control-sm text-center quantity-input"
+                                                                            id="jumlah_{{ $parameter->id }}" readonly>
+                                                                        <div class="input-group-append">
+                                                                            <button
+                                                                                class="btn btn-primary btn-sm btn-quantity-stepper"
+                                                                                type="button" data-action="increment"><i
+                                                                                    class="fal fa-plus"></i></button>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            @empty
+                                                                <div class="p-3 text-muted text-center">Tidak ada
+                                                                    parameter.</div>
+                                                            @endforelse
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                                <div class="col-xl">
-                                                    <input type="text" disabled value=""
-                                                        style="border: 0; border-bottom: 1.9px solid #eaeaea; margin-top: -.5rem; border-radius: 0"
-                                                        class="form-control" id="poly_ruang" name="poly_ruang">
-                                                    @error('poly_ruang')
-                                                        <div class="invalid-feedback">{{ $message }}</div>
-                                                    @enderror
-                                                </div>
-                                            </div>
+                                            @endforeach
                                         </div>
                                     </div>
                                 </div>
 
-                                <div class="row justify-content-center mt-4">
-                                    <div class="col-xl-4">
-
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-xl-5" style="text-align: right">
-                                                    <label class="form-label text-end" for="order_type">
-                                                        Tipe Order
-                                                    </label>
-                                                </div>
-                                                <div class="col-xl">
-                                                    <div class="form-check">
-                                                        <input class="form-check-input" type="radio" name="order_type"
-                                                            id="order_type_normal" value="normal" checked>
-                                                        <label class="form-check-label" for="order_type_normal">
-                                                            Normal
-                                                        </label>
-                                                    </div>
-                                                    <div class="form-check">
-                                                        <input class="form-check-input" type="radio" name="order_type"
-                                                            id="order_type_cito" value="cito">
-                                                        <label class="form-check-label" for="order_type_cito">
-                                                            CITO (naik 30%)
-                                                        </label>
-                                                    </div>
-                                                    @error('order_type')
-                                                        <div class="invalid-feedback">{{ $message }}</div>
-                                                    @enderror
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-xl-4">
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-xl-4" style="text-align: right">
-                                                    <label for="jenis_kelamin">Jenis Kelamin</label>
-                                                </div>
-                                                <div class="col-xl">
-                                                    <div class="form-check">
-                                                        <input disabled class="form-check-input" type="radio"
-                                                            name="jenis_kelamin" id="gender_male" value="Laki-laki">
-                                                        <label class="form-check-label" for="gender_male">
-                                                            Laki-laki
-                                                        </label>
-                                                    </div>
-                                                    <div class="form-check">
-                                                        <input disabled class="form-check-input" type="radio"
-                                                            name="jenis_kelamin" id="gender_female" value="Perempuan">
-                                                        <label class="form-check-label" for="gender_female">
-                                                            Perempuan
-                                                        </label>
-                                                    </div>
-                                                    @error('jenis_kelamin')
-                                                        <div class="invalid-feedback">{{ $message }}</div>
-                                                    @enderror
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-xl-4">
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-xl-4" style="text-align: right">
-                                                    <label for="alamat">Alamat</label>
-                                                </div>
-                                                <div class="col-xl">
-                                                    <input type="text" value=""
-                                                        style="border: 0; border-bottom: 1.9px solid #eaeaea; margin-top: -.5rem; border-radius: 0"
-                                                        class="form-control" id="alamat" name="alamat">
-                                                    @error('alamat')
-                                                        <div class="invalid-feedback">{{ $message }}</div>
-                                                    @enderror
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="row justify-content-center mt-4">
-                                    <div class="col-xl-4">
-
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-xl-5" style="text-align: right">
-                                                    <label class="form-label text-end" for="doctor_id">
-                                                        Dokter Radiologi
-                                                    </label>
-                                                </div>
-                                                <div class="col-xl">
-                                                    <select class="select2 form-control w-100" id="doctor_id"
-                                                        name="doctor_id">
-                                                        <option value=""></option>
-                                                        @foreach ($radiologyDoctors as $doctor)
-                                                            <option value="{{ $doctor->id }}">
-                                                                {{ $doctor->employee->fullname }}
-                                                            </option>
-                                                        @endforeach
-                                                    </select>
-                                                    @error('doctor_id')
-                                                        <div class="invalid-feedback">{{ $message }}</div>
-                                                    @enderror
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-xl-4">
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-xl-4" style="text-align: right">
-                                                    <label for="diagnosa_awal">Diagnosa Klinis</label>
-                                                </div>
-                                                <div class="col-xl">
-                                                    <input type="text" value=""
-                                                        style="border: 0; border-bottom: 1.9px solid #eaeaea; margin-top: -.5rem; border-radius: 0"
-                                                        class="form-control" id="diagnosa_awal" name="diagnosa_awal">
-                                                    @error('diagnosa_awal')
-                                                        <div class="invalid-feedback">{{ $message }}</div>
-                                                    @enderror
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-xl-4">
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-xl-4" style="text-align: right">
-                                                    <label for="no_telp">No. Telp / HP</label>
-                                                </div>
-                                                <div class="col-xl">
-                                                    <input type="text" value=""
-                                                        style="border: 0; border-bottom: 1.9px solid #eaeaea; margin-top: -.5rem; border-radius: 0"
-                                                        class="form-control" id="no_telp" name="no_telp">
-                                                    @error('no_telp')
-                                                        <div class="invalid-feedback">{{ $message }}</div>
-                                                    @enderror
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="row justify-content-center mt-4">
-                                    <div class="col-xl-12">
-                                        <div class="form-group">
-                                            <input type="text" class="form-control mb-3" id="searchRadiology"
-                                                placeholder="Cari tindakan...">
-                                            <div class="grid">
-                                                @foreach ($radiology_categories as $category)
-                                                    <div class="card">
-                                                        <h3>{{ $category->nama_kategori }}</h3>
-                                                        @foreach ($category->parameter_radiologi as $parameter)
-                                                            <div class="item parameter_radiologi">
-                                                                <input type="checkbox" value="{{ $parameter->id }}"
-                                                                    class="parameter_radiologi_checkbox"
-                                                                    id="parameter_radiologi_{{ $parameter->id }}"> <label>
-                                                                    <span
-                                                                        class="form-check-label">{{ $parameter->parameter }}</span>(<span
-                                                                        id="harga_parameter_radiologi_{{ $parameter->id }}">{{ rp(0) }}</span>)
-                                                                </label>
-
-                                                                <input type="number" value="1"
-                                                                    class="form-control parameter_radiologi_number"
-                                                                    id="jumlah_{{ $parameter->id }}">
-                                                            </div>
-                                                        @endforeach
-                                                    </div>
-                                                @endforeach
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="row justify-content-end mt-3">
-                                    <div class="col-xl-8">
+                                {{-- BAGIAN 3: TOTAL & AKSI --}}
+                                <div class="row">
+                                    <div class="col-md-6">
                                         <a href="{{ route('radiologi.list-order') }}"
-                                            class="btn btn-outline-primary waves-effect waves-themed">
-                                            <span class="fal fa-arrow-left mr-1"></span>
-                                            Kembali
+                                            class="btn btn-outline-danger waves-effect waves-themed">
+                                            <span class="fal fa-arrow-left mr-1"></span> Kembali
                                         </a>
                                     </div>
-
-                                    <div class="col-xl-3">
-                                        <h3 class="text-success"> <i class="fa fa-calculator"></i> <span
-                                                id="radiologi-total">Rp
-                                                0</span>
-                                        </h3>
-                                        <button onclick="event.preventDefault()"
-                                            class="btn btn-primary waves-effect waves-themed submit-btn">
-                                            <span class="fal fa-plus mr-1"></span>
-                                            Simpan
+                                    <div class="col-md-6">
+                                        <div class="total-price-container">
+                                            <small>Total Biaya</small>
+                                            <h2 id="radiologi-total">Rp 0</h2>
+                                        </div>
+                                        <button
+                                            class="btn btn-lg btn-success waves-effect waves-themed btn-block mt-3 submit-btn">
+                                            <span class="fal fa-save mr-1"></span> Simpan Order
                                         </button>
                                     </div>
                                 </div>
                             </form>
-
                         </div>
                     </div>
                 </div>
@@ -403,27 +326,19 @@
         </div>
     </main>
 @endsection
+
 @section('plugin')
-    {{-- Select 2 --}}
     <script src="/js/formplugins/select2/select2.bundle.js"></script>
     <script>
-        window._kategoriRadiologi = @json($radiology_categories);
-        window._tarifRadiologi = @json($tarifs);
-        window._penjamins = @json($penjamins);
-        window._kelasRawats = @json($kelas_rawats);
-
-        // Select 2
-        $(function() {
+        $(document).ready(function() {
             $('.select2').select2({
+                placeholder: "-- Pilih Dokter --",
+                allowClear: true,
                 dropdownCssClass: "move-up"
             });
-            $(".select2").on("select2:open", function() {
-                // Mengambil elemen kotak pencarian
-                var searchField = $(".select2-search__field");
-
-                // Mengubah urutan elemen untuk memindahkannya ke atas
-                searchField.insertBefore(searchField.prev());
-            });
+            // Menyimpan variabel global dari Controller
+            window._tarifRadiologi = @json($tarifs);
+            window._penjamins = @json($penjamins);
         });
     </script>
     <script src="{{ asset('js/simrs/order-radiologi.js') }}?v={{ time() }}"></script>

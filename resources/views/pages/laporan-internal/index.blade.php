@@ -98,8 +98,8 @@
                                                 <th>Status</th>
                                                 <th>Keterangan</th>
                                                 {{-- <th>Dokumentasi</th> --}}
-                                                    <th>Jam Masuk</th>
-                                                    <th>Jam Diproses</th>
+                                                <th>Jam Masuk</th>
+                                                <th>Jam Diproses</th>
                                                 @if (auth()->user()->employee->organization->name == 'Informasi Teknologi (IT)')
                                                     <th>Respon Time</th>
                                                 @endif
@@ -381,7 +381,7 @@
                     },
                     error: function(xhr, error, code) {
                         // Handle jika terjadi error saat mengambil data
-                        console.error("Gagal memuat data dari server:", xhr.responseText);
+                        console.log("Gagal memuat data dari server:", xhr.responseText);
                         // Mungkin tampilkan notifikasi error kepada pengguna
                     }
                 },
@@ -480,7 +480,7 @@
                             // Tombol edit
                             buttons.push(
                                 `<button class="btn btn-sm btn-primary" onclick="editLaporan(${data})"><i class="fas fa-edit"></i></button>`
-                                );
+                            );
 
                             // Tombol dokumentasi (jika ada), akan diletakkan di tengah
                             let dokumentasiBtn = '';
@@ -495,7 +495,7 @@
                             // Tombol hapus
                             buttons.push(
                                 `<button class="btn btn-sm btn-danger" onclick="deleteLaporan(${data})"><i class="fas fa-trash"></i></button>`
-                                );
+                            );
 
                             // Jika ada tombol dokumentasi, letakkan di tengah
                             if (dokumentasiBtn) {
@@ -805,7 +805,7 @@
                 $('#downloadDokumentasi').attr('href', fileUrl).show();
                 $('#dokumentasiModal').modal('show');
             } catch (e) {
-                console.error('Error showing documentation:', e);
+                console.log('Error showing documentation:', e);
                 $('#invalidUrl').show();
                 $('#dokumentasiModal').modal('show');
             }
