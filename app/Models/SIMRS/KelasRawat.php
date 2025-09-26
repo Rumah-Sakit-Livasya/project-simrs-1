@@ -55,6 +55,12 @@ class KelasRawat extends Model
         return $this->belongsToMany(TarifKelasRawat::class, 'tarif_kelas_rawat');
     }
 
+    // UBAH METHOD INI
+    public function tarifKelasRawat()
+    {
+        return $this->hasMany(TarifKelasRawat::class, 'kelas_rawat_id');
+    }
+
     public function tarif_parameter_radiologi()
     {
         return $this->hasMany(TarifParameterRadiologi::class, 'kelas_rawat_id');

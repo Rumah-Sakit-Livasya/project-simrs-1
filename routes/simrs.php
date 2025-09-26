@@ -15,6 +15,7 @@ use App\Http\Controllers\FarmasiResepController;
 use App\Http\Controllers\FarmasiResepResponseController;
 use App\Http\Controllers\FarmasiReturResepController;
 use App\Http\Controllers\FarmasiSignaController;
+use App\Http\Controllers\ImportExportController;
 use App\Http\Controllers\InterventionPageController;
 use App\Http\Controllers\JamMakanGiziController;
 use App\Http\Controllers\KategoriGiziController;
@@ -348,6 +349,20 @@ Route::group(['middleware' => ['auth']], function () {
                 Route::get('/migrasi', [ControlPanelController::class, 'peralatan'])->name('peralatan.index');
                 Route::post('/export', [PeralatanController::class, 'export'])->name('peralatan.export');
                 Route::post('/import', [PeralatanController::class, 'import'])->name('peralatan.import');
+            });
+
+            Route::prefix('manajemen-data')->group(function () {
+                Route::get('/import-export', [ImportExportController::class, 'index'])->name('import-export.index');
+
+                // Export Routes
+                Route::get('/export/kelas-rawat', [ImportExportController::class, 'exportKelasRawat'])->name('export.kelas-rawat');
+                Route::get('/export/rooms', [ImportExportController::class, 'exportRooms'])->name('export.rooms');
+                Route::get('/export/beds', [ImportExportController::class, 'exportBeds'])->name('export.beds');
+
+                // Import Routes
+                Route::post('/import/kelas-rawat', [ImportExportController::class, 'importKelasRawat'])->name('import.kelas-rawat');
+                Route::post('/import/rooms', [ImportExportController::class, 'importRooms'])->name('import.rooms');
+                Route::post('/import/beds', [ImportExportController::class, 'importBeds'])->name('import.beds');
             });
         });
 

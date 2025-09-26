@@ -82,7 +82,7 @@
                                 <td><label>:</label></td>
                                 <td>
                                     <input type="text" class="form-control" id="tgl_masuk" name="tgl_masuk"
-                                        value="{{ $pengkajian?->tgl_masuk ? \Carbon\Carbon::parse($pengkajian->tgl_masuk)->format('d-m-Y') : \Carbon\Carbon::parse($registration->registration_date)->format('d-m-Y') }}">
+                                        value="{{ $pengkajian?->tgl_masuk ? \Carbon\Carbon::parse($pengkajian->tgl_masuk)->format('d-m-Y') : \Carbon\Carbon::parse($registration->registration_date)->format('Y-m-d') }}">
                                 </td>
                             </tr>
 
@@ -276,14 +276,14 @@
                                     <div class="card-actionbar">
                                         <div class="card-actionbar-row d-flex justify-content-between align-items-center">
                                             <button type="button"
-                                                class="btn btn-primary waves-effect waves-light save-form d-flex align-items-center"
+                                                class="btn btn-warning bsd-resume-medis-rajal waves-effect waves-light save-form d-flex align-items-center"
                                                 data-status="0">
-                                                <span class="mdi mdi-content-save"></span> Simpan (draft)
+                                                <span class="mdi mdi-content-save mr-1"></span> Simpan (draft)
                                             </button>
                                             <button type="button"
-                                                class="btn btn-primary waves-effect waves-light save-form d-flex align-items-center"
+                                                class="btn btn-primary bsf-resume-medis-rajal waves-effect waves-light save-form d-flex align-items-center"
                                                 data-status="1">
-                                                <span class="mdi mdi-content-save"></span> Simpan (final)
+                                                <span class="mdi mdi-content-save mr-1"></span> Simpan (final)
                                             </button>
                                         </div>
                                     </div>
