@@ -191,7 +191,7 @@ Pemeriksaan Penunjang: {{ $assesment->pemeriksaan_penunjang ?? '' }}
                                                     <div class="form-group">
                                                         <label for="diagnosa_tambahan" class="form-label">DIAGNOSA
                                                             TAMBAHAN</label>
-                                                        <textarea class="form-control" id="diagnosa_utama" name="diagnosa_utama" rows="4" required>
+                                                        <textarea class="form-control" id="diagnosa_tambahan" name="diagnosa_tambahan" rows="4" required>
 @if (empty($pengkajian) && !empty($diagnosa_tambahan))
 {{ $diagnosa_tambahan }}
 @else
