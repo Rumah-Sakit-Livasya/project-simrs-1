@@ -179,12 +179,12 @@
                                         </div>
 
                                         <div class="mt-4 d-flex align-items-center">
-                                            <a href="{{ route('edit.pendaftaran.pasien', $patient->id) }}"
+                                            <button type="button" id="edit-pasien-btn"
                                                 class="btn btn-sm btn-outline-primary d-flex align-items-center"
                                                 title="Edit Data Pasien">
                                                 <i class="fas fa-edit mr-2"></i>
                                                 Edit Data Pasien
-                                            </a>
+                                            </button>
                                         </div>
 
                                         <div class="tab-pane fade" id="kunjungan" role="tabpanel"
@@ -477,6 +477,14 @@
 
     <script>
         $(document).ready(function() {
+            $('#edit-pasien-btn').on('click', function() {
+                // Membuka pop-up window saat tombol diklik
+                var url = '{{ route('edit.pendaftaran.pasien', $patient->id) }}';
+                var fullscreen = 'toolbar=yes,scrollbars=yes,resizable=yes,top=0,left=0,width=' + screen
+                    .width + ',height=' + screen.height;
+                window.open(url, '_blank', fullscreen);
+            });
+
             $('.btn-back-to-layanan').on('click', function(e) {
                 e.preventDefault(); // Prevent default link behavior
                 var currentPanelId = $(this).data(
