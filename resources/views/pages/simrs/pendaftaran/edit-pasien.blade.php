@@ -157,18 +157,19 @@
                                                                     class="form-control @error('date_of_birth') is-invalid @enderror"
                                                                     placeholder="dd-mm-yyyy" id="date_of_birth"
                                                                     name="date_of_birth" required
-                                                                    value="{{ old('date_of_birth') }}" maxlength="10"
-                                                                    autocomplete="off"
+                                                                    value="{{ old('date_of_birth', \Carbon\Carbon::parse($patient->date_of_birth)->format('d-m-Y')) }}"
+                                                                    maxlength="10" autocomplete="off"
                                                                     oninput="
-                                                                        let v = this.value.replace(/[^0-9]/g, '').slice(0,8);
-                                                                        if(v.length >= 5){
-                                                                            this.value = v.slice(0,2)+'-'+v.slice(2,4)+'-'+v.slice(4,8);
-                                                                        }else if(v.length >= 3){
-                                                                            this.value = v.slice(0,2)+'-'+v.slice(2,4)+(v.length > 4 ? '-'+v.slice(4,8) : '');
-                                                                        }else{
-                                                                            this.value = v;
-                                                                        }
-                                                                    ">
+        let v = this.value.replace(/[^0-9]/g, '').slice(0,8);
+        if(v.length >= 5){
+            this.value = v.slice(0,2)+'-'+v.slice(2,4)+'-'+v.slice(4,8);
+        }else if(v.length >= 3){
+            this.value = v.slice(0,2)+'-'+v.slice(2,4)+(v.length > 4 ? '-'+v.slice(4,8) : '');
+        }else{
+            this.value = v;
+        }
+    ">
+
                                                                 <div class="input-group-append">
                                                                     <span class="input-group-text fs-xl">
                                                                         <i class="fal fa-calendar-alt"></i>
@@ -394,22 +395,19 @@
                                                 </div>
                                             </div>
                                         </div>
+                                        {{-- GANTI SELURUH BLOK ALAMAT DARI SINI --}}
+
                                         <div class="form-group">
                                             <div class="row align-items-center">
                                                 <div class="col-sm-4" style="text-align: right">
                                                     <label for="province" class="form-label">Provinsi *</label>
                                                 </div>
                                                 <div class="col-sm-8">
-                                                    <select disabled
+                                                    {{-- Dibuat disabled, akan diisi dan diaktifkan oleh Javascript --}}
+                                                    <select
                                                         class="@error('province') is-invalid @enderror form-control w-100"
-                                                        id="province" name="province">
-                                                        <option value="" selected></option>
-                                                        @foreach ($provinces as $province)
-                                                            <option
-                                                                value="{{ $province['id'] }}  {{ old('province') == $province['id'] ? 'selected' : '' }}">
-                                                                {{ $province['name'] }}
-                                                            </option>
-                                                        @endforeach
+                                                        id="province" name="province" disabled>
+                                                        {{-- Dibiarkan kosong --}}
                                                     </select>
                                                     @error('province')
                                                         <p class="invalid-feedback">{{ $message }}</p>
@@ -420,14 +418,13 @@
                                         <div class="form-group">
                                             <div class="row align-items-center">
                                                 <div class="col-sm-4" style="text-align: right">
-                                                    <label class="form-label" for="regency">Kota / Kabupaten
-                                                        *</label>
+                                                    <label class="form-label" for="regency">Kota / Kabupaten *</label>
                                                 </div>
                                                 <div class="col-sm-8">
-                                                    <select disabled
+                                                    <select
                                                         class="@error('regency') is-invalid @enderror form-control w-100"
-                                                        id="regency" name="regency">
-                                                        <option value="" disabled selected></option>
+                                                        id="regency" name="regency" disabled>
+                                                        {{-- Dibiarkan kosong --}}
                                                     </select>
                                                     @error('regency')
                                                         <p class="invalid-feedback">{{ $message }}</p>
@@ -441,10 +438,10 @@
                                                     <label class="form-label" for="subdistrict">Kecamatan *</label>
                                                 </div>
                                                 <div class="col-sm-8">
-                                                    <select disabled
+                                                    <select
                                                         class="@error('subdistrict') is-invalid @enderror form-control w-100"
-                                                        id="subdistrict" name="subdistrict">
-                                                        <option value="" disabled selected></option>
+                                                        id="subdistrict" name="subdistrict" disabled>
+                                                        {{-- Dibiarkan kosong --}}
                                                     </select>
                                                     @error('subdistrict')
                                                         <p class="invalid-feedback">{{ $message }}</p>
@@ -458,18 +455,24 @@
                                                     <label class="form-label" for="ward">Kelurahan *</label>
                                                 </div>
                                                 <div class="col-sm-8">
-                                                    @if (old('ward', $patient->ward) && $patient->kelurahan)
-                                                        <option value="{{ $patient->ward }}" selected>
-                                                            {{ $patient->kelurahan->name }} -
-                                                            {{ $patient->kelurahan->kecamatan->name }}
-                                                        </option>
-                                                    @endif
+                                                    {{-- Ini adalah bagian kunci. Kita cetak <option> awal jika data ada. --}}
+                                                    <select class="@error('ward') is-invalid @enderror form-control w-100"
+                                                        id="ward" name="ward" required>
+                                                        @if ($patient->ward && $patient->kelurahan)
+                                                            <option value="{{ $patient->ward }}" selected>
+                                                                {{ $patient->kelurahan->name }} -
+                                                                {{ $patient->kelurahan->kecamatan->name }}
+                                                            </option>
+                                                        @endif
+                                                    </select>
                                                     @error('ward')
                                                         <p class="invalid-feedback">{{ $message }}</p>
                                                     @enderror
                                                 </div>
                                             </div>
                                         </div>
+
+                                        {{-- SAMPAI SINI --}}
                                         <div class="form-group">
                                             <div class="row align-items-center">
                                                 <div class="col-sm-4" style="text-align: right">
@@ -857,21 +860,20 @@
         </form>
     </main>
 @endsection
-
 @section('plugin')
     <script src="/js/formplugins/bootstrap-datepicker/bootstrap-datepicker.js"></script>
     <script src="/js/formplugins/select2/select2.bundle.js"></script>
     <script>
         $(document).ready(function() {
+            // =================================================================
+            // INISIALISASI PLUGIN (TIDAK BERUBAH)
+            // =================================================================
             $('#date_of_birth').datepicker({
-                format: 'dd-mm-yyyy', // Format yang ditampilkan ke pengguna
+                format: 'dd-mm-yyyy',
                 autoclose: true,
                 todayHighlight: true,
-                orientation: "bottom left" // Atur posisi popup
+                orientation: "bottom left"
             });
-            // =================================================================
-            // INISIALISASI SEMUA SELECT MENJADI SELECT2
-            // =================================================================
             $('#title').select2({
                 placeholder: 'Pilih Title'
             });
@@ -894,7 +896,10 @@
                 placeholder: 'Pilih Penjamin'
             });
 
-            // Inisialisasi Select2 untuk alamat (awalnya kosong)
+
+            // =================================================================
+            // LOGIKA ALAMAT (TIDAK BERUBAH)
+            // =================================================================
             $('#province').select2({
                 placeholder: 'Provinsi (Otomatis)'
             });
@@ -905,11 +910,6 @@
                 placeholder: 'Kecamatan (Otomatis)'
             });
 
-            // =================================================================
-            // LOGIKA UNTUK ALAMAT
-            // =================================================================
-
-            // 1. Inisialisasi Select2 untuk Kelurahan dengan AJAX
             $('#ward').select2({
                 placeholder: 'Cari dan Pilih Kelurahan',
                 ajax: {
@@ -927,7 +927,6 @@
                                 return {
                                     id: item.id,
                                     text: item.name + ' - ' + item.kecamatan.name,
-                                    // Kirim data tambahan
                                     full_data: item
                                 };
                             })
@@ -937,64 +936,49 @@
                 }
             });
 
-            // 2. Fungsi untuk mengisi dropdown Kecamatan, Kabupaten, dan Provinsi
-            function populateAddressFields(data) {
+            function populateStaticAddressFields(prov, kab, kec) {
                 const provinceSelect = $('#province');
                 const regencySelect = $('#regency');
                 const subdistrictSelect = $('#subdistrict');
-
-                if (!data || !data.kecamatan) {
-                    console.log("Data alamat tidak lengkap diterima:", data);
-                    return;
+                provinceSelect.empty();
+                regencySelect.empty();
+                subdistrictSelect.empty();
+                if (prov) {
+                    provinceSelect.append(new Option(prov.name, prov.id, true, true)).trigger('change');
                 }
-
-                const kecamatan = data.kecamatan;
-                const kabupaten = kecamatan.kabupaten;
-                const provinsi = kabupaten.provinsi;
-
-                // Buat option baru jika belum ada
-                if (provinceSelect.find("option[value='" + provinsi.id + "']").length === 0) {
-                    provinceSelect.append(new Option(provinsi.name, provinsi.id, true, true));
+                if (kab) {
+                    regencySelect.append(new Option(kab.name, kab.id, true, true)).trigger('change');
                 }
-                if (regencySelect.find("option[value='" + kabupaten.id + "']").length === 0) {
-                    regencySelect.append(new Option(kabupaten.name, kabupaten.id, true, true));
+                if (kec) {
+                    subdistrictSelect.append(new Option(kec.name, kec.id, true, true)).trigger('change');
                 }
-                if (subdistrictSelect.find("option[value='" + kecamatan.id + "']").length === 0) {
-                    subdistrictSelect.append(new Option(kecamatan.name, kecamatan.id, true, true));
-                }
-
-                // Pilih nilainya dan trigger change agar Select2 update
-                provinceSelect.val(provinsi.id).trigger('change');
-                regencySelect.val(kabupaten.id).trigger('change');
-                subdistrictSelect.val(kecamatan.id).trigger('change');
             }
 
-            // 3. Event listener saat pengguna memilih kelurahan BARU dari hasil pencarian
             $('#ward').on('select2:select', function(e) {
-                var data = e.params.data.full_data;
-                populateAddressFields(data);
+                const data = e.params.data.full_data;
+                if (data && data.kecamatan) {
+                    populateStaticAddressFields(
+                        data.kecamatan.kabupaten.provinsi,
+                        data.kecamatan.kabupaten,
+                        data.kecamatan
+                    );
+                }
             });
 
-            // 4. OTOMATISASI: Jalankan saat halaman dimuat untuk menampilkan data yang ada
-            @if ($patient->ward && $patient->kelurahan)
+
+            // =================================================================
+            // OTOMATISASI SAAT HALAMAN DIMUAT (VERSI FINAL & AMAN)
+            // =================================================================
+            // Cek apakah variabel $alamatData yang dikirim dari controller itu ada (tidak null)
+            @if ($alamatData)
                 (function() {
-                    // Buat objek data palsu yang strukturnya sama dengan hasil AJAX
-                    // untuk digunakan oleh fungsi populateAddressFields
-                    const existingAddressData = {
-                        kecamatan: {
-                            id: '{{ $patient->kelurahan->kecamatan->id }}',
-                            name: '{{ $patient->kelurahan->kecamatan->name }}',
-                            kabupaten: {
-                                id: '{{ $patient->kelurahan->kecamatan->kabupaten->id }}',
-                                name: '{{ $patient->kelurahan->kecamatan->kabupaten->name }}',
-                                provinsi: {
-                                    id: '{{ $patient->kelurahan->kecamatan->kabupaten->provinsi->id }}',
-                                    name: '{{ $patient->kelurahan->kecamatan->kabupaten->provinsi->name }}'
-                                }
-                            }
-                        }
-                    };
-                    populateAddressFields(existingAddressData);
+                    const existingAddress = @json($alamatData);
+
+                    populateStaticAddressFields(
+                        existingAddress.provinsi,
+                        existingAddress.kabupaten,
+                        existingAddress.kecamatan
+                    );
                 })();
             @endif
         });

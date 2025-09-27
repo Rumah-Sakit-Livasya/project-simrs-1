@@ -9,6 +9,7 @@ use App\Models\SIMRS\Ethnic;
 use App\Models\SIMRS\Family;
 use App\Models\SIMRS\GroupPenjamin;
 use App\Models\SIMRS\KelasRawat;
+use App\Models\SIMRS\Kelurahan;
 use App\Models\SIMRS\Patient;
 use App\Models\SIMRS\Penjamin;
 use App\Models\SIMRS\Provinsi;
@@ -189,13 +190,43 @@ class PatientController extends Controller
         $patient->load(['family', 'ethnic', 'penjamin', 'kelurahan.kecamatan.kabupaten.provinsi']);
 
         $dataPenjamin = Penjamin::all();
-        $provinces = Provinsi::all(); // Ini bisa dihapus jika alamat sepenuhnya via AJAX
+        $provinces = Provinsi::all();
+
+        // =================================================================
+        // PERBAIKAN UTAMA: SIAPKAN DATA ALAMAT DI SINI
+        // =================================================================
+        $alamatData = null;
+
+        // 1. Cari data Kelurahan berdasarkan ID dari $patient->ward
+        //    dan langsung eager load relasi ke atasnya.
+        $kelurahan = Kelurahan::with('kecamatan.kabupaten.provinsi')->find($patient->ward);
+
+        // 2. Sekarang, cek berdasarkan variabel $kelurahan yang baru kita buat
+        if ($kelurahan && $kelurahan->kecamatan && $kelurahan->kecamatan->kabupaten && $kelurahan->kecamatan->kabupaten->provinsi) {
+            $alamatData = [
+                'provinsi' => [
+                    'id' => $kelurahan->kecamatan->kabupaten->provinsi->id,
+                    'name' => $kelurahan->kecamatan->kabupaten->provinsi->name
+                ],
+                'kabupaten' => [
+                    'id' => $kelurahan->kecamatan->kabupaten->id,
+                    'name' => $kelurahan->kecamatan->kabupaten->name
+                ],
+                'kecamatan' => [
+                    'id' => $kelurahan->kecamatan->id,
+                    'name' => $kelurahan->kecamatan->name
+                ],
+            ];
+        }
+
+        // dd($patient, $alamatData); // Hapus atau comment baris dd() yang lama
 
         return view('pages.simrs.pendaftaran.edit-pasien', [
             'patient' => $patient,
             'penjamins' => $dataPenjamin,
             'provinces' => $provinces,
-            'ethnics' => Ethnic::all()
+            'ethnics' => Ethnic::all(),
+            'alamatData' => $alamatData, // <-- KIRIM DATA ALAMAT YANG SUDAH BERSIH KE VIEW
         ]);
     }
 
