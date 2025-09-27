@@ -274,9 +274,26 @@ class TindakanMedisController extends Controller
 
     public function getTindakanByDepartementAndKelas(Request $request)
     {
-        $tindakan = TindakanMedis::whereHas('grup_tindakan_medis', function ($query) use ($request) {
-            $query->where('departement_id', $request->departement_id);
-        })->get();
+        // Mulai dengan query builder, jangan langsung ->get()
+        $query = TindakanMedis::query();
+
+        // Filter berdasarkan departement (ini sudah benar)
+        $query->whereHas('grup_tindakan_medis', function ($q) use ($request) {
+            $q->where('departement_id', $request->departement_id);
+        });
+
+        // ====================================================================
+        // TAMBAHAN: Filter berdasarkan kata kunci pencarian (search)
+        // ====================================================================
+        // Gunakan when() untuk menjalankan query ini hanya jika $request->search ada isinya
+        $query->when($request->search, function ($q, $search) {
+            // Asumsi nama kolom di tabel tindakan_medis adalah 'nama_tindakan'
+            return $q->where('nama_tindakan', 'like', '%' . $search . '%');
+        });
+
+        // Ambil hasilnya setelah semua filter diterapkan
+        $tindakan = $query->limit(20)->get(); // Tambahkan limit agar tidak terlalu berat
+
         return response()->json($tindakan);
     }
 

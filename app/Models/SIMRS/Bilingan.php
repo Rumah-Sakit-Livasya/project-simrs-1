@@ -3,8 +3,6 @@
 namespace App\Models\SIMRS;
 
 use Carbon\Carbon;
-
-use App\Events\BillingFinalized;
 use App\Models\Keuangan\JasaDokter;
 use App\Models\OrderRadiologi;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -12,14 +10,24 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Auditable;
 use OwenIt\Auditing\Contracts\Auditable as AuditableContract;
+use Illuminate\Database\Eloquent\Casts\Attribute; // Penting untuk accessor baru
 
 class Bilingan extends Model implements AuditableContract
 {
     use HasFactory, SoftDeletes, Auditable;
 
+    /**
+     * Persentase default untuk perhitungan jasa dokter.
+     * @info Sebaiknya nilai ini disimpan di database (misal: tabel settings) atau di file config agar mudah diubah.
+     */
+    const PERSENTASE_JASA_DOKTER = 0.60;
+
     protected $guarded = ['id'];
     protected $table = 'bilingan';
 
+    //======================================================================
+    // RELATIONS (Hubungan antar model, distandarisasi ke camelCase)
+    //======================================================================
 
     public function registration()
     {
@@ -28,59 +36,17 @@ class Bilingan extends Model implements AuditableContract
 
     public function pembayaran_tagihan()
     {
-        return $this->hasOne(PembayaranTagihan::class);
+        return $this->hasOne(PembayaranTagihan::class, 'bilingan_id');
     }
 
-    public function jasa_dokter()
+    public function jasaDokter()
     {
         return $this->hasMany(JasaDokter::class, 'bilingan_id');
     }
 
-    public function down_payment()
+    public function downPayment()
     {
         return $this->hasMany(DownPayment::class);
-    }
-
-    public function tagihan_pasien()
-    {
-        return $this->belongsToMany(TagihanPasien::class, 'bilingan_tagihan_pasien');
-    }
-
-    public function order_tindakan_medis()
-    {
-        return $this->belongsToMany(OrderTindakanMedis::class, 'order_tindakan_medis_bilingan');
-    }
-
-    public function pembayaranTagihan()
-    {
-        return $this->hasOne(PembayaranTagihan::class, 'bilingan_id');
-    }
-    public function konfirmasiAsuransi()
-    {
-        return $this->hasOne(\App\Models\Keuangan\KonfirmasiAsuransi::class, 'registration_id', 'registration_id');
-    }
-
-    // Accessor untuk cek status lunas berdasarkan pembayaran tagihan
-    // public function getStatusLunasAttribute()
-    // {
-    //     if ($this->pembayaranTagihan && $this->pembayaranTagihan->bill_notes) {
-    //         return str_contains(strtolower($this->pembayaranTagihan->bill_notes), 'lunas');
-    //     }
-
-    //     return false;
-    // }
-
-    public function getStatusPembayaranAttribute()
-    {
-        return $this->status_lunas ? 'Lunas' : 'Belum Lunas';
-    }
-
-    public function getStatusLunasAttribute()
-    {
-        if ($this->pembayaranTagihan && $this->pembayaranTagihan->bill_notes) {
-            return str_contains(strtolower($this->pembayaranTagihan->bill_notes), 'lunas');
-        }
-        return false;
     }
 
     public function tagihanPasien()
@@ -88,64 +54,114 @@ class Bilingan extends Model implements AuditableContract
         return $this->belongsToMany(TagihanPasien::class, 'bilingan_tagihan_pasien', 'bilingan_id', 'tagihan_pasien_id');
     }
 
-    // Pada model Bilingan.php
+    public function orderTindakanMedis()
+    {
+        return $this->belongsToMany(OrderTindakanMedis::class, 'order_tindakan_medis_bilingan');
+    }
+
+    public function konfirmasiAsuransi()
+    {
+        return $this->hasOne(\App\Models\Keuangan\KonfirmasiAsuransi::class, 'registration_id', 'registration_id');
+    }
+
     public function orderRadiologi()
     {
         return $this->hasOne(OrderRadiologi::class, 'bilingan_id', 'id');
     }
+
+    //======================================================================
+    // ACCESSORS & MUTATORS (Atribut Dinamis)
+    //======================================================================
+
+    /**
+     * Accessor untuk mendapatkan total DP sebagai properti.
+     * Penggunaan: $bilingan->total_dp
+     */
+    protected function totalDp(): Attribute
+    {
+        return Attribute::make(
+            get: fn() => (float) $this->downPayment()->sum('nominal')
+        );
+    }
+
+    /**
+     * Accessor untuk mengecek status lunas berdasarkan catatan pembayaran.
+     * @warning Logika ini rapuh karena bergantung pada string. Sebaiknya gunakan kolom status boolean/enum.
+     */
+    protected function statusLunas(): Attribute
+    {
+        return Attribute::make(
+            get: function () {
+                if ($this->pembayaran_tagihan && $this->pembayaran_tagihan->bill_notes) {
+                    return str_contains(strtolower($this->pembayaran_tagihan->bill_notes), 'lunas');
+                }
+                return false;
+            }
+        );
+    }
+
+    /**
+     * Accessor untuk menampilkan teks status pembayaran.
+     * Penggunaan: $bilingan->status_pembayaran
+     */
+    protected function statusPembayaran(): Attribute
+    {
+        return Attribute::make(
+            get: fn() => $this->status_lunas ? 'Lunas' : 'Belum Lunas'
+        );
+    }
+
+    //======================================================================
+    // MODEL EVENTS (Logika yang berjalan otomatis)
+    //======================================================================
+
     protected static function booted()
     {
         static::updated(function (Bilingan $bilingan) {
-            \Log::info('Bilingan updated', ['id' => $bilingan->id, 'status' => $bilingan->status]);
-
+            // Jalankan hanya jika kolom 'status' diubah menjadi 'final'
             if ($bilingan->isDirty('status') && strtolower($bilingan->status) === 'final') {
-                \Log::info('Processing final bilingan', ['id' => $bilingan->id]);
+                \Log::info('Processing final bilingan.', ['id' => $bilingan->id]);
 
-                // UBAH BAGIAN INI
-                // Tidak lagi memfilter 'Tindakan Medis', tapi mengecualikan 'Biaya Administrasi'
                 $tagihanPasienItems = $bilingan->tagihanPasien()
                     ->where('tagihan', 'NOT LIKE', 'Biaya Administrasi%')
                     ->get();
-                // --- AKHIR PERUBAHAN ---
 
-                \Log::info('Found tagihan to process for Jasa Dokter', ['count' => $tagihanPasienItems->count()]);
+                \Log::info('Found tagihan items to process for Jasa Dokter.', ['count' => $tagihanPasienItems->count()]);
 
                 foreach ($tagihanPasienItems as $tagihan) {
-                    \Log::info('Processing tagihan', ['id' => $tagihan->id, 'description' => $tagihan->tagihan]);
-
+                    // Cek untuk menghindari duplikasi
                     if (!$tagihan->jasaDokter()->exists()) {
-                        \Log::info('Creating jasa dokter for tagihan', ['id' => $tagihan->id]);
                         $bilingan->createJasaDokter($tagihan);
                     } else {
-                        \Log::info('Jasa dokter already exists for tagihan', ['id' => $tagihan->id]);
+                        \Log::warning('Jasa dokter already exists for this tagihan, skipping.', ['tagihan_id' => $tagihan->id]);
                     }
                 }
             }
         });
     }
 
+    //======================================================================
+    // PUBLIC & PROTECTED METHODS (Fungsi Bantuan)
+    //======================================================================
+
+    /**
+     * Fungsi bantuan untuk membuat entri JasaDokter dari sebuah TagihanPasien.
+     */
     protected function createJasaDokter(TagihanPasien $tagihan)
     {
         try {
             $registration = $this->registration;
 
-            if (!$registration) {
-                \Log::error('Missing registration relation for bilingan', [
+            if (!$registration || !$registration->doctor_id) {
+                \Log::error('Missing registration or doctor relation for bilingan, cannot create JasaDokter.', [
                     'bilingan_id' => $this->id,
                     'tagihan_id' => $tagihan->id
                 ]);
                 return;
             }
 
-            $persentaseJasaDokter = 0.60;
-            $wajibBayar = $tagihan->wajib_bayar;
-            $nilaiJasaDokter = $wajibBayar * $persentaseJasaDokter;
-
-            \Log::info('Calculating Jasa Dokter', [
-                'wajib_bayar' => $wajibBayar,
-                'persentase' => $persentaseJasaDokter,
-                'hasil_perhitungan' => $nilaiJasaDokter
-            ]);
+            $wajibBayar = (float) $tagihan->wajib_bayar;
+            $nilaiJasaDokter = $wajibBayar * self::PERSENTASE_JASA_DOKTER;
 
             JasaDokter::create([
                 'tagihan_pasien_id' => $tagihan->id,
@@ -165,9 +181,13 @@ class Bilingan extends Model implements AuditableContract
                 'status'            => 'draft',
             ]);
 
-            \Log::info('JasaDokter (draft) created successfully', ['tagihan_id' => $tagihan->id, 'bilingan_id' => $this->id, 'calculated_share' => $nilaiJasaDokter]);
+            \Log::info('JasaDokter (draft) created successfully.', [
+                'tagihan_id' => $tagihan->id,
+                'bilingan_id' => $this->id,
+                'calculated_share' => $nilaiJasaDokter
+            ]);
         } catch (\Exception $e) {
-            \Log::error('Error creating JasaDokter (draft): ' . $e->getMessage(), [
+            \Log::error('Error creating JasaDokter: ' . $e->getMessage(), [
                 'tagihan_id' => $tagihan->id,
                 'bilingan_id' => $this->id,
                 'error_trace' => $e->getTraceAsString()
