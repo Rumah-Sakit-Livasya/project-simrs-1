@@ -25,6 +25,18 @@
             <input type="text" class="form-control"
                 value="{{ $bilingan->registration->patient->medical_record_number ?? 'N/A' }}" readonly>
         </div>
+        <div class="col">
+            <label>Penjamin:</label>
+            <input type="text" class="form-control"
+                value="{{ $bilingan->registration->penjamin->nama_perusahaan ?? ($bilingan->registration->penjamin ?? 'N/A') }}"
+                readonly>
+        </div>
+        <div class="col">
+            <label>Nama Dokter:</label>
+            <input type="text" class="form-control"
+                value="{{ $bilingan->registration->doctor->name ?? ($bilingan->registration->nama_dokter ?? 'N/A') }}"
+                readonly>
+        </div>
     </div>
 
     <div class="mb-3">
@@ -57,15 +69,49 @@
         <tbody>
             {{-- Data will be populated here using DataTable --}}
         </tbody>
+        <tfoot>
+            <tr class="bg-gray-200">
+                {{-- Kosongkan 5 kolom pertama untuk mendorong konten ke kanan --}}
+                <th colspan="5"></th>
+
+                {{-- Gabungkan 2 kolom untuk setiap total agar rapi --}}
+                <th colspan="2" class="text-right">
+                    <strong>Total DP:</strong>
+                    <span id="totalDp" class="d-block"></span>
+                </th>
+                <th colspan="2" class="text-right">
+                    <strong>Total Jaminan:</strong>
+                    <span id="totalJaminan" class="d-block"></span>
+                </th>
+                <th colspan="2" class="text-right">
+                    <strong>Total Tagihan:</strong>
+                    <span id="totalTagihan" class="d-block"></span>
+                </th>
+            </tr>
+        </tfoot>
     </table>
 </div>
 
 @section('plugin-tagihan-pasien')
     <script>
-        // function formatRupiah(angka) {
-        //     const numericValue = parseFloat(angka) || 0;
-        //     return numericValue.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-        // }
+        // ================================================================
+        // TAMBAHKAN FUNGSI BARU UNTUK FORMAT RUPIAH
+        // ================================================================
+        function formatRupiah(angka, prefix) {
+            let number_string = (angka || 0).toString().replace(/[^,\d]/g, ''),
+                split = number_string.split(','),
+                sisa = split[0].length % 3,
+                rupiah = split[0].substr(0, sisa),
+                ribuan = split[0].substr(sisa).match(/\d{3}/gi);
+
+            if (ribuan) {
+                separator = sisa ? '.' : '';
+                rupiah += separator + ribuan.join('.');
+            }
+
+            rupiah = split[1] != undefined ? rupiah + ',' + split[1] : rupiah;
+            return prefix == undefined ? rupiah : (rupiah ? 'Rp ' + rupiah : '');
+        }
 
         function updateTotalBayarAndKembalian(nominal) {
             // const tunai = parseFloat(nominal.value.replace(/\./g, '').replace(/[^0-9]/g, ''));
@@ -598,6 +644,45 @@
                         }
                     }
                 ],
+                // Fungsi ini akan berjalan setiap kali tabel di-draw (saat load, search, dll)
+                "footerCallback": function(row, data, start, end, display) {
+                    var api = this.api();
+
+                    // Ambil nilai Total DP dari variabel bilingan yang dikirim dari controller
+                    // Pastikan di controller Anda ada $bilingan->total_dp atau sejenisnya
+                    const totalDp = {{ $bilingan->total_dp ?? 0 }};
+
+                    // Inisialisasi variabel total
+                    let total = 0;
+                    let totalJaminan = 0;
+
+                    // Iterasi setiap baris data yang ada di tabel
+                    api.rows({
+                        page: 'current'
+                    }).data().each(function(d) {
+                        const nominal = parseFloat(d.nominal) || 0;
+                        const quantity = parseFloat(d.quantity) || 0;
+                        const jaminPercent = parseFloat(d.jamin) || 0;
+                        const jaminanRp = parseFloat(d.jaminan_rp) || 0;
+
+                        const rowTotal = nominal * quantity;
+
+                        // Kalkulasi Total (sebelum diskon/jaminan)
+                        total += rowTotal;
+
+                        // Kalkulasi Total Jaminan
+                        const jaminanFromPercent = rowTotal * (jaminPercent / 100);
+                        totalJaminan += (jaminanRp + jaminanFromPercent);
+                    });
+
+                    // Kalkulasi Total Tagihan = total - totalDp
+                    const totalTagihan = total - totalDp;
+
+                    // Update elemen HTML di footer
+                    $('#totalDp').html(formatRupiah(totalDp, 'Rp '));
+                    $('#totalJaminan').html(formatRupiah(totalJaminan, 'Rp '));
+                    $('#totalTagihan').html(formatRupiah(totalTagihan, 'Rp '));
+                },
                 language: {
                     emptyTable: "Tidak ada data yang tersedia"
                 },
