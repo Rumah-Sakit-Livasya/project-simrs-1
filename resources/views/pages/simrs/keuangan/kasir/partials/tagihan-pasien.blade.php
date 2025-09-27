@@ -675,8 +675,8 @@
                         totalJaminan += (jaminanRp + jaminanFromPercent);
                     });
 
-                    // Kalkulasi Total Tagihan = total - totalDp
-                    const totalTagihan = total - totalDp;
+                    // Kalkulasi Total Tagihan = total (tidak dikurangi totalDp)
+                    const totalTagihan = total;
 
                     // Update elemen HTML di footer
                     $('#totalDp').html(formatRupiah(totalDp, 'Rp '));
