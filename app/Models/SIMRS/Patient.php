@@ -39,9 +39,10 @@ class Patient extends Model
 
     public function kelurahan()
     {
-        return $this->belongsTo(Kelurahan::class);
+        // Argumen kedua ('ward') adalah nama foreign key di tabel 'patients'.
+        // Argumen ketiga ('id') adalah nama primary key di tabel 'kelurahans'.
+        return $this->belongsTo(Kelurahan::class, 'ward', 'id');
     }
-
     public function registration()
     {
         return $this->hasMany(Registration::class);
