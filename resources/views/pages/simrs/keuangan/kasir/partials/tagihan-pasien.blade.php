@@ -1,5 +1,5 @@
 <div class="tab-pane fade show active" id="tagihan-pasien" role="tabpanel">
-    <div class="row mb-3">
+    <div class="row mb-2">
         <div class="col">
             <label>No Registrasi:</label>
             <input type="text" class="form-control" value="{{ $bilingan->registration->registration_number ?? 'N/A' }}"
@@ -20,6 +20,8 @@
             <input type="text" class="form-control" value="{{ $bilingan->registration->patient->name ?? 'N/A' }}"
                 readonly>
         </div>
+    </div>
+    <div class="row mb-3">
         <div class="col">
             <label>RM:</label>
             <input type="text" class="form-control"
@@ -36,6 +38,11 @@
             <input type="text" class="form-control"
                 value="{{ $bilingan->registration->doctor->name ?? ($bilingan->registration->nama_dokter ?? 'N/A') }}"
                 readonly>
+        </div>
+        <div class="col">
+            <label>Rujukan:</label>
+            <input type="text" class="form-control"
+                value="{{ ucwords(strtolower($bilingan->registration->rujukan ?? 'N/A')) }}" readonly>
         </div>
     </div>
 
