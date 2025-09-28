@@ -16,6 +16,7 @@ use App\Models\SIMRS\TutupKunjungan;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Yajra\DataTables\Facades\DataTables;
 
 class BilinganController extends Controller
 {
@@ -63,28 +64,39 @@ class BilinganController extends Controller
     public function getDownPaymentData($id)
     {
         try {
-            $data = DownPayment::where('bilingan_id', $id) // Filter berdasarkan ID bilingan
-                ->get() // Ambil data yang diperlukan
-                ->map(function ($item) {
-                    // Format data untuk DataTable
-                    return [
-                        'id' => $item->id, // Menampilkan nama user
-                        'tanggal' => $item->created_at ? $item->created_at->format('Y-m-d') : null,
-                        'metode_pembayaran' => $item->metode_pembayaran,
-                        'nominal' => $item->tipe === 'DP Refund' ? '-' . $item->nominal : $item->nominal,
-                        'tipe' => $item->tipe,
-                        'user_input' => $item->user->employee->fullname ?? null, // Menampilkan nama user
-                        'keterangan' => $item->keterangan,
-                    ];
-                });
-            return response()->json([
-                'data' => $data,
-                'recordsTotal' => $data->count(),
-                'recordsFiltered' => $data->count(),
-            ]);
+            // 1. Buat query builder, jangan langsung ->get().
+            // Eager load relasi untuk performa yang lebih baik (mencegah N+1 problem).
+            $query = DownPayment::with('user.employee')
+                ->where('bilingan_id', $id)
+                ->latest(); // Urutkan berdasarkan yang terbaru
+
+            // 2. Serahkan query ke DataTables untuk diproses
+            return DataTables::of($query)
+                ->addColumn('tanggal', function ($row) {
+                    return $row->created_at->format('Y-m-d H:i:s');
+                })
+                ->addColumn('user_input', function ($row) {
+                    // Gunakan optional chaining (?->) untuk keamanan jika relasi tidak ada
+                    return $row->user?->employee?->fullname ?? 'N/A';
+                })
+                // ==========================================================
+                // PERBAIKAN UTAMA DI SINI
+                // ==========================================================
+                ->addColumn('nominal', function ($row) {
+                    // KOLOM INI UNTUK TAMPILAN (DISPLAY): Diberi format Rupiah dan tanda minus jika refund.
+                    $nominal = number_format($row->nominal, 0, ',', '.');
+                    return $row->tipe === 'DP Refund' ? '-' . $nominal : $nominal;
+                })
+                ->addColumn('nominal_raw', function ($row) {
+                    // KOLOM INI MENTAH UNTUK KALKULASI DI JAVASCRIPT.
+                    return $row->nominal;
+                })
+                // ==========================================================
+                ->make(true);
         } catch (\Exception $e) {
-            Log::error('Error fetching billing list data: ' . $e->getMessage());
-            return response()->json(['error' => 'Data could not be retrieved 2: ' . $e->getMessage()], 500);
+            Log::error('Error fetching Down Payment data for DataTables: ' . $e->getMessage());
+            // Mengembalikan response error yang sesuai dengan format DataTables
+            return response()->json(['error' => 'Data could not be retrieved.'], 500);
         }
     }
 

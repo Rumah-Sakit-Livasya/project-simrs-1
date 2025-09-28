@@ -31,7 +31,7 @@
                                                 <div class="col-xl">
                                                     <input type="text" class="form-control" id="datepicker-1"
                                                         placeholder="Select date" name="registration_date"
-                                                        value="{{ old('registration_date', '01/01/2018 - 01/15/2018') }}">
+                                                        value="{{ request('registration_date', old('registration_date', '01/01/2018 - 01/15/2018')) }}">
                                                     @error('registration_date')
                                                         <div class="invalid-feedback">{{ $message }}</div>
                                                     @enderror
@@ -46,7 +46,8 @@
                                                     <label class="form-label" for="medical_record_number">No. RM</label>
                                                 </div>
                                                 <div class="col-xl">
-                                                    <input type="text" value="{{ old('medical_record_number') }}"
+                                                    <input type="text"
+                                                        value="{{ request('medical_record_number', old('medical_record_number')) }}"
                                                         class="form-control" id="medical_record_number"
                                                         name="medical_record_number" onkeyup="formatAngka(this)">
                                                     @error('medical_record_number')
@@ -60,11 +61,11 @@
                                         <div class="form-group">
                                             <div class="row align-items-center">
                                                 <div class="col-xl-5 text-end">
-                                                    <label class="form-label" for="registration_name">Nama Pasien</label>
+                                                    <label class="form-label" for="name">Nama Pasien</label>
                                                 </div>
                                                 <div class="col-xl">
-                                                    <input type="text" value="{{ old('name') }}" class="form-control"
-                                                        id="name" name="name">
+                                                    <input type="text" value="{{ request('name', old('name')) }}"
+                                                        class="form-control" id="name" name="name">
                                                     @error('name')
                                                         <div class="invalid-feedback">{{ $message }}</div>
                                                     @enderror
@@ -86,10 +87,10 @@
                                                         name="registration_type">
                                                         <option value=""></option>
                                                         <option value="rawat-inap"
-                                                            {{ old('registration_type') == 'rawat-inap' ? 'selected' : '' }}>
+                                                            {{ request('registration_type', old('registration_type')) == 'rawat-inap' ? 'selected' : '' }}>
                                                             Rawat Inap</option>
                                                         <option value="rawat-jalan"
-                                                            {{ old('registration_type') == 'rawat-jalan' ? 'selected' : '' }}>
+                                                            {{ request('registration_type', old('registration_type')) == 'rawat-jalan' ? 'selected' : '' }}>
                                                             Rawat Jalan</option>
                                                     </select>
                                                     @error('registration_type')
@@ -106,8 +107,8 @@
                                                     <label class="form-label" for="address">No Registrasi</label>
                                                 </div>
                                                 <div class="col-xl">
-                                                    <input type="text" value="{{ old('address') }}" class="form-control"
-                                                        id="address" name="address">
+                                                    <input type="text" value="{{ request('address', old('address')) }}"
+                                                        class="form-control" id="address" name="address">
                                                     @error('address')
                                                         <div class="invalid-feedback">{{ $message }}</div>
                                                     @enderror
@@ -125,12 +126,12 @@
                                                     <select class="select2 form-control w-100" id="departement_id"
                                                         name="departement_id">
                                                         <option value=""></option>
-                                                        <option value="Rawat Inap"
-                                                            {{ old('departement_id') == 'Rawat Inap' ? 'selected' : '' }}>
-                                                            Rawat Inap</option>
-                                                        <option value="Rawat Jalan"
-                                                            {{ old('departement_id') == 'Rawat Jalan' ? 'selected' : '' }}>
-                                                            Rawat Jalan</option>
+                                                        @foreach ($departements as $departement)
+                                                            <option value="{{ $departement->id }}"
+                                                                {{ request('departement_id', old('departement_id')) == $departement->id ? 'selected' : '' }}>
+                                                                {{ $departement->name }}
+                                                            </option>
+                                                        @endforeach
                                                     </select>
                                                     @error('departement_id')
                                                         <div class="invalid-feedback">{{ $message }}</div>
