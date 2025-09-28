@@ -42,6 +42,12 @@ class TagihanPasienController extends Controller
             });
         }
 
+        if ($request->filled('departement_id')) {
+            $query->whereHas('registration', function ($q) use ($request) {
+                $q->where('departement_id', $request->departement_id);
+            });
+        }
+
         // Format Date
         $registrationDate = old('registration_date') ?? request('registration_date');
         $startDate = $endDate = now()->format('Y-m-d');
@@ -51,7 +57,9 @@ class TagihanPasienController extends Controller
         }
 
         $tagihan_pasien = $query->get();
-        return view('pages.simrs.keuangan.kasir.index', compact('tagihan_pasien', 'startDate', 'endDate', 'registrationDate'));
+        $departements = Departement::all();
+
+        return view('pages.simrs.keuangan.kasir.index', compact('tagihan_pasien', 'startDate', 'endDate', 'registrationDate', 'departements'));
     }
 
     public function store(Request $request)

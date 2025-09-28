@@ -36,7 +36,7 @@
             </div>
             <div class="col">
                 <label>Nominal:</label>
-                <input type="text" class="form-control" name="nominal" placeholder="Masukkan Nominal">
+                <input type="text" class="form-control format-rupiah" name="nominal" placeholder="Masukkan Nominal">
             </div>
             <div class="col">
                 <label>Keterangan:</label>
@@ -45,9 +45,8 @@
             </div>
             <div class="col">
                 <label>Total DP:</label>
-                <input type="text" class="form-control" name="total_dp"
-                    value="{{ $bilingan->down_payment ? ($bilingan->down_payment->isNotEmpty() ? $bilingan->down_payment->where('tipe', 'Down Payment')->sum('nominal') - $bilingan->down_payment->where('tipe', 'DP Refund')->sum('nominal') : '0') : '0' }}"
-                    readonly>
+                {{-- GANTI name="total_dp" MENJADI id="totalDpDisplay" --}}
+                <input type="text" class="form-control" id="totalDpDisplay" readonly>
                 <div class="row my-3">
                     <div class="col text-left">
                         <button type="reset" class="btn btn-secondary">
@@ -91,15 +90,71 @@
     <script>
         $(document).ready(function() {
 
-            $('#DownPaymentTable').DataTable({
+            // ================================================================
+            // FUNGSI BANTUAN (Bisa di-share jika file JS terpisah, atau duplikat di sini)
+            // ================================================================
+
+            function formatRupiah(angka) {
+                let number_string = String(angka).replace(/[^,\d]/g, '').toString(),
+                    split = number_string.split(','),
+                    sisa = split[0].length % 3,
+                    rupiah = split[0].substr(0, sisa),
+                    ribuan = split[0].substr(sisa).match(/\d{3}/gi);
+
+                if (ribuan) {
+                    separator = sisa ? '.' : '';
+                    rupiah += separator + ribuan.join('.');
+                }
+                return rupiah || '0';
+            }
+
+            function unformatRupiah(rupiah) {
+                return parseFloat(String(rupiah).replace(/\./g, '')) || 0;
+            }
+
+            // ================================================================
+            // FUNGSI KALKULASI TOTAL DP
+            // ================================================================
+
+            /**
+             * Menghitung total DP bersih (DP Masuk - DP Refund) dari data DataTable
+             * dan mengupdate tampilan di field Total DP.
+             */
+            function updateTotalDpDisplay() {
+                const data = $('#DownPaymentTable').DataTable().rows().data();
+                let totalDp = 0;
+
+                data.each(function(d) {
+                    const nominal = parseFloat(d.nominal_raw) || 0; // Gunakan kolom mentah untuk kalkulasi
+                    if (d.tipe === 'Down Payment') {
+                        totalDp += nominal;
+                    } else if (d.tipe === 'DP Refund') {
+                        totalDp -= nominal;
+                    }
+                });
+
+                // Update field display dengan format Rupiah
+                $('#totalDpDisplay').val(formatRupiah(totalDp));
+
+                // Juga update total DP di tab Tagihan Pasien secara real-time
+                $('#totalDp').text('Rp ' + formatRupiah(totalDp));
+
+                // Panggil fungsi kalkulasi total di tab tagihan agar ikut terupdate
+                if (typeof recalculateTableTotals === "function") {
+                    recalculateTableTotals();
+                }
+            }
+
+
+            // ================================================================
+            // INISIALISASI DATATABLE
+            // ================================================================
+            const dpTable = $('#DownPaymentTable').DataTable({
                 processing: true,
                 serverSide: true,
                 ajax: {
                     url: '/simrs/kasir/down-payment/data/{{ $bilingan->id }}',
-                    type: 'GET',
-                    dataSrc: function(json) {
-                        return json && json.data ? json.data : [];
-                    }
+                    type: 'GET'
                 },
                 columns: [{
                         data: 'tanggal',
@@ -112,7 +167,7 @@
                     {
                         data: 'nominal',
                         name: 'nominal'
-                    },
+                    }, // Kolom nominal yang sudah diformat
                     {
                         data: 'tipe',
                         name: 'tipe'
@@ -128,14 +183,17 @@
                     {
                         data: 'aksi',
                         name: 'aksi',
-                        render: function(data, type, row) {
-                            return '<button class="btn btn-danger btn-delete" data-id="' + row.id +
-                                '"><i class="fal fa-trash"></i></button>';
-                        },
                         orderable: false,
-                        searchable: false
+                        searchable: false,
+                        render: function(data, type, row) {
+                            return `<button class="btn btn-danger btn-sm btn-delete-dp" data-id="${row.id}"><i class="fal fa-trash"></i></button>`;
+                        }
                     }
                 ],
+                "drawCallback": function(settings) {
+                    // Panggil fungsi update total setiap kali tabel selesai digambar
+                    updateTotalDpDisplay();
+                },
                 language: {
                     emptyTable: "Tidak ada data yang tersedia"
                 },
@@ -146,38 +204,75 @@
                 pageLength: 5
             });
 
+
+            // ================================================================
+            // EVENT HANDLERS
+            // ================================================================
+
+            // 1. Event handler untuk auto-format Rupiah pada input Nominal
+            $('#downPaymentForm input[name="nominal"]').on('input', function(e) {
+                let cursorPosition = this.selectionStart,
+                    originalLength = this.value.length;
+                let value = $(this).val(),
+                    unformattedValue = unformatRupiah(value),
+                    formattedValue = formatRupiah(unformattedValue);
+                $(this).val(formattedValue);
+                let newLength = this.value.length;
+                cursorPosition = cursorPosition + (newLength - originalLength);
+                this.setSelectionRange(cursorPosition, cursorPosition);
+            });
+
+            // 2. Event handler untuk submit form DP
             $('#downPaymentForm').on('submit', function(e) {
                 e.preventDefault();
-                let formData = $(this).serialize();
-                const bilinganId = '{{ $bilingan->id }}';
-                const userId = '{{ auth()->user()->id }}';
-                formData += `&bilingan_id=${bilinganId}&user_id=${userId}`;
-                // Send the form data to the server
-                // using AJAX
+
+                const nominalInput = $(this).find('input[name="nominal"]');
+                const nominalValue = unformatRupiah(nominalInput.val()); // Unformat sebelum kirim
+
+                // Kumpulkan data form lainnya
+                const formData = {
+                    _token: '{{ csrf_token() }}',
+                    metode_pembayaran: $(this).find('select[name="metode_pembayaran"]').val(),
+                    keterangan: $(this).find('input[name="keterangan"]').val(),
+                    nominal: nominalValue, // Kirim nilai numerik murni
+                    bilingan_id: '{{ $bilingan->id }}',
+                    user_id: '{{ auth()->user()->id }}'
+                };
+
                 $.ajax({
                     url: '/simrs/kasir/down-payment',
                     type: 'POST',
                     data: formData,
-                    headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                    },
                     success: function(response) {
-                        showSuccessAlert('Down payment saved successfully.');
-                        $('#DownPaymentTable').DataTable().ajax.reload();
-                        // Optionally update the Total DP field and refresh the DataTable if needed.
+                        Swal.fire({
+                            toast: true,
+                            position: 'top-end',
+                            icon: 'success',
+                            title: 'DP berhasil disimpan.',
+                            showConfirmButton: false,
+                            timer: 1500
+                        });
+                        dpTable.ajax
+                            .reload(); // DataTable akan otomatis memanggil updateTotalDpDisplay()
+                        $('#downPaymentForm')[0].reset();
+                        $('.select2').trigger('change');
                     },
                     error: function(xhr) {
-                        showErrorAlert('Error saving down payment.');
-                        $('#DownPaymentTable').DataTable().ajax.reload();
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal!',
+                            text: 'Terjadi kesalahan saat menyimpan DP.'
+                        });
                     }
                 });
             });
 
-            $(document).on('click', '.btn-delete', function() {
+            // 3. Event handler untuk tombol Hapus DP
+            $('#DownPaymentTable tbody').on('click', '.btn-delete-dp', function() {
                 const id = $(this).data('id');
                 Swal.fire({
                     title: 'Anda yakin?',
-                    text: "Anda yakin ingin menghapus data ini?",
+                    text: "Data DP ini akan dihapus.",
                     icon: 'warning',
                     showCancelButton: true,
                     confirmButtonColor: '#3085d6',
@@ -187,23 +282,27 @@
                 }).then((result) => {
                     if (result.isConfirmed) {
                         $.ajax({
-                            url: '/simrs/kasir/down-payment/' + id,
+                            url: `/simrs/kasir/down-payment/${id}`,
                             type: 'DELETE',
                             headers: {
                                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                             },
                             success: function(response) {
-                                Swal.fire('Deleted!', 'Data berhasil dihapus.',
+                                Swal.fire('Terhapus!', 'Data DP berhasil dihapus.',
                                     'success');
-                                $('#DownPaymentTable').DataTable().ajax.reload();
+                                dpTable.ajax
+                                    .reload(); // DataTable akan otomatis memanggil updateTotalDpDisplay()
                             },
                             error: function(xhr) {
-                                Swal.fire('Error!', 'Gagal menghapus data.', 'error');
+                                Swal.fire('Gagal!',
+                                    'Terjadi kesalahan saat menghapus data.',
+                                    'error');
                             }
                         });
                     }
                 });
             });
+
         });
     </script>
 @endsection
