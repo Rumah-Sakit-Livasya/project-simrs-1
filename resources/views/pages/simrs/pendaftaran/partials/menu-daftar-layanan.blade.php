@@ -10,27 +10,36 @@
             <div class="row">
                 <ul id="patient-menu-icon">
                     <li class="text-center">
-                        @if ($registration->registration_type == 'rawat-jalan')
-                            <a
-                                href="{{ route('poliklinik.daftar-pasien', ['menu' => 'pengkajian_perawat', 'registration' => $registration->registration_number]) }}">
-                            @elseif($registration->registration_type == 'rawat-inap')
-                                <a
-                                    href="{{ route('rawat-inap.daftar-pasien', ['menu' => 'pengkajian_perawat', 'registration' => $registration->registration_number]) }}">
-                                @elseif($registration->registration_type == 'igd')
-                                    <a
-                                        href="{{ route('igd.catatan-medis', ['menu' => 'pengkajian_perawat', 'registration' => $registration->registration_number]) }}">
-                        @endif
-                        <center>
-                            <div class="circle-menu waves-effect pink accent-2" data-layanan="pengkajian-nurse-rajal">
-                                <i class="mdi mdi-clipboard-pulse"></i>
-                            </div>
-                            <span>Catatan Medis</span>
-                        </center>
+                        @php
+                            $catatanMedisRoute = match ($registration->registration_type) {
+                                'rawat-jalan' => route('poliklinik.daftar-pasien', [
+                                    'menu' => 'pengkajian_perawat',
+                                    'registration' => $registration->registration_number,
+                                ]),
+                                'rawat-inap' => route('rawat-inap.daftar-pasien', [
+                                    'menu' => 'pengkajian_perawat',
+                                    'registration' => $registration->registration_number,
+                                ]),
+                                'igd' => route('igd.catatan-medis', [
+                                    'menu' => 'pengkajian_perawat',
+                                    'registration' => $registration->registration_number,
+                                ]),
+                                default => '#',
+                            };
+                        @endphp
+                        <a href="{{ $catatanMedisRoute }}">
+                            <center>
+                                <div class="circle-menu waves-effect pink accent-2"
+                                    data-layanan="pengkajian-nurse-rajal">
+                                    <i class="mdi mdi-clipboard-pulse"></i>
+                                </div>
+                                <span>Catatan Medis</span>
+                            </center>
                         </a>
                     </li>
                     <li class="text-center">
                         <a
-                            href="{{ route('detail.registrasi.pasien.layanan', ['registrations' => $registration->registration_number, 'layanan' => 'tindakan-medis']) }}">
+                            href="{{ route('detail.registrasi.pasien.layanan', ['registrations' => $registration->id, 'layanan' => 'tindakan-medis']) }}">
                             <div class="circle-menu waves-effect light-green accent-3 menu-layanan"
                                 data-layanan="tindakan-medis">
                                 <i class="mdi mdi-needle"></i>
@@ -47,7 +56,7 @@
                     </li>
                     <li class="text-center">
                         <a
-                            href="{{ route('detail.registrasi.pasien.layanan', ['registrations' => $registration->registration_number, 'layanan' => 'laboratorium']) }}">
+                            href="{{ route('detail.registrasi.pasien.layanan', ['registrations' => $registration->id, 'layanan' => 'laboratorium']) }}">
                             <div class="circle-menu waves-effect purple accent-3 menu-layanan"
                                 data-layanan="laboratorium">
                                 <i class="mdi mdi-flask-outline"></i>
@@ -57,7 +66,7 @@
                     </li>
                     <li class="text-center">
                         <a
-                            href="{{ route('detail.registrasi.pasien.layanan', ['registrations' => $registration->registration_number, 'layanan' => 'radiologi']) }}">
+                            href="{{ route('detail.registrasi.pasien.layanan', ['registrations' => $registration->id, 'layanan' => 'radiologi']) }}">
                             <div class="circle-menu waves-effect red accent-3 menu-layanan" data-layanan="radiologi">
                                 <i class="mdi mdi-radioactive"></i>
                             </div>
@@ -66,7 +75,7 @@
                     </li>
                     <li class="text-center">
                         <a
-                            href="{{ route('detail.registrasi.pasien.layanan', ['registrations' => $registration->registration_number, 'layanan' => 'pemakaian-alat']) }}">
+                            href="{{ route('detail.registrasi.pasien.layanan', ['registrations' => $registration->id, 'layanan' => 'pemakaian-alat']) }}">
                             <div class="circle-menu waves-effect blue accent-3 menu-layanan"
                                 data-layanan="pemakaian-alat">
                                 <i class="mdi mdi-source-merge"></i>
@@ -76,7 +85,7 @@
                     </li>
                     <li class="text-center">
                         <a
-                            href="{{ route('detail.registrasi.pasien.layanan', ['registrations' => $registration->registration_number, 'layanan' => 'visite-dokter']) }}">
+                            href="{{ route('detail.registrasi.pasien.layanan', ['registrations' => $registration->id, 'layanan' => 'visite-dokter']) }}">
                             <div class="circle-menu waves-effect blue accent-3 menu-layanan"
                                 data-layanan="visite-dokter">
                                 <i class="mdi mdi-stethoscope"></i>
@@ -93,7 +102,7 @@
                     </li>
                     <li class="text-center">
                         <a
-                            href="{{ route('detail.registrasi.pasien.layanan', ['registrations' => $registration->registration_number, 'layanan' => 'operasi']) }}">
+                            href="{{ route('detail.registrasi.pasien.layanan', ['registrations' => $registration->id, 'layanan' => 'operasi']) }}">
                             <div class="circle-menu waves-effect light-green accent-3 menu-layanan"
                                 data-layanan="operasi">
                                 <i class="mdi mdi-heart-pulse"></i>
@@ -103,7 +112,7 @@
                     </li>
                     <li class="text-center">
                         <a
-                            href="{{ route('detail.registrasi.pasien.layanan', ['registrations' => $registration->registration_number, 'layanan' => 'persalinan']) }}">
+                            href="{{ route('detail.registrasi.pasien.layanan', ['registrations' => $registration->id, 'layanan' => 'persalinan']) }}">
                             <div class="circle-menu waves-effect teal accent-3 menu-layanan" data-layanan="persalinan">
                                 <i class="mdi mdi-seat-flat-angled"></i>
                             </div>
@@ -112,7 +121,7 @@
                     </li>
                     <li class="text-center">
                         <a
-                            href="{{ route('detail.registrasi.pasien.layanan', ['registrations' => $registration->registration_number, 'layanan' => 'gizi']) }}">
+                            href="{{ route('detail.registrasi.pasien.layanan', ['registrations' => $registration->id, 'layanan' => 'gizi']) }}">
                             <div class="circle-menu waves-effect red accent-3 menu-layanan" data-layanan="gizi">
                                 <i class="mdi mdi-bowl"></i>
                             </div>

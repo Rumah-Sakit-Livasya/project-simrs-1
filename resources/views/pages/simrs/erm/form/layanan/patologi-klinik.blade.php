@@ -8,7 +8,7 @@
             </div>
         </div>
         <div class="p-3">
-            @include('pages.simrs.pendaftaran.partials.laboratorium')
+            @include('pages.simrs.erm.form.penunjang.partials.laboratorium')
         </div>
     @endif
 @endsection
