@@ -24,7 +24,10 @@
                             <div class="form-group">
                                 <label for="tipe_tagihan">Tipe Tagihan</label>
                                 <select class="form-control" id="tipe_tagihan" name="tipe_tagihan" required>
-                                    <option value="Biaya Tindakan Medis">Biaya Tindakan Medis</option>
+                                    <option value=""></option>
+                                    @foreach ($tipe_transaksi as $tipe)
+                                        <option value="{{ $tipe->id }}">{{ $tipe->name }}</option>
+                                    @endforeach
                                 </select>
                             </div>
                             <div class="form-group">

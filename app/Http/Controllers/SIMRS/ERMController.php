@@ -1226,7 +1226,14 @@ class ERMController extends Controller
         $file = $request->file('file');
         $registrationId = $request->registration_id;
         $path = "documents/{$registrationId}";
-        $storedFile = $file->store($path, 'public');
+
+        // Generate a unique filename to avoid duplicate entry on unique index
+        $extension = $file->getClientOriginalExtension();
+        $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+        $uniqueSuffix = uniqid('_', true);
+        $uniqueFileName = $originalName . $uniqueSuffix . '.' . $extension;
+
+        $storedFile = $file->storeAs($path, $uniqueFileName, 'public');
 
         \App\Models\UploadedDocument::create([
             'registration_id' => $registrationId,
@@ -1234,7 +1241,7 @@ class ERMController extends Controller
             'document_category_id' => $request->document_category_id,
             'description' => $request->description,
             'original_filename' => $file->getClientOriginalName(),
-            'stored_filename' => basename($storedFile),
+            'stored_filename' => $uniqueFileName,
             'file_path' => $storedFile,
             'mime_type' => $file->getMimeType(),
             'file_size' => $file->getSize(),
