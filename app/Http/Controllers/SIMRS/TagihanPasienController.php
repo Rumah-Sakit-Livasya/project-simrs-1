@@ -5,6 +5,7 @@ namespace App\Http\Controllers\SIMRS;
 use App\Http\Controllers\Controller;
 use App\Models\Employee;
 use App\Models\SIMRS\Bilingan;
+use App\Models\SIMRS\BilinganTagihanPasien;
 use App\Models\SIMRS\Departement;
 use App\Models\SIMRS\KelasRawat;
 use App\Models\SIMRS\OrderTindakanMedis;
@@ -14,6 +15,7 @@ use App\Models\SIMRS\TindakanMedis;
 use App\Models\TarifTindakanMedis;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Yajra\DataTables\Facades\DataTables;
 
 class TagihanPasienController extends Controller
 {
@@ -72,11 +74,27 @@ class TagihanPasienController extends Controller
             'departement_id' => 'required|integer',
             'tindakan_id' => 'required|integer',
             'quantity' => 'required|integer|min:1',
-            'nominal' => 'required|numeric',
+            'nominal_awal' => 'required|numeric',
             'bilingan_id' => 'required|integer',
             'registration_id' => 'required|integer',
             'user_id' => 'required|integer',
         ]);
+        $validatedData['nominal'] = $validatedData['nominal_awal'] * $validatedData['quantity'];
+
+        // Tambahkan logika: Cek status Bilingan, jika sudah 'final' tolak penyimpanan
+        $bilingan = Bilingan::find($validatedData['bilingan_id']);
+        if (!$bilingan) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Bilingan tidak ditemukan.',
+            ], 404);
+        }
+        if ($bilingan->status === 'final') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Tidak dapat menambah tagihan. Status bilingan sudah final.',
+            ], 403);
+        }
 
         $tindakan = TindakanMedis::where('id', $request->tindakan_id)->first();
         if ($validatedData['tipe_tagihan'] == "Biaya Tindakan Medis") {
@@ -88,6 +106,12 @@ class TagihanPasienController extends Controller
         try {
             // Simpan data ke database
             $tagihanPasien = TagihanPasien::create($validatedData);
+
+            // Simpan relasi bilingan-tagihan pasien
+            BilinganTagihanPasien::create([
+                'tagihan_pasien_id' => $tagihanPasien->id,
+                'bilingan_id' => $bilingan->id,
+            ]);
 
             return response()->json([
                 'success' => true,
@@ -140,37 +164,47 @@ class TagihanPasienController extends Controller
     public function getData($id)
     {
         try {
-            $data = TagihanPasien::select(['id', 'date as tanggal', 'tagihan as detail_tagihan', 'quantity', 'nominal', 'tipe_diskon', 'disc', 'diskon as diskon_rp', 'jamin', 'jaminan as jaminan_rp', 'wajib_bayar'])
-                ->where('bilingan_id', $id)
-                ->get(); // Ambil data yang diperlukan
+            // 1. Dapatkan model Bilingan terlebih dahulu
+            $bilingan = Bilingan::find($id);
 
-            // Add a 'del' column for delete actions
-            $data = $data->map(function ($item) {
-                $item->del = '<button class="btn btn-danger delete" data-id="' . $item->id . '"><i class="fas fa-trash"></i></button>'; // Icon trash button
+            // 2. Lakukan pengecekan awal yang krusial
+            if (!$bilingan) {
+                // Jika bilingan tidak ditemukan, kembalikan data kosong
+                return response()->json(['data' => []]);
+            }
 
-                // If value is 0, display it as is
-                $item->nominal = $item->nominal == 0 ? '0' : $item->nominal;
-                $item->diskon_rp = $item->diskon_rp == 0 ? '0' : $item->diskon_rp;
-                $item->disc = $item->disc == 0 ? '0' : $item->disc;
-                $item->jaminan_rp = $item->jaminan_rp == 0 ? '0' : $item->jaminan_rp;
-                $item->jamin = $item->jamin == 0 ? '0' : $item->jamin;
+            // =======================================================================
+            // PERBAIKAN LOGIKA: Tampilkan data HANYA jika status BUKAN 'final'
+            // Jika sudah 'final', tabel di frontend harus kosong (tidak bisa diedit)
+            // =======================================================================
+            if (strtolower($bilingan->status) === 'final') {
+                return response()->json(['data' => []]);
+            }
 
-                return $item;
-            });
+            // 3. Buat Query Builder. Eager load tidak diperlukan di sini
+            // karena kita tidak mengakses relasi 'bilingan' di dalam DataTables.
+            $query = TagihanPasien::where('bilingan_id', $id);
 
-            // Log the data for debugging
-            \Log::info('Data fetched for DataTables:', $data->toArray());
-
-            return response()->json([
-                'data' => $data,
-                'recordsTotal' => $data->count(),
-                'recordsFiltered' => $data->count(),
-            ]); // Return data in the expected format for DataTables
+            // 4. Serahkan Query Builder ke DataTables untuk diproses secara server-side
+            return DataTables::of($query)
+                // Mengganti nama kolom dari database ke nama yang diharapkan frontend
+                ->addColumn('tanggal', fn($row) => $row->date)
+                ->addColumn('detail_tagihan', fn($row) => $row->tagihan)
+                ->addColumn('diskon_rp', fn($row) => $row->diskon)
+                ->addColumn('jaminan_rp', fn($row) => $row->jaminan)
+                // Tambahkan kolom 'del' secara dinamis untuk tombol hapus
+                ->addColumn('del', function ($row) {
+                    return '<button type="button" class="btn btn-danger btn-sm delete-btn" data-id="' . $row->id . '"><i class="fa fa-trash"></i></button>';
+                })
+                // Beritahu DataTables bahwa kolom 'del' berisi HTML dan tidak boleh di-escape
+                ->rawColumns(['del'])
+                ->make(true);
         } catch (\Exception $e) {
-            \Log::error('Error fetching data for DataTables: ' . $e->getMessage());
-            return response()->json(['error' => 'Data could not be retrieved 10000.'], 500); // Return error response
+            Log::error('Error fetching Tagihan Pasien data for DataTables: ' . $e->getMessage());
+            return response()->json(['error' => 'Data tidak dapat diambil.'], 500);
         }
     }
+
 
     public function getNominalAwal($id)
     {

@@ -1985,27 +1985,180 @@
             <form style="width:30%;" class="cxform" id="frm" name="frm" method="post">
                 @csrf
                 <div class="tableTitle frm">Print Settings</div>
-                <table width="100%">
+                <table width="100%" id="list" style="margin-top: 10px;">
+                    <thead>
+                        <tr>
+                            <th colspan="4">KETERANGAN</th>
+                            <th width="10%">JML</th>
+                            <th width="15%" align="center">HARGA</th>
+                            <th width="15%" align="right">SUBTOTAL</th>
+                        </tr>
+                    </thead>
                     <tbody>
+                        {{-- ====================================================================== --}}
+                        {{-- BAGIAN LOOPING TAGIHAN PASIEN (DIBERI PENGECEKAN) --}}
+                        {{-- ====================================================================== --}}
+                        @if ($bilingan->tagihanPasien && $bilingan->tagihanPasien->isNotEmpty())
+                            @foreach ($bilingan->tagihanPasien as $item)
+                                <tr style="font-size:1.3em; font-weight: bold;">
+                                    @if (strpos($item->tagihan, 'Biaya Administrasi') !== false)
+                                        <td colspan="6">&nbsp;&nbsp;Administrasi</td>
+                                    @elseif (strpos($item->tagihan, 'Tindakan Medis') !== false)
+                                        <td colspan="6">&nbsp;&nbsp;Biaya Tindakan Medis</td>
+                                    @else
+                                        <td colspan="6">&nbsp;&nbsp;{{ $item->tagihan }}</td>
+                                    @endif
+                                    <td align="right"><a style="display:none"></a></td>
+                                </tr>
+                                <tr style="font-size:1.3em;">
+                                    <td colspan="4">
+                                        <span style="display: block;"> &nbsp; &nbsp;{{ $item->tagihan }}</span>
+                                    </td>
+                                    <td align="center" style="letter-spacing: 2px;">{{ $item->quantity }}</td>
+                                    <td align="right" style="letter-spacing: 2px;">
+                                        {{ number_format($item->nominal_awal, 0, ',', '.') }}
+                                    </td>
+                                    <td align="right" style="letter-spacing: 2px;">
+                                        {{ number_format($item->nominal, 0, ',', '.') }}
+                                    </td>
+                                </tr>
+                                <tr style="font-size:1.2em; font-weight: bold; text-align:right;">
+                                    <td colspan="6">Subtotal</td>
+                                    <td style="letter-spacing: 2px;">{{ number_format($item->nominal, 0, ',', '.') }}
+                                    </td>
+                                </tr>
+                            @endforeach
+                        @endif
+
+                        {{-- Garis Pemisah --}}
+                        <tr style="border-top: 3px double #000;">
+                            <td colspan="7" style="padding:1px;"></td>
+                        </tr>
+
+                        {{-- ====================================================================== --}}
+                        {{-- BAGIAN TOTAL DAN PEMBAYARAN --}}
+                        {{-- ====================================================================== --}}
+
+                        {{-- Total Tagihan --}}
+                        <tr style="font-size:1.2em; font-weight: bold; letter-spacing: 4px;">
+                            <td colspan="4">&nbsp;</td>
+                            <td colspan="2" style="letter-spacing: 2px;">Total Tagihan :</td>
+                            <td align="right" style="letter-spacing: 2px;">
+                                {{ number_format($bilingan->wajib_bayar, 0, ',', '.') }}
+                            </td>
+                        </tr>
+
+                        {{-- Deposit (DP) --}}
+                        @if ($bilingan->downPayment && $bilingan->downPayment->isNotEmpty())
+                            <tr style="font-size:1.2em; font-weight: bold; letter-spacing: 4px;">
+                                <td colspan="4">&nbsp;</td>
+                                <td colspan="2">Deposit :</td>
+                                <td></td>
+                            </tr>
+                            @foreach ($bilingan->downPayment as $deposit)
+                                <tr style="text-align: right; font-size: 1.2em; letter-spacing: 4px;">
+                                    <td colspan="4">&nbsp;</td>
+                                    <td style="text-align: left;" colspan="2">
+                                        <span
+                                            style="font-size: 0.9em;">&nbsp;&nbsp;&nbsp;&nbsp;[{{ \Carbon\Carbon::parse($deposit->created_at)->format('d M Y H:i') }}]</span>
+                                        {{ $deposit->metode_pembayaran }}
+                                    </td>
+                                    <td style="font-weight: bold;">
+                                        {{ number_format($deposit->nominal, 0, ',', '.') }}
+                                    </td>
+                                </tr>
+                            @endforeach
+                        @endif
+
+                        {{-- Detail Pembayaran (hanya jika ada relasi pembayaran_tagihan) --}}
+                        @if ($bilingan->pembayaran_tagihan)
+                            <tr style="font-size:1.2em; font-weight: bold; letter-spacing: 4px;">
+                                <td colspan="4">&nbsp;</td>
+                                <td colspan="2">Pembayaran :</td>
+                                <td></td>
+                            </tr>
+                            <tr style="text-align: right; font-size: 1.2em; letter-spacing: 4px;">
+                                <td colspan="4">&nbsp;</td>
+                                <td style="text-align: left;" colspan="2">
+                                    <span
+                                        style="font-size: 0.9em;">&nbsp;&nbsp;&nbsp;&nbsp;[{{ \Carbon\Carbon::parse($bilingan->pembayaran_tagihan->created_at)->format('d M Y H:i') }}]</span>
+                                    Tunai
+                                </td>
+                                <td style="font-weight: bold;">
+                                    {{ number_format($bilingan->pembayaran_tagihan->jumlah_terbayar, 0, ',', '.') }}
+                                </td>
+                            </tr>
+                            {{-- Menampilkan DP yang diperhitungkan saat pembayaran --}}
+                            @if ($bilingan->downPayment && $bilingan->downPayment->isNotEmpty())
+                                <tr style="text-align: right; font-size: 1.2em; letter-spacing: 4px;">
+                                    <td colspan="4">&nbsp;</td>
+                                    <td style="text-align: left;" colspan="2">
+                                        <span style="font-size: 0.9em;">&nbsp;&nbsp;&nbsp;&nbsp;[Digunakan]</span>
+                                        Dengan DP
+                                    </td>
+                                    <td style="font-weight: bold;">
+                                        {{ number_format($bilingan->total_dp ?? 0, 0, ',', '.') }}
+                                    </td>
+                                </tr>
+                            @endif
+                            <tr style="font-size:1.2em; font-weight: bold; letter-spacing: 4px;">
+                                <td colspan="4">&nbsp;</td>
+                                <td colspan="2">Sisa Tagihan :</td>
+                                <td align="right">{{ number_format($bilingan->sisa_tagihan ?? 0, 0, ',', '.') }}</td>
+                            </tr>
+                            <tr style="font-size:1.2em; font-weight: bold; letter-spacing: 4px;">
+                                <td colspan="4">&nbsp;</td>
+                                <td colspan="2">Kembalian :</td>
+                                <td align="right">
+                                    {{ number_format($bilingan->pembayaran_tagihan->kembalian ?? 0, 0, ',', '.') }}
+                                </td>
+                            </tr>
+                        @endif
+
                         <tr>
-                            <td class="label">Rekap OK</td>
-                            <td>
-                                <input name="rekap_ok" type="radio" value="yes" checked="checked"> Ya
-                                <input name="rekap_ok" type="radio" value="no"> Tidak
+                            <td colspan="7"></td>
+                        </tr>
+
+                        {{-- ====================================================================== --}}
+                        {{-- BAGIAN FOOTER CETAK DAN TANDA TANGAN --}}
+                        {{-- ====================================================================== --}}
+                        <tr style="border-top: 3px double #000; font-size: 1em;">
+                            <td colspan="7" style="font-style: italic;">Dicetak Oleh :
+                                {{ auth()->user()->employee->fullname ?? auth()->user()->name }},
+                                {{ \Carbon\Carbon::now()->format('d M Y H:i') }}
                             </td>
                         </tr>
                         <tr>
-                            <td class="label">Rekap VK</td>
-                            <td>
-                                <input name="rekap_vk" type="radio" value="yes" checked="checked"> Ya
-                                <input name="rekap_vk" type="radio" value="no"> Tidak
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="label">Rekap ALL</td>
-                            <td>
-                                <input name="rekap_all" type="radio" value="yes"> Ya
-                                <input name="rekap_all" type="radio" value="no" checked="checked"> Tidak
+                            <td colspan="7">
+                                <table width="100%" style="font-size: 1em;">
+                                    <tbody>
+                                        <tr>
+                                            <td align="center">
+                                                {{ $bilingan->location ?? 'Majalengka' }},
+                                                {{ \Carbon\Carbon::parse($bilingan->location_date ?? now())->format('d M Y') }}
+                                                <span style="display: block; height: 40px;"></span>
+                                                <span style="white-space: nowrap!important">
+                                                    <div>
+                                                        ({{ auth()->user()->employee->fullname ?? auth()->user()->name }})
+                                                    </div>
+                                                </span>
+                                                <div>PETUGAS</div>
+                                            </td>
+                                            <td align="center">
+                                                <span style="display: block; visibility: hidden;">
+                                                    {{ $bilingan->location ?? 'Majalengka' }},
+                                                    {{ \Carbon\Carbon::parse($bilingan->location_date ?? now())->format('d M Y') }}
+                                                </span>
+                                                <span style="display: block; height: 40px;"></span>
+                                                <span style="white-space: nowrap!important">
+                                                    <div>({{ $bilingan->registration->patient->name ?? 'Pasien' }})
+                                                    </div>
+                                                </span>
+                                                <div>PASIEN</div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </td>
                         </tr>
                     </tbody>
@@ -2033,7 +2186,8 @@
                 <tbody>
                     <tr>
                         <td width="17%"><strong>Tanggal Reg</strong></td>
-                        <td width="27%">: {{ \Carbon\Carbon::parse($bilingan->registration_date)->format('d M Y') }}
+                        <td width="27%">:
+                            {{ \Carbon\Carbon::parse($bilingan->registration_date)->format('d M Y') }}
                         </td>
                         <td width="18%"><strong>Nama Pasien</strong></td>
                         <td width="38%">: {{ $bilingan->registration->patient->name }}</td>
@@ -2047,7 +2201,9 @@
                     </tr>
                     <tr>
                         <td><strong>Penjamin</strong></td>
-                        <td>: {{ $bilingan->registration->penjamin->nama_perusahaan }}</td>
+                        <td>:
+                            {{ strtolower($bilingan->registration->penjamin->nama_perusahaan ?? '') === 'standar' ? 'UMUM' : $bilingan->registration->penjamin->nama_perusahaan ?? '' }}
+                        </td>
                         <td><strong>Dokter Penanggung Jawab</strong></td>
                         <td>: {{ $bilingan->registration->doctor->employee->fullname }}</td>
                     </tr>
@@ -2073,7 +2229,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach ($bilingan->tagihan_pasien as $item)
+                    @foreach ($bilingan->tagihanPasien as $item)
                         <tr style="font-size:1.3em; font-weight: bold;">
                             @if (strpos($item->tagihan, 'Biaya Administrasi') !== false)
                                 <td colspan="6">&nbsp;&nbsp;Administrasi</td>
@@ -2116,7 +2272,7 @@
                         <td>
                         </td>
                     </tr>
-                    @foreach ($bilingan->down_payment as $deposit)
+                    @foreach ($bilingan->downPayment as $deposit)
                         <tr style="text-align: right; font-size: 1.2em; letter-spacing: 4px;">
                             <td colspan="4">&nbsp;</td>
                             <td style="text-align: left;" colspan="2">
@@ -2149,15 +2305,15 @@
                     <tr style="text-align: right; font-size: 1.2em; letter-spacing: 4px;">
                         <td colspan="4">&nbsp;</td>
                         <td style="text-align: left;" colspan="2">
-                            @if ($bilingan->down_payment->isNotEmpty())
+                            @if ($bilingan->downPayment->isNotEmpty())
                                 <span
-                                    style="font-size: 0.9em;">&nbsp;&nbsp;&nbsp;&nbsp;[{{ \Carbon\Carbon::parse($bilingan->down_payment->first()->created_at)->format('d M Y H:i') }}]</span>
+                                    style="font-size: 0.9em;">&nbsp;&nbsp;&nbsp;&nbsp;[{{ \Carbon\Carbon::parse($bilingan->downPayment->first()->created_at)->format('d M Y H:i') }}]</span>
                                 Dengan DP
-                                {{-- {{ $bilingan->down_payment->first()->metode_pembayaran }} --}}
+                                {{-- {{ $bilingan->downPayment->first()->metode_pembayaran }} --}}
                             @endif
                         </td>
                         <td style="font-weight: bold;">
-                            {{ number_format($bilingan->down_payment ? ($bilingan->down_payment->isNotEmpty() ? $bilingan->down_payment->where('tipe', 'Down Payment')->sum('nominal') : 0) : 0, 0, ',', '.') }}
+                            {{ number_format($bilingan->downPayment ? ($bilingan->downPayment->isNotEmpty() ? $bilingan->downPayment->where('tipe', 'Down Payment')->sum('nominal') : 0) : 0, 0, ',', '.') }}
                         </td>
                     </tr>
                     <tr style="font-size:1.2em; font-weight: bold; letter-spacing: 4px;">

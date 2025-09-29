@@ -15,6 +15,7 @@ use App\Models\SIMRS\TagihanPasien;
 use App\Models\SIMRS\TutupKunjungan;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -47,6 +48,17 @@ class BilinganController extends Controller
                     '<button class="btn btn-outline-primary btn-sm mt-1 btn-icon waves-effect waves-themed btn-print-bill" title="Print Bill" data-billing-id="' . $item->id . '"><i class="fal fa-print"></i></button> ' .
                     '<button class="btn btn-outline-success btn-sm mt-1 btn-icon waves-effect waves-themed badge-sm btn-print-kwitansi" title="Print Kwitansi" data-billing-id="' . $item->id . '"><i class="fal fa-print"></i></button> ' .
                     '<span class="btn btn-outline-warning btn-sm mt-1 btn-icon waves-effect waves-themed badge-sm btn-print-kwitansi-penjamin" title="Print Kwitansi Penjamin" data-billing-id="' . $item->id . '"><i class="fal fa-print"></i></span>';
+                $item->aksi = '
+                    <div class="d-flex flex-column flex-md-row align-items-stretch gap-2">
+                        <button
+                            class="btn btn-outline-danger btn-sm btn-icon waves-effect waves-themed btn-cancel-bill w-100 w-md-auto mr-3"
+                            title="Batalkan Bill"
+                            data-billing-id="' . $item->id . '"
+                        >
+                            <i class="fal fa-times-circle"></i>
+                            <span class="d-none d-md-inline ms-1">Cancel Bill</span>
+                        </button>
+                ';
                 return $item;
             });
 
@@ -97,6 +109,98 @@ class BilinganController extends Controller
             Log::error('Error fetching Down Payment data for DataTables: ' . $e->getMessage());
             // Mengembalikan response error yang sesuai dengan format DataTables
             return response()->json(['error' => 'Data could not be retrieved.'], 500);
+        }
+    }
+
+    /**
+     * Cancel a payment by resetting the is_paid flag on the bilingan,
+     * deleting the associated payment record, and also deleting all pembayaran tagihan.
+     *
+     * @param int $id The Bilingan ID
+     * @return \Illuminate\Http\JsonResponse
+     */
+    /**
+     * Cancel all payments for a given Bilingan (by Bilingan ID).
+     *
+     * @param int $id The Bilingan ID
+     * @return \Illuminate\Http\JsonResponse
+     */
+    // public function cancelPayment($id)
+    // {
+    //     DB::beginTransaction();
+    //     try {
+    //         // Ambil data Bilingan berdasarkan ID
+    //         $bilingan = Bilingan::with(['pembayaran_tagihan', 'tagihanPasien'])->findOrFail($id);
+
+    //         // Cek apakah ada pembayaran tagihan yang bisa dibatalkan
+    //         if ($bilingan->pembayaran_tagihan->count() === 0) {
+    //             return response()->json(['message' => 'Tidak ada pembayaran yang bisa dibatalkan.'], 404);
+    //         }
+
+
+    //         // Hapus semua pembayaran tagihan yang berelasi dengan bilingan ini
+    //         // Set semua pembayaran tagihan jumlah_terbayar menjadi 0
+    //         // Set jumlah_terbayar pada pembayaran_tagihan menjadi null tanpa foreach
+    //         $bilingan->pembayaran_tagihan->jumlah_terbayar = 0;
+    //         $bilingan->pembayaran_tagihan->save();
+
+    //         // Set is_paid pada bilingan menjadi 0 (belum dibayar)
+    //         $bilingan->is_paid = 1;
+    //         $bilingan->save();
+
+    //         // Set is_paid pada semua tagihan pasien yang terkait menjadi 0
+    //         if ($bilingan->tagihanPasien) {
+    //             foreach ($bilingan->tagihanPasien as $tagihan) {
+    //                 $tagihan->is_paid = 0;
+    //                 $tagihan->save();
+    //             }
+    //         }
+
+    //         DB::commit();
+
+    //         return response()->json(['success' => true, 'message' => 'Pembayaran dan pembayaran tagihan berhasil dibatalkan.']);
+    //     } catch (\Exception $e) {
+    //         DB::rollBack();
+    //         Log::error('Error canceling payment: ' . $e->getMessage());
+    //         return response()->json(['message' => 'Gagal membatalkan pembayaran.'], 500);
+    //     }
+    // }
+
+    /**
+     * Cancel a bill by reverting its status from 'final' to 'draft'.
+     *
+     * @param int $id The Bilingan ID
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function cancelBill($id)
+    {
+        try {
+            DB::beginTransaction();
+
+            $bilingan = Bilingan::with('pembayaran_tagihan')->findOrFail($id);
+
+            // Hanya bisa membatalkan tagihan dengan status 'final'
+            if (strtolower($bilingan->status) !== 'final') {
+                return response()->json(['message' => 'Hanya tagihan dengan status "Final" yang bisa dibatalkan.'], 422);
+            }
+
+            // Hapus semua pembayaran tagihan yang berelasi dengan bilingan ini
+            if ($bilingan->pembayaran_tagihan && $bilingan->pembayaran_tagihan->count() > 0) {
+                $bilingan->pembayaran_tagihan()->delete();
+            }
+
+            // Kembalikan status ke 'belum final'
+            $bilingan->status = 'belum final';
+            $bilingan->is_paid = 0;
+            $bilingan->save();
+
+            DB::commit();
+
+            return response()->json(['success' => true, 'message' => 'Status tagihan berhasil dikembalikan ke Draft dan pembayaran tagihan dihapus.']);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error canceling bill: ' . $e->getMessage());
+            return response()->json(['message' => 'Gagal membatalkan tagihan.'], 500);
         }
     }
 
@@ -324,7 +428,7 @@ class BilinganController extends Controller
             }
 
             // Update related OrderRadiologi and OrderLaboratorium
-            if ($bilingan->registration) {
+            if ($bilingan && $bilingan->registration) {
                 $registrationId = $bilingan->registration->id;
 
                 OrderRadiologi::where('registration_id', $registrationId)
@@ -332,6 +436,13 @@ class BilinganController extends Controller
 
                 OrderLaboratorium::where('registration_id', $registrationId)
                     ->update(['status_billed' => true]);
+            }
+
+            // Update is_paid pada table tagihan menjadi 1
+            if ($bilingan && $bilingan->tagihanPasien) {
+                foreach ($bilingan->tagihanPasien as $tagihan) {
+                    $tagihan->update(['is_paid' => 1]);
+                }
             }
 
             return response()->json([
@@ -348,9 +459,21 @@ class BilinganController extends Controller
 
     public function printBill($id)
     {
-        $bilingan = Bilingan::with('pembayaran_tagihan')->findOrFail($id);
+        // Eager load SEMUA relasi yang dibutuhkan oleh view 'print-bill'
+        $bilingan = Bilingan::with([
+            'registration.patient',
+            'registration.penjamin',
+            'registration.doctor.employee',
+            'registration.departement',
+            'registration.kelas_rawat',
+            'pembayaran_tagihan',
+            'tagihanPasien',
+            'downPayment'
+        ])->findOrFail($id);
+
         return view('pages.simrs.keuangan.kasir.partials.print-bill', compact('bilingan'));
     }
+
     public function printKwitansi($id)
     {
         $bilingan = Bilingan::with('pembayaran_tagihan')->findOrFail($id);
