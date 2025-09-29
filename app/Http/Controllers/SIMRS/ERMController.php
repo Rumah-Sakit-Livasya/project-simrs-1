@@ -1588,8 +1588,30 @@ class ERMController extends Controller
                 // $order_lab = OrderLaboratorium::where('registration_id', $registration->id)->get();
 
                 $groupPenjaminId = GroupPenjamin::where('id', $registration->penjamin->group_penjamin_id)->first()->id;
+                $tipeRegis = $registration->registration_type;
+                $kelasRawat = in_array($tipeRegis, ['rawat-jalan', 'igd', 'odc']) ? 'RAWAT JALAN' : 'RAWAT INAP';
+                $jaminan = $registration->penjamin->name;
+                if ($jaminan === 'Umum') {
+                    $penjamin = 'Jaminan Pribadi';
+                } elseif ($jaminan === 'BPJS') {
+                    $penjamin = "BPJS Kesehatan";
+                } else {
+                    $penjamin = $registration->penjamin->name;
+                }
 
-                return view('pages.simrs.erm.form.layanan.patologi-klinik', compact('laboratoriumOrders', 'laboratoriumDoctors', 'laboratorium_categories', 'laboratorium_tarifs', 'patient', 'groupPenjaminId', 'kelas_rawats', 'registration', 'registrations', 'menu', 'departements', 'jadwal_dokter', 'path'));
+                // Group doctors by department
+                $doctors = Doctor::with(['employee', 'departements', 'department_from_doctors'])
+                    ->whereHas('department_from_doctors')
+                    ->get();
+
+                $groupedDoctors = [];
+                foreach ($doctors as $doctor) {
+                    if ($doctor->department_from_doctors) {
+                        $groupedDoctors[$doctor->department_from_doctors->name][] = $doctor;
+                    }
+                }
+
+                return view('pages.simrs.erm.form.layanan.patologi-klinik', compact('laboratoriumOrders', 'laboratoriumDoctors', 'laboratorium_categories', 'laboratorium_tarifs', 'patient', 'groupPenjaminId', 'groupedDoctors', 'penjamin', 'kelas_rawats', 'kelasRawat', 'registration', 'registrations', 'menu', 'departements', 'jadwal_dokter', 'path'));
 
             case 'transfer_pasien_perawat':
                 $pengkajian = TransferPasienAntarRuangan::firstWhere('registration_id', $registration->id);

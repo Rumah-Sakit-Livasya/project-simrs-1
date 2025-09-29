@@ -271,7 +271,7 @@ Route::group(['middleware' => ['auth']], function () {
         Route::get('/{registrations:id}', [RegistrationController::class, 'show'])
             ->name('detail.registrasi.pasien');
 
-        Route::get('/{registrations}/{layanan}', [RegistrationController::class, 'layanan'])
+        Route::get('/{registrations:id}/layanan/{layanan}', [RegistrationController::class, 'layanan'])
             ->name('detail.registrasi.pasien.layanan');
 
 
