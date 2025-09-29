@@ -1399,6 +1399,8 @@ Route::group(['middleware' => ['auth']], function () {
             Route::put('/tagihan-pasien/update/{id}', [TagihanPasienController::class, 'updateTagihan'])->name('tagihan.pasien.update');
             Route::get('/bilingan/data/{id}/', [BilinganController::class, 'getData'])->name('bilingan.pasien.data');
             Route::put('/bilingan/update-status/{id}', [BilinganController::class, 'updateBilinganStatus'])->name('bilingan.update.status');
+            Route::put('/bilingan/cancel-payment/{id}', [BilinganController::class, 'cancelPayment'])->name('bilingan.cancel-payment');
+            Route::put('/bilingan/cancel-bill/{id}', [BilinganController::class, 'cancelBill'])->name('bilingan.cancel-bill');
             Route::get('/down-payment/data/{id}', [BilinganController::class, 'getDownPaymentData'])->name('down.payment.data');
             Route::post('/down-payment', [BilinganController::class, 'storeDownPayment'])->name('down.payment.store');
             Route::delete('/down-payment/{id}', [BilinganController::class, 'destroyDownPayment'])->name('down.payment.destroy');

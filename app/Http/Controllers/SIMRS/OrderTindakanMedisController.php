@@ -110,6 +110,7 @@ class OrderTindakanMedisController extends Controller
                 'date' => now(),
                 'tagihan' => '[Tindakan Medis] ' . $medicalAction->tindakan_medis->nama_billing,
                 'quantity' => $validatedData['qty'],
+                'nominal_awal' => $medicalAction->tindakan_medis->getTarif($groupPenjaminId, $kelasId)->total,
                 'nominal' => $validatedData['qty'] * $medicalAction->tindakan_medis->getTotalTarif($groupPenjaminId, $kelasId),
                 'tipe_diskon' => $request->tipe_diskon ?? null,
                 'disc' => $request->disc ?? null,
@@ -123,8 +124,6 @@ class OrderTindakanMedisController extends Controller
             BilinganTagihanPasien::create([
                 'tagihan_pasien_id' => $tagihanPasien->id,
                 'bilingan_id' => $bilingan->id,
-                'status' => 'belum final',
-                'is_paid' => 0,
             ]);
 
             if ($request->bilingan_ids) {

@@ -54,8 +54,9 @@
                                     value="1" required>
                             </div>
                             <div class="form-group">
-                                <label for="nominal">Harga</label>
-                                <input type="text" class="form-control" id="nominal" name="nominal" readonly>
+                                <label for="nominal_awal">Harga</label>
+                                <input type="text" class="form-control" id="nominal_awal" name="nominal_awal"
+                                    readonly>
                             </div>
                         </div>
                     </div>
@@ -94,7 +95,7 @@
                     departement_id: $('#departement').val(),
                     tindakan_id: $('#tindakan').val(),
                     quantity: $('#quantity').val(),
-                    nominal: $('#nominal').val().replace(/\./g, ''), // Hapus format angka
+                    nominal_awal: $('#nominal_awal').val().replace(/\./g, ''), // Hapus format angka
                     bilingan_id: bilinganId,
                     registration_id: registrationId,
                     user_id: userId,
@@ -298,7 +299,7 @@
                             success: function(response) {
                                 let quantity = parseInt($('#quantity').val()) || 1;
                                 let total = response.harga;
-                                $('#nominal').val(total.toLocaleString('id-ID'));
+                                $('#nominal_awal').val(total.toLocaleString('id-ID'));
                             },
                             error: function(xhr) {
                                 console.log('Error fetching tarif:', xhr.responseText);
@@ -328,7 +329,7 @@
                             kelas_rawat_id: kelasRawatId
                         },
                         success: function(response) {
-                            $('#nominal').val(response.harga.toLocaleString('id-ID'));
+                            $('#nominal_awal').val(response.harga.toLocaleString('id-ID'));
                         },
                         error: function(xhr) {
                             console.log('Error fetching tarif:', xhr.responseText);

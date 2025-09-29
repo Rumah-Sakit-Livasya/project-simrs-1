@@ -15,7 +15,7 @@
     </div>
 
     {{-- Form Pembayaran akan muncul hanya jika status final dan belum lunas --}}
-    @if ($bilingan->status == 'final' && !$bilingan->status_lunas)
+    @if ($bilingan->status == 'final' && $bilingan->is_paid == 0)
         <form id="pembayaranTagihan">
             {{-- Baris 1: Informasi Tagihan --}}
             <div class="row">
@@ -221,6 +221,7 @@
                             <th>Sisa Tagihan</th>
                             <th>Kembalian</th>
                             <th>Print</th>
+                            <th>Aksi</th>
                         </tr>
                     </thead>
                     <tbody></tbody>
@@ -348,46 +349,80 @@
                     bayarBtn.prop('disabled', true).html(
                         `<span class="spinner-border spinner-border-sm"></span> Memproses...`);
 
-                    let formData = form.serializeArray();
-                    let dataToSend = {};
+                    // ================================================================
+                    // PERBAIKAN UTAMA: KUMPULKAN DATA SECARA EKSPLISIT
+                    // ================================================================
 
-                    // Proses dan unformat data sebelum dikirim ke server
-                    $.each(formData, function(i, field) {
-                        let value = field.value;
-                        // Cek elemen berdasarkan nama atau class untuk un-formatting
-                        if (form.find(`[name="${field.name}"]`).hasClass('format-rupiah')) {
-                            value = unformatRupiah(value);
-                        }
+                    // 1. Ambil semua data dari input dan unformat nilainya
+                    const wajibBayar = unformatRupiah($('#wajibBayar').val());
+                    const dpPasien = unformatRupiah($('#dpPasien').val());
+                    const totalBayar = unformatRupiah($('#totalBayar').val());
+                    const sisaTagihan = unformatRupiah($('#sisaTagihan').val());
+                    const kembalian = unformatRupiah($('#kembalian').val());
 
-                        // Handle array fields (untuk CC)
-                        if (field.name.endsWith('[]')) {
-                            let name = field.name.slice(0, -2);
-                            if (!dataToSend[name]) dataToSend[name] = [];
-                            dataToSend[name].push(value);
-                        } else {
-                            dataToSend[field.name] = value;
+                    // 2. Siapkan objek data yang akan dikirim
+                    let dataToSend = {
+                        _token: '{{ csrf_token() }}',
+                        bilingan_id: '{{ $bilingan->id }}',
+                        user_id: '{{ auth()->user()->id }}',
+
+                        // Sesuaikan nama field ini dengan yang diharapkan oleh validasi backend Anda
+                        'total_tagihan': wajibBayar, // Mengisi 'total_tagihan'
+                        'tagihan_pasien': wajibBayar, // Mengisi 'tagihan_pasien'
+                        'jumlah_terbayar': totalBayar,
+                        'sisa_tagihan': sisaTagihan,
+                        'kembalian': kembalian,
+                        'keterangan': form.find('[name="keterangan"]').val(),
+
+                        // Data Pembayaran Tunai
+                        'tunai': unformatRupiah(form.find('[name="tunai"]').val()),
+
+                        // Data Pembayaran CC/Debit (akan menjadi array)
+                        'bank_perusahaan_id_cc': [],
+                        'tipe_cc': [],
+                        'cc_number_cc': [],
+                        'auth_number_cc': [],
+                        'batch_cc': [],
+                        'nominal_cc': [],
+
+                        // Data Pembayaran Transfer
+                        'bank_perusahaan_id_tf': form.find('[name="bank_perusahaan_id_tf"]').val(),
+                        'bank_pengirim_tf': form.find('[name="bank_pengirim_tf"]').val(),
+                        'nominal_tf': unformatRupiah(form.find('[name="nominal_tf"]').val()),
+                        'norek_pengirim_tf': form.find('[name="norek_pengirim_tf"]').val(),
+                    };
+
+                    // 3. Kumpulkan data dari tabel Credit Card
+                    form.find('table tbody tr').each(function() {
+                        const $row = $(this);
+                        // Kirim hanya jika ada mesin EDC yang dipilih dan nominal diisi
+                        const mesinEdc = $row.find('[name="bank_perusahaan_id_cc[]"]').val();
+                        const nominalCc = unformatRupiah($row.find('[name="nominal_cc[]"]').val());
+
+                        if (mesinEdc && nominalCc > 0) {
+                            dataToSend.bank_perusahaan_id_cc.push(mesinEdc);
+                            dataToSend.tipe_cc.push($row.find('[name="tipe_cc[]"]').val());
+                            dataToSend.cc_number_cc.push($row.find('[name="cc_number_cc[]"]')
+                                .val());
+                            dataToSend.auth_number_cc.push($row.find('[name="auth_number_cc[]"]')
+                                .val());
+                            dataToSend.batch_cc.push($row.find('[name="batch_cc[]"]').val());
+                            dataToSend.nominal_cc.push(nominalCc);
                         }
                     });
 
-                    // Tambahkan data yang tidak ada di form secara eksplisit
-                    dataToSend.bilingan_id = '{{ $bilingan->id }}';
-                    dataToSend.user_id = '{{ auth()->user()->id }}';
-                    dataToSend.jumlah_terbayar = unformatRupiah($('#totalBayar').val());
-                    dataToSend.sisa_tagihan = unformatRupiah($('#sisaTagihan').val());
-                    dataToSend.kembalian = unformatRupiah($('#kembalian').val());
-
+                    // 4. Tambahkan catatan pembayaran
                     let now = new Date();
                     let formattedDate =
                         `${now.getDate()} ${now.toLocaleString('default', { month: 'short' })} ${now.getFullYear()} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
                     dataToSend.bill_notes = `Lunas, Tgl Bayar: ${formattedDate}`;
 
+
+                    // 5. Kirim data yang sudah bersih ke server
                     $.ajax({
                         url: '/simrs/kasir/pembayaran-tagihan',
                         type: 'POST',
                         data: dataToSend,
-                        headers: {
-                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                        },
                         success: function(response) {
                             Swal.fire({
                                     icon: 'success',
@@ -399,17 +434,27 @@
                                 .then(() => location.reload());
                         },
                         error: function(xhr) {
+                            // Tampilkan pesan error dari server jika ada
+                            let message = 'Terjadi kesalahan saat menyimpan data.';
+                            if (xhr.responseJSON && xhr.responseJSON.message) {
+                                message = xhr.responseJSON.message;
+                                // Jika ada error validasi spesifik, tampilkan juga
+                                if (xhr.responseJSON.errors) {
+                                    message += '<br><small>' + Object.values(xhr.responseJSON
+                                        .errors).join('<br>') + '</small>';
+                                }
+                            }
                             Swal.fire({
                                 icon: 'error',
                                 title: 'Gagal!',
-                                text: xhr.responseJSON.message ||
-                                    'Terjadi kesalahan saat menyimpan pembayaran.'
+                                html: message
                             });
                             bayarBtn.prop('disabled', false).html(
                                 '<i class="fas fa-money-bill-alt me-1"></i> Bayar');
                         }
                     });
                 });
+
 
                 // ================================================================
                 // INISIALISASI SAAT HALAMAN DIMUAT
@@ -491,9 +536,12 @@
                         {
                             data: 'print',
                             name: 'print'
+                        },
+                        {
+                            data: 'aksi',
+                            name: 'aksi'
                         }
                     ],
-                    // ... (sisa opsi datatable)
                 });
 
                 // Event handler untuk tombol print
@@ -507,6 +555,78 @@
                         'toolbar=yes,scrollbars=yes,resizable=yes,fullscreen=yes');
                 });
             }
+
+            // ================================================================
+            // NEW EVENT HANDLERS FOR CANCELLATION BUTTONS
+            // ================================================================
+
+            // 1. Event handler for the "Cancel Payment" button
+            $(document).on('click', '.btn-cancel-payment', function() {
+                const billingId = $(this).data('billing-id');
+
+                Swal.fire({
+                    title: 'Batalkan Pembayaran?',
+                    text: "Aksi ini akan menghapus catatan pembayaran dan mengubah status tagihan menjadi 'Belum Lunas'. Anda yakin?",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Ya, batalkan pembayaran!',
+                    cancelButtonText: 'Tidak'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: `/simrs/kasir/bilingan/cancel-payment/${billingId}`,
+                            type: 'PUT',
+                            headers: {
+                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                            },
+                            success: function(response) {
+                                Swal.fire('Berhasil!', response.message, 'success')
+                                    .then(() => location.reload());
+                            },
+                            error: function(xhr) {
+                                Swal.fire('Gagal!', xhr.responseJSON.message ||
+                                    'Terjadi kesalahan.', 'error');
+                            }
+                        });
+                    }
+                });
+            });
+
+            // 2. Event handler for the "Cancel Bill" button
+            $(document).on('click', '.btn-cancel-bill', function() {
+                const billingId = $(this).data('billing-id');
+
+                Swal.fire({
+                    title: 'Batalkan Tagihan Final?',
+                    text: "Aksi ini akan mengembalikan status tagihan dari 'Final' menjadi 'Draft', memungkinkan Anda untuk mengeditnya kembali. Anda yakin?",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Ya, batalkan tagihan!',
+                    cancelButtonText: 'Tidak'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: `/simrs/kasir/bilingan/cancel-bill/${billingId}`,
+                            type: 'PUT',
+                            headers: {
+                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                            },
+                            success: function(response) {
+                                Swal.fire('Berhasil!', response.message, 'success')
+                                    .then(() => location.reload());
+                            },
+                            error: function(xhr) {
+                                Swal.fire('Gagal!', xhr.responseJSON.message ||
+                                    'Terjadi kesalahan.', 'error');
+                            }
+                        });
+                    }
+                });
+            });
         });
     </script>
 @endsection

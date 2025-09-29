@@ -149,7 +149,7 @@
             function recalculateRow($row) {
                 // 1. Baca semua nilai, PASTIKAN di-unformat terlebih dahulu
                 const quantity = parseFloat($row.find('.input-quantity').val()) || 0;
-                const nominal = unformatRupiah($row.find('.input-nominal').val());
+                const nominal = unformatRupiah($row.find('.input-nominal-awal').val());
                 const discPercent = parseFloat($row.find('.input-disc').val()) || 0;
                 const diskonRp = unformatRupiah($row.find('.input-diskon-rp').val());
                 const jaminPercent = parseFloat($row.find('.input-jamin').val()) || 0;
@@ -176,7 +176,7 @@
                 $('#tagihanTable tbody tr').each(function() {
                     const $row = $(this);
                     const quantity = parseFloat($row.find('.input-quantity').val()) || 0;
-                    const nominal = unformatRupiah($row.find('.input-nominal').val());
+                    const nominal = unformatRupiah($row.find('.input-nominal-awal').val());
                     const jaminPercent = parseFloat($row.find('.input-jamin').val()) || 0;
                     const jaminanRp = unformatRupiah($row.find('.input-jaminan-rp').val());
                     const wajibBayar = unformatRupiah($row.find('.input-wajib-bayar').val());
@@ -242,10 +242,10 @@
                         }
                     },
                     {
-                        data: 'nominal',
-                        name: 'nominal',
+                        data: 'nominal_awal',
+                        name: 'nominal_awal',
                         render: function(data, type, row) {
-                            return `<input type="text" readonly class="form-control edit-input input-nominal format-rupiah" value="${formatRupiah(data)}" data-column="nominal" data-id="${row.id}">`;
+                            return `<input type="text" readonly class="form-control edit-input input-nominal-awal format-rupiah" value="${formatRupiah(data)}" data-column="nominal" data-id="${row.id}">`;
                         }
                     },
                     {
