@@ -142,7 +142,7 @@
                                                         style="transform: scale(1.4)"></i>
                                                 </div>
                                                 <div class="col">
-                                                    <span class="d-block">{{ $age }}</span>
+                                                    <span class="d-block">{{ hitungUmur($patient->date_of_birth) }}</span>
                                                     <span class="text-primary">Umur</span>
                                                 </div>
                                             </div>
