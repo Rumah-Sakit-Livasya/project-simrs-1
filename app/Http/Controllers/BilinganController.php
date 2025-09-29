@@ -488,7 +488,7 @@ class BilinganController extends Controller
         // Fetch unbilled lab orders
         $labOrders = OrderLaboratorium::with(['order_parameter_laboratorium.parameter_laboratorium'])
             ->where('registration_id', $registration_id)
-            ->where('status_billed', 0)
+            ->where('is_konfirmasi', 0)
             ->get()
             ->flatMap(function ($order) {
                 // Setiap order bisa punya banyak order_parameter_laboratorium

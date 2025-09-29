@@ -524,11 +524,24 @@
             const tagihanTable = $('#tagihanTable').DataTable();
 
             function fetchNotifications() {
+                notifList.empty();
+
+                // Tampilkan animasi loading sebelum data termuat
+                const loadingHtml = `
+                    <div class="d-flex justify-content-center align-items-center py-3" id="notif-loading-indicator">
+                        <div class="spinner-border text-primary" role="status" style="width: 1.5rem; height: 1.5rem;">
+                            <span class="sr-only">Loading...</span>
+                        </div>
+                        <span class="mr-2">Memuat notifikasi...</span>
+                    </div>
+                `;
+                notifList.append(loadingHtml);
+
                 $.ajax({
                     url: `/simrs/kasir/order-notifications/${registrationId}`,
                     type: 'GET',
                     success: function(data) {
-                        notifList.empty(); // Clear previous list
+                        notifList.empty(); // Hapus loading
                         notifBadge.text(data.length); // Update badge count
 
                         if (data.length === 0) {
@@ -550,6 +563,12 @@
                                 notifList.append(itemHtml);
                             });
                         }
+                    },
+                    error: function() {
+                        notifList.empty();
+                        notifList.append(
+                            '<div class="text-danger text-center py-2">Gagal memuat notifikasi.</div>'
+                        );
                     }
                 });
             }
