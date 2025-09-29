@@ -355,7 +355,7 @@ class OrderLaboratoriumController extends Controller
             'order_id' => 'required|integer|exists:order_laboratorium,id',
             'diagnosa_klinis' => 'nullable|string|max:255',
             'inspection_date' => 'nullable|date',
-            'result_date' => 'nullable|date',
+            'result_datetime' => 'nullable|date',
         ]);
 
         if ($validator->fails()) {
@@ -378,7 +378,7 @@ class OrderLaboratoriumController extends Controller
             $order->update([
                 'diagnosa_klinis' => $validatedData['diagnosa_klinis'],
                 'inspection_date' => $validatedData['inspection_date'],
-                'result_date'     => $validatedData['result_date'],
+                'result_datetime'     => $validatedData['result_datetime'],
             ]);
 
             // Loop melalui parameter yang ada dan update jika ada input baru
