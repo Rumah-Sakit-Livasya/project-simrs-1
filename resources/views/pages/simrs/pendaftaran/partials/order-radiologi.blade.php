@@ -268,7 +268,7 @@
                 <hr class="mt-0">
 
                 {{-- PEMILIHAN PEMERIKSAAN --}}
-                <div class="px-3 mt-3">
+                <div class="px-3 mb-3">
                     <div class="form-group">
                         <label class="form-label" for="searchRadiology">Cari Pemeriksaan</label>
                         <div class="input-group">
@@ -295,7 +295,7 @@
                     @foreach ($radiology_categories as $category)
                         <div class="{{ $columnClass }} category-column mb-3">
                             <div class="panel panel-pemeriksaan">
-                                <div class="panel">
+                                <div class="panel-hdr">
                                     <h2 class="h6 mb-0">{{ $category->nama_kategori }}</h2>
                                     <div class="panel-toolbar">
                                         <small class="text-muted">{{ $category->parameter_radiologi->count() }}

@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Models\SIMRS\Bilingan;
 use App\Models\SIMRS\Doctor;
 use App\Models\SIMRS\ParameterRadiologi;
+use App\Models\SIMRS\Patient;
 use App\Models\SIMRS\Registration;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -36,6 +37,12 @@ class OrderRadiologi extends Model
     {
         return $this->belongsToMany(ParameterRadiologi::class, 'order_parameter_radiologi');
     }
+
+    public function patient()
+    {
+        return $this->belongsTo(Patient::class);
+    }
+
 
     // Pada model OrderRadiologi.php
     public function bilingan()
