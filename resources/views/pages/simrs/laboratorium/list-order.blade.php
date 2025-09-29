@@ -120,12 +120,38 @@
                 cancelButtonText: 'Batal'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    // Lakukan AJAX call untuk konfirmasi di sini
-                    // Contoh: $.post(`//apisimrs/laboratorium/confirm-payment/${orderId}`, function(data) { ... });
-                    showSuccessAlert('Tagihan berhasil dikonfirmasi.');
-                    // location.reload(); // Uncomment untuk muat ulang halaman
+                    let formData = new FormData();
+                    formData.append('id', orderId);
+
+                    fetch("/api/simrs/laboratorium/pay", {
+                            method: "POST",
+                            body: formData,
+                            headers: {
+                                "X-CSRF-TOKEN": document
+                                    .querySelector('meta[name="csrf-token"]')
+                                    ?.getAttribute("content") || "",
+                            },
+                        })
+                        .then((response) => {
+                            if (!response.ok) {
+                                throw new Error("Error: " + response.statusText);
+                            }
+                            return response.json();
+                        })
+                        .then((data) => {
+                            if (data.success) {
+                                showSuccessAlert("Data berhasil disimpan");
+                                setTimeout(() => window.location.reload(), 2000);
+                            } else {
+                                showErrorAlertNoRefresh(data.message || "Terjadi kesalahan.");
+                            }
+                        })
+                        .catch((error) => {
+                            console.log("Error:", error);
+                            showErrorAlertNoRefresh(`Error: ${error.message}`);
+                        });
                 }
-            })
+            });
         });
 
         $(document).on('click', '.edit-btn', function() {
