@@ -290,9 +290,11 @@ class OrderLaboratoriumController extends Controller
 
         $order->update(['is_konfirmasi' => 1]);
 
+        $success = true;
+        $message = 'Konfirmasi pembayaran berhasil.';
+
         if (! $order->otc_id && $order->registration_id) {
             $billing = Bilingan::firstOrCreate(
-
                 ['registration_id' => $order->registration_id],
                 [
                     'patient_id' => $order->registration->patient_id,
@@ -315,6 +317,7 @@ class OrderLaboratoriumController extends Controller
                     'date' => Carbon::now(),
                     'tagihan' => '[Biaya Laboratorium] ' . $parameter->parameter_laboratorium->parameter,
                     'quantity' => 1,
+                    'nominal_awal' => $parameter->nominal_rupiah,
                     'nominal' => $parameter->nominal_rupiah,
                     'harga' => $parameter->nominal_rupiah,
                     'wajib_bayar' => $parameter->nominal_rupiah,
@@ -339,7 +342,10 @@ class OrderLaboratoriumController extends Controller
             }
         }
 
-        return response('ok');
+        return response()->json([
+            'success' => $success,
+            'message' => $message,
+        ]);
     }
 
     public function editOrderLaboratorium(Request $request)
