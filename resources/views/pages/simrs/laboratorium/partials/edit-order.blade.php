@@ -200,11 +200,12 @@
                                     @enderror
                                 </div>
                                 <div class="form-group">
-                                    <label class="form-label" for="result_date">Tanggal Hasil</label>
-                                    <input type="date" class="form-control @error('result_date') is-invalid @enderror"
-                                        id="result_date" name="result_date"
-                                        value="{{ old('result_date', $order->result_date ? \Carbon\Carbon::parse($order->result_date)->format('Y-m-d') : '') }}">
-                                    @error('result_date')
+                                    <label class="form-label" for="result_datetime">Tgl & Jam Hasil</label>
+                                    <input type="datetime-local"
+                                        class="form-control @error('result_datetime') is-invalid @enderror"
+                                        id="result_datetime" name="result_datetime"
+                                        value="{{ old('result_datetime', $order->result_datetime ? \Carbon\Carbon::parse($order->result_datetime)->format('Y-m-d\TH:i') : '') }}">
+                                    @error('result_datetime')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
