@@ -102,6 +102,7 @@ use App\Http\Controllers\SIMRS\Setup\TarifRegistrasiController;
 use App\Http\Controllers\SIMRS\TagihanPasienController;
 use App\Http\Controllers\SIMRS\TarifVisiteDokterController;
 use App\Http\Controllers\SIMRS\TindakanMedisController;
+use App\Http\Controllers\SIMRS\TipeTransaksiController;
 use App\Http\Controllers\SIMRS\TriageController;
 use App\Http\Controllers\SIMRS\UtilityController;
 use App\Http\Controllers\SIMRS\Warehouse\DistribusiBarangController;
@@ -446,6 +447,16 @@ Route::group(['middleware' => ['auth']], function () {
                     Route::get('/', [EthnicController::class, 'index'])
                         ->name('master-data.ethnics');
                 });
+
+                // Rute untuk menampilkan halaman utama dan data untuk DataTables
+                Route::get('tipe-transaksi', [TipeTransaksiController::class, 'index'])->name('tipe-transaksi.index');
+                Route::get('tipe-transaksi/data', [TipeTransaksiController::class, 'data'])->name('tipe-transaksi.data');
+
+                // Rute untuk proses CRUD (API-like)
+                Route::post('tipe-transaksi', [TipeTransaksiController::class, 'store'])->name('tipe-transaksi.store');
+                Route::get('tipe-transaksi/{id}/edit', [TipeTransaksiController::class, 'edit'])->name('tipe-transaksi.edit');
+                Route::put('tipe-transaksi/{id}', [TipeTransaksiController::class, 'update'])->name('tipe-transaksi.update');
+                Route::delete('tipe-transaksi/{id}', [TipeTransaksiController::class, 'destroy'])->name('tipe-transaksi.destroy');
             });
 
             // Medical services routes
@@ -1408,6 +1419,9 @@ Route::group(['middleware' => ['auth']], function () {
             Route::get('/print-bill/{id}', [BilinganController::class, 'printBill'])->name('print.bill');
             Route::get('/print-kwitansi/{id}', [BilinganController::class, 'printKwitansi'])->name('print.kwitansi');
             Route::get('/tagihan-pasien/{id}/tarif', [TagihanPasienController::class, 'getTarifShare']);
+
+            Route::get('/order-notifications/{registration_id}', [BilinganController::class, 'getOrderNotifications'])->name('kasir.order-notifications');
+            Route::post('/process-order', [BilinganController::class, 'processOrderIntoBill'])->name('kasir.process-order');
         });
 
         Route::prefix('operasi')->group(function () {

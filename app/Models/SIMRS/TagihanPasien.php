@@ -108,4 +108,12 @@ class TagihanPasien extends Model implements AuditableContract
     {
         return $this->belongsTo(OrderAlatMedis::class);
     }
+
+    /**
+     * Satu Tagihan Pasien dimiliki oleh satu Tipe Transaksi.
+     */
+    public function tipeTransaksi()
+    {
+        return $this->belongsTo(TipeTransaksi::class);
+    }
 }

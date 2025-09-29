@@ -4,16 +4,21 @@ namespace App\Http\Controllers\SIMRS;
 
 use App\Http\Controllers\Controller;
 use App\Models\Employee;
+use App\Models\OrderRadiologi;
 use App\Models\SIMRS\Bilingan;
 use App\Models\SIMRS\BilinganTagihanPasien;
 use App\Models\SIMRS\Departement;
 use App\Models\SIMRS\KelasRawat;
+use App\Models\SIMRS\Laboratorium\OrderLaboratorium;
 use App\Models\SIMRS\OrderTindakanMedis;
+use App\Models\SIMRS\Peralatan\OrderAlatMedis;
 use App\Models\SIMRS\Registration;
 use App\Models\SIMRS\TagihanPasien;
 use App\Models\SIMRS\TindakanMedis;
+use App\Models\SIMRS\TipeTransaksi;
 use App\Models\TarifTindakanMedis;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -129,12 +134,37 @@ class TagihanPasienController extends Controller
 
     public function detailTagihan($id)
     {
-        $bilingan = Bilingan::where('id', $id)->first();
+        $bilingan = Bilingan::with('registration')->findOrFail($id);
+        $registrationId = $bilingan->registration->id;
+
+        // =================================================================
+        // PERBAIKAN UTAMA: Filter orders by the CURRENT registration ID
+        // =================================================================
+        $order_lab = OrderLaboratorium::where('registration_id', $registrationId)
+            ->where('status_billed', 0)
+            ->get();
+
+        $order_rad = OrderRadiologi::where('registration_id', $registrationId)
+            ->where('status_billed', 0)
+            ->get();
+
+        // Combine the counts for the badge
+        $belum_ditagihkan = $order_lab->count() + $order_rad->count();
+
+        // Data for dropdowns in modal (no change needed here)
         $kelasRawats = KelasRawat::all();
         $doctors = Employee::where('is_doctor', 1)->get();
         $departements = Departement::all();
-        // return dd($kelasRawats);
-        return view('pages.simrs.keuangan.kasir.detail', compact('bilingan', 'kelasRawats', 'doctors', 'departements'));
+        $tipe_transaksi = TipeTransaksi::all();
+
+        return view('pages.simrs.keuangan.kasir.detail', compact(
+            'tipe_transaksi',
+            'belum_ditagihkan',
+            'bilingan',
+            'kelasRawats',
+            'doctors',
+            'departements'
+        ));
     }
 
     public function destroyTagihan($id)
