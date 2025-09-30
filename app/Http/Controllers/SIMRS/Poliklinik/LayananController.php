@@ -103,6 +103,7 @@ class LayananController extends Controller
                 'tagihan' => '[Pemakaian Alat]', // Nama alat diisi setelah commit
                 'quantity' => $validatedData['qty'],
                 'nominal' => $nominalTotal,
+                'nominal_awal' => $tarif->total,
                 'wajib_bayar' => $nominalTotal,
             ]);
 
