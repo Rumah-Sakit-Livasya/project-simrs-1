@@ -87,7 +87,7 @@
 
 @section('content')
     <main id="js-page-content" role="main" class="page-content">
-        <form id="form-laboratorium" action="{{ route('order.laboratorium.edit-order') }}" method="POST">
+        <form id="form-laboratorium" action="{{ route('order.laboratorium.edit-order') }}" method="POST" autocomplete="off">
             @csrf
             <input type="hidden" name="user_id" value="{{ auth()->user()->id }}">
             <input type="hidden" name="employee_id" value="{{ auth()->user()->employee->id }}">
@@ -200,11 +200,12 @@
                                     @enderror
                                 </div>
                                 <div class="form-group">
-                                    <label class="form-label" for="result_date">Tanggal Hasil</label>
-                                    <input type="date" class="form-control @error('result_date') is-invalid @enderror"
-                                        id="result_date" name="result_date"
-                                        value="{{ old('result_date', $order->result_date ? \Carbon\Carbon::parse($order->result_date)->format('Y-m-d') : '') }}">
-                                    @error('result_date')
+                                    <label class="form-label" for="result_datetime">Tgl & Jam Hasil</label>
+                                    <input type="datetime-local"
+                                        class="form-control @error('result_datetime') is-invalid @enderror"
+                                        id="result_datetime" name="result_datetime"
+                                        value="{{ old('result_datetime', $order->result_datetime ? \Carbon\Carbon::parse($order->result_datetime)->format('Y-m-d\TH:i') : '') }}">
+                                    @error('result_datetime')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
@@ -408,10 +409,10 @@
                                     <span class="fal fa-plus-circle mr-2"></span>
                                     Tambah Tindakan
                                 </button>
-                                <button type="submit" id="laboratorium-submit"
+                                <button type="button" id="laboratorium-submit"
                                     class="btn btn-lg btn-primary waves-effect waves-themed">
                                     <span class="fal fa-save mr-2"></span>
-                                    Simpan Perubahan
+                                    Simpan Final
                                 </button>
                             </div>
                         </div>
@@ -527,6 +528,90 @@
                 showDeleteConfirmation(function() {
                     /* AJAX Call Here */
                     showSuccessAlert('Pemeriksaan berhasil dihapus.');
+                });
+            });
+
+            // --- SUBMIT FORM VIA JS DENGAN KONFIRMASI ---
+            $('#form-laboratorium').on('submit', function(e) {
+                // Prevent default submit, handled by JS
+                e.preventDefault();
+            });
+
+            $('#laboratorium-submit').on('click', function(e) {
+                e.preventDefault();
+                Swal.fire({
+                    title: 'Simpan Final?',
+                    text: "Pastikan data sudah benar sebelum disimpan.",
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'Ya, Simpan!',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Submit form via AJAX
+                        var $form = $('#form-laboratorium');
+                        var formData = new FormData($form[0]);
+                        var actionUrl = $form.attr('action');
+                        var $btn = $(this);
+                        $btn.prop('disabled', true).html(
+                            '<span class="spinner-border spinner-border-sm mr-2"></span>Proses...'
+                        );
+                        $.ajax({
+                            url: actionUrl,
+                            method: 'POST',
+                            data: formData,
+                            processData: false,
+                            contentType: false,
+                            success: function(response) {
+                                // Sukses, bisa redirect atau reload
+                                Swal.fire({
+                                    title: 'Berhasil!',
+                                    text: 'Data berhasil disimpan.',
+                                    icon: 'success',
+                                    confirmButtonText: 'OK'
+                                }).then(() => {
+                                    // Redirect ke daftar order atau reload
+                                    window.location.href =
+                                        "{{ route('laboratorium.list-order') }}";
+                                });
+                            },
+                            error: function(xhr) {
+                                $btn.prop('disabled', false).html(
+                                    '<span class="fal fa-save mr-2"></span>Simpan Final'
+                                );
+                                // Tampilkan error
+                                let msg = 'Terjadi kesalahan saat menyimpan data.';
+                                if (xhr.responseJSON && xhr.responseJSON.message) {
+                                    msg = xhr.responseJSON.message;
+                                }
+                                Swal.fire({
+                                    title: 'Gagal!',
+                                    text: msg,
+                                    icon: 'error',
+                                    confirmButtonText: 'OK'
+                                });
+                                // Jika ada error validasi, tampilkan di form
+                                if (xhr.status === 422 && xhr.responseJSON && xhr
+                                    .responseJSON.errors) {
+                                    let errors = xhr.responseJSON.errors;
+                                    // Bersihkan error sebelumnya
+                                    $form.find('.is-invalid').removeClass('is-invalid');
+                                    $form.find('.invalid-feedback').remove();
+                                    $.each(errors, function(field, messages) {
+                                        let $input = $form.find('[name="' +
+                                            field + '"]');
+                                        $input.addClass('is-invalid');
+                                        if ($input.next('.invalid-feedback')
+                                            .length === 0) {
+                                            $input.after(
+                                                '<div class="invalid-feedback">' +
+                                                messages[0] + '</div>');
+                                        }
+                                    });
+                                }
+                            }
+                        });
+                    }
                 });
             });
         });

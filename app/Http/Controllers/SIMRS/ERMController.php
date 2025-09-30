@@ -1226,7 +1226,14 @@ class ERMController extends Controller
         $file = $request->file('file');
         $registrationId = $request->registration_id;
         $path = "documents/{$registrationId}";
-        $storedFile = $file->store($path, 'public');
+
+        // Generate a unique filename to avoid duplicate entry on unique index
+        $extension = $file->getClientOriginalExtension();
+        $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+        $uniqueSuffix = uniqid('_', true);
+        $uniqueFileName = $originalName . $uniqueSuffix . '.' . $extension;
+
+        $storedFile = $file->storeAs($path, $uniqueFileName, 'public');
 
         \App\Models\UploadedDocument::create([
             'registration_id' => $registrationId,
@@ -1234,7 +1241,7 @@ class ERMController extends Controller
             'document_category_id' => $request->document_category_id,
             'description' => $request->description,
             'original_filename' => $file->getClientOriginalName(),
-            'stored_filename' => basename($storedFile),
+            'stored_filename' => $uniqueFileName,
             'file_path' => $storedFile,
             'mime_type' => $file->getMimeType(),
             'file_size' => $file->getSize(),
@@ -1581,8 +1588,30 @@ class ERMController extends Controller
                 // $order_lab = OrderLaboratorium::where('registration_id', $registration->id)->get();
 
                 $groupPenjaminId = GroupPenjamin::where('id', $registration->penjamin->group_penjamin_id)->first()->id;
+                $tipeRegis = $registration->registration_type;
+                $kelasRawat = in_array($tipeRegis, ['rawat-jalan', 'igd', 'odc']) ? 'RAWAT JALAN' : 'RAWAT INAP';
+                $jaminan = $registration->penjamin->name;
+                if ($jaminan === 'Umum') {
+                    $penjamin = 'Jaminan Pribadi';
+                } elseif ($jaminan === 'BPJS') {
+                    $penjamin = "BPJS Kesehatan";
+                } else {
+                    $penjamin = $registration->penjamin->name;
+                }
 
-                return view('pages.simrs.erm.form.layanan.patologi-klinik', compact('laboratoriumOrders', 'laboratoriumDoctors', 'laboratorium_categories', 'laboratorium_tarifs', 'patient', 'groupPenjaminId', 'kelas_rawats', 'registration', 'registrations', 'menu', 'departements', 'jadwal_dokter', 'path'));
+                // Group doctors by department
+                $doctors = Doctor::with(['employee', 'departements', 'department_from_doctors'])
+                    ->whereHas('department_from_doctors')
+                    ->get();
+
+                $groupedDoctors = [];
+                foreach ($doctors as $doctor) {
+                    if ($doctor->department_from_doctors) {
+                        $groupedDoctors[$doctor->department_from_doctors->name][] = $doctor;
+                    }
+                }
+
+                return view('pages.simrs.erm.form.layanan.patologi-klinik', compact('laboratoriumOrders', 'laboratoriumDoctors', 'laboratorium_categories', 'laboratorium_tarifs', 'patient', 'groupPenjaminId', 'groupedDoctors', 'penjamin', 'kelas_rawats', 'kelasRawat', 'registration', 'registrations', 'menu', 'departements', 'jadwal_dokter', 'path'));
 
             case 'transfer_pasien_perawat':
                 $pengkajian = TransferPasienAntarRuangan::firstWhere('registration_id', $registration->id);

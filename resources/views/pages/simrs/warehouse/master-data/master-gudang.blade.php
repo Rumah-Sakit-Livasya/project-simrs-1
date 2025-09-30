@@ -1,37 +1,37 @@
 @extends('inc.layout')
 @section('title', 'List Master Gudang')
+
 @section('content')
     <main id="js-page-content" role="main" class="page-content">
+        <div class="subheader">
+            <h1 class="subheader-title">
+                <i class='subheader-icon fal fa-warehouse'></i> Master Gudang
+                <small>
+                    Pengelolaan data master gudang, apotek, dan warehouse.
+                </small>
+            </h1>
+        </div>
 
+        {{-- Form Pencarian --}}
         @include('pages.simrs.warehouse.master-data.partials.master-gudang-form')
 
+        {{-- Tabel Data --}}
         @include('pages.simrs.warehouse.master-data.partials.master-gudang-datatable')
-
-        @include('pages.simrs.warehouse.master-data.partials.add-master-gudang-modal')
     </main>
+
+    {{-- Modal Tambah Data --}}
+    @include('pages.simrs.warehouse.master-data.partials.gudang-modal')
 @endsection
+
 @section('plugin')
     <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
     <script src="/js/datagrid/datatables/datatables.export.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous">
-    </script>
+    <script src="/js/formplugins/select2/select2.bundle.js"></script> {{-- Tambahkan ini --}}
 
     <script>
-        var controls = {
-            leftArrow: '<i class="fal fa-angle-left" style="font-size: 1.25rem"></i>',
-            rightArrow: '<i class="fal fa-angle-right" style="font-size: 1.25rem"></i>'
-        }
-
         $(document).ready(function() {
-
-            $('#loading-spinner').show();
-            // initialize datatable
-            $('#dt-basic-example').dataTable({
-                "drawCallback": function(settings) {
-                    // Menyembunyikan preloader setelah data berhasil dimuat
-                    $('#loading-spinner').hide();
-                },
+            // Inisialisasi Datatable
+            $('#dt-master-gudang').dataTable({
                 responsive: true,
                 lengthChange: false,
                 dom: "<'row mb-3'<'col-sm-12 col-md-6 d-flex align-items-center justify-content-start'f><'col-sm-12 col-md-6 d-flex align-items-center justify-content-end'lB>>" +
@@ -70,9 +70,29 @@
                 ]
             });
 
+            $('.select2').select2({
+                // jika select2 berada di dalam modal, dropdownParent diperlukan
+                // jika tidak, baris ini tidak akan berpengaruh buruk
+                dropdownParent: $(this).closest('.modal')
+            });
+
+            $('#filter_apotek').select2({
+                placeholder: 'Pilih status apotek'
+            });
+            $('#filter_warehouse').select2({
+                placeholder: 'Pilih status warehouse'
+            });
+            $('#filter_aktif').select2({
+                placeholder: 'Pilih status'
+            });
+
+            // Inisialisasi Select2 KHUSUS untuk MODAL
+            $('.select2-modal').select2({
+                dropdownParent: $('#gudangModal') // Penting!
+            });
+
         });
     </script>
-
+    {{-- JS untuk fungsionalitas hapus --}}
     <script src="{{ asset('js/simrs/warehouse/master-data/master-gudang.js') }}?v={{ time() }}"></script>
-
 @endsection

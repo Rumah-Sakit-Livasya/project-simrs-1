@@ -1243,11 +1243,10 @@ class RegistrationController extends Controller
      * @param  string  $layanan
      * @return \Illuminate\View\View|\Illuminate\Http\Response
      */
-    public function layanan(int $id, string $layanan)
+    public function layanan(int $registrations, string $layanan)
     {
         $registration = Registration::with(['patient', 'doctor', 'penjamin'])
-            ->where('registration_number', $id)
-            ->firstOrFail();
+            ->findOrFail($registrations);
 
         $doctors = Doctor::with(['employee', 'departements', 'department_from_doctors'])->get();
 
@@ -1362,7 +1361,7 @@ class RegistrationController extends Controller
         return match ($layanan) {
             'tindakan-medis'   => view('pages.simrs.pendaftaran.partials.tindakan-medis', $viewData),
             'laboratorium'     => view('pages.simrs.pendaftaran.partials.laboratorium', $viewData),
-            'radiologi'     => view('pages.simrs.pendaftaran.partials.radiologi', $viewData),
+            'radiologi'        => view('pages.simrs.pendaftaran.partials.radiologi', $viewData),
             'pemakaian-alat'   => view('pages.simrs.pendaftaran.partials.pemakaian-alat', $viewData),
             'visite-dokter'    => view('pages.simrs.pendaftaran.partials.visite-dokter', $viewData),
             'operasi'          => view('pages.simrs.pendaftaran.partials.operasi', $viewData),

@@ -23,24 +23,17 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class LaboratoriumController extends Controller
 {
-    public function order(Request $request)
+    public function order()
     {
         $laboratoriumDoctors = Doctor::whereHas('department_from_doctors', function ($query) {
             $query->where('name', 'like', '%lab%');
         })->get();
-
-        $registration = null;
-        if ($request->filled('registration_id')) {
-            $registration = \App\Models\SIMRS\Registration::find($request->registration_id);
-        }
-
         return view('pages.simrs.laboratorium.order', [
             'laboratoriumDoctors' => $laboratoriumDoctors,
             'penjamins' => Penjamin::all(),
             'kelas_rawats' => KelasRawat::all(),
             'laboratorium_categories' => KategoriLaboratorium::all(),
-            'laboratorium_tarifs' => TarifParameterLaboratorium::all(),
-            'registration' => $registration,
+            'tarifs' => TarifParameterLaboratorium::all(),
         ]);
     }
 

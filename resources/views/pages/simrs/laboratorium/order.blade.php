@@ -364,17 +364,17 @@
                 dropdownCssClass: "move-up"
             });
 
+            // Menyimpan variabel global dari Controller
+            window._kategoriLaboratorium = @json($laboratorium_categories);
+            window._tarifLaboratorium = @json($tarifs);
+            window._penjamins = @json($penjamins);
+            window._kelasRawats = @json($kelas_rawats);
+
+            // TIDAK PERLU ADA JAVASCRIPT DISINI LAGI
+            // Semua logika sudah dipindahkan ke file eksternal
         });
     </script>
 
-    <script>
-        // Pass data dari PHP ke JavaScript
-        window._kategoriLaboratorium = @json($laboratorium_categories);
-        window._tarifLaboratorium = @json($laboratorium_tarifs);
-        window._registration = @json($registration);
-        window._groupPenjaminId = @json($groupPenjaminId);
-        window._kelasRawats = @json($kelas_rawats);
-    </script>
-    {{-- Pastikan nama file JS ini sesuai dan dimuat di layout utama Anda --}}
-    <script src="{{ asset('js/simrs/form-laboratorium.js') }}?v={{ time() }}"></script>
+    {{-- Memuat file JS eksternal yang sudah diperbaiki --}}
+    <script src="{{ asset('js/simrs/order-laboratorium-jquery.js') }}?v={{ time() }}"></script>
 @endsection

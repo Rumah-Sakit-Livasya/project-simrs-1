@@ -54,6 +54,27 @@
         {{-- <button class="btn btn-info" id="save-partial">Save Partial</button> --}}
         <button class="btn btn-secondary" id="reload-tagihan">Reload Tagihan</button>
         <button class="btn btn-primary" id="add-tagihan">Tambah Tagihan</button>
+        <button class="btn btn-info position-relative ml-2" id="order-notification-btn">
+            <i class="fa fa-bell"></i>
+            <span class="badge badge-danger position-absolute top-0 start-100 translate-middle"
+                id="order-notification-badge" style="font-size: 0.8em;">
+                {{ $belum_ditagihkan ?? 0 }}
+            </span>
+        </button>
+
+        <div id="order-notification-popup" class="card shadow border position-fixed"
+            style="display: none; top: 80px; right: 30px; z-index: 1050; width: 350px; max-width: 90vw;">
+            <div class="card-header d-flex justify-content-between align-items-center py-2 px-3">
+                <span class="font-weight-bold">Notifikasi Order</span>
+                <button type="button" class="close" id="close-order-notification-popup" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="card-body p-2" id="order-notification-list" style="max-height: 350px; overflow-y: auto;">
+                {{-- Daftar notifikasi order akan dimuat di sini --}}
+                <div class="text-center text-muted py-3" id="order-notification-empty">Tidak ada notifikasi order.</div>
+            </div>
+        </div>
     </div>
 
     {{-- Table --}}
@@ -483,6 +504,127 @@
             });
             $('#add-tagihan').on('click', function() {
                 $('#add-tagihan-modal').modal('show');
+            });
+        });
+    </script>
+
+    <script>
+        $(document).ready(function() {
+            // ================================================================
+            // NEW NOTIFICATION LOGIC
+            // ================================================================
+            const notifBtn = $('#order-notification-btn');
+            const notifPopup = $('#order-notification-popup');
+            const notifClose = $('#close-order-notification-popup');
+            const notifList = $('#order-notification-list');
+            const notifEmpty = $('#order-notification-empty').detach(); // Detach the "empty" message to reuse it
+            const notifBadge = $('#order-notification-badge');
+            const registrationId = "{{ $bilingan->registration->id }}";
+            const bilinganId = "{{ $bilingan->id }}";
+            const tagihanTable = $('#tagihanTable').DataTable();
+
+            function fetchNotifications() {
+                notifList.empty();
+
+                // Tampilkan animasi loading sebelum data termuat
+                const loadingHtml = `
+                    <div class="d-flex justify-content-center align-items-center py-3" id="notif-loading-indicator">
+                        <div class="spinner-border text-primary" role="status" style="width: 1.5rem; height: 1.5rem;">
+                            <span class="sr-only">Loading...</span>
+                        </div>
+                        <span class="mr-2">Memuat notifikasi...</span>
+                    </div>
+                `;
+                notifList.append(loadingHtml);
+
+                $.ajax({
+                    url: `/simrs/kasir/order-notifications/${registrationId}`,
+                    type: 'GET',
+                    success: function(data) {
+                        notifList.empty(); // Hapus loading
+                        notifBadge.text(data.length); // Update badge count
+
+                        if (data.length === 0) {
+                            notifList.append(notifEmpty);
+                        } else {
+                            data.forEach(function(order) {
+                                const itemHtml = `
+                            <div class="d-flex justify-content-between align-items-center border-bottom py-2 px-1">
+                                <div>
+                                    <strong>${order.title}</strong>
+                                    <br>
+                                    <small class="text-muted">${order.time} - Rp ${formatRupiah(order.nominal)}</small>
+                                </div>
+                                <button class="btn btn-primary btn-xs btn-process-order" data-order-id="${order.id}" data-order-type="${order.type}" title="Tambahkan ke Tagihan">
+                                    <i class="fal fa-plus"></i>
+                                </button>
+                            </div>
+                        `;
+                                notifList.append(itemHtml);
+                            });
+                        }
+                    },
+                    error: function() {
+                        notifList.empty();
+                        notifList.append(
+                            '<div class="text-danger text-center py-2">Gagal memuat notifikasi.</div>'
+                        );
+                    }
+                });
+            }
+
+            notifBtn.on('click', function() {
+                if (notifPopup.is(':visible')) {
+                    notifPopup.hide();
+                } else {
+                    fetchNotifications();
+                    notifPopup.show();
+                }
+            });
+
+            notifClose.on('click', function() {
+                notifPopup.hide();
+            });
+
+            // Event handler for the dynamically created "process order" buttons
+            notifList.on('click', '.btn-process-order', function() {
+                const btn = $(this);
+                const orderId = btn.data('order-id');
+                const orderType = btn.data('order-type');
+
+                // Add a loading state to the button
+                btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span>');
+
+                $.ajax({
+                    url: "{{ route('kasir.process-order') }}",
+                    type: 'POST',
+                    data: {
+                        _token: '{{ csrf_token() }}',
+                        order_id: orderId,
+                        order_type: orderType,
+                        bilingan_id: bilinganId
+                    },
+                    success: function(response) {
+                        showSuccessAlert(response.message);
+                        tagihanTable.ajax.reload(); // Reload the main billing table
+                        fetchNotifications(); // Refresh the notification list
+                    },
+                    error: function(xhr) {
+                        showErrorAlertNoRefresh(xhr.responseJSON.message ||
+                            'Gagal memproses order.');
+                        // Re-enable the button on error
+                        btn.prop('disabled', false).html('<i class="fal fa-plus"></i>');
+                    }
+                });
+            });
+
+            // Optional: Close popup when clicking outside
+            $(document).on('mousedown', function(event) {
+                if (notifPopup.is(':visible') && !notifPopup.is(event.target) && notifPopup.has(event
+                        .target).length === 0 && !notifBtn.is(event.target) && notifBtn.has(event.target)
+                    .length === 0) {
+                    notifPopup.hide();
+                }
             });
         });
     </script>

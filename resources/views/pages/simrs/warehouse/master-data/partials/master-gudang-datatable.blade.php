@@ -1,85 +1,87 @@
-<style>
-    .display-none {
-        display: none;
-    }
-
-    .popover {
-        max-width: 100%;
-        max-height:
-    }
-</style>
-
-
 <div class="row">
     <div class="col-xl-12">
-        <div id="panel-1" class="panel">
+        <div id="panel-2" class="panel">
             <div class="panel-hdr">
                 <h2>
                     Daftar <span class="fw-300"><i>Master Gudang</i></span>
                 </h2>
+                <div class="panel-toolbar">
+                    {{--
+                    Tombol Tambah ini SEKARANG DIKONTROL OLEH JAVASCRIPT.
+                    Diberi ID 'btn-add' dan tidak lagi memiliki data-toggle/data-target.
+                    --}}
+                    <button id="btn-add" class="btn btn-primary btn-sm">
+                        <i class="fal fa-plus mr-1"></i>
+                        Tambah
+                    </button>
+                </div>
             </div>
             <div class="panel-container show">
                 <div class="panel-content">
-                    <!-- datatable start -->
-                    <table id="dt-basic-example" class="table table-bordered table-hover table-striped w-100">
-                        <i id="loading-spinner" class="fas fa-spinner fa-spin"></i>
+                    <table id="dt-master-gudang" class="table table-bordered table-hover table-striped w-100">
                         <thead class="bg-primary-600">
                             <tr>
-                                <th>#</th>
+                                <th class="text-center">#</th>
                                 <th>Nama Gudang</th>
                                 <th>Cost Center</th>
-                                <th>Apotek?</th>
-                                <th>Default Apotek Rajal?</th>
-                                <th>Default Apotek Ranap?</th>
-                                <th>Warehouse?</th>
-                                <th>Aktif?</th>
-                                <th>Aksi</th>
+                                <th class="text-center">Apotek?</th>
+                                <th class="text-center">Default Rajal?</th>
+                                <th class="text-center">Default Ranap?</th>
+                                <th class="text-center">Warehouse?</th>
+                                <th class="text-center">Status</th>
+                                <th class="text-center">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach ($master_gudangs as $master_gudang)
+                            @forelse ($master_gudangs as $gudang)
                                 <tr>
-                                    <td>{{ $loop->iteration }}</td>
-                                    <td>{{ $master_gudang->nama }}</td>
-                                    <td>{{ $master_gudang->cost_center }}</td>
-                                    <td>{{ $master_gudang->apotek ? 'Ya' : 'Tidak' }}</td>
-                                    <td>{{ $master_gudang->rajal_default ? 'Ya' : 'Tidak' }}</td>
-                                    <td>{{ $master_gudang->ranap_default ? 'Ya' : 'Tidak' }}</td>
-                                    <td>{{ $master_gudang->warehouse ? 'Ya' : 'Tidak' }}</td>
-                                    <td>{{ $master_gudang->aktif ? 'Aktif' : 'Non Aktif' }}</td>
-                                    <td>
-                                        <a class="mdi mdi-pencil pointer mdi-24px text-secondary edit-btn"
-                                            data-bs-toggle="modal" data-bs-target="#editModal{{ $master_gudang->id }}"
-                                            title="Edit" data-id="{{ $master_gudang->id }}"></a>
+                                    <td class="text-center">{{ $loop->iteration }}</td>
+                                    <td>{{ $gudang->nama }}</td>
+                                    <td>{{ $gudang->cost_center ?? '-' }}</td>
+                                    <td class="text-center">{!! $gudang->apotek
+                                        ? '<span class="badge badge-success">Ya</span>'
+                                        : '<span class="badge badge-secondary">Tidak</span>' !!}</td>
+                                    <td class="text-center">{!! $gudang->rajal_default
+                                        ? '<span class="badge badge-info">Ya</span>'
+                                        : '<span class="badge badge-secondary">Tidak</span>' !!}</td>
+                                    <td class="text-center">{!! $gudang->ranap_default
+                                        ? '<span class="badge badge-info">Ya</span>'
+                                        : '<span class="badge badge-secondary">Tidak</span>' !!}</td>
+                                    <td class="text-center">{!! $gudang->warehouse
+                                        ? '<span class="badge badge-success">Ya</span>'
+                                        : '<span class="badge badge-secondary">Tidak</span>' !!}</td>
+                                    <td class="text-center">{!! $gudang->aktif
+                                        ? '<span class="badge badge-primary">Aktif</span>'
+                                        : '<span class="badge badge-danger">Non Aktif</span>' !!}</td>
+                                    <td class="text-center">
+                                        {{--
+                                        Tombol Edit ini juga DIKONTROL OLEH JAVASCRIPT.
+                                        Hanya memiliki class 'edit-btn' dan atribut 'data-id'.
+                                        --}}
+                                        <button class="btn btn-xs btn-warning waves-effect waves-themed edit-btn"
+                                            data-id="{{ $gudang->id }}" title="Edit Data">
+                                            <i class="fal fa-pencil"></i>
+                                        </button>
 
-                                        @include(
-                                            'pages.simrs.warehouse.master-data.partials.edit-master-gudang-modal',
-                                            [
-                                                'master_gudang' => $master_gudang,
-                                            ]
-                                        )
-
-                                        <a class="mdi mdi-close pointer mdi-24px text-danger delete-btn" title="Hapus"
-                                            data-id="{{ $master_gudang->id }}"></a>
+                                        {{-- Tombol Hapus tetap sama, dikontrol oleh JS --}}
+                                        <button class="btn btn-xs btn-danger waves-effect waves-themed delete-btn"
+                                            data-id="{{ $gudang->id }}" title="Hapus Data">
+                                            <i class="fal fa-trash"></i>
+                                        </button>
                                     </td>
                                 </tr>
-                            @endforeach
+                            @empty
+                                {{-- Menangani kasus jika tidak ada data sama sekali --}}
+                                <tr>
+                                    <td colspan="9" class="text-center">
+                                        <div class="alert alert-info">
+                                            Tidak ada data untuk ditampilkan.
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforelse
                         </tbody>
-                        <tfoot>
-                            <tr>
-                                <th>#</th>
-                                <th>Nama Gudang</th>
-                                <th>Cost Center</th>
-                                <th>Apotek?</th>
-                                <th>Default Apotek Rajal?</th>
-                                <th>Default Apotek Ranap?</th>
-                                <th>Warehouse?</th>
-                                <th>Aktif?</th>
-                                <th>Aksi</th>
-                            </tr>
-                        </tfoot>
                     </table>
-                    <!-- datatable end -->
                 </div>
             </div>
         </div>

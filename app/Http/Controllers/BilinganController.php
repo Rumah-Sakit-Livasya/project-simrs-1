@@ -479,4 +479,161 @@ class BilinganController extends Controller
         $bilingan = Bilingan::with('pembayaran_tagihan')->findOrFail($id);
         return view('pages.simrs.keuangan.kasir.partials.print-kwitansi', compact('bilingan'));
     }
+
+    /**
+     * NEW METHOD: Fetch unbilled orders for the notification popup.
+     */
+    public function getOrderNotifications($registration_id)
+    {
+        // Fetch unbilled lab orders
+        $labOrders = OrderLaboratorium::with(['order_parameter_laboratorium.parameter_laboratorium'])
+            ->where('registration_id', $registration_id)
+            ->where('is_konfirmasi', 0)
+            ->get()
+            ->flatMap(function ($order) {
+                // Setiap order bisa punya banyak order_parameter_laboratorium
+                return $order->order_parameter_laboratorium->map(function ($detail) use ($order) {
+                    return [
+                        'id' => $order->id,
+                        'type' => 'laboratorium',
+                        'title' => 'Lab: ' . ($detail->parameter_laboratorium->parameter ?? 'Tindakan tidak ditemukan'),
+                        'time' => $order->created_at->format('d M Y H:i'),
+                        'nominal' => $detail->nominal_rupiah ?? 0,
+                    ];
+                });
+            });
+
+        // Fetch unbilled radiology orders
+        $radOrders = OrderRadiologi::with(['order_parameter_radiologi.parameter_radiologi.tarif_parameter_radiologi'])
+            ->where('registration_id', $registration_id)
+            ->where('status_billed', 0)
+            ->get()
+            ->flatMap(function ($order) {
+                // Setiap order bisa punya banyak order_parameter_radiologi
+                return $order->order_parameter_radiologi->map(function ($detail) use ($order) {
+                    $parameter = $detail->parameter_radiologi;
+                    $tarif = $parameter?->tarif_parameter_radiologi?->first()?->total ?? 0;
+                    return [
+                        'id' => $order->id,
+                        'type' => 'radiologi',
+                        'title' => 'Rad: ' . ($parameter?->parameter ?? 'Tindakan tidak ditemukan'),
+                        'time' => $order->created_at->format('d M Y H:i'),
+                        'nominal' => $tarif,
+                    ];
+                });
+            });
+
+        // Merge and sort the collections by time
+        $allOrders = $labOrders->merge($radOrders)->sortByDesc('time')->values();
+
+        return response()->json($allOrders);
+    }
+
+    /**
+     * NEW METHOD: Process an order and create a new TagihanPasien.
+     */
+    public function processOrderIntoBill(Request $request)
+    {
+        $request->validate([
+            'order_id' => 'required|integer',
+            'order_type' => 'required|string|in:laboratorium,radiologi',
+            'bilingan_id' => 'required|integer|exists:bilingan,id',
+        ]);
+
+        DB::beginTransaction();
+        try {
+            $bilingan = Bilingan::with('registration')->findOrFail($request->bilingan_id);
+            $order = null;
+            $tagihanDetail = '';
+            $nominal = 0;
+
+            if ($request->order_type === 'laboratorium') {
+                // Ambil order laboratorium beserta detail parameter dan tarif
+                $order = OrderLaboratorium::with([
+                    'order_parameter_laboratorium.parameter_laboratorium.tarif_parameter_laboratorium'
+                ])->findOrFail($request->order_id);
+
+                // Ambil semua detail parameter order
+                $details = $order->order_parameter_laboratorium;
+
+                // Untuk setiap detail, buat tagihan (jika lebih dari satu parameter)
+                foreach ($details as $detail) {
+                    $parameter = $detail->parameter_laboratorium;
+                    $tarif = $parameter?->tarif_parameter_laboratorium?->first()?->total ?? 0;
+                    $tagihanDetail = '[Lab] ' . ($parameter?->parameter ?? 'Tindakan tidak ditemukan');
+                    $nominal = $tarif;
+
+                    // Cek apakah sudah ditagihkan
+                    if ($order->status_billed) {
+                        return response()->json(['message' => 'Order ini sudah ditagihkan.'], 422);
+                    }
+
+                    TagihanPasien::create([
+                        'user_id' => auth()->id(),
+                        'bilingan_id' => $bilingan->id,
+                        'registration_id' => $bilingan->registration->id,
+                        'date' => now()->format('Y-m-d H:i:s'),
+                        'tagihan' => $tagihanDetail,
+                        'quantity' => 1,
+                        'nominal' => $nominal,
+                        'nominal_awal' => $nominal,
+                        'wajib_bayar' => $nominal,
+                        'tipe_diskon' => 'None',
+                        'disc' => 0,
+                        'diskon' => 0,
+                        'jamin' => 0,
+                        'jaminan' => 0,
+                    ]);
+                }
+            } else { // radiologi
+                // Ambil order radiologi beserta detail parameter dan tarif
+                $order = OrderRadiologi::with([
+                    'order_parameter_radiologi.parameter_radiologi.tarif_parameter_radiologi'
+                ])->findOrFail($request->order_id);
+
+                $details = $order->order_parameter_radiologi;
+
+                foreach ($details as $detail) {
+                    $parameter = $detail->parameter_radiologi;
+                    $tarif = $parameter?->tarif_parameter_radiologi?->first()?->total ?? 0;
+                    $tagihanDetail = '[Rad] ' . ($parameter?->parameter ?? 'Tindakan tidak ditemukan');
+                    $nominal = $tarif;
+
+                    // Cek apakah sudah ditagihkan
+                    if ($order->status_billed) {
+                        return response()->json(['message' => 'Order ini sudah ditagihkan.'], 422);
+                    }
+
+                    TagihanPasien::create([
+                        'user_id' => auth()->id(),
+                        'bilingan_id' => $bilingan->id,
+                        'registration_id' => $bilingan->registration->id,
+                        'date' => now()->format('Y-m-d H:i:s'),
+                        'tagihan' => $tagihanDetail,
+                        'quantity' => 1,
+                        'nominal' => $nominal,
+                        'nominal_awal' => $nominal,
+                        'wajib_bayar' => $nominal,
+                        'tipe_diskon' => 'None',
+                        'disc' => 0,
+                        'diskon' => 0,
+                        'jamin' => 0,
+                        'jaminan' => 0,
+                    ]);
+                }
+            }
+
+            // Tandai order sudah ditagihkan
+            $order->status_billed = 1;
+            $order->save();
+
+            DB::commit();
+
+            return response()->json(['success' => true, 'message' => 'Order berhasil ditambahkan ke tagihan.']);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error processing order into bill: ' . $e->getMessage());
+            return response()->json(['message' => 'Gagal memproses order.'], 500);
+        }
+    }
 }

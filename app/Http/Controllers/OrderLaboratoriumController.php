@@ -290,9 +290,11 @@ class OrderLaboratoriumController extends Controller
 
         $order->update(['is_konfirmasi' => 1]);
 
+        $success = true;
+        $message = 'Konfirmasi pembayaran berhasil.';
+
         if (! $order->otc_id && $order->registration_id) {
             $billing = Bilingan::firstOrCreate(
-
                 ['registration_id' => $order->registration_id],
                 [
                     'patient_id' => $order->registration->patient_id,
@@ -315,6 +317,7 @@ class OrderLaboratoriumController extends Controller
                     'date' => Carbon::now(),
                     'tagihan' => '[Biaya Laboratorium] ' . $parameter->parameter_laboratorium->parameter,
                     'quantity' => 1,
+                    'nominal_awal' => $parameter->nominal_rupiah,
                     'nominal' => $parameter->nominal_rupiah,
                     'harga' => $parameter->nominal_rupiah,
                     'wajib_bayar' => $parameter->nominal_rupiah,
@@ -339,21 +342,22 @@ class OrderLaboratoriumController extends Controller
             }
         }
 
-        return response('ok');
+        return response()->json([
+            'success' => $success,
+            'message' => $message,
+        ]);
     }
 
     public function editOrderLaboratorium(Request $request)
     {
-        // Gunakan Validator facade untuk kontrol pesan error yang lebih baik
         $validator = Validator::make($request->all(), [
             'order_id' => 'required|integer|exists:order_laboratorium,id',
             'diagnosa_klinis' => 'nullable|string|max:255',
             'inspection_date' => 'nullable|date',
-            'result_date' => 'nullable|date',
+            'result_datetime' => 'nullable|date',
         ]);
 
         if ($validator->fails()) {
-            // Jika menggunakan AJAX, kembalikan JSON. Jika tidak, redirect dengan error.
             if ($request->ajax()) {
                 return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
             }
@@ -362,83 +366,47 @@ class OrderLaboratoriumController extends Controller
 
         $validatedData = $validator->validated();
 
-        // Gunakan DB Transaction untuk memastikan semua query berhasil atau tidak sama sekali
         DB::beginTransaction();
         try {
-            // Ambil order beserta relasi parameternya untuk efisiensi
             $order = OrderLaboratorium::with('order_parameter_laboratorium')->findOrFail($validatedData['order_id']);
 
-            // Update data utama order
+            // Update data utama order, termasuk status_isi_hasil menjadi 1
             $order->update([
                 'diagnosa_klinis' => $validatedData['diagnosa_klinis'],
                 'inspection_date' => $validatedData['inspection_date'],
-                'result_date'     => $validatedData['result_date'],
+                'result_datetime' => $validatedData['result_datetime'],
+                'status_isi_hasil' => 1,
             ]);
 
-            // Loop melalui parameter yang ada dan update jika ada input baru
             foreach ($order->order_parameter_laboratorium as $parameter) {
                 $id = $parameter->id;
-
-                // Ambil nilai dari request
                 $catatan = $request->input('catatan_' . $id);
                 $hasil = $request->input('hasil_' . $id);
 
-                // Buat array untuk menampung data yang akan diupdate
                 $updateData = [];
 
-                // Cek apakah ada input 'catatan' untuk parameter ini
                 if ($request->has('catatan_' . $id)) {
                     $updateData['catatan'] = $catatan;
                 }
 
-                // Cek apakah ada input 'hasil' untuk parameter ini
                 if ($request->has('hasil_' . $id)) {
                     $updateData['hasil'] = $hasil;
                 }
 
-                // Jika ada data yang perlu diupdate, jalankan query
                 if (!empty($updateData)) {
-                    // Update sekali jalan, lebih efisien
                     $parameter->update($updateData);
                 }
             }
 
-            // Jika semua berhasil, commit transaksi
             DB::commit();
 
-            // --- INI BAGIAN UTAMA PERUBAHAN ---
-
-            // **Opsi 1: Jika menggunakan form submit biasa (Full page reload)**
-            // Ganti 'nama.route.order.list' dengan nama route Anda yang sebenarnya.
             return redirect()->route('laboratorium.list-order')->with('success', 'Order Laboratorium berhasil diperbarui!');
-
-            // **Opsi 2: Jika menggunakan AJAX/Fetch API**
-            /*
-            return response()->json([
-                'success' => true,
-                'message' => 'Order Laboratorium berhasil diperbarui!',
-                'redirect_url' => route('nama.route.order.list') // Kirim URL redirect ke frontend
-            ]);
-            */
         } catch (\Exception $e) {
-            // Jika terjadi error, batalkan semua perubahan
             DB::rollBack();
 
-            // Catat error untuk debugging
             Log::error('Gagal update order laboratorium: ' . $e->getMessage() . ' di baris ' . $e->getLine());
 
-            // --- INI JUGA BERUBAH ---
-
-            // **Opsi 1: Untuk form submit biasa**
             return redirect()->back()->with('error', 'Terjadi kesalahan saat memperbarui order.')->withInput();
-
-            // **Opsi 2: Untuk AJAX/Fetch API**
-            /*
-            return response()->json([
-                'success' => false,
-                'message' => 'Terjadi kesalahan pada server: ' . $e->getMessage(),
-            ], 500);
-            */
         }
     }
 }
