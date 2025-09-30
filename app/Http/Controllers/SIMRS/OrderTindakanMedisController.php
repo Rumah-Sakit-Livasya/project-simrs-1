@@ -96,11 +96,6 @@ class OrderTindakanMedisController extends Controller
                 $kelasId = $kelasId->id;
             }
 
-            // Periksa apakah bilingan sudah ada
-
-            // return dd($bilingan);
-
-
             // Simpan tagihan pasien
             $tagihanPasien = TagihanPasien::create([
                 'user_id' => $validatedData['user_id'],
