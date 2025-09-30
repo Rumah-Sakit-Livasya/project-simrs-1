@@ -119,6 +119,7 @@ class DoctorVisitController extends Controller
                 'tagihan' => '[Visite Dokter] ' . ($visitingDoctor->employee->fullname ?? 'N/A'),
                 'quantity' => 1,
                 'nominal' => $tarif->total,
+                'nominal_awal' => $tarif->total,
                 'wajib_bayar' => $tarif->total,
             ]);
 
