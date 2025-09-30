@@ -209,6 +209,7 @@ class OrderRadiologiController extends Controller
                     'date' => Carbon::now(),
                     'tagihan' => '[Biaya Radiologi] ' . $parameter->parameter_radiologi->parameter,
                     'quantity' => 1,
+                    'nominal_awal' => $parameter->nominal_rupiah,
                     'nominal' => $parameter->nominal_rupiah,
                     'harga' => $parameter->nominal_rupiah,
                     'wajib_bayar' => $parameter->nominal_rupiah,

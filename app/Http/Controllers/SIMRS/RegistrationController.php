@@ -615,6 +615,7 @@ class RegistrationController extends Controller
                     'date' => Carbon::now(),
                     'tagihan' => "[Biaya Administrasi] UGD",
                     'nominal' => $hargaTarifAdmin->harga,
+                    'nominal_awal' => $hargaTarifAdmin->harga,
                     'quantity' => 1,
                     'harga' => $hargaTarifAdmin->harga,
                     'wajib_bayar' => $hargaTarifAdmin->harga
@@ -653,6 +654,7 @@ class RegistrationController extends Controller
                         'registration_id' => $registration->id,
                         'date' => Carbon::now(),
                         'tagihan' => "[Biaya Administrasi] Rawat Inap",
+                        'nominal_awal' => $tarifAdmin,
                         'nominal' => $tarifAdmin,
                         'quantity' => 1,
                         'harga' => $tarifAdmin,
