@@ -69,6 +69,7 @@ use App\Http\Controllers\SIMRS\Laboratorium\LaboratoriumController;
 use App\Http\Controllers\SIMRS\Laboratorium\NilaiNormalLaboratoriumController;
 use App\Http\Controllers\SIMRS\Laboratorium\ParameterLaboratoriumController;
 use App\Http\Controllers\SIMRS\Laboratorium\TipeLaboratoriumController;
+use App\Http\Controllers\SIMRS\Obat\OrderObatController;
 use App\Http\Controllers\SIMRS\Operasi\JenisOperasiController;
 use App\Http\Controllers\SIMRS\Operasi\KategoriOperasiController;
 use App\Http\Controllers\SIMRS\Operasi\OperasiController;
@@ -158,6 +159,26 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::group(['middleware' => ['auth']], function () {
+    Route::prefix('pendaftaran/{registration_id}')->group(function () {
+        Route::get('detail', [RegistrationController::class, 'show'])->name('pendaftaran.detail');
+        Route::get('layanan/{layanan}', [RegistrationController::class, 'layanan'])->name('pendaftaran.layanan');
+
+        Route::prefix('order-obat')->name('order-obat.')->group(function () {
+            Route::post('/', [OrderObatController::class, 'store'])->name('store');
+            Route::put('/{order_obat}', [OrderObatController::class, 'update'])->name('update');
+            Route::delete('/{order_obat}', [OrderObatController::class, 'destroy'])->name('destroy');
+            Route::get('/fetch-create-form', [OrderObatController::class, 'fetchCreateForm'])->name('fetch-create-form');
+            Route::get('/{order_obat}/fetch-edit-form', [OrderObatController::class, 'fetchEditForm'])->name('fetch-edit-form');
+        });
+    });
+
+    Route::prefix('api')->name('api.')->group(function () {
+        Route::get('order-obat-data/{registration_id}', [OrderObatController::class, 'data'])->name('order-obat.data');
+        Route::get('search-obat', [OrderObatController::class, 'searchObat'])->name('search-obat');
+    });
+
+    Route::get('order-obat/print/{order_obat}', [OrderObatController::class, 'print'])->name('order-obat.print');
+
     /*
     |--------------------------------------------------------------------------
     | Patient Registration and Search Routes
@@ -1070,6 +1091,8 @@ Route::group(['middleware' => ['auth']], function () {
 
             Route::get('popup/pilih-pasien/{poli}', [RadiologiController::class, 'popupPilihPasien'])
                 ->name('radiologi.popup.pilih-pasien');
+
+            Route::delete('order/{id}', [RadiologiController::class, 'destroy'])->name('radiologi.order.destroy');
         });
 
         Route::prefix('laboratorium')->group(function () {

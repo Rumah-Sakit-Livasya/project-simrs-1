@@ -85,18 +85,85 @@
     {{-- </div> --}}
     @include('pages.simrs.pendaftaran.partials.modal-tindakan-medis')
 @endsection
-
 @section('plugin-erm')
     <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
     <script src="/js/formplugins/select2/select2.bundle.js"></script>
     <script src="/js/formplugins/bootstrap-datepicker/bootstrap-datepicker.js"></script>
-    {{-- @include('pages.simrs.poliklinik.partials.action-js.tindakan-medis') --}}
+
     <script>
         let dtTindakanBidan;
-        $(document).ready(function() {
-            // Sembunyikan elemen 'tindakan-medis' saat pertama kali dimuat
-            $('#tindakan-medis').hide();
 
+        // Fungsi untuk memuat dan menampilkan data tindakan medis
+        function loadMedicalActions(registrationId) {
+            if (!registrationId) return; // Keluar jika tidak ada ID registrasi
+
+            $.ajax({
+                url: `/api/simrs/get-medical-actions/${registrationId}`,
+                method: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success) {
+                        const data = response.data;
+                        let rows = [];
+                        let idx = 1;
+                        data.forEach(action => {
+                            rows.push({
+                                no: idx++,
+                                tanggal_tindakan: action.tanggal_tindakan || 'Tidak Diketahui',
+                                doctor: action.doctor?.employee?.fullname || 'Tidak Diketahui',
+                                tindakan: action.tindakan_medis?.nama_tindakan ||
+                                    'Tidak Diketahui',
+                                kelas: action.departement?.name || 'Tidak Diketahui',
+                                qty: action.qty || 0,
+                                entry_by: action.user?.employee?.fullname || 'Tidak Diketahui',
+                                foc: action.foc || 'Tidak Diketahui',
+                                aksi: `<button class="btn btn-danger btn-sm delete-action" data-id="${action.id}">Hapus</button>`
+                            });
+                        });
+                        // Pastikan DataTable sudah diinisialisasi sebelum digunakan
+                        if (dtTindakanBidan) {
+                            dtTindakanBidan.clear().rows.add(rows).draw();
+                        }
+                    } else {
+                        showErrorAlertNoRefresh('Gagal memuat tindakan medis: ' + response.message);
+                    }
+                },
+                error: function(xhr) {
+                    let errorMessage = 'Terjadi kesalahan yang tidak diketahui. Silakan coba lagi nanti.';
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        errorMessage = xhr.responseJSON.message;
+                    } else if (xhr.status === 404) {
+                        // Jika tidak ada data, tabel akan menampilkan "Belum ada tindakan medis."
+                        // jadi tidak perlu menampilkan error.
+                        dtTindakanBidan.clear().draw();
+                    } else if (xhr.status === 500) {
+                        errorMessage = 'Terjadi kesalahan pada server. Silakan coba lagi nanti.';
+                    } else if (xhr.status !== 0) { // Jangan tampilkan error jika request dibatalkan
+                        errorMessage =
+                            `Gagal memuat tindakan medis. Status: ${xhr.status}, Pesan: ${xhr.statusText}`;
+                    }
+                    // showErrorAlertNoRefresh(errorMessage); // Uncomment jika ingin menampilkan error
+                }
+            });
+        }
+
+        // Fungsi untuk menambahkan baris tindakan medis baru ke DataTable
+        function addMedicalAction(data) {
+            let rowCount = dtTindakanBidan.data().count() + 1;
+            dtTindakanBidan.row.add({
+                no: rowCount,
+                tanggal_tindakan: data.tanggal_tindakan || 'Tidak Diketahui',
+                doctor: data.doctor?.employee?.fullname || 'Tidak Diketahui',
+                tindakan: data.tindakan_medis?.nama_tindakan || 'Tidak Diketahui',
+                kelas: data.departement?.name || 'Tidak Diketahui',
+                qty: data.qty || 0,
+                entry_by: data.user?.employee?.fullname || 'Tidak Diketahui',
+                foc: data.foc || 'Tidak Diketahui',
+                aksi: `<button class="btn btn-danger btn-sm delete-action" data-id="${data.id}">Hapus</button>`
+            }).draw();
+        }
+
+        $(document).ready(function() {
             // Inisialisasi DataTable
             dtTindakanBidan = $('#dt-tindakan-bidan').DataTable({
                 processing: true,
@@ -110,9 +177,7 @@
                 },
                 columns: [{
                         data: 'no',
-                        name: 'no',
-                        orderable: false,
-                        searchable: false
+                        name: 'no'
                     },
                     {
                         data: 'tanggal_tindakan',
@@ -144,74 +209,20 @@
                     },
                     {
                         data: 'aksi',
-                        name: 'aksi',
-                        orderable: false,
-                        searchable: false
+                        name: 'aksi'
                     }
                 ],
                 data: []
             });
 
-            // Event listener untuk menu item "Tindakan Medis"
-            $('.menu-layanan[data-layanan="tindakan-medis"]').on('click', function() {
-                const registrationId = $('#registration').val();
+            // --- PERUBAHAN UTAMA: Panggil fungsi untuk memuat data saat halaman siap ---
+            const registrationId = "{{ $registration->id }}";
+            loadMedicalActions(registrationId);
+            // --- AKHIR PERUBAHAN UTAMA ---
 
-                $.ajax({
-                    url: `/api/simrs/get-medical-actions/${registrationId}`,
-                    method: 'GET',
-                    dataType: 'json',
-                    success: function(response) {
-                        $('#modal-tambah-tindakan').modal('hide');
-                        if (response.success) {
-                            const data = response.data;
-                            let rows = [];
-                            let idx = 1;
-                            data.forEach(action => {
-                                rows.push({
-                                    no: idx++,
-                                    tanggal_tindakan: action.tanggal_tindakan ||
-                                        'Tidak Diketahui',
-                                    doctor: action.doctor?.employee?.fullname ||
-                                        'Tidak Diketahui',
-                                    tindakan: action.tindakan_medis
-                                        ?.nama_tindakan || 'Tidak Diketahui',
-                                    kelas: action.departement?.name ||
-                                        'Tidak Diketahui',
-                                    qty: action.qty || 0,
-                                    entry_by: action.user?.employee?.fullname ||
-                                        'Tidak Diketahui',
-                                    foc: action.foc || 'Tidak Diketahui',
-                                    aksi: `<button class="btn btn-danger btn-sm delete-action" data-id="${action.id}">Hapus</button>`
-                                });
-                            });
-                            dtTindakanBidan.clear().rows.add(rows).draw();
-                        } else {
-                            $('#modal-tambah-tindakan').modal('hide');
-                            showErrorAlertNoRefresh('Gagal memuat tindakan medis: ' + response
-                                .message);
-                        }
-                    },
-                    error: function(xhr) {
-                        $('#modal-tambah-tindakan').modal('hide');
-                        let errorMessage =
-                            'Terjadi kesalahan yang tidak diketahui. Silakan coba lagi nanti.';
-                        if (xhr.responseJSON && xhr.responseJSON.message) {
-                            errorMessage = xhr.responseJSON.message;
-                        } else if (xhr.status === 0) {
-                            errorMessage =
-                                'Tidak terhubung ke server. Silakan periksa koneksi internet Anda.';
-                        } else if (xhr.status === 404) {
-                            errorMessage = 'Tindakan medis tidak ditemukan.';
-                        } else if (xhr.status === 500) {
-                            errorMessage =
-                                'Terjadi kesalahan pada server. Silakan coba lagi nanti.';
-                        } else {
-                            errorMessage =
-                                `Gagal memuat tindakan medis. Status: ${xhr.status}, Pesan: ${xhr.statusText}`;
-                        }
-                        // showErrorAlertNoRefresh(errorMessage);
-                    }
-                });
+            // Event listener untuk menu item "Tindakan Medis" (opsional, untuk refresh)
+            $('.menu-layanan[data-layanan="tindakan-medis"]').on('click', function() {
+                loadMedicalActions(registrationId);
             });
 
             // Event listener untuk tombol hapus tindakan medis
@@ -241,36 +252,20 @@
                             },
                             success: function(response) {
                                 if (response == 1) {
-                                    // Hapus baris dari DataTable
                                     dtTindakanBidan.row($row).remove().draw();
-                                    $('#modal-tambah-tindakan').modal('hide');
                                     showSuccessAlert(
-                                        'Tindakan medis berhasil dihapus.');
+                                    'Tindakan medis berhasil dihapus.');
                                 } else {
-                                    $('#modal-tambah-tindakan').modal('hide');
                                     showErrorAlertNoRefresh(
                                         'Gagal menghapus tindakan medis: ' + (
                                             response.message || ''));
                                 }
                             },
                             error: function(xhr) {
-                                $('#modal-tambah-tindakan').modal('hide');
                                 let errorMessage =
-                                    'Terjadi kesalahan yang tidak diketahui. Silakan coba lagi nanti.';
+                                    'Terjadi kesalahan yang tidak diketahui.';
                                 if (xhr.responseJSON && xhr.responseJSON.message) {
                                     errorMessage = xhr.responseJSON.message;
-                                } else if (xhr.status === 0) {
-                                    errorMessage =
-                                        'Tidak terhubung ke server. Silakan periksa koneksi internet Anda.';
-                                } else if (xhr.status === 404) {
-                                    errorMessage =
-                                        'Tindakan medis yang ingin dihapus tidak ditemukan.';
-                                } else if (xhr.status === 500) {
-                                    errorMessage =
-                                        'Terjadi kesalahan pada server. Silakan coba lagi nanti.';
-                                } else {
-                                    errorMessage =
-                                        `Gagal menghapus tindakan medis. Status: ${xhr.status}, Pesan: ${xhr.statusText}`;
                                 }
                                 showErrorAlertNoRefresh(errorMessage);
                             }
@@ -279,22 +274,19 @@
                 });
             });
 
-            // Set tanggal default untuk input
+            // Inisialisasi datepicker dan tanggal default
             let today = new Date();
             let day = String(today.getDate()).padStart(2, '0');
             let month = String(today.getMonth() + 1).padStart(2, '0');
             let year = today.getFullYear();
             let formattedDate = `${day}-${month}-${year}`;
-            $('#tglTindakan').val(formattedDate);
-
-            // Inisialisasi datepicker
-            $('#tglTindakan').datepicker({
+            $('#tglTindakan').val(formattedDate).datepicker({
                 format: 'dd-mm-yyyy',
                 autoclose: true,
                 todayHighlight: true,
             });
 
-            // Pastikan kode ini ada di dalam file JS Anda
+            // Event listener untuk select departemen
             $('#departement-tindakan-medis').on('change', function() {
                 const tindakanMedisSelect = $('#tindakanMedis');
                 const selectedOption = $(this).find('option:selected');
@@ -315,36 +307,16 @@
                 tindakanMedisSelect.trigger('change');
             });
 
-            // Fungsi untuk menambahkan tindakan medis baru ke DataTable
-            function addMedicalAction(data) {
-                // Ambil jumlah baris saat ini untuk penomoran
-                let rowCount = dtTindakanBidan.data().count() + 1;
-                dtTindakanBidan.row.add({
-                    no: rowCount,
-                    tanggal_tindakan: data.tanggal_tindakan || 'Tidak Diketahui',
-                    doctor: data.doctor?.employee?.fullname || 'Tidak Diketahui',
-                    tindakan: data.tindakan_medis?.nama_tindakan || 'Tidak Diketahui',
-                    kelas: data.departement?.name || 'Tidak Diketahui',
-                    qty: data.qty || 0,
-                    entry_by: data.user?.employee?.fullname || 'Tidak Diketahui',
-                    foc: data.foc || 'Tidak Diketahui',
-                    aksi: `<button class="btn btn-danger btn-sm delete-action" data-id="${data.id}">Hapus</button>`
-                }).draw();
-            }
-
-            // Event listener untuk pengiriman form untuk menambahkan tindakan medis baru
+            // Event listener untuk pengiriman form tambah tindakan
             $('#modal-tambah-tindakan #store-form').on('submit', function(event) {
                 event.preventDefault();
-
                 const modal = $('#modal-tambah-tindakan');
                 const loadingOverlay = modal.find('.modal-loading-overlay');
-
-                // Tampilkan loading overlay
                 loadingOverlay.show();
 
                 const formData = {
                     tanggal_tindakan: $('#tglTindakan').val(),
-                    registration_id: $('#registration').val(),
+                    registration_id: registrationId,
                     doctor_id: $('#dokterPerawat').val(),
                     tindakan_medis_id: $('#tindakanMedis').val(),
                     kelas: $('#kelas-tindakan-medis').val(),
@@ -374,12 +346,11 @@
                     },
                     error: function(xhr) {
                         let errorMessage = 'Terjadi kesalahan yang tidak diketahui.';
-                        if (xhr.responseJSON && xhr.responseJSON.message) {
-                            errorMessage = xhr.responseJSON.message;
-                        }
                         if (xhr.status === 422) {
                             errorMessage = Object.values(xhr.responseJSON.errors).flat().join(
                                 '<br>');
+                        } else if (xhr.responseJSON && xhr.responseJSON.message) {
+                            errorMessage = xhr.responseJSON.message;
                         }
                         showErrorAlertNoRefresh(errorMessage);
                     },
@@ -389,16 +360,10 @@
                 });
             });
 
+            // Event listener saat modal tambah tindakan ditampilkan
             $('#modal-tambah-tindakan').on('shown.bs.modal', function(event) {
                 const modal = $(this);
                 const loadingOverlay = modal.find('.modal-loading-overlay');
-                const registrasiId = "{{ $registration->id }}";
-                let today = new Date();
-                let day = String(today.getDate()).padStart(2, '0');
-                let month = String(today.getMonth() + 1).padStart(2, '0');
-                let year = today.getFullYear();
-                let formattedDate = `${day}-${month}-${year}`;
-
                 loadingOverlay.show();
 
                 $('#store-form')[0].reset();
@@ -410,33 +375,29 @@
                         dropdownParent: $('#modal-tambah-tindakan')
                     });
 
-                if (registrasiId) {
-                    $.ajax({
-                        url: `/api/simrs/get-registrasi-data/${registrasiId}`,
-                        method: 'GET',
-                        dataType: 'json',
-                        success: function(response) {
-                            if (response.success) {
-                                const data = response.data;
-                                $('#dokterPerawat').val(data.dokter_id).trigger('change');
-                                $('#kelas-tindakan-medis').val(data.kelas_id).trigger('change');
-                                $('#departement-tindakan-medis').val(data.departement_id)
-                                    .trigger('change');
-                            } else {
-                                showErrorAlertNoRefresh('Data registrasi tidak ditemukan: ' +
-                                    response.message);
-                            }
-                        },
-                        error: function(xhr) {
-                            showErrorAlertNoRefresh('Gagal memuat data registrasi.');
-                        },
-                        complete: function() {
-                            loadingOverlay.hide();
+                $.ajax({
+                    url: `/api/simrs/get-registrasi-data/${registrationId}`,
+                    method: 'GET',
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response.success) {
+                            const data = response.data;
+                            $('#dokterPerawat').val(data.dokter_id).trigger('change');
+                            $('#kelas-tindakan-medis').val(data.kelas_id).trigger('change');
+                            $('#departement-tindakan-medis').val(data.departement_id).trigger(
+                                'change');
+                        } else {
+                            showErrorAlertNoRefresh('Data registrasi tidak ditemukan: ' +
+                                response.message);
                         }
-                    });
-                } else {
-                    loadingOverlay.hide();
-                }
+                    },
+                    error: function(xhr) {
+                        showErrorAlertNoRefresh('Gagal memuat data registrasi.');
+                    },
+                    complete: function() {
+                        loadingOverlay.hide();
+                    }
+                });
             });
         });
     </script>

@@ -29,221 +29,114 @@
 
         <div class="tab-content p-3">
             <div class="tab-pane fade show active" id="tab_default-1" role="tabpanel">
-                @include('pages.simrs.poliklinik.partials.detail-pasien')
+                @include('pages.simrs.erm.partials.detail-pasien')
                 <hr style="border-color: #868686; margin-top: 50px; margin-bottom: 30px;">
-                
-                @include('pages.simrs.pendaftaran.partials.radiologi')
-                @yield('script-radiologi')
 
-                {{-- <div class="row">
-                    <div class="col-md-12">
-                        <div class="p-3">
-                            <div class="card-head collapsed d-flex justify-content-between">
-                                <div class="title">
-                                    <header class="text-primary text-center font-weight-bold mb-4">
-                                        <h2 class="font-weight-bold">RESEP HARIAN</h4>
-                                    </header>
-                                </div> <!-- Tambahkan judul jika perlu -->
-                            </div>
-
-                            <div class="panel-content" aria-expanded="true">
-
-                                <table id="dt-basic-example" class="table table-bordered table-hover table-striped w-100">
-                                    <i id="loading-spinner" class="fas fa-spinner fa-spin"></i>
-                                    <thead class="bg-primary-600">
-                                        <tr>
-                                            <th>#</th>
-                                            <th>Detail</th>
-                                            <th>Tanggal</th>
-                                            <th>No Resep</th>
-                                            <th>Nama Dokter</th>
-                                            <th>Apotek</th>
-                                            <th>User Input</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach ($reseps as $resep)
-                                            <tr>
-                                                <td>{{ $loop->iteration }}</td>
-                                                <td> <button type="button" class="btn btn-sm btn-primary"
-                                                        data-bs-placement="top" data-bs-toggle="popover"
-                                                        data-bs-title="Detail Resep Harian" data-bs-html="true"
-                                                        data-bs-content-id="popover-content-{{ $resep->id }}">
-                                                        <i class="fas fa-list text-light" style="transform: scale(1.8)"></i>
-                                                    </button>
-                                                    <div class="display-none" id="popover-content-{{ $resep->id }}">
-                                                        @include(
-                                                            'pages.simrs.farmasi.resep-harian.partials.rh-detail',
-                                                            ['resep' => $resep]
-                                                        )
-                                                    </div>
-                                                </td>
-                                                <td>{{ tgl_waktu($resep->created_at) }}</td>
-                                                <td>{{ $resep->kode_resep }}</td>
-                                                <td>{{ $resep->doctor->employee->fullname }}</td>
-                                                <td>{{ $resep->gudang->nama }}</td>
-                                                <td>{{ $resep->user->name }}</td>
-                                            </tr>
-                                        @endforeach
-                                    </tbody>
-                                    <tfoot>
-                                        <tr>
-                                            <th>#</th>
-                                            <th>Detail</th>
-                                            <th>Tanggal</th>
-                                            <th>No Resep</th>
-                                            <th>Nama Dokter</th>
-                                            <th>Apotek</th>
-                                            <th>User Input</th>
-                                        </tr>
-                                    </tfoot>
-                                </table>
-
-                                <div class="row justify-content-end mt-3">
-                                    <div class="col-xl-3">
-                                        <button type="button" class="btn btn-primary waves-effect waves-themed"
-                                            id="tambah-btn" data-bs-toggle="collapse" data-bs-target="#resep-harian-form">
-                                            <span class="fal fa-plus mr-1"></span>
-                                            Tambah Resep
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <br>
-
-                                <div class="collapse" id="resep-harian-form">
-                                    <div class="card card-body">
-                                        <div class="loading" id="loading-page"></div>
-                                        <h1>Tambah Resep Harian</h1>
-                                        <form action="{{ route('farmasi.resep-harian.store') }}" method="post"
-                                            id="rh-form">
-                                            @method('post')
-                                            @csrf
-                                            <input type="hidden" name="user_id" value="{{ auth()->user()->id }}">
-                                            <input type="hidden" name="registration_id" value="{{ $registration->id }}">
-                                            <input type="hidden" name="doctor_id" value="{{ $registration->doctor->id }}">
-
-                                            <div class="col-md-12">
-                                                <div class="card mt-3">
-                                                    <div class="card-header bg-primary text-white">
-                                                        Resep Elektronik
-                                                        &nbsp;
-                                                        <i id="loading-spinner-head"
-                                                            class="loading fas fa-spinner fa-spin"></i>
-                                                        <span class="loading-message loading text-warning">Loading...</span>
-                                                    </div>
-                                                    <div class="card-body p-0">
-                                                        <div class="row p-2">
-                                                            @if (!isset($default_apotek))
-                                                                <div class="col-6">
-                                                                    <select
-                                                                        class="select2 form-control @error('gudang_id') is-invalid @enderror"
-                                                                        name="gudang_id" id="cppt_gudang_id">
-                                                                        <option value="" disabled selected hidden>
-                                                                            Pilih Gudang
-                                                                        </option>
-                                                                        @foreach ($gudangs as $gudang)
-                                                                            <option value="{{ $gudang->id }}">
-                                                                                {{ $gudang->nama }}</option>
-                                                                        @endforeach
-                                                                    </select>
-                                                                </div>
-                                                                <div class="col-6">
-                                                                @else
-                                                                    <div class="col-12">
-                                                                        <input type="hidden" name="gudang_id"
-                                                                            value="{{ $default_apotek->id }}">
-                                                            @endif
-                                                            <select class="form-control" name="barang_id"
-                                                                id="cppt_barang_id">
-                                                                <option value="" disabled selected hidden>Pilih
-                                                                    Obat
-                                                                </option>
-                                                                @if (isset($default_apotek))
-                                                                    @foreach ($barangs as $barang)
-                                                                        @php
-                                                                            $items = $barang->stored_items->where(
-                                                                                'gudang_id',
-                                                                                $default_apotek->id,
-                                                                            );
-                                                                            $qty = $items->sum('qty');
-                                                                            $barang->qty = $qty;
-                                                                        @endphp
-                                                                        @if ($qty > 0)
-                                                                            <option value="{{ $barang->id }}"
-                                                                                class="obat"
-                                                                                data-zat="@foreach ($barang->zat_aktif as $zat_aktif) {{ $zat_aktif->zat->nama }}, @endforeach"
-                                                                                data-qty="{{ $qty }}"
-                                                                                data-item="{{ json_encode($barang) }}">
-                                                                                {{ $barang->nama }} (Stock:
-                                                                                {{ $qty }})</option>
-                                                                        @endif
-                                                                    @endforeach
-                                                                @endif
-                                                            </select>
-                                                            <div class="row">
-                                                                <div class="col-xl">
-                                                                    <input type="checkbox" name="zat_aktif" id="zat_aktif">
-                                                                    <label for="zat_aktif"> Zat Aktif </label>
-                                                                </div>
+                <div class="panel-hdr border-top">
+                    <h2 class="text-light">
+                        <i class="fas fa-address-card mr-3 ml-2 text-primary" style="transform: scale(2.1)"></i>
+                        <span class="text-primary">Radiologi</span>
+                    </h2>
+                </div>
+                <div>
+                    <div class="row">
+                        <div class="col-xl-12">
+                            <div id="panel-1" class="panel">
+                                <div class="panel-container show">
+                                    <div class="panel-content">
+                                        <!-- datatable start -->
+                                        <table id="dt-basic-example"
+                                            class="table table-bordered table-hover table-striped w-100">
+                                            <thead class="bg-primary-600">
+                                                <tr>
+                                                    <th>#</th>
+                                                    <th>Detail</th>
+                                                    <th>Tanggal</th>
+                                                    <th>No. Registrasi</th>
+                                                    <th>No. Order</th>
+                                                    <th>Poly / Ruang</th>
+                                                    <th>Penjamin</th>
+                                                    <th>Dokter</th>
+                                                    <th>Status Isi Hasil</th>
+                                                    <th>Status Billed</th>
+                                                    <th>Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach ($radiologiOrders as $order)
+                                                    <tr>
+                                                        <td>{{ $loop->iteration }}</td>
+                                                        <td>
+                                                            <button type="button" class="btn btn-sm btn-primary"
+                                                                data-bs-placement="top" data-bs-toggle="popover"
+                                                                data-bs-title="Detail Order Radiologi" data-bs-html="true"
+                                                                data-bs-content-id="popover-content-{{ $order->id }}">
+                                                                <i class="fas fa-list text-light"
+                                                                    style="transform: scale(1.8)"></i>
+                                                            </button>
+                                                            <div class="display-none"
+                                                                id="popover-content-{{ $order->id }}">
+                                                                @include(
+                                                                    'pages.simrs.pendaftaran.partials.detail-order-radiologi',
+                                                                    ['order' => $order]
+                                                                )
                                                             </div>
-                                                            <div class="form-control-line"></div>
-
-                                                            <br>
-
-                                                            <table class="table table-striped">
-                                                                <thead class="smooth card-header bg-secondary text-white">
-                                                                    <tr>
-                                                                        <th>Nama Obat</th>
-                                                                        <th style="width: 10%;">UOM</th>
-                                                                        <th style="width: 5%;">Stok</th>
-                                                                        <th style="width: 10%;">Qty Perhari</th>
-                                                                        <th style="width: 10%;">Jumlah Hari</th>
-                                                                        <th style="width: 10%;">Total Qty</th>
-                                                                        <th style="width: 15%">Signa</th>
-                                                                        <th style="width: 1%;">Aksi</th>
-                                                                    </tr>
-                                                                </thead>
-                                                                <tbody id="table_re"></tbody>
-                                                            </table>
-
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-
-
-                                            </div>
-
-                                            <div class="col-md-12">
-                                                <div class="card mt-3">
-                                                    <div class="card-header bg-info text-white">
-                                                        Resep Manual
-                                                    </div>
-                                                    <div class="card-body p-0">
-                                                        <textarea class="form-control border-0 rounded-0" id="resep_manual" name="resep_manual" rows="4"
-                                                            placeholder="Resep Manual"></textarea>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <div class="row justify-content-end mt-3">
-                                                <div class="col-xl-3">
-                                                    <button type="submit"
-                                                        class="btn btn-primary waves-effect waves-themed" id="simpan-btn">
-                                                        <span class="fal fa-save mr-1"></span>
-                                                        Simpan Resep Harian
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </form>
+                                                        </td>
+                                                        <td>
+                                                            {{ $order->order_date }}
+                                                        </td>
+                                                        <td>
+                                                            {{ $order->registration->id }}
+                                                        </td>
+                                                        <td>
+                                                            {{ $order->no_order }}
+                                                        </td>
+                                                        <td>
+                                                            {{ $order->registration->poliklinik }}
+                                                        </td>
+                                                        <td>
+                                                            {{ $order->registration->patient->penjamin->name ?? '-' }}
+                                                        </td>
+                                                        <td>
+                                                            {{ $order->doctor->employee->fullname }}
+                                                        </td>
+                                                        <td>
+                                                            {{ $order->status_isi_hasil == 1 ? 'Finished' : 'Ongoing' }}
+                                                        </td>
+                                                        <td>
+                                                            {{ $order->status_billed == 1 ? 'Billed' : 'Not Billed' }}
+                                                        </td>
+                                                        <td> - </td>
+                                                    </tr>
+                                                @endforeach
+                                            </tbody>
+                                            <tfoot>
+                                                <tr>
+                                                    <th>#</th>
+                                                    <th>Detail</th>
+                                                    <th>Tanggal</th>
+                                                    <th>No. Registrasi</th>
+                                                    <th>No. Order</th>
+                                                    <th>Poly / Ruang</th>
+                                                    <th>Penjamin</th>
+                                                    <th>Dokter</th>
+                                                    <th>Status Isi Hasil</th>
+                                                    <th>Status Billed</th>
+                                                    <th>Action</th>
+                                                </tr>
+                                            </tfoot>
+                                        </table>
+                                        <!-- datatable end -->
                                     </div>
                                 </div>
-
                             </div>
                         </div>
                     </div>
-                </div> --}}
+
+                </div>
+                @include('pages.simrs.pendaftaran.partials.order-radiologi')
+
+
             </div>
         </div>
     @endif
@@ -252,9 +145,30 @@
     <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
     <script src="/js/datagrid/datatables/datatables.export.js"></script>
     <script src="/js/formplugins/select2/select2.bundle.js"></script>
+    {{-- Datepicker --}}
+    <script src="/js/formplugins/bootstrap-datepicker/bootstrap-datepicker.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous">
     </script>
+
+    @yield('script-radiologi')
+
+    <script>
+        let listPopoverRadiologi = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'))
+        listPopoverRadiologi.map((el) => {
+            let opts = {
+                animation: true,
+            }
+            if (el.hasAttribute('data-bs-content-id')) {
+                opts.content = document.getElementById(el.getAttribute('data-bs-content-id')).innerHTML;
+                opts.html = true;
+                opts.sanitize = false;
+            }
+            new bootstrap.Popover(el, opts);
+        })
+    </script>
+
+
     <script src="{{ asset('js/simrs/erm/form/ranap/resep-harian.js') }}?time={{ now() }}"></script>
 
     <script>

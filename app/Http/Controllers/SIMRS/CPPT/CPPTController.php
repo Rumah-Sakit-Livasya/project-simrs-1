@@ -119,7 +119,7 @@ class CPPTController extends Controller
             $formattedCppt = $cppt->map(function ($item) {
                 $item->nama = optional($item->user->employee)->fullname;
 
-                if (! empty($item->tipe_rawat)) {
+                if (!empty($item->tipe_rawat)) {
                     $item->tipe_rawat = $item->tipe_rawat === 'igd'
                         ? 'UGD'
                         : ucwords(str_replace('-', ' ', $item->tipe_rawat));
@@ -175,7 +175,7 @@ class CPPTController extends Controller
                 // Nama dokter (jika ada relasi doctor di employee)
                 $item->nama = optional($item->user->employee->doctor)->name;
 
-                if (! empty($item->tipe_rawat)) {
+                if (!empty($item->tipe_rawat)) {
                     $item->tipe_rawat = $item->tipe_rawat === 'igd'
                         ? 'UGD'
                         : ucwords(str_replace('-', ' ', $item->tipe_rawat));
@@ -255,7 +255,7 @@ class CPPTController extends Controller
 
             // Logika penyimpanan tanda tangan (signature) - samakan dengan PengkajianController
             $signatureData = $validatedData['signature_data'] ?? null;
-            if (! empty($signatureData['signature_image']) && str_starts_with($signatureData['signature_image'], 'data:image')) {
+            if (!empty($signatureData['signature_image']) && str_starts_with($signatureData['signature_image'], 'data:image')) {
                 $oldPath = optional($cppt->signature)->signature;
                 $image = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', str_replace(' ', '+', $signatureData['signature_image'])));
                 $imageName = 'ttd_cppt_' . $cppt->id . '_' . time() . '.png';
@@ -292,7 +292,7 @@ class CPPTController extends Controller
                     'registration_id' => $validatedData['registration_id'],
                 ];
 
-                if (! $request->has('gudang_id')) { // Hanya resep manual
+                if (!$request->has('gudang_id')) { // Hanya resep manual
                     // Data yang akan di-update atau di-create
                     $dataToInsertOrUpdate = [
                         'cppt_id' => $cppt->id,
@@ -335,22 +335,25 @@ class CPPTController extends Controller
                     $instruksi_obats = $request->get('instruksi_obat');
                     $signas = $request->get('signa');
 
-                    if (! $barang_ids || ! $qtys || ! $hargas || ! $subtotals || ! $instruksi_obats || ! $signas) {
-                        throw new \Exception('Field item resep tidak lengkap');
-                    }
+                    // ====================================================
+                    //  LOGIKA FARMASI
+                    // ====================================================
+                    // if (!$barang_ids || !$qtys || !$hargas || !$subtotals || !$instruksi_obats || !$signas) {
+                    //     throw new \Exception('Field item resep tidak lengkap');
+                    // }
 
-                    foreach ($barang_ids as $key => $barang_id) {
-                        FarmasiResepElektronikItems::create([
-                            're_id' => $re->id,
-                            'barang_id' => $barang_id,
-                            'satuan_id' => WarehouseBarangFarmasi::findOrFail($barang_id)->satuan_id,
-                            'qty' => $qtys[$key],
-                            'harga' => $hargas[$key],
-                            'subtotal' => $subtotals[$key],
-                            'instruksi' => $instruksi_obats[$key],
-                            'signa' => $signas[$key],
-                        ]);
-                    }
+                    // foreach ($barang_ids as $key => $barang_id) {
+                    //     FarmasiResepElektronikItems::create([
+                    //         're_id' => $re->id,
+                    //         'barang_id' => $barang_id,
+                    //         'satuan_id' => WarehouseBarangFarmasi::findOrFail($barang_id)->satuan_id,
+                    //         'qty' => $qtys[$key],
+                    //         'harga' => $hargas[$key],
+                    //         'subtotal' => $subtotals[$key],
+                    //         'instruksi' => $instruksi_obats[$key],
+                    //         'signa' => $signas[$key],
+                    //     ]);
+                    // }
                 }
 
                 // --- Logika untuk Response: Gunakan firstOrCreate ---
@@ -381,7 +384,7 @@ class CPPTController extends Controller
     {
         // Gunakan Gate untuk memeriksa otorisasi
         // Pastikan Anda sudah mendaftarkan 'modify-cppt' di AuthServiceProvider atau bootstrap/app.php
-        if (! Gate::allows('modify-cppt', $cppt)) {
+        if (!Gate::allows('modify-cppt', $cppt)) {
             return response()->json(['error' => 'Anda tidak memiliki izin untuk mengedit data ini.'], 403);
         }
 
@@ -397,7 +400,7 @@ class CPPTController extends Controller
     public function update(Request $request, CPPT $cppt)
     {
         // 1. Otorisasi
-        if (! Gate::allows('modify-cppt', $cppt)) {
+        if (!Gate::allows('modify-cppt', $cppt)) {
             return response()->json(['error' => 'Anda tidak memiliki izin untuk memperbarui data ini.'], 403);
         }
 
@@ -456,7 +459,7 @@ class CPPTController extends Controller
     public function destroy(CPPT $cppt)
     {
         // Otorisasi
-        if (! Gate::allows('modify-cppt', $cppt)) {
+        if (!Gate::allows('modify-cppt', $cppt)) {
             return response()->json(['error' => 'Anda tidak memiliki izin untuk menghapus data ini.'], 403);
         }
 
@@ -489,7 +492,7 @@ class CPPTController extends Controller
     public function verify(CPPT $cppt)
     {
         // Otorisasi
-        if (! Gate::allows('verify-cppt', $cppt)) {
+        if (!Gate::allows('verify-cppt', $cppt)) {
             return response()->json(['error' => 'Anda tidak memiliki izin untuk melakukan verifikasi.'], 403);
         }
 
@@ -518,7 +521,7 @@ class CPPTController extends Controller
         // Cari SBAR berdasarkan cppt_id
         $sbar = \App\Models\Sbar::where('cppt_id', $cpptId)->latest()->first();
 
-        if (! $sbar) {
+        if (!$sbar) {
             return response()->json(['error' => 'Data SBAR tidak ditemukan untuk CPPT ini.'], 404);
         }
 

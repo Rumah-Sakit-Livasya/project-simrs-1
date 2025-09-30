@@ -24,8 +24,7 @@
                                                 <div class="col-xl ">
                                                     <input type="text" class="form-control" id="datepicker-1"
                                                         style="border: 0; border-bottom: 1.9px solid #eaeaea; margin-top: -.5rem; border-radius: 0"
-                                                        placeholder="Select date" name="registration_date"
-                                                        value="01/01/2018 - 01/15/2018">
+                                                        placeholder="Select date" name="registration_date">
                                                 </div>
                                             </div>
                                             @error('registration_date')
@@ -130,7 +129,8 @@
                             </div>
 
                             <div class="col-xl-3">
-                                <a href="{{ route('radiologi.order') }}" class="btn btn-primary waves-effect waves-themed">
+                                <a href="{{ route('radiologi.order') }}"
+                                    class="btn btn-primary waves-effect waves-themed">
                                     <span class="fal fa-plus mr-1"></span>
                                     Order Baru
                                 </a>

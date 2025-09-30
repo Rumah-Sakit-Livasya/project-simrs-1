@@ -59,7 +59,7 @@
                                         </div>
                                     </td>
                                     <td>
-                                        @if ($order->registration_otc)
+                                        @if ($order->tipe_pasien === 'otc')
                                             <a>
                                                 {{ $order->order_date }}
                                             </a>
@@ -88,7 +88,7 @@
                                         @endif
                                     </td>
                                     <td>
-                                        @if ($order->registration_otc)
+                                        @if ($order->tipe_pasien === 'otc')
                                             <a>
                                                 OTC
                                             </a>
@@ -114,7 +114,7 @@
                                         @endif
                                     </td>
                                     <td>
-                                        @if ($order->registration_otc)
+                                        @if ($order->tipe_pasien === 'otc')
                                             <a>
                                                 {{ $order->registration_otc->registration_number }}
                                             </a>
@@ -140,7 +140,7 @@
                                         @endif
                                     </td>
                                     <td>
-                                        @if ($order->registration_otc)
+                                        @if ($order->tipe_pasien === 'otc')
                                             <a>
                                                 {{ $order->no_order }}
                                             </a>
@@ -166,7 +166,7 @@
                                         @endif
                                     </td>
                                     <td>
-                                        @if ($order->registration_otc)
+                                        @if ($order->tipe_pasien === 'otc')
                                             <a>
                                                 {{ $order->registration_otc->nama_pasien }}
                                             </a>
@@ -192,7 +192,7 @@
                                         @endif
                                     </td>
                                     <td>
-                                        @if ($order->registration_otc)
+                                        @if ($order->tipe_pasien === 'otc')
                                             <a>
                                                 {{ $order->registration_otc->poly_ruang }}
                                             </a>
@@ -218,7 +218,7 @@
                                         @endif
                                     </td>
                                     <td>
-                                        @if ($order->registration_otc)
+                                        @if ($order->tipe_pasien === 'otc')
                                             <a>
                                                 {{ $order->registration_otc->penjamin->name ?? '-' }}
                                             </a>
@@ -244,7 +244,7 @@
                                         @endif
                                     </td>
                                     <td>
-                                        @if ($order->registration_otc)
+                                        @if ($order->tipe_pasien === 'otc')
                                             <a>
                                                 {{ $order->doctor->employee->fullname }}
                                             </a>
@@ -270,7 +270,7 @@
                                         @endif
                                     </td>
                                     <td>
-                                        @if ($order->registration_otc)
+                                        @if ($order->tipe_pasien === 'otc')
                                             <a>
                                                 {{ $order->status_isi_hasil == 1 ? 'Finished' : 'Ongoing' }}
                                             </a>
@@ -296,7 +296,7 @@
                                         @endif
                                     </td>
                                     <td>
-                                        @if ($order->registration_otc)
+                                        @if ($order->tipe_pasien === 'otc')
                                             <a>
                                                 {{ $order->status_billed == 1 ? 'Billed' : 'Not Billed' }}
                                             </a>
@@ -338,6 +338,9 @@
 
                                         <a class="mdi mdi-file-document pointer mdi-24px text-warning result-btn"
                                             title="Print Hasil" data-id="{{ $order->id }}"></a>
+
+                                        <a class="mdi mdi-delete pointer mdi-24px text-danger delete-btn"
+                                            title="Hapus Order" data-id="{{ $order->id }}"></a>
                                     </td>
                                 </tr>
                             @endforeach

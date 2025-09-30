@@ -47,12 +47,14 @@
                             <span>Tindakan Medis</span>
                         </a>
                     </li>
-                    <li>
-                        <div class="circle-menu waves-effect amber lighten-1 menu-layanan"
-                            data-layanan="obatalkes_ruangan/list_obat_alkes">
-                            <i class="mdi mdi-pill"></i>
-                        </div>
-                        <span>Obat/Alkes</span>
+                    <li class="text-center">
+                        <a
+                            href="{{ route('detail.registrasi.pasien.layanan', ['registrations' => $registration->id, 'layanan' => 'order-obat']) }}">
+                            <div class="circle-menu waves-effect amber lighten-1">
+                                <i class="mdi mdi-pill"></i>
+                            </div>
+                            <span>Obat/Alkes</span>
+                        </a>
                     </li>
                     <li class="text-center">
                         <a

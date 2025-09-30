@@ -56,39 +56,37 @@
                 });
             });
 
-            /// Get the current date and time
-            var today = new Date();
+            // --- PERUBAHAN UNTUK DATERANGE PICKER ---
+            // Tentukan tanggal awal dan akhir.
+            // Jika ada tanggal dari request (hasil pencarian), gunakan itu.
+            // Jika tidak, gunakan tanggal hari ini.
+            @php
+                $dateRange = request('registration_date');
+                if ($dateRange) {
+                    $dates = explode(' - ', $dateRange);
+                    // Pastikan formatnya YYYY-MM-DD sesuai dengan yang dikirim daterangepicker
+                    $startDate = \Carbon\Carbon::parse($dates[0])->format('Y-m-d');
+                    $endDate = \Carbon\Carbon::parse($dates[1])->format('Y-m-d');
+                } else {
+                    $startDate = \Carbon\Carbon::today()->format('Y-m-d');
+                    $endDate = \Carbon\Carbon::today()->format('Y-m-d');
+                }
+            @endphp
 
-            // Format it as "YYYY-MM-DD"
-            var formattedToday = today.getFullYear() + '-' +
-                ('0' + (today.getMonth() + 1)).slice(-2) + '-' +
-                ('0' + today.getDate()).slice(-2) + ' ' +
-                ('0' + today.getHours()).slice(-2) + ':' +
-                ('0' + today.getMinutes()).slice(-2) + ':' +
-                ('0' + today.getSeconds()).slice(-2);
-
-            // Set the default date for the datepicker
             $('#datepicker-1').daterangepicker({
                 opens: 'left',
-                startDate: moment(today).format('YYYY-MM-DD'),
-                endDate: moment(today).format('YYYY-MM-DD'),
-                // timePicker: true, // Enable time selection
-                // timePicker24Hour: true, // 24-hour format
-                // timePickerSeconds: true, // Include seconds in time selection
+                startDate: moment('{{ $startDate }}'), // Gunakan variabel dari PHP
+                endDate: moment('{{ $endDate }}'), // Gunakan variabel dari PHP
                 locale: {
-                    format: 'YYYY-MM-DD' // Display format for the picker
+                    format: 'YYYY-MM-DD' // Format yang dikirim ke server
                 }
-            }, function(start, end, label) {
-                console.log("A new date selection was made: " + start.format('YYYY-MM-DD') +
-                    ' to ' + end.format('YYYY-MM-DD'));
             });
 
 
             $('#loading-spinner').show();
             // initialize datatable
-            $('#dt-basic-example').dataTable({
+            let table = $('#dt-basic-example').DataTable({
                 "drawCallback": function(settings) {
-                    // Menyembunyikan preloader setelah data berhasil dimuat
                     $('#loading-spinner').hide();
                 },
                 responsive: true,
@@ -127,6 +125,65 @@
                         className: 'btn-outline-primary btn-sm'
                     }
                 ]
+            });
+
+            // ===================== TAMBAHKAN BLOK KODE INI =====================
+            // Event listener untuk tombol delete
+            $('#dt-basic-example tbody').on('click', '.delete-btn', function() {
+                var orderId = $(this).data('id');
+                var row = $(this).closest('tr'); // Ambil elemen <tr> dari baris yang akan dihapus
+
+                // Tampilkan konfirmasi menggunakan SweetAlert
+                Swal.fire({
+                    title: 'Apakah Anda yakin?',
+                    text: "Order ini akan dihapus secara permanen!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Ya, hapus!',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Jika user mengonfirmasi, kirim request AJAX
+                        $.ajax({
+                            url: `/simrs/radiologi/order/${orderId}`, // Sesuaikan dengan URL route Anda
+                            type: 'DELETE',
+                            headers: {
+                                // Kirim CSRF token untuk keamanan
+                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                            },
+                            success: function(response) {
+                                if (response.success) {
+                                    // Hapus baris dari DataTable
+                                    table.row(row).remove().draw();
+
+                                    // Tampilkan notifikasi sukses
+                                    Swal.fire(
+                                        'Dihapus!',
+                                        response.message,
+                                        'success'
+                                    );
+                                } else {
+                                    // Tampilkan notifikasi error dari server
+                                    Swal.fire(
+                                        'Gagal!',
+                                        response.message,
+                                        'error'
+                                    );
+                                }
+                            },
+                            error: function(xhr, status, error) {
+                                // Tangani error AJAX (misal: server down, 404, dll)
+                                Swal.fire(
+                                    'Error!',
+                                    'Tidak dapat menghubungi server. Coba lagi nanti.',
+                                    'error'
+                                );
+                            }
+                        });
+                    }
+                });
             });
 
         });

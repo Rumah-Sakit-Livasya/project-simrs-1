@@ -226,7 +226,13 @@ Pemeriksaan Penunjang: {{ $assesment->pemeriksaan_penunjang ?? '' }}
                                                     <div class="form-group">
                                                         <label for="tindakan_utama" class="form-label">TINDAKAN
                                                             UTAMA</label>
-                                                        <textarea class="form-control" id="tindakan_utama" name="tindakan_utama" rows="4">{{ $pengkajian?->tindakan_utama ?? '' }}</textarea>
+                                                        <textarea class="form-control" id="tindakan_utama" name="tindakan_utama" rows="4">
+@if (empty($pengkajian?->tindakan_utama) && !empty($terapi_tindakan))
+{{ $terapi_tindakan }}
+@else
+{{ $pengkajian?->tindakan_utama ?? '' }}
+@endif
+</textarea>
                                                     </div>
                                                 </td>
                                                 <td style="width: 25%">
