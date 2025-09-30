@@ -25,7 +25,7 @@ class OrderRadiologi extends Model
 
     public function registration_otc()
     {
-        return $this->belongsTo(RegistrationOTC::class, 'otc_id');
+        return $this->belongsTo(RegistrationOTC::class, 'registration_id');
     }
 
     public function registration()
