@@ -18,7 +18,9 @@ use App\Models\SIMRS\Penjamin;
 use App\Models\SIMRS\Radiologi\TarifParameterRadiologi;
 use App\Models\SIMRS\Registration;
 use App\Models\TemplateHasilRadiologi;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
 
 class RadiologiController extends Controller
@@ -26,10 +28,12 @@ class RadiologiController extends Controller
     public function index(Request $request)
     {
         $query = OrderRadiologi::query()
-            ->with(['registration', 'registration_otc', 'registration_otc.doctor', 'patient']);
+            ->with(['registration', 'registration_otc', 'patient', 'doctor.employee']); // Pastikan relasi yang dibutuhkan ada di with()
+
         $filters = ['registration_number', 'no_order'];
         $filterApplied = false;
 
+        // Cek apakah ada filter yang dikirim dari form
         foreach ($filters as $filter) {
             if ($request->filled($filter)) {
                 $query->where($filter, 'like', '%' . $request->$filter . '%');
@@ -44,17 +48,6 @@ class RadiologiController extends Controller
             $filterApplied = true;
         }
 
-        // Filter by date range
-        if ($request->filled('registration_date')) {
-            $dateRange = explode(' - ', $request->order_date);
-            if (count($dateRange) === 2) {
-                $startDate = date('Y-m-d 00:00:00', strtotime($dateRange[0]));
-                $endDate = date('Y-m-d 23:59:59', strtotime($dateRange[1]));
-                $query->whereBetween('order_date', [$startDate, $endDate]);
-            }
-            $filterApplied = true;
-        }
-
         if ($request->filled('name')) {
             $query->whereHas('registration.patient', function ($q) use ($request) {
                 $q->where('name', 'like', '%' . $request->name . '%');
@@ -62,18 +55,34 @@ class RadiologiController extends Controller
             $filterApplied = true;
         }
 
-        // Get the filtered results if any filter is applied
+        // Filter berdasarkan rentang tanggal HANYA jika dikirim dari form
+        if ($request->filled('registration_date')) {
+            // Nama parameter di form adalah 'registration_date', bukan 'order_date'
+            $dateRange = explode(' - ', $request->registration_date);
+            if (count($dateRange) === 2) {
+                $startDate = Carbon::createFromFormat('Y-m-d', $dateRange[0])->startOfDay();
+                $endDate = Carbon::createFromFormat('Y-m-d', $dateRange[1])->endOfDay();
+                $query->whereBetween('order_date', [$startDate, $endDate]);
+            }
+            $filterApplied = true;
+        }
+
+        // --- PERUBAHAN UTAMA DI SINI ---
+        // Jika ada filter yang diterapkan, ambil data sesuai filter.
+        // Jika tidak, ambil data untuk hari ini sebagai default.
         if ($filterApplied) {
-            $order = $query->orderBy('order_date', 'asc')->get();
+            $orders = $query->orderBy('order_date', 'desc')->get();
         } else {
-            // Return empty collection if no filters applied
-            $order = collect();
+            // Default: Ambil data untuk hari ini
+            $query->whereDate('order_date', Carbon::today());
+            $orders = $query->orderBy('order_date', 'desc')->get();
         }
 
         return view('pages.simrs.radiologi.list-order', [
-            'orders' => $order
+            'orders' => $orders
         ]);
     }
+
 
     public function order()
     {
@@ -372,6 +381,37 @@ class RadiologiController extends Controller
             return back()->with('success', 'Tarif radiologi berhasil diimpor!');
         } catch (\Exception $e) {
             return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function destroy($id)
+    {
+        try {
+            // Cari order berdasarkan ID, jika tidak ketemu akan otomatis error 404
+            $order = OrderRadiologi::findOrFail($id);
+
+            // Lakukan validasi tambahan jika perlu, misalnya:
+            // if ($order->status_billed == 1) {
+            //     return response()->json(['success' => false, 'message' => 'Order yang sudah ditagih tidak bisa dihapus.'], 400);
+            // }
+
+            // Hapus order
+            $order->delete();
+
+            // Kirim respons sukses
+            return response()->json(['success' => true, 'message' => 'Order Radiologi berhasil dihapus.']);
+        } catch (\Exception $e) {
+            // Catat error untuk debugging
+            Log::error('Gagal menghapus order radiologi: ' . $e->getMessage());
+
+            // Kirim respons error ke client
+            return response()->json(['success' => false, 'message' => 'Terjadi kesalahan pada server saat menghapus data.'], 500);
         }
     }
 }

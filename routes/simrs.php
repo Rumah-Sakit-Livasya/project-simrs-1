@@ -1070,6 +1070,8 @@ Route::group(['middleware' => ['auth']], function () {
 
             Route::get('popup/pilih-pasien/{poli}', [RadiologiController::class, 'popupPilihPasien'])
                 ->name('radiologi.popup.pilih-pasien');
+
+            Route::delete('order/{id}', [RadiologiController::class, 'destroy'])->name('radiologi.order.destroy');
         });
 
         Route::prefix('laboratorium')->group(function () {

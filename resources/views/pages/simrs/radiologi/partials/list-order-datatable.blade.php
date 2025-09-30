@@ -338,6 +338,9 @@
 
                                         <a class="mdi mdi-file-document pointer mdi-24px text-warning result-btn"
                                             title="Print Hasil" data-id="{{ $order->id }}"></a>
+
+                                        <a class="mdi mdi-delete pointer mdi-24px text-danger delete-btn"
+                                            title="Hapus Order" data-id="{{ $order->id }}"></a>
                                     </td>
                                 </tr>
                             @endforeach
