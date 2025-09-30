@@ -152,7 +152,7 @@
         </div>
     </main>
     @include('pages.simrs.master-data.penunjang-medis.radiologi.partials.tambah-parameter-radiologi')
-    @include('pages.simrs.master-data.penunjang-medis.radiologi.partials.edit-grup-parameter-radiologi')
+    @include('pages.simrs.master-data.penunjang-medis.radiologi.partials.edit-parameter-radiologi')
 @endsection
 @section('plugin')
     <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
