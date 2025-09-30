@@ -1369,6 +1369,8 @@ class RegistrationController extends Controller
             'operasi'          => view('pages.simrs.pendaftaran.partials.operasi', $viewData),
             'persalinan'       => view('pages.simrs.pendaftaran.partials.persalinan', $viewData),
             'gizi'             => view('pages.simrs.pendaftaran.partials.gizi', $viewData),
+            'order-obat'       => view('pages.simrs.pendaftaran.partials.order-obat', $viewData),
+
             default            => abort(404, 'Layanan tidak ditemukan'),
         };
     }
