@@ -537,10 +537,9 @@ class BayiController extends Controller
 
     public function store(Request $request)
     {
-        Log::info('Store bayi request data:', $request->all());
-
         // 1. Validasi Input dari Form
         $validatedData = $request->validate([
+            // Menambahkan validasi kondisional untuk order_id
             'order_persalinan_id'   => 'nullable|exists:order_persalinan,id',
             'order_operasi_id'      => 'nullable|exists:order_operasi,id',
             'bayi_id'               => 'nullable|exists:bayi,id',
@@ -550,11 +549,10 @@ class BayiController extends Controller
             'nama_bayi'             => 'required|string|max:255',
             'tempat_lahir'          => 'required|string|max:255',
 
-            // ======================= PERBAIKAN 1: Aturan Validasi Tanggal =======================
-            // Mengubah 'datetime' menjadi 'date_format' agar sesuai dengan format dari input type="datetime-local"
-            // Format yang dikirim adalah 'YYYY-MM-DDTHH:MM', contoh: '2024-01-10T15:30'
+            // ======================= IMPLEMENTASI LOGIKA BARU 1 =======================
+            // Mengubah aturan validasi agar sesuai dengan format input "datetime-local" (YYYY-MM-DDTHH:MM)
             'tgl_lahir'             => 'required|date_format:Y-m-d\TH:i',
-            // ===================================================================================
+            // ==========================================================================
 
             'jenis_kelamin'         => 'required|in:Laki-laki,Perempuan',
             'berat'                 => 'required|numeric|min:0',
@@ -585,36 +583,24 @@ class BayiController extends Controller
             'kelas_rawat_id.required'  => 'Kelas Rawat ID tidak boleh kosong.',
             'doctor_id.required'       => 'Nama Dokter wajib dipilih.',
             'nama_bayi.required'       => 'Nama Bayi wajib diisi.',
-            'tgl_lahir.date_format'    => 'Format Tanggal & Jam Lahir tidak valid.', // Pesan error untuk aturan baru
+            'tgl_lahir.date_format'    => 'Format Tanggal & Jam Lahir tidak valid.',
         ]);
 
-        // Validasi tambahan: salah satu dari order_persalinan_id atau order_operasi_id harus ada
+        // Validasi tambahan: memastikan salah satu order_id ada
         if (!$request->order_persalinan_id && !$request->order_operasi_id) {
             throw ValidationException::withMessages([
-                'order' => 'Order persalinan atau operasi harus diisi.'
-            ]);
-        }
-        if ($request->order_persalinan_id && $request->order_operasi_id) {
-            throw ValidationException::withMessages([
-                'order' => 'Hanya salah satu dari order persalinan atau operasi yang boleh diisi.'
+                'order' => 'Referensi order persalinan atau operasi tidak ditemukan.'
             ]);
         }
 
         DB::beginTransaction();
         try {
-            // Pengecekan bed_id valid
-            if (!$request->bed_id || !Bed::find($request->bed_id)) {
-                throw ValidationException::withMessages([
-                    'bed_id' => 'Bed tidak valid atau tidak ditemukan.'
-                ]);
-            }
-
             // 2. Ambil data order (persalinan atau operasi)
             $order = null;
             if ($request->order_persalinan_id) {
                 $order = OrderPersalinan::with('registration.patient')->findOrFail($request->order_persalinan_id);
             } elseif ($request->order_operasi_id) {
-                $order = OrderOperasi::with('registration.patient')->findOrFail($request->order_operasi_id);
+                // $order = OrderOperasi::with('registration.patient')->findOrFail($request->order_operasi_id); // Sesuaikan jika model ini ada
             }
 
             if (!$order || !$order->registration?->patient) {
@@ -622,23 +608,24 @@ class BayiController extends Controller
             }
             $ibu = $order->registration->patient;
 
-
             // 3. Logika Pasien Bayi (Create / Update)
             $patientBayi = null;
             $bayi = null;
             $isNewBaby = empty($request->bayi_id);
 
-            // Format tanggal dan waktu yang akan disimpan ke database
+            // ======================= IMPLEMENTASI LOGIKA BARU 2 =======================
+            // Siapkan variabel untuk menyimpan tanggal lahir dalam format database (Y-m-d H:i:s)
             $birthDateTime = Carbon::parse($request->tgl_lahir)->format('Y-m-d H:i:s');
+            // ==========================================================================
 
             if ($isNewBaby) {
-                // Membuat record patient baru untuk bayi
+                // =============== MEMBUAT RECORD PATIENT BARU UNTUK BAYI ===============
                 $patientBayi = Patient::create([
                     'medical_record_number' => MedicalRecordHelper::generateMedicalRecordNumber(),
                     'name'                  => $request->nama_bayi,
                     'place'                 => $request->tempat_lahir,
-                    'date_of_birth'         => $birthDateTime, // Menggunakan variabel yang sudah diformat
-                    'gender'                => $request->jenis_kelamin,
+                    'date_of_birth'         => $birthDateTime, // Gunakan format datetime
+                    'gender'                => ($request->jenis_kelamin == 'Laki-laki') ? 'L' : 'P', // Konversi ke L/P
                     'title'                 => 'By.',
                     'nickname'              => 'By. ' . explode(' ', $request->nama_bayi)[0],
                     'married_status'        => 'Belum Kawin',
@@ -646,96 +633,74 @@ class BayiController extends Controller
                     'last_education'        => 'Belum Sekolah',
                     'job'                   => 'Belum Bekerja',
                     'religion'              => $ibu->religion ?? 'Islam',
-                    'address'               => $ibu->address ?? '',
-                    'ward'                  => $ibu->ward ?? '',
-                    'subdistrict'           => $ibu->subdistrict ?? '',
-                    'regency'               => $ibu->regency ?? '',
+                    'address'               => $ibu->address ?? 'TIDAK DIKETAHUI',
+                    'ward'                  => $ibu->ward ?? 'TIDAK DIKETAHUI',
+                    'subdistrict'           => $ibu->subdistrict ?? 'TIDAK DIKETAHUI',
+                    'regency'               => $ibu->regency ?? 'TIDAK DIKETAHUI',
                     'province'              => $ibu->province ?? '',
-                    'mobile_phone_number'   => $ibu->mobile_phone_number ?? '',
-                    'ethnic'                => $ibu->ethnic ?? '',
+                    'mobile_phone_number'   => $ibu->mobile_phone_number ?? '0000',
+                    'ethnic'                => $ibu->ethnic ?? 'TIDAK DIKETAHUI',
                     'citizenship'           => $ibu->citizenship ?? 'WNI',
                 ]);
             } else {
-                // Memperbarui record patient yang sudah ada
+                // =============== MEMPERBARUI RECORD PATIENT YANG SUDAH ADA ===============
                 $bayi = Bayi::findOrFail($request->bayi_id);
                 $patientBayi = Patient::findOrFail($bayi->patient_id);
                 $patientBayi->update([
                     'name'          => $request->nama_bayi,
-                    'gender'        => $request->jenis_kelamin,
-                    // ======================= PERBAIKAN 2: Konsistensi Format Update =======================
-                    // Menyamakan format agar saat update, jam dan menit tidak hilang
-                    'date_of_birth' => $birthDateTime,
-                    // ======================================================================================
+                    'gender'        => ($request->jenis_kelamin == 'Laki-laki') ? 'L' : 'P',
+                    'date_of_birth' => $birthDateTime, // Gunakan format datetime yang sama
                     'place'         => $request->tempat_lahir,
                 ]);
             }
 
             // 4. Menyiapkan data untuk tabel 'bayi'
-            $validatedData['patient_id'] = $patientBayi->id;
-            $validatedData['no_rm'] = $patientBayi->medical_record_number;
-            $validatedData['registration_id'] = $order->registration_id;
-            $validatedData['tgl_lahir'] = Carbon::parse($request->tgl_lahir); // Laravel akan handle Carbon object ini dengan benar
+            $dataForBayi = $validatedData;
+            $dataForBayi['patient_id'] = $patientBayi->id;
+            $dataForBayi['no_rm'] = $patientBayi->medical_record_number;
+            $dataForBayi['registration_id'] = $order->registration_id;
+            $dataForBayi['tgl_lahir'] = Carbon::parse($request->tgl_lahir);
 
             $bedInfo = Bed::with('room.kelas_rawat')->findOrFail($request->bed_id);
             if (!$bedInfo->room?->kelas_rawat) {
                 throw new \Exception('Data bed, ruangan, atau kelas rawat tidak lengkap.');
             }
-            $validatedData['kelas_kamar'] = $bedInfo->room->kelas_rawat->kelas . ' / ' . $bedInfo->room->ruangan . ' - ' . $bedInfo->nama_tt;
+            $dataForBayi['kelas_kamar'] = $bedInfo->room->kelas_rawat->kelas . ' / ' . $bedInfo->room->ruangan . ' - ' . $bedInfo->nama_tt;
 
             // 5. Menyimpan atau Memperbarui data di tabel 'bayi'
             $oldBedId = $isNewBaby ? null : $bayi->getOriginal('bed_id');
             $newBedId = (int)$request->bed_id;
 
-            Log::info('Bed management:', [
-                'oldBedId' => $oldBedId,
-                'newBedId' => $newBedId,
-            ]);
-
             if ($isNewBaby) {
-                $bayi = Bayi::create($validatedData);
+                $bayi = Bayi::create($dataForBayi);
                 $bayi->update([
                     'tgl_reg' => now(),
                     'tgl_jam_registrasi' => now(),
                     'no_label' => now()->format('ymd') . '-' . str_pad($bayi->id, 4, '0', STR_PAD_LEFT)
                 ]);
             } else {
-                // $bayi sudah di-fetch di atas
-                $bayi->update($validatedData);
+                $bayi->update($dataForBayi);
             }
 
             // 6. Logika Manajemen Bed/Kamar
             if ($isNewBaby || $oldBedId !== $newBedId) {
-                // Kosongkan bed lama
                 if ($oldBedId && $oldBedId !== $newBedId) {
                     DB::table('bed_patient')
-                        ->where('bed_id', $oldBedId)
-                        ->where('patient_id', $patientBayi->id)
-                        ->whereNull('tanggal_keluar')
-                        ->update([
-                            'status' => 'kosong',
-                            'tanggal_keluar' => now(),
-                            'updated_at' => now()
-                        ]);
+                        ->where('bed_id', $oldBedId)->where('patient_id', $patientBayi->id)->whereNull('tanggal_keluar')
+                        ->update(['status' => 'kosong', 'tanggal_keluar' => now(), 'updated_at' => now()]);
 
                     DB::table('beds')
-                        ->where('id', $oldBedId)
-                        ->where('patient_id', $patientBayi->id)
-                        ->update([
-                            'patient_id' => null,
-                            'updated_at' => now()
-                        ]);
+                        ->where('id', $oldBedId)->where('patient_id', $patientBayi->id)
+                        ->update(['patient_id' => null, 'updated_at' => now()]);
                 }
 
-                // Isi bed baru
                 $isBedActivelyOccupied = DB::table('bed_patient')
-                    ->where('bed_id', $newBedId)
-                    ->whereNull('tanggal_keluar')
-                    ->where('patient_id', '!=', $patientBayi->id)
+                    ->where('bed_id', $newBedId)->whereNull('tanggal_keluar')
                     ->exists();
 
                 if ($isBedActivelyOccupied) {
                     throw ValidationException::withMessages([
-                        'bed_id' => 'Kamar/Bed yang dipilih sudah terisi oleh pasien lain. Silakan pilih yang lain.'
+                        'bed_id' => 'Kamar/Bed yang dipilih sudah terisi oleh pasien lain.'
                     ]);
                 }
 
@@ -751,10 +716,7 @@ class BayiController extends Controller
 
                     DB::table('beds')
                         ->where('id', $newBedId)
-                        ->update([
-                            'patient_id' => $patientBayi->id,
-                            'updated_at' => now()
-                        ]);
+                        ->update(['patient_id' => $patientBayi->id, 'updated_at' => now()]);
                 }
             }
 
@@ -763,7 +725,7 @@ class BayiController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => $isNewBaby ? 'Data bayi berhasil disimpan!' : 'Data bayi berhasil diperbarui!',
-                'bayi' => $bayi->fresh() // Mengambil data terbaru dari DB untuk dikirim kembali
+                'bayi' => $bayi->fresh()
             ]);
         } catch (ValidationException $e) {
             DB::rollBack();
@@ -776,8 +738,8 @@ class BayiController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Gagal menyimpan data bayi: ' . $e->getMessage(), [
-                'trace' => $e->getTraceAsString(),
-                'request' => $request->all(),
+                'trace' => substr($e->getTraceAsString(), 0, 2000),
+                'request' => $request->except(['_token']),
                 'line' => $e->getLine(),
                 'file' => $e->getFile()
             ]);
