@@ -335,6 +335,9 @@ class CPPTController extends Controller
                     $instruksi_obats = $request->get('instruksi_obat');
                     $signas = $request->get('signa');
 
+                    // ====================================================
+                    //  LOGIKA FARMASI
+                    // ====================================================
                     // if (!$barang_ids || !$qtys || !$hargas || !$subtotals || !$instruksi_obats || !$signas) {
                     //     throw new \Exception('Field item resep tidak lengkap');
                     // }

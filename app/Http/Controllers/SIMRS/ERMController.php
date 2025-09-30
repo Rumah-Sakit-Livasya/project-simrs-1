@@ -1516,9 +1516,11 @@ class ERMController extends Controller
                 $pengkajian = ResumeMedisRajal::firstWhere('registration_id', $registration->id);
                 if ($registration->registration_type == 'rawat-jalan') {
                     $assesment = DoctorInitialAssessment::firstWhere('registration_id', $registration->id);
+                    $terapi_tindakan = $assesment->terapi_tindakan ?? null;
                 } else {
                     $assesment = PengkajianDokterIGD::firstWhere('registration_id', $registration->id);
                 }
+
 
                 // Flag untuk menampilkan SweetAlert2 jika assesment belum ada
                 $showSwal = false;
@@ -1531,7 +1533,7 @@ class ERMController extends Controller
                     $keluhan_utama = $assesment->anamnesis['keluhan_utama'];
                 }
 
-                return view('pages.simrs.erm.form.dokter.resume_medis', compact('registration', 'registrations', 'pengkajian', 'assesment', 'diagnosa_utama', 'diagnosa_tambahan', 'keluhan_utama', 'menu', 'departements', 'jadwal_dokter', 'dokter', 'path'));
+                return view('pages.simrs.erm.form.dokter.resume_medis', compact('registration', 'registrations', 'pengkajian', 'assesment', 'diagnosa_utama', 'diagnosa_tambahan', 'keluhan_utama', 'terapi_tindakan', 'menu', 'departements', 'jadwal_dokter', 'dokter', 'path'));
 
             case 'rekonsiliasi_obat':
                 $dokter = Employee::where('is_doctor', 1)->get();
