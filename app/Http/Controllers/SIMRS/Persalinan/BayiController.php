@@ -291,6 +291,250 @@ class BayiController extends Controller
     //         ], 500);
     //     }
     // }
+    // public function store(Request $request)
+    // {
+    //     Log::info('Store bayi request data:', $request->all());
+
+    //     // 1. Validasi Input dari Form
+    //     $validatedData = $request->validate([
+    //         'order_persalinan_id'   => 'nullable|exists:order_persalinan,id',
+    //         'order_operasi_id'      => 'nullable|exists:order_operasi,id',
+    //         'bayi_id'               => 'nullable|exists:bayi,id',
+    //         'doctor_id'             => 'required|exists:doctors,id',
+    //         'bed_id'                => 'required|exists:beds,id',
+    //         'kelas_rawat_id'        => 'required|exists:kelas_rawat,id',
+    //         'nama_bayi'             => 'required|string|max:255',
+    //         'tempat_lahir'          => 'required|string|max:255',
+    //         'tgl_lahir'             => 'required|date',
+    //         'jenis_kelamin'         => 'required|in:Laki-laki,Perempuan',
+    //         'berat'                 => 'required|numeric|min:0',
+    //         'panjang'               => 'required|numeric|min:0',
+    //         'status_lahir'          => 'required|in:Hidup,Meninggal',
+    //         'jenis_kelahiran'       => 'required|in:Tunggal,Kembar',
+    //         'nama_keluarga'         => 'nullable|string|max:255',
+    //         'lingkar_kepala'        => 'nullable|numeric|min:0',
+    //         'lingkar_dada'          => 'nullable|numeric|min:0',
+    //         'kelahiran_ke'          => 'nullable|integer|min:0',
+    //         'kelainan_fisik'        => 'nullable|string',
+    //         'kelahiran_normal'      => 'nullable|string',
+    //         'kelahiran_dgn_tindakan' => 'nullable|string',
+    //         'apgar_score_1_minute'  => 'nullable|integer|min:0|max:10',
+    //         'apgar_score_5_minutes' => 'nullable|integer|min:0|max:10',
+    //         'gestasi'               => 'nullable|integer|min:0',
+    //         'pregnant_g'            => 'nullable|string|max:50',
+    //         'pregnant_p'            => 'nullable|string|max:50',
+    //         'pregnant_a'            => 'nullable|string|max:50',
+    //         'placenta_weight'       => 'nullable|string|max:50',
+    //         'placenta_measure'      => 'nullable|string|max:50',
+    //         'placenta_anomaly'      => 'nullable|string|max:50',
+    //         'pregnant_complication' => 'nullable|string',
+    //         'partus'                => 'nullable|string',
+    //         'partus_complication'   => 'nullable|string',
+    //     ], [
+    //         'bed_id.required'          => 'Kelas / Kamar Rawat untuk bayi wajib dipilih.',
+    //         'kelas_rawat_id.required'  => 'Kelas Rawat ID tidak boleh kosong.',
+    //         'doctor_id.required'       => 'Nama Dokter wajib dipilih.',
+    //         'nama_bayi.required'       => 'Nama Bayi wajib diisi.',
+    //     ]);
+
+    //     // Validasi tambahan: salah satu dari order_persalinan_id atau order_operasi_id harus ada
+    //     if (!$request->order_persalinan_id && !$request->order_operasi_id) {
+    //         throw ValidationException::withMessages([
+    //             'order' => 'Order persalinan atau operasi harus diisi.'
+    //         ]);
+    //     }
+    //     if ($request->order_persalinan_id && $request->order_operasi_id) {
+    //         throw ValidationException::withMessages([
+    //             'order' => 'Hanya salah satu dari order persalinan atau operasi yang boleh diisi.'
+    //         ]);
+    //     }
+
+    //     DB::beginTransaction();
+    //     try {
+    //         // Pengecekan bed_id valid
+    //         if (!$request->bed_id || !Bed::find($request->bed_id)) {
+    //             throw ValidationException::withMessages([
+    //                 'bed_id' => 'Bed tidak valid atau tidak ditemukan.'
+    //             ]);
+    //         }
+
+    //         // 2. Ambil data order (persalinan atau operasi)
+    //         $order = null;
+    //         $ibu = null;
+    //         if ($request->order_persalinan_id) {
+    //             $order = OrderPersalinan::with('registration.patient')->findOrFail($request->order_persalinan_id);
+    //             $ibu = $order->registration->patient;
+    //         } elseif ($request->order_operasi_id) {
+    //             $order = OrderOperasi::with('registration.patient')->findOrFail($request->order_operasi_id);
+    //             $ibu = $order->registration->patient;
+    //         }
+
+    //         if (!$ibu) {
+    //             throw new \Exception('Data registrasi atau pasien ibu tidak ditemukan.');
+    //         }
+
+    //         // 3. Logika Pasien Bayi (Create / Update)
+    //         $patientBayi = null;
+    //         $bayi = null;
+    //         $isNewBaby = empty($request->bayi_id);
+
+    //         if ($isNewBaby) {
+    //             // Membuat record patient baru untuk bayi
+    //             $patientBayi = Patient::create([
+    //                 'medical_record_number' => MedicalRecordHelper::generateMedicalRecordNumber(),
+    //                 'name'                  => $request->nama_bayi,
+    //                 'place'                 => $request->tempat_lahir,
+    //                 'date_of_birth'         => Carbon::parse($request->tgl_lahir)->format('Y-m-d'),
+    //                 'gender'                => $request->jenis_kelamin,
+    //                 'title'                 => 'By.',
+    //                 'nickname'              => 'By. ' . explode(' ', $request->nama_bayi)[0],
+    //                 'married_status'        => 'Belum Kawin',
+    //                 'language'              => 'Indonesia',
+    //                 'last_education'        => 'Belum Sekolah',
+    //                 'job'                   => 'Belum Bekerja',
+    //                 'religion'              => $ibu->religion ?? 'Islam',
+    //                 'address'               => $ibu->address ?? '',
+    //                 'ward'                  => $ibu->ward ?? '',
+    //                 'subdistrict'           => $ibu->subdistrict ?? '',
+    //                 'regency'               => $ibu->regency ?? '',
+    //                 'province'              => $ibu->province ?? '',
+    //                 'mobile_phone_number'   => $ibu->mobile_phone_number ?? '',
+    //                 'ethnic'                => $ibu->ethnic ?? '',
+    //                 'citizenship'           => $ibu->citizenship ?? 'WNI',
+    //             ]);
+    //         } else {
+    //             // Memperbarui record patient yang sudah ada
+    //             $bayi = Bayi::findOrFail($request->bayi_id);
+    //             $patientBayi = Patient::findOrFail($bayi->patient_id);
+    //             $patientBayi->update([
+    //                 'name'          => $request->nama_bayi,
+    //                 'gender'        => $request->jenis_kelamin,
+    //                 'date_of_birth' => Carbon::parse($request->tgl_lahir)->format('Y-m-d'),
+    //                 'place'         => $request->tempat_lahir,
+    //             ]);
+    //         }
+
+    //         // 4. Menyiapkan data untuk tabel 'bayi'
+    //         $validatedData['patient_id'] = $patientBayi->id;
+    //         $validatedData['no_rm'] = $patientBayi->medical_record_number;
+    //         $validatedData['registration_id'] = $order->registration_id;
+    //         $validatedData['tgl_lahir'] = Carbon::parse($request->tgl_lahir);
+
+    //         $bedInfo = Bed::with('room.kelas_rawat')->findOrFail($request->bed_id);
+    //         if (!$bedInfo->room?->kelas_rawat) {
+    //             throw new \Exception('Data bed, ruangan, atau kelas rawat tidak lengkap.');
+    //         }
+    //         $validatedData['kelas_kamar'] = $bedInfo->room->kelas_rawat->kelas . ' / ' . $bedInfo->room->ruangan . ' - ' . $bedInfo->nama_tt;
+
+    //         // 5. Menyimpan atau Memperbarui data di tabel 'bayi'
+    //         $oldBedId = $isNewBaby ? null : $bayi->getOriginal('bed_id');
+    //         $newBedId = (int)$request->bed_id;
+
+    //         Log::info('Bed management:', [
+    //             'oldBedId' => $oldBedId,
+    //             'newBedId' => $newBedId,
+    //         ]);
+
+    //         if ($isNewBaby) {
+    //             $bayi = Bayi::create($validatedData);
+    //             $bayi->update([
+    //                 'tgl_reg' => now(),
+    //                 'tgl_jam_registrasi' => now(),
+    //                 'no_label' => now()->format('ymd') . '-' . str_pad($bayi->id, 4, '0', STR_PAD_LEFT)
+    //             ]);
+    //         } else {
+    //             $bayi->update($validatedData);
+    //         }
+
+    //         // 6. Logika Manajemen Bed/Kamar
+    //         if ($isNewBaby || $oldBedId !== $newBedId) {
+    //             // Kosongkan bed lama
+    //             if ($oldBedId && $oldBedId !== $newBedId) {
+    //                 DB::table('bed_patient')
+    //                     ->where('bed_id', $oldBedId)
+    //                     ->where('patient_id', $patientBayi->id)
+    //                     ->whereNull('tanggal_keluar')
+    //                     ->update([
+    //                         'status' => 'kosong',
+    //                         'tanggal_keluar' => now(),
+    //                         'updated_at' => now()
+    //                     ]);
+
+    //                 DB::table('beds')
+    //                     ->where('id', $oldBedId)
+    //                     ->where('patient_id', $patientBayi->id)
+    //                     ->update([
+    //                         'patient_id' => null,
+    //                         'updated_at' => now()
+    //                     ]);
+    //             }
+
+    //             // Isi bed baru
+    //             $isBedActivelyOccupied = DB::table('bed_patient')
+    //                 ->where('bed_id', $newBedId)
+    //                 ->whereNull('tanggal_keluar')
+    //                 ->where('patient_id', '!=', $patientBayi->id)
+    //                 ->exists();
+
+    //             Log::info('isBedActivelyOccupied:', ['value' => $isBedActivelyOccupied]);
+
+    //             if ($isBedActivelyOccupied) {
+    //                 throw ValidationException::withMessages([
+    //                     'bed_id' => 'Kamar/Bed yang dipilih sudah terisi oleh pasien lain. Silakan pilih yang lain.'
+    //                 ]);
+    //             }
+
+    //             if ($oldBedId !== $newBedId) {
+    //                 DB::table('bed_patient')->insert([
+    //                     'patient_id' => $patientBayi->id,
+    //                     'bed_id' => $newBedId,
+    //                     'status' => 'terisi',
+    //                     'tanggal_masuk' => now(),
+    //                     'created_at' => now(),
+    //                     'updated_at' => now(),
+    //                 ]);
+
+    //                 DB::table('beds')
+    //                     ->where('id', $newBedId)
+    //                     ->update([
+    //                         'patient_id' => $patientBayi->id,
+    //                         'updated_at' => now()
+    //                     ]);
+    //             }
+    //         }
+
+    //         DB::commit();
+
+    //         return response()->json([
+    //             'success' => true,
+    //             'message' => $isNewBaby ? 'Data bayi berhasil disimpan!' : 'Data bayi berhasil diperbarui!',
+    //             'bayi' => $bayi->fresh()
+    //         ]);
+    //     } catch (ValidationException $e) {
+    //         DB::rollBack();
+    //         Log::error('Validation error saat menyimpan bayi: ' . json_encode($e->errors()));
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => $e->validator->errors()->first(),
+    //             'errors' => $e->errors()
+    //         ], 422);
+    //     } catch (\Exception $e) {
+    //         DB::rollBack();
+    //         Log::error('Gagal menyimpan data bayi: ' . $e->getMessage(), [
+    //             'trace' => $e->getTraceAsString(),
+    //             'request' => $request->all(),
+    //             'line' => $e->getLine(),
+    //             'file' => $e->getFile()
+    //         ]);
+
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Terjadi kesalahan pada server: ' . $e->getMessage()
+    //         ], 500);
+    //     }
+    // }
+
+
     public function store(Request $request)
     {
         Log::info('Store bayi request data:', $request->all());
@@ -305,7 +549,13 @@ class BayiController extends Controller
             'kelas_rawat_id'        => 'required|exists:kelas_rawat,id',
             'nama_bayi'             => 'required|string|max:255',
             'tempat_lahir'          => 'required|string|max:255',
-            'tgl_lahir'             => 'required|date',
+
+            // ======================= PERBAIKAN 1: Aturan Validasi Tanggal =======================
+            // Mengubah 'datetime' menjadi 'date_format' agar sesuai dengan format dari input type="datetime-local"
+            // Format yang dikirim adalah 'YYYY-MM-DDTHH:MM', contoh: '2024-01-10T15:30'
+            'tgl_lahir'             => 'required|date_format:Y-m-d\TH:i',
+            // ===================================================================================
+
             'jenis_kelamin'         => 'required|in:Laki-laki,Perempuan',
             'berat'                 => 'required|numeric|min:0',
             'panjang'               => 'required|numeric|min:0',
@@ -335,6 +585,7 @@ class BayiController extends Controller
             'kelas_rawat_id.required'  => 'Kelas Rawat ID tidak boleh kosong.',
             'doctor_id.required'       => 'Nama Dokter wajib dipilih.',
             'nama_bayi.required'       => 'Nama Bayi wajib diisi.',
+            'tgl_lahir.date_format'    => 'Format Tanggal & Jam Lahir tidak valid.', // Pesan error untuk aturan baru
         ]);
 
         // Validasi tambahan: salah satu dari order_persalinan_id atau order_operasi_id harus ada
@@ -360,23 +611,25 @@ class BayiController extends Controller
 
             // 2. Ambil data order (persalinan atau operasi)
             $order = null;
-            $ibu = null;
             if ($request->order_persalinan_id) {
                 $order = OrderPersalinan::with('registration.patient')->findOrFail($request->order_persalinan_id);
-                $ibu = $order->registration->patient;
             } elseif ($request->order_operasi_id) {
                 $order = OrderOperasi::with('registration.patient')->findOrFail($request->order_operasi_id);
-                $ibu = $order->registration->patient;
             }
 
-            if (!$ibu) {
+            if (!$order || !$order->registration?->patient) {
                 throw new \Exception('Data registrasi atau pasien ibu tidak ditemukan.');
             }
+            $ibu = $order->registration->patient;
+
 
             // 3. Logika Pasien Bayi (Create / Update)
             $patientBayi = null;
             $bayi = null;
             $isNewBaby = empty($request->bayi_id);
+
+            // Format tanggal dan waktu yang akan disimpan ke database
+            $birthDateTime = Carbon::parse($request->tgl_lahir)->format('Y-m-d H:i:s');
 
             if ($isNewBaby) {
                 // Membuat record patient baru untuk bayi
@@ -384,7 +637,7 @@ class BayiController extends Controller
                     'medical_record_number' => MedicalRecordHelper::generateMedicalRecordNumber(),
                     'name'                  => $request->nama_bayi,
                     'place'                 => $request->tempat_lahir,
-                    'date_of_birth'         => Carbon::parse($request->tgl_lahir)->format('Y-m-d'),
+                    'date_of_birth'         => $birthDateTime, // Menggunakan variabel yang sudah diformat
                     'gender'                => $request->jenis_kelamin,
                     'title'                 => 'By.',
                     'nickname'              => 'By. ' . explode(' ', $request->nama_bayi)[0],
@@ -409,7 +662,10 @@ class BayiController extends Controller
                 $patientBayi->update([
                     'name'          => $request->nama_bayi,
                     'gender'        => $request->jenis_kelamin,
-                    'date_of_birth' => Carbon::parse($request->tgl_lahir)->format('Y-m-d'),
+                    // ======================= PERBAIKAN 2: Konsistensi Format Update =======================
+                    // Menyamakan format agar saat update, jam dan menit tidak hilang
+                    'date_of_birth' => $birthDateTime,
+                    // ======================================================================================
                     'place'         => $request->tempat_lahir,
                 ]);
             }
@@ -418,7 +674,7 @@ class BayiController extends Controller
             $validatedData['patient_id'] = $patientBayi->id;
             $validatedData['no_rm'] = $patientBayi->medical_record_number;
             $validatedData['registration_id'] = $order->registration_id;
-            $validatedData['tgl_lahir'] = Carbon::parse($request->tgl_lahir);
+            $validatedData['tgl_lahir'] = Carbon::parse($request->tgl_lahir); // Laravel akan handle Carbon object ini dengan benar
 
             $bedInfo = Bed::with('room.kelas_rawat')->findOrFail($request->bed_id);
             if (!$bedInfo->room?->kelas_rawat) {
@@ -443,6 +699,7 @@ class BayiController extends Controller
                     'no_label' => now()->format('ymd') . '-' . str_pad($bayi->id, 4, '0', STR_PAD_LEFT)
                 ]);
             } else {
+                // $bayi sudah di-fetch di atas
                 $bayi->update($validatedData);
             }
 
@@ -476,8 +733,6 @@ class BayiController extends Controller
                     ->where('patient_id', '!=', $patientBayi->id)
                     ->exists();
 
-                Log::info('isBedActivelyOccupied:', ['value' => $isBedActivelyOccupied]);
-
                 if ($isBedActivelyOccupied) {
                     throw ValidationException::withMessages([
                         'bed_id' => 'Kamar/Bed yang dipilih sudah terisi oleh pasien lain. Silakan pilih yang lain.'
@@ -508,7 +763,7 @@ class BayiController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => $isNewBaby ? 'Data bayi berhasil disimpan!' : 'Data bayi berhasil diperbarui!',
-                'bayi' => $bayi->fresh()
+                'bayi' => $bayi->fresh() // Mengambil data terbaru dari DB untuk dikirim kembali
             ]);
         } catch (ValidationException $e) {
             DB::rollBack();
