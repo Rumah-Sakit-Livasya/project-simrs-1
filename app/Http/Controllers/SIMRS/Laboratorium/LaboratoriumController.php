@@ -58,6 +58,7 @@ class LaboratoriumController extends Controller
     {
         $order = OrderLaboratorium::findOrFail($id);
         $order->load(['registration', 'registration_otc', 'registration_otc.doctor']);
+        // dd($order->doctor->employee->fullname);
         return view('pages.simrs.laboratorium.partials.hasil-order', [
             'order' => $order,
             'nilai_normals' => NilaiNormalLaboratorium::all()
