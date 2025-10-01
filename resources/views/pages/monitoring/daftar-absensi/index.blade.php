@@ -85,6 +85,32 @@
             <div class="col-xl-12">
                 <div class="card pt-2">
                     <div class="card-body row">
+                        <div class="row d-flex align-items-center mb-3">
+                            {{-- Judul Tanggal Dinamis --}}
+                            <div class="col-md-6">
+                                <h5 class="font-weight-bold text-primary">
+                                    {{ $display_date->translatedFormat('l, j F Y') }}
+                                </h5>
+                                <span style="font-size: 1.1em">Semua laporan absensi bisa dilihat pada menu dibawah
+                                    ini.</span>
+                            </div>
+
+                            {{-- Form Filter Tanggal --}}
+                            <div class="col-md-6">
+                                <form action="{{ route('monitoring.attendances') }}" method="GET"
+                                    class="form-inline float-md-right">
+                                    <div class="form-group mr-2">
+                                        <label for="date-filter" class="mr-2 font-weight-bold">Pilih Tanggal:</label>
+                                        <input type="date" id="date-filter" name="date" class="form-control"
+                                            value="{{ $selected_date }}">
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fal fa-search mr-1"></i> Filter
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
                         <div class="col-xl-4 col-sm-4 mb-2">
                             <h5 class="font-weight-bold text-primary">
                                 {{ \Carbon\Carbon::now()->translatedFormat('l, j F Y') }}
@@ -124,7 +150,7 @@
                 <div id="panel-1" class="panel">
                     <div class="panel-hdr">
                         <h2>
-                            Daftar Absen Hari Ini
+                            Daftar Absensi Tanggal {{ $display_date->translatedFormat('j F Y') }}
                         </h2>
                     </div>
                     <div class="panel-container show">
