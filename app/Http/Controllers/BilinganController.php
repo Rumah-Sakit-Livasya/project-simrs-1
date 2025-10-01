@@ -3,19 +3,23 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\SIMRS\RegistrationController;
+use App\Models\CancelPayment;
 use App\Models\PembayaranCreditCard;
 use App\Models\PembayaranTransfer;
 use App\Models\SIMRS\Bilingan;
 use App\Models\OrderRadiologi;
+use App\Models\OtorisasiUser;
 use App\Models\SIMRS\DownPayment;
 use App\Models\SIMRS\Laboratorium\OrderLaboratorium;
 use App\Models\SIMRS\PembayaranTagihan;
 use App\Models\SIMRS\Registration;
 use App\Models\SIMRS\TagihanPasien;
 use App\Models\SIMRS\TutupKunjungan;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -634,6 +638,111 @@ class BilinganController extends Controller
             DB::rollBack();
             Log::error('Error processing order into bill: ' . $e->getMessage());
             return response()->json(['message' => 'Gagal memproses order.'], 500);
+        }
+    }
+
+    /**
+     * Handle authorization and cancellation of a billing record.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function authorizeAndCancelBill(Request $request, $id)
+    {
+        $request->validate([
+            'email' => 'required|email',
+            'password' => 'required',
+            'catatan' => 'required|string',
+        ]);
+
+        DB::beginTransaction();
+        try {
+            // 1. Cari user yang akan memberikan otorisasi berdasarkan email
+            $authorizer = User::where('email', $request->email)->where('is_active', 1)->first();
+
+            // 2. Gunakan zimbralogin untuk autentikasi
+            if (!$authorizer || !$this->zimbraLogin($request->email, $request->password)) {
+                return response()->json(['message' => 'Email atau Password otorisasi salah!'], 401);
+            }
+
+            // 3. Cek apakah user tersebut memiliki hak otorisasi "Cancel Payment"
+            $hasAuthorization = OtorisasiUser::where('user_id', $authorizer->id)
+                ->where('otorisasi_type', 'Cancel Payment')
+                ->exists();
+
+            if (!$hasAuthorization) {
+                return response()->json(['message' => 'User tidak memiliki hak otorisasi untuk membatalkan tagihan.'], 403);
+            }
+
+            // 4. Cari tagihan (bilingan)
+            $bilingan = Bilingan::findOrFail($id);
+
+            // 5. Ubah status tagihan kembali ke 'draft'
+            $bilingan->update(['status' => 'draft']);
+
+            // 6. Catat log pembatalan
+            CancelPayment::create([
+                'bilingan_id' => $bilingan->id,
+                'user_id' => auth()->id(), // Kasir yang sedang login
+                'otorisasi_id' => $authorizer->id, // User yang memberi otorisasi
+                'tgl_batal' => Carbon::now(),
+                'catatan' => $request->catatan,
+            ]);
+
+            DB::commit();
+
+            return response()->json(['message' => 'Tagihan berhasil dibatalkan dan dikembalikan ke status Draft.']);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['message' => 'Terjadi kesalahan internal saat membatalkan tagihan.'], 500);
+        }
+    }
+
+    private function zimbraLogin($email, $password)
+    {
+        $data = [
+            "Header" => [
+                "context" => [
+                    "_jsns" => "urn:zimbra",
+                    "userAgent" => ["name" => "curl", "version" => "8.8.15"],
+                ],
+            ],
+            "Body" => [
+                "AuthRequest" => [
+                    "_jsns" => "urn:zimbraAccount",
+                    "account" => ["_content" => $email, "by" => "name"],
+                    "password" => $password,
+                ],
+            ],
+        ];
+
+        try {
+            $encodedData = json_encode($data);
+
+            $url = 'https://webmail.livasya.com/service/soap';
+            $curl = curl_init($url);
+            curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "POST");
+            curl_setopt($curl, CURLOPT_HTTPHEADER, array(
+                'Content-Type:application/json'
+            ));
+            curl_setopt($curl, CURLOPT_POST, true);
+            curl_setopt($curl, CURLOPT_POSTFIELDS, $encodedData);
+            curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+            $result = curl_exec($curl);
+            curl_close($curl);
+
+            $mark = 'AUTH_FAILED';
+
+            if (strpos($result, $mark) !== false) {
+                return false; // Autentikasi gagal
+            } else {
+                return true;
+            }
+        } catch (\Exception $e) {
+            // Tangani kesalahan saat menjalankan permintaan cURL
+            return false;
         }
     }
 }
