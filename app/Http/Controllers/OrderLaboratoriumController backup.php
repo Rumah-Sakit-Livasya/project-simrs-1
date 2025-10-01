@@ -284,72 +284,36 @@ class OrderLaboratoriumController extends Controller
         ]);
 
         $order = OrderLaboratorium::with([
-            'registration.patient', // Eager load relasi patient dari registration
-            'registration_otc',     // Eager load relasi otc
+            'registration',
             'order_parameter_laboratorium.parameter_laboratorium',
         ])->findOrFail($validatedData['id']);
 
-        // 1. Konfirmasi order tetap dilakukan untuk semua jenis
         $order->update(['is_konfirmasi' => 1]);
 
-        $billing = null;
-        $patientId = null;
-        $registrationId = null; // Akan diisi jika ini pasien terdaftar
+        $success = true;
+        $message = 'Konfirmasi pembayaran berhasil.';
 
-        // 2. Logika untuk menentukan Bilingan (Master Tagihan)
-        // Sekarang kita tangani kedua kasus: pasien terdaftar DAN pasien OTC
-        if ($order->registration_id && $order->registration) {
-            // --- KASUS 1: PASIEN TERDAFTAR (RAWAT JALAN / INAP) ---
-            $registrationId = $order->registration_id;
-            $patientId = $order->registration->patient_id;
-
-            // Cari atau buat Bilingan berdasarkan ID Registrasi
+        if (! $order->otc_id && $order->registration_id) {
             $billing = Bilingan::firstOrCreate(
-                ['registration_id' => $registrationId],
+                ['registration_id' => $order->registration_id],
                 [
-                    'patient_id' => $patientId,
+                    'patient_id' => $order->registration->patient_id,
                     'status' => 'belum final',
                     'wajib_bayar' => 0,
                 ]
             );
-        } elseif ($order->otc_id) {
-            // --- KASUS 2: PASIEN OTC (UMUM / LUAR) ---
-            $patientId = $order->patient_id; // Ambil patient_id langsung dari order
 
-            // Untuk OTC, kita anggap 1 order = 1 Bilingan.
-            // Kita cek dulu apakah Bilingan sudah pernah dibuat untuk order ini.
-            if ($order->bilingan_id) {
-                $billing = Bilingan::find($order->bilingan_id);
-            }
-
-            // Jika belum ada, buat Bilingan baru.
-            if (!$billing && $patientId) {
-                $billing = Bilingan::create([
-                    'patient_id' => $patientId,
-                    'registration_id' => null, // PENTING: OTC tidak punya registration_id
-                    'status' => 'belum final', // Bisa juga di-set 'lunas' jika pembayaran OTC selalu langsung
-                    'wajib_bayar' => 0,
-                ]);
-
-                // Tautkan Bilingan yang baru dibuat ke order ini agar tidak duplikat di kemudian hari
-                $order->update(['bilingan_id' => $billing->id]);
-            }
-        }
-
-        // 3. Proses pembuatan item tagihan (TagihanPasien)
-        // Logika ini berjalan jika Bilingan berhasil ditemukan atau dibuat
-        if ($billing) {
             $totalAmount = 0;
 
             foreach ($order->order_parameter_laboratorium as $parameter) {
-                if (!$parameter->parameter_laboratorium || $parameter->nominal_rupiah <= 0) {
+                if (! $parameter->parameter_laboratorium || $parameter->nominal_rupiah <= 0) {
                     continue;
                 }
 
                 $tagihan = TagihanPasien::create([
                     'user_id' => auth()->id(),
                     'bilingan_id' => $billing->id,
-                    'registration_id' => $registrationId, // Akan NULL jika ini order OTC
+                    'registration_id' => $order->registration_id,
                     'date' => Carbon::now(),
                     'tagihan' => '[Biaya Laboratorium] ' . $parameter->parameter_laboratorium->parameter,
                     'quantity' => 1,
@@ -367,16 +331,20 @@ class OrderLaboratoriumController extends Controller
                 $totalAmount += $parameter->nominal_rupiah;
             }
 
-            // Update total tagihan di Bilingan.
-            // Menggunakan increment lebih aman untuk menghindari race condition.
+            // Update the total amount in the billing if we have items
             if ($totalAmount > 0) {
-                $billing->increment('wajib_bayar', $totalAmount);
+                $billing->update(['wajib_bayar' => $totalAmount]);
+            }
+
+            // Update the billing_id in the order if needed
+            if ($order->bilingan_id !== $billing->id) {
+                $order->update(['bilingan_id' => $billing->id]);
             }
         }
 
         return response()->json([
-            'success' => true,
-            'message' => 'Konfirmasi pembayaran dan pembuatan tagihan berhasil.',
+            'success' => $success,
+            'message' => $message,
         ]);
     }
 

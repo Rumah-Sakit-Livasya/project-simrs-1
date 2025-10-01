@@ -75,10 +75,11 @@
                                         </td>
                                         <td>
                                             @if ($order->status_billed == 1)
-                                                <span class="badge badge-success">Sudah Ditagih</span>
+                                                <span class="badge badge-success">Payment (closed)</span>
                                             @else
-                                                <span class="badge badge-secondary">Belum Ditagih</span>
+                                                <span class="badge badge-secondary">Not Billed</span>
                                             @endif
+
                                         </td>
                                         <td class="text-center">
                                             <a href="#" class="btn btn-xs btn-outline-primary" data-toggle="tooltip"
