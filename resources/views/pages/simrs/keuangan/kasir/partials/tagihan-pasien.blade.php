@@ -493,6 +493,23 @@
                                     $('#save-draft').html('Save Draft');
                                     $('#save-final, #save-draft, #reload-tagihan, #add-tagihan, #order-notification-btn')
                                         .prop('disabled', false);
+
+                                    // Pindah ke tab Pembayaran Tagihan setelah submit
+                                    // Aktifkan tab dan scroll ke elemen
+                                    const pembayaranTab = $(
+                                        'a[data-toggle="tab"][href="#pembayaran-tagihan"]'
+                                    );
+                                    if (pembayaranTab.length) {
+                                        pembayaranTab.tab('show');
+                                    }
+                                    // Scroll ke elemen dengan id pembayaran-tagihan
+                                    const pembayaranTagihan = document.getElementById(
+                                        'pembayaran-tagihan');
+                                    if (pembayaranTagihan) {
+                                        pembayaranTagihan.scrollIntoView({
+                                            behavior: 'smooth'
+                                        });
+                                    }
                                 }
                             });
                         }
