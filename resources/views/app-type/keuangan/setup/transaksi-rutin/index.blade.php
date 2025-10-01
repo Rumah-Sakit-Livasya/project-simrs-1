@@ -252,33 +252,6 @@
     <script src="/js/notifications/toastr/toastr.js"></script>
     <link rel="stylesheet" href="/css/notifications/toastr/toastr.css">
     <script>
-        function showToast(type, message) {
-            const toastContainer = $('.toast-container');
-            const toastId = 'toast-' + Date.now();
-
-            const toastHtml = `
-        <div id="${toastId}" class="toast align-items-center text-white bg-${type} border-0" role="alert" aria-live="assertive" aria-atomic="true">
-            <div class="d-flex">
-                <div class="toast-body">
-                    ${message}
-                </div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-            </div>
-        </div>
-    `;
-
-            toastContainer.append(toastHtml);
-            const toastElement = document.getElementById(toastId);
-            const toast = new bootstrap.Toast(toastElement);
-            toast.show();
-
-            // Hapus toast setelah 5 detik
-            setTimeout(() => {
-                toastElement.remove();
-            }, 5000);
-        }
-    </script>
-    <script>
         $(document).ready(function() {
             $.ajaxSetup({
                 headers: {
@@ -286,36 +259,40 @@
                 }
             });
 
+            // Inisialisasi Select2 untuk filter di luar modal
             $('.select2').select2({
                 placeholder: "Pilih...",
                 allowClear: true
             });
-            $('.select2-modal').select2({
-                dropdownParent: $('#formModal'),
-                placeholder: "Pilih Akun..."
-            });
 
             // ==========================================================
-            // INISIALISASI DATATABLES DI SINI
+            // PERBAIKAN UTAMA DI SINI
+            // Inisialisasi Select2 KHUSUS untuk elemen di dalam modal
+            // Menggunakan dropdownParent untuk memperbaiki masalah fokus/search
             // ==========================================================
+            $('#formModal .select2').select2({
+                dropdownParent: $('#formModal'), // Ini kuncinya!
+                placeholder: "Pilih...",
+                allowClear: true
+            });
+
+
+            // Inisialisasi DataTables
             const table = $('#transaksi-rutin-table').DataTable({
                 responsive: true,
                 pageLength: 10,
                 lengthChange: false,
                 order: [
                     [2, 'asc']
-                ], // Urutkan berdasarkan Nama Transaksi
-                columnDefs: [{
-                        orderable: false,
-                        targets: 0
-                    } // Matikan sorting untuk checkbox
                 ],
-                // Dom untuk menempatkan tombol search dan export
+                columnDefs: [{
+                    orderable: false,
+                    targets: 0
+                }],
                 dom: "<'row mb-3'<'col-sm-12 col-md-6 d-flex align-items-center justify-content-start'f><'col-sm-12 col-md-6 d-flex align-items-center justify-content-end'lB>>" +
                     "<'row'<'col-sm-12'tr>>" +
                     "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
-                buttons: [ /* Tombol export bisa ditambahkan di sini jika perlu */ ],
-                // Bahasa untuk DataTables
+                buttons: [],
                 language: {
                     search: "_INPUT_",
                     searchPlaceholder: "Cari data...",
@@ -327,7 +304,7 @@
                 }
             });
 
-            // Logika Checkbox (disesuaikan untuk client-side DataTables)
+            // Logika Checkbox
             function checkCheckboxes() {
                 const checkedCount = $('.row-checkbox:checked').length;
                 $('#btn-hapus').prop('disabled', checkedCount === 0);
@@ -343,6 +320,7 @@
             });
             $('#transaksi-rutin-table tbody').on('change', 'input.row-checkbox', checkCheckboxes);
 
+
             // Logika untuk form dan modal
             const form = $('#transaksiRutinForm');
             const modal = $('#formModal');
@@ -352,14 +330,17 @@
                 $('#transaksi_id').val('');
                 $('#formMethod').val('POST');
                 form.attr('action', "{{ route('transaksi-rutin.store') }}");
-                $('.select2-modal').val(null).trigger('change');
+                // Reset select2 di dalam modal
+                $('#formModal .select2').val(null).trigger('change');
                 $('#formModalLabel').text('Tambah Transaksi Rutin');
                 modal.modal('show');
             });
 
             $('#btn-edit').on('click', function() {
                 const id = $('.row-checkbox:checked').val();
-                const tr = $(`tr:has(input[value="${id}"])`);
+                if (!id) return; // Tambahkan pengecekan jika tidak ada yang dipilih
+
+                const tr = $(`tr[data-id="${id}"]`); // Gunakan data-id untuk selector yang lebih andal
 
                 const nama = tr.find('.nama-transaksi').text();
                 const coaId = tr.data('coa-id');
@@ -368,7 +349,7 @@
                 $('#transaksi_id').val(id);
                 $('#nama_transaksi').val(nama);
                 $('#chart_of_account_id').val(coaId).trigger('change');
-                $('#is_active').val(isActive);
+                $('#is_active').val(isActive).trigger('change'); // Trigger change untuk select2
 
                 $('#formMethod').val('PUT');
                 form.attr('action', `{{ url('keuangan/setup/transaksi-rutin') }}/${id}`);
@@ -381,7 +362,8 @@
                 const checkedCount = $('.row-checkbox:checked').length;
                 if (checkedCount === 0) {
                     e.preventDefault();
-                    alert('Tidak ada data yang dipilih untuk dihapus.');
+                    toastr.warning(
+                    'Tidak ada data yang dipilih untuk dihapus.'); // Ganti alert dengan toastr
                     return false;
                 }
                 if (!confirm(`Yakin ingin menghapus ${checkedCount} data terpilih?`)) {

@@ -707,7 +707,7 @@
 
         @font-face {
             font-family: 'Open Sans';
-            src: url('http://192.168.1.253/testing/include/styles/opensans.ttf');
+            src: url('/font/opensans.ttf');
         }
 
         body {
@@ -1160,7 +1160,7 @@
         }
 
         .watermark {
-            background-image: url(http://192.168.1.253/testing/include/styles/../images/logocx.png);
+            background-image: url(/img/logo.png);
             background-position: center center;
             background-size: contain;
             background-repeat: no-repeat;
@@ -1203,8 +1203,8 @@
     <div id="previews" style="margin-bottom:0px; margin-top:-10px">
 
         <div style="float:left; width:40%; border-bottom:none">
-            <div class="lgo_persen" style=" width:100%; height:120px;"><img
-                    src="http://192.168.1.253/testing/include/images/logocx.png" style="height:60%; margin-top:3%">
+            <div class="lgo_persen" style=" width:100%; height:120px;"><img src="/img/logo.png"
+                    style="height:60%; margin-top:3%">
             </div>
         </div>
 
@@ -1302,85 +1302,79 @@
             <tbody>
 
                 @foreach ($order->order_parameter_laboratorium as $parameter)
-                        <tr>
-                            <td align="center">{{ $loop->iteration }}</td>
-                            <td>{{ $parameter->parameter_laboratorium->parameter }}</td>
-                            @php
-                                $is_kritis = false;
-                                $is_abnormal = false;
-                                $nilai_normal_parameter = null;
+                    <tr>
+                        <td align="center">{{ $loop->iteration }}</td>
+                        <td>{{ $parameter->parameter_laboratorium->parameter }}</td>
+                        @php
+                            $is_kritis = false;
+                            $is_abnormal = false;
+                            $nilai_normal_parameter = null;
 
-                                if ($order->registration) {
-                                    $dob = $order->registration->patient->date_of_birth;
-                                    $jenis_kelamin = $order->registration->patient->gender;
-                                } else { // otc
-                                    $dob = $order->registration_otc->date_of_birth;
-                                    $jenis_kelamin = $order->registration_otc->jenis_kelamin;
-                                }
+                            if ($order->registration) {
+                                $dob = $order->registration->patient->date_of_birth;
+                                $jenis_kelamin = $order->registration->patient->gender;
+                            } else {
+                                // otc
+                                $dob = $order->registration_otc->date_of_birth;
+                                $jenis_kelamin = $order->registration_otc->jenis_kelamin;
+                            }
 
-                                foreach ($nilai_normals as $nilai_normal) {
+                            foreach ($nilai_normals as $nilai_normal) {
+                                if ($nilai_normal->parameter_laboratorium_id == $parameter->parameter_laboratorium_id) {
                                     if (
-                                        $nilai_normal->parameter_laboratorium_id ==
-                                        $parameter->parameter_laboratorium_id
+                                        isWithinAgeRange($dob, $nilai_normal->dari_umur, $nilai_normal->sampai_umur) &&
+                                        ($nilai_normal->jenis_kelamin == $jenis_kelamin ||
+                                            $nilai_normal->jenis_kelamin == 'Semuanya')
                                     ) {
-                                        if (
-                                            isWithinAgeRange(
-                                                $dob,
-                                                $nilai_normal->dari_umur,
-                                                $nilai_normal->sampai_umur,
-                                            ) &&
-                                            ($nilai_normal->jenis_kelamin == $jenis_kelamin ||
-                                                $nilai_normal->jenis_kelamin == 'Semuanya')
-                                        ) {
-                                            $nilai_normal_parameter = $nilai_normal;
-                                            break;
-                                        }
+                                        $nilai_normal_parameter = $nilai_normal;
+                                        break;
                                     }
                                 }
+                            }
 
+                            if (
+                                $nilai_normal_parameter != null &&
+                                $parameter->parameter_laboratorium->tipe_hasil == 'Angka'
+                            ) {
+                                // check if abnormal
                                 if (
-                                    $nilai_normal_parameter != null &&
-                                    $parameter->parameter_laboratorium->tipe_hasil == 'Angka'
+                                    $parameter->hasil < $nilai_normal_parameter->min ||
+                                    $parameter->hasil > $nilai_normal_parameter->max
                                 ) {
-                                    // check if abnormal
+                                    $is_abnormal = true;
+                                    // check if critical
                                     if (
-                                        $parameter->hasil < $nilai_normal_parameter->min ||
-                                        $parameter->hasil > $nilai_normal_parameter->max
+                                        $parameter->hasil < $nilai_normal_parameter->min_kritis ||
+                                        $parameter->hasil > $nilai_normal_parameter->max_kritis
                                     ) {
-                                        $is_abnormal = true;
-                                        // check if critical
-                                        if (
-                                            $parameter->hasil < $nilai_normal_parameter->min_kritis ||
-                                            $parameter->hasil > $nilai_normal_parameter->max_kritis
-                                        ) {
-                                            $is_kritis = true;
-                                        }
+                                        $is_kritis = true;
                                     }
                                 }
-                            @endphp
+                            }
+                        @endphp
 
-                            <td align="center">
-                                @if ($is_abnormal && !$is_kritis)
-                                    <p style="font-weight: bold;"> {{ $parameter->hasil }}*</p>
-                                @elseif ($is_kritis)
-                                    <p style="color:#FF0000; font-weight: bold;"> {{ $parameter->hasil }}**</p>
+                        <td align="center">
+                            @if ($is_abnormal && !$is_kritis)
+                                <p style="font-weight: bold;"> {{ $parameter->hasil }}*</p>
+                            @elseif ($is_kritis)
+                                <p style="color:#FF0000; font-weight: bold;"> {{ $parameter->hasil }}**</p>
+                            @else
+                                <p>{{ $parameter->hasil }}</p>
+                            @endif
+                        </td>
+                        <td align="center">
+                            @if ($nilai_normal_parameter)
+                                @if ($parameter->parameter_laboratorium->tipe_hasil == 'Angka')
+                                    {{ $nilai_normal_parameter->min }} - {{ $nilai_normal_parameter->max }}
                                 @else
-                                    <p>{{ $parameter->hasil }}</p>
+                                    {{ $nilai_normal_parameter->nilai_normal }}
                                 @endif
-                            </td>
-                            <td align="center">
-                                @if ($nilai_normal_parameter)
-                                    @if ($parameter->parameter_laboratorium->tipe_hasil == 'Angka')
-                                        {{ $nilai_normal_parameter->min }} - {{ $nilai_normal_parameter->max }}
-                                    @else
-                                        {{ $nilai_normal_parameter->nilai_normal }}
-                                    @endif
-                                @endif
-                            </td>
-                            <td align="center">{{ $parameter->parameter_laboratorium->satuan }}</td>
-                            <td align="center">{{ $parameter->parameter_laboratorium->metode }}</td>
-                            <td align="center">{{ $parameter->catatan }}</td>
-                        </tr>
+                            @endif
+                        </td>
+                        <td align="center">{{ $parameter->parameter_laboratorium->satuan }}</td>
+                        <td align="center">{{ $parameter->parameter_laboratorium->metode }}</td>
+                        <td align="center">{{ $parameter->catatan }}</td>
+                    </tr>
                 @endforeach
             </tbody>
         </table>
@@ -1402,14 +1396,7 @@
                     <p align="center">
                         Penanggung Jawab Laboratorium,
                         <br>
-                        <!-- <br />
-                        <br />
-                        <br />
-                        <br />
-                        <br /> -->
-                        <img src="http://192.168.1.253/testing/include/ttd_pegawai/pid_908_66e1117c67628.png"
-                            style="width: 2.65cm; height: 2.6cm">
-                        <!--			<img src="http://192.168.1.253/testing/include/ttd/ttd_dok_lab.jpg" style="width: 2.65cm; height: 2.6cm"> -->
+                        <img src="/img/ttd-dr-dillar.png" style="width: 2.65cm; height: 2.6cm">
                         <br>
                         dr. Dillar Gunalar Sp.Pk
                     </p>

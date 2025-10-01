@@ -187,49 +187,99 @@
                                     @foreach ($tagihan_pasien as $tagihan)
                                         <tr style="font-size: .8rem">
                                             <td>{{ $loop->iteration }}</td>
+
+                                            {{-- Tanggal dibuat --}}
                                             <td>
-                                                <a href="{{ route('tagihan.pasien.detail', $tagihan->id) }}">
-                                                    {{ tgl_waktu($tagihan->created_at) }}
-                                                </a>
+                                                @if ($tagihan && $tagihan->created_at)
+                                                    <a href="{{ route('tagihan.pasien.detail', $tagihan->id) }}">
+                                                        {{ tgl_waktu($tagihan->created_at) }}
+                                                    </a>
+                                                @else
+                                                    -
+                                                @endif
                                             </td>
+
+                                            {{-- Nomor rekam medis --}}
                                             <td>
-                                                <a href="{{ route('tagihan.pasien.detail', $tagihan->id) }}">
-                                                    {{ $tagihan->registration->patient->medical_record_number }}
-                                                </a>
+                                                @if ($tagihan && $tagihan->registration && $tagihan->registration->patient)
+                                                    <a href="{{ route('tagihan.pasien.detail', $tagihan->id) }}">
+                                                        {{ $tagihan->registration->patient->medical_record_number }}
+                                                    </a>
+                                                @else
+                                                    -
+                                                @endif
                                             </td>
+
+                                            {{-- Nomor registrasi --}}
                                             <td>
-                                                <a href="{{ route('tagihan.pasien.detail', $tagihan->id) }}">
-                                                    {{ $tagihan->registration->registration_number }}
-                                                </a>
+                                                @if ($tagihan && $tagihan->registration)
+                                                    <a href="{{ route('tagihan.pasien.detail', $tagihan->id) }}">
+                                                        {{ $tagihan->registration->registration_number }}
+                                                    </a>
+                                                @else
+                                                    -
+                                                @endif
                                             </td>
+
+                                            {{-- Nama pasien --}}
                                             <td>
-                                                <a href="{{ route('tagihan.pasien.detail', $tagihan->id) }}">
-                                                    {{ $tagihan->registration->patient->name }}
-                                                </a>
+                                                @if ($tagihan && $tagihan->registration && $tagihan->registration->patient)
+                                                    <a href="{{ route('tagihan.pasien.detail', $tagihan->id) }}">
+                                                        {{ $tagihan->registration->patient->name }}
+                                                    </a>
+                                                @else
+                                                    -
+                                                @endif
                                             </td>
+
+                                            {{-- Dokter --}}
                                             <td>
-                                                <a href="{{ route('tagihan.pasien.detail', $tagihan->id) }}">
-                                                    {{ $tagihan->registration->doctor->employee->fullname }}
-                                                </a>
+                                                @if ($tagihan && $tagihan->registration && $tagihan->registration->doctor && $tagihan->registration->doctor->employee)
+                                                    <a href="{{ route('tagihan.pasien.detail', $tagihan->id) }}">
+                                                        {{ $tagihan->registration->doctor->employee->fullname }}
+                                                    </a>
+                                                @else
+                                                    -
+                                                @endif
                                             </td>
+
+                                            {{-- Poliklinik / Rawat Inap --}}
                                             <td>
-                                                <a href="{{ route('tagihan.pasien.detail', $tagihan->id) }}">
-                                                    {{ $tagihan->registration['registration_type'] == 'rawat-inap' ? 'RAWAT INAP' : $tagihan->registration->poliklinik }}
-                                                </a>
+                                                @if ($tagihan && $tagihan->registration)
+                                                    <a href="{{ route('tagihan.pasien.detail', $tagihan->id) }}">
+                                                        {{ $tagihan->registration['registration_type'] == 'rawat-inap' ? 'RAWAT INAP' : $tagihan->registration->poliklinik }}
+                                                    </a>
+                                                @else
+                                                    -
+                                                @endif
                                             </td>
+
+                                            {{-- Penjamin --}}
                                             <td>
-                                                <a href="{{ route('tagihan.pasien.detail', $tagihan->id) }}">
-                                                    {{ $tagihan->registration->penjamin->nama_perusahaan }}
-                                                </a>
+                                                @if ($tagihan && $tagihan->registration && $tagihan->registration->penjamin)
+                                                    <a href="{{ route('tagihan.pasien.detail', $tagihan->id) }}">
+                                                        {{ $tagihan->registration->penjamin->nama_perusahaan }}
+                                                    </a>
+                                                @else
+                                                    -
+                                                @endif
                                             </td>
+
+                                            {{-- Status --}}
                                             <td class="text-center">
-                                                <a href="{{ route('tagihan.pasien.detail', $tagihan->id) }}">
-                                                    @if ($tagihan->status === 'final')
-                                                        <i class='bx bx-money text-success' style="font-size: 1.2em;"></i>
-                                                    @else
-                                                        <i class='bx bx-money text-danger' style="font-size: 1.2em;"></i>
-                                                    @endif
-                                                </a>
+                                                @if ($tagihan)
+                                                    <a href="{{ route('tagihan.pasien.detail', $tagihan->id) }}">
+                                                        @if ($tagihan->status === 'final')
+                                                            <i class='bx bx-money text-success'
+                                                                style="font-size: 1.2em;"></i>
+                                                        @else
+                                                            <i class='bx bx-money text-danger'
+                                                                style="font-size: 1.2em;"></i>
+                                                        @endif
+                                                    </a>
+                                                @else
+                                                    -
+                                                @endif
                                             </td>
                                         </tr>
                                     @endforeach
