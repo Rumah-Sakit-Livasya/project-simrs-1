@@ -2295,8 +2295,8 @@
                         <td style="text-align: left;" colspan="2">
                             <span
                                 style="font-size: 0.9em;">&nbsp;&nbsp;&nbsp;&nbsp;[{{ \Carbon\Carbon::parse($bilingan->pembayaran_tagihan->created_at)->format('d M Y H:i') }}]</span>
-                            Tunai
-                            {{-- {{ $bilingan->pembayaran_tagihan->metode_pembayaran }} --}}
+
+                            {{ $bilingan->pembayaran_tagihan->pembayaran_credit_card ? 'Debet Card/Kredit Card' : 'Tunai' }}
                         </td>
                         <td style="font-weight: bold;">
                             {{ number_format($bilingan->pembayaran_tagihan->jumlah_terbayar, 0, ',', '.') }}

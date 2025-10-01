@@ -29,6 +29,6 @@ class PembayaranTagihan extends Model implements AuditableContract
 
     public function pembayaran_credit_card()
     {
-        return $this->belongsTo(PembayaranCreditCard::class);
+        return $this->hasOne(PembayaranCreditCard::class, 'pembayaran_tagihan_id');
     }
 }

@@ -30,7 +30,7 @@
             <div class="col">
                 <label>Penjamin:</label>
                 <input type="text" class="form-control"
-                    value="{{ $bilingan->registration->penjamin->nama_perusahaan ?? ($bilingan->registration->penjamin ?? 'N/A') }}"
+                    value="{{ strtolower($bilingan->registration->penjamin->nama_perusahaan ?? ($bilingan->registration->penjamin ?? 'N/A')) === 'standar' ? 'UMUM' : $bilingan->registration->penjamin->nama_perusahaan ?? ($bilingan->registration->penjamin ?? 'N/A') }}"
                     readonly>
             </div>
             <div class="col">
