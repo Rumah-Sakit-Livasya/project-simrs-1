@@ -137,6 +137,7 @@ class OrderLaboratoriumController extends Controller
             'user_id' => 'required|integer|exists:users,id',
             'employee_id' => 'required|integer|exists:employees,id',
             'doctor_id' => 'required|integer|exists:doctors,id',
+            'order_date' => 'required',
             'order_type' => ['required', Rule::in(['normal', 'cito'])],
             'diagnosa_awal' => 'required|string|max:255',
             'parameters' => 'required|array|min:1',
@@ -209,7 +210,8 @@ class OrderLaboratoriumController extends Controller
                         'no_telp' => $validatedData['no_telp'] ?? null,
                         'poly_ruang' => 'LABORATORIUM',
                         'jenis_kelamin' => $validatedData['jenis_kelamin'],
-                        'order_date' => Carbon::now()->toDateTimeString(),
+                        'order_date' => $validatedData['order_date'],
+                        'registration_date' => $validatedData['order_date'],
                         'registration_number' => $this->generate_otc_registration_number(),
                         'order_lab' => $no_order,
                         'order_type' => $validatedData['order_type'],
@@ -229,8 +231,8 @@ class OrderLaboratoriumController extends Controller
 
                 // Siapkan data untuk dimasukkan ke tabel 'order_laboratorium'
                 $orderData += [
+                    'registration_id' => $registrationOTC->id,
                     'user_id' => $validatedData['user_id'],
-                    'patient_id' => $validatedData['patient_id'],
                     'doctor_id' => $dokterLaboratoriumId,
                     'order_date' => Carbon::now(),
                     'no_order' => $no_order,

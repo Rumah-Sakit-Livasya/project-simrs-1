@@ -30,10 +30,6 @@
                 placeholder: 'Pilih Klinik',
             });
 
-            $('#dt-basic-example').dataTable({
-                responsive: false,
-            });
-
             $('.js-thead-colors a').on('click', function() {
                 var theadColor = $(this).attr("data-bg");
                 console.log(theadColor);
