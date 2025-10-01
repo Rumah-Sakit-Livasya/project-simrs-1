@@ -231,6 +231,57 @@
     @endif
 </div>
 
+<!-- Modal Otorisasi Batal Tagihan -->
+<div class="modal fade" id="otorisasiBatalTagihanModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Otorisasi Pembatalan Tagihan</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form id="otorisasiForm">
+                <div class="modal-body">
+                    <input type="hidden" id="bilinganIdToCancel" name="bilingan_id">
+                    <div class="alert alert-warning">
+                        Aksi ini memerlukan otorisasi dari user yang berwenang.
+                    </div>
+                    <div class="form-group">
+                        <label for="otorisasiUserSelect">Pilih User Otorisasi</label>
+                        <select class="form-control" id="otorisasiUserSelect" style="width: 100%;" required>
+                            <option value="" data-email="">-- Pilih User --</option>
+                            {{-- Loop data user yang sudah kita kirim dari controller --}}
+                            @foreach ($authorizedUsers as $user)
+                                <option value="{{ $user->id }}" data-email="{{ $user->email }}">
+                                    {{ $user->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="otorisasiEmail">Email</label>
+                        {{-- Input ini sekarang readonly, nilainya akan diisi oleh JavaScript --}}
+                        <input type="email" class="form-control bg-light" id="otorisasiEmail" name="email"
+                            readonly required placeholder="Pilih user dari daftar di atas">
+                    </div>
+                    <div class="form-group">
+                        <label for="otorisasiPassword">Password</label>
+                        <input type="password" class="form-control" id="otorisasiPassword" name="password" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="otorisasiCatatan">Alasan Pembatalan</label>
+                        <textarea class="form-control" id="otorisasiCatatan" name="catatan" rows="3" required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary" id="submitOtorisasiBtn">Submit Otorisasi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 @section('plugin-pembayaran-tagihan')
     <script>
         // ================================================================
@@ -595,35 +646,66 @@
             });
 
             // 2. Event handler for the "Cancel Bill" button
+            // Inisialisasi Select2 untuk dropdown user otorisasi
+            $('#otorisasiUserSelect').select2({
+                placeholder: "Pilih User Otorisasi",
+                dropdownParent: $('#otorisasiBatalTagihanModal')
+            });
+
+            // Event handler saat user dipilih dari dropdown
+            $('#otorisasiUserSelect').on('change', function() {
+                // Ambil email dari atribut data-email pada option yang dipilih
+                const selectedEmail = $(this).find('option:selected').data('email');
+
+                // Set nilai dari input email yang readonly
+                $('#otorisasiEmail').val(selectedEmail);
+            });
+
+            // Modifikasi event handler untuk tombol .btn-cancel-bill
             $(document).on('click', '.btn-cancel-bill', function() {
                 const billingId = $(this).data('billing-id');
 
-                Swal.fire({
-                    title: 'Batalkan Tagihan Final?',
-                    text: "Aksi ini akan mengembalikan status tagihan dari 'Final' menjadi 'Draft', memungkinkan Anda untuk mengeditnya kembali. Anda yakin?",
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#d33',
-                    cancelButtonColor: '#3085d6',
-                    confirmButtonText: 'Ya, batalkan tagihan!',
-                    cancelButtonText: 'Tidak'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        $.ajax({
-                            url: `/simrs/kasir/bilingan/cancel-bill/${billingId}`,
-                            type: 'PUT',
-                            headers: {
-                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                            },
-                            success: function(response) {
-                                Swal.fire('Berhasil!', response.message, 'success')
-                                    .then(() => location.reload());
-                            },
-                            error: function(xhr) {
-                                Swal.fire('Gagal!', xhr.responseJSON.message ||
-                                    'Terjadi kesalahan.', 'error');
-                            }
-                        });
+                // Reset form
+                $('#otorisasiForm').trigger('reset');
+
+                // Reset Select2 ke pilihan default dan trigger change untuk mengosongkan field email
+                $('#otorisasiUserSelect').val('').trigger('change');
+
+                // Set bilingan ID
+                $('#bilinganIdToCancel').val(billingId);
+
+                // Tampilkan modal
+                $('#otorisasiBatalTagihanModal').modal('show');
+            });
+
+            // Event handler untuk submit form otorisasi (INI TETAP SAMA, TIDAK PERLU DIUBAH)
+            $('#otorisasiForm').on('submit', function(e) {
+                e.preventDefault();
+                const form = $(this);
+                const submitBtn = $('#submitOtorisasiBtn');
+                const billingId = $('#bilinganIdToCancel').val();
+                const url = `/simrs/kasir/authorize-and-cancel-bill/${billingId}`;
+
+                submitBtn.prop('disabled', true).html(
+                    '<span class="spinner-border spinner-border-sm"></span> Memproses...');
+
+                $.ajax({
+                    url: url,
+                    type: 'PUT',
+                    data: form.serialize(),
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
+                    success: function(response) {
+                        $('#otorisasiBatalTagihanModal').modal('hide');
+                        Swal.fire('Berhasil!', response.message, 'success')
+                            .then(() => location.reload());
+                    },
+                    error: function(xhr) {
+                        $('#otorisasiBatalTagihanModal').modal('hide');
+                        Swal.fire('Gagal!', xhr.responseJSON.message || 'Terjadi kesalahan.',
+                            'error');
+                        submitBtn.prop('disabled', false).html('Submit Otorisasi');
                     }
                 });
             });
