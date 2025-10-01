@@ -449,6 +449,30 @@ class BilinganController extends Controller
                 }
             }
 
+            // Simpan data pembayaran credit card jika ada pada request
+            if (
+                $request->filled('bank_perusahaan_id_cc') ||
+                $request->filled('tipe_cc') ||
+                $request->filled('cc_number_cc') ||
+                $request->filled('auth_number_cc') ||
+                $request->filled('batch_cc') ||
+                $request->filled('nominal_cc')
+            ) {
+                // Pastikan semua array memiliki jumlah elemen yang sama
+                $ccCount = count($request->input('bank_perusahaan_id_cc', []));
+                for ($i = 0; $i < $ccCount; $i++) {
+                    PembayaranCreditCard::create([
+                        'pembayaran_tagihan_id' => $pembayaranTagihan->id,
+                        'bank_perusahaan_id'    => $request->input('bank_perusahaan_id_cc.' . $i),
+                        'tipe'                  => $request->input('tipe_cc.' . $i),
+                        'cc_number'             => $request->input('cc_number_cc.' . $i),
+                        'auth_number'           => $request->input('auth_number_cc.' . $i),
+                        'batch'                 => $request->input('batch_cc.' . $i),
+                        'nominal'               => $request->input('nominal_cc.' . $i),
+                    ]);
+                }
+            }
+
             return response()->json([
                 'success' => 'Pembayaran Tagihan berhasil disimpan.',
                 'data'    => $pembayaranTagihan,

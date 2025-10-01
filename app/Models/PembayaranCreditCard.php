@@ -12,6 +12,6 @@ class PembayaranCreditCard extends Model
 
     public function pembayaran_tagihan()
     {
-        return $this->belongsTo(PembayaranTagihan::class);
+        return $this->belongsTo(PembayaranTagihan::class, 'pembayaran_tagihan_id');
     }
 }

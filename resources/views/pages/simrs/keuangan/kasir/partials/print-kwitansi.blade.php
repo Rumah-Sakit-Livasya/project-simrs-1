@@ -130,7 +130,43 @@
             font-size: 11px;
         }
 
+        /* Style untuk input yang bisa diedit agar terlihat seperti teks biasa */
+        .editable-input {
+            width: 100%;
+            border: none;
+            background-color: transparent;
+            font-size: 12px;
+            /* Samakan dengan font size tabel */
+            font-family: Arial, sans-serif;
+            /* Samakan font family */
+            padding: 0;
+            margin: 0;
+            outline: none;
+            /* Hilangkan outline saat di-klik */
+            box-sizing: border-box;
+        }
+
+        /* Sembunyikan input saat akan dicetak */
         @media print {
+            .editable-input {
+                display: none !important;
+            }
+        }
+
+        /* Sembunyikan elemen print-only di layar biasa */
+        .print-only {
+            display: none;
+            font-size: 12px;
+            /* Samakan dengan font size tabel */
+        }
+
+        /* Tampilkan elemen print-only saat akan dicetak */
+        @media print {
+            .print-only {
+                display: inline !important;
+                /* Gunakan 'inline' atau 'block' sesuai kebutuhan */
+            }
+
             textarea.keterangan-input {
                 display: none !important;
             }
@@ -172,7 +208,16 @@
             <table class="receipt-details">
                 <tr>
                     <td class="label">Sudah Terima Dari</td>
-                    <td>{{ $bilingan->registration->patient->name }}</td>
+                    <td>
+                        {{-- Input ini akan terlihat di layar dan bisa diedit --}}
+                        <input type="text" id="terimaDariInput" class="editable-input"
+                            value="{{ $bilingan->registration->patient->name }}">
+
+                        {{-- Span ini hanya akan terlihat saat mencetak --}}
+                        <span id="terimaDariPrint" class="print-only">
+                            {{ $bilingan->registration->patient->name }}
+                        </span>
+                    </td>
                 </tr>
                 <tr>
                     <td class="label">Nama Pasien</td>
@@ -209,29 +254,109 @@
 
 @section('script')
     <script>
+        /**
+         * =================================================================================
+         * FUNGSI UTAMA
+         * =================================================================================
+         */
+
+        // Fungsi untuk memicu dialog print browser
         function printPage() {
-            document.getElementById('divButtons').style.display = 'none';
+            // Sembunyikan tombol-tombol agar tidak ikut tercetak
+            const buttonsDiv = document.getElementById('divButtons');
+            if (buttonsDiv) {
+                buttonsDiv.style.display = 'none';
+            }
+
+            // Panggil fungsi print bawaan browser
             window.print();
-            document.getElementById('divButtons').style.display = '';
+
+            // Tampilkan kembali tombol setelah dialog print ditutup
+            if (buttonsDiv) {
+                buttons_div.style.display = '';
+            }
+
             return false;
         }
 
-        const textarea = document.getElementById('keteranganInput');
-        const textDiv = document.getElementById('keteranganPrint');
 
-        function syncText() {
-            textDiv.innerText = textarea.value;
+        /**
+         * =================================================================================
+         * INISIALISASI ELEMEN & VARIABEL
+         * =================================================================================
+         */
+
+        // Ambil elemen untuk "Sudah Terima Dari"
+        const terimaDariInput = document.getElementById('terimaDariInput');
+        const terimaDariPrint = document.getElementById('terimaDariPrint');
+
+        // Ambil elemen untuk "Untuk Pembayaran" (Keterangan)
+        const keteranganTextarea = document.getElementById('keteranganInput');
+        const keteranganPrintDiv = document.getElementById('keteranganPrint');
+
+
+        /**
+         * =================================================================================
+         * FUNGSI SINKRONISASI
+         * (Menyalin teks dari input ke elemen yang akan dicetak)
+         * =================================================================================
+         */
+
+        // Fungsi untuk menyinkronkan field "Sudah Terima Dari"
+        function syncTerimaDari() {
+            if (terimaDariInput && terimaDariPrint) {
+                terimaDariPrint.innerText = terimaDariInput.value;
+            }
         }
 
-        textarea.addEventListener('input', syncText);
-        window.onbeforeprint = syncText;
-
-        // Set default value for textarea if empty
-        window.onload = function() {
-            if (!textarea.value) {
-                textarea.value = 'PEMBAYARAN PELAYANAN RAWAT INAP';
-                syncText();
+        // Fungsi untuk menyinkronkan field "Untuk Pembayaran" (Keterangan)
+        function syncKeterangan() {
+            if (keteranganTextarea && keteranganPrintDiv) {
+                keteranganPrintDiv.innerText = keteranganTextarea.value;
             }
+        }
+
+
+        /**
+         * =================================================================================
+         * EVENT LISTENERS
+         * (Menjalankan fungsi saat ada interaksi pengguna atau event browser)
+         * =================================================================================
+         */
+
+        // 1. Jalankan sinkronisasi secara real-time saat pengguna mengetik
+        if (terimaDariInput) {
+            terimaDariInput.addEventListener('input', syncTerimaDari);
+        }
+        if (keteranganTextarea) {
+            keteranganTextarea.addEventListener('input', syncKeterangan);
+        }
+
+
+        // 2. Jalankan SEMUA fungsi sinkronisasi TEPAT SEBELUM dialog print muncul
+        window.onbeforeprint = function() {
+            syncTerimaDari();
+            syncKeterangan();
+        };
+
+
+        // 3. Jalankan saat halaman selesai dimuat untuk set nilai default dan sinkronisasi awal
+        window.onload = function() {
+            // Set nilai default untuk "Sudah Terima Dari" jika kosong
+            if (terimaDariInput && !terimaDariInput.value.trim()) {
+                // Biarkan nilai dari PHP sebagai default utama
+                // Jika ingin default lain, ganti di sini. Contoh:
+                // terimaDariInput.value = 'Nama Default';
+            }
+            // Lakukan sinkronisasi awal
+            syncTerimaDari();
+
+            // Set nilai default untuk "Untuk Pembayaran" jika kosong
+            if (keteranganTextarea && !keteranganTextarea.value.trim()) {
+                keteranganTextarea.value = 'PEMBAYARAN PELAYANAN RAWAT INAP';
+            }
+            // Lakukan sinkronisasi awal
+            syncKeterangan();
         };
     </script>
 @endsection
