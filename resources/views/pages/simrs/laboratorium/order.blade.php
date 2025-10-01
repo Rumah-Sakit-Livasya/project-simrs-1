@@ -365,6 +365,11 @@
                 allowClear: true,
                 dropdownCssClass: "move-up"
             });
+            $('#tipe_pasien').select2({
+                placeholder: "-- Pilih Tipe Pasien --",
+                allowClear: true,
+                dropdownCssClass: "move-up"
+            });
 
             // Menyimpan variabel global dari Controller
             window._kategoriLaboratorium = @json($laboratorium_categories);

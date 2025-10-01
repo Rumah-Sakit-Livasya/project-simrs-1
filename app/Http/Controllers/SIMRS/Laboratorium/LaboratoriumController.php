@@ -68,8 +68,6 @@ class LaboratoriumController extends Controller
     public function index(Request $request)
     {
         // 1. Eager Loading Komprehensif
-        // Muat semua relasi yang dibutuhkan oleh view di awal untuk menghindari N+1 query.
-        // Ini adalah langkah paling penting untuk performa.
         $query = OrderLaboratorium::query()->with([
             'registration.patient.penjamin',
             'registration_otc.penjamin',
@@ -77,27 +75,28 @@ class LaboratoriumController extends Controller
             'order_parameter_laboratorium.parameter_laboratorium' // Untuk child row
         ]);
 
-        // 2. Terapkan Filter Secara Kondisional menggunakan when()
-        // Metode when() hanya akan menjalankan closure jika kondisi pertamanya true.
+        // 2. Terapkan Filter Secara Kondisional
 
-        // Filter berdasarkan rentang tanggal
-        $query->when($request->filled('order_date'), function ($q) use ($request) {
-            $dateRange = explode(' to ', $request->order_date); // Disesuaikan untuk flatpickr range
+        // Filter berdasarkan rentang tanggal dari input
+        if ($request->filled('registration_date')) {
+            $dateRange = explode(' - ', $request->registration_date);
             if (count($dateRange) === 2) {
                 $startDate = Carbon::parse($dateRange[0])->startOfDay();
                 $endDate = Carbon::parse($dateRange[1])->endOfDay();
-                $q->whereBetween('order_date', [$startDate, $endDate]);
+                $query->whereBetween('order_date', [$startDate, $endDate]);
             }
-        });
+        } else {
+            // *** INI BAGIAN PENTINGNYA ***
+            // Jika tidak ada input tanggal, default ke hari ini
+            $query->whereDate('order_date', today());
+        }
 
-        // Filter berdasarkan No. Order (ada di tabel utama OrderLaboratorium)
+        // Filter berdasarkan No. Order
         $query->when($request->filled('no_order'), function ($q) use ($request) {
             $q->where('no_order', 'like', '%' . $request->no_order . '%');
         });
 
-        // --- FILTER UNIVERSAL (Mencari di Pasien Biasa DAN Pasien OTC) ---
-
-        // Filter berdasarkan Nama Pasien (mencari di dua relasi sekaligus)
+        // Filter berdasarkan Nama Pasien (universal)
         $query->when($request->filled('name'), function ($q) use ($request) {
             $q->where(function ($subQuery) use ($request) {
                 $subQuery->whereHas('registration.patient', function ($patientQuery) use ($request) {
@@ -108,7 +107,7 @@ class LaboratoriumController extends Controller
             });
         });
 
-        // Filter berdasarkan No. Registrasi (mencari di dua relasi sekaligus)
+        // Filter berdasarkan No. Registrasi (universal)
         $query->when($request->filled('registration_number'), function ($q) use ($request) {
             $q->where(function ($subQuery) use ($request) {
                 $subQuery->whereHas('registration', function ($regQuery) use ($request) {
@@ -119,24 +118,25 @@ class LaboratoriumController extends Controller
             });
         });
 
-        // Filter berdasarkan No. Rekam Medis (hanya ada di pasien biasa)
+        // Filter berdasarkan No. RM (hanya pasien biasa)
         $query->when($request->filled('medical_record_number'), function ($q) use ($request) {
-            $q->whereHas('registration.patient', function ($patientQuery) use ($request) {
-                $patientQuery->where('medical_record_number', 'like', '%' . $request->medical_record_number . '%');
+            $cleanedRM = str_replace('-', '', $request->medical_record_number);
+            $q->whereHas('registration.patient', function ($patientQuery) use ($cleanedRM) {
+                $patientQuery->where('medical_record_number', 'like', '%' . $cleanedRM . '%');
             });
         });
 
+        // 3. Eksekusi Query dan Kirim Data ke View
+        $orders = $query->orderByDesc('id')->get(); // Diurutkan berdasarkan ID terbaru
 
-        // 3. Terapkan Filter Default (Hanya jika tidak ada filter lain yang aktif)
-        // Cek apakah ada input filter yang diisi oleh pengguna
-        $activeFilters = ['order_date', 'no_order', 'name', 'registration_number', 'medical_record_number'];
-        if (!$request->hasAny($activeFilters)) {
-            // Jika tidak ada filter, tampilkan data untuk hari ini saja
-            $query->whereDate('order_date', today());
-        }
-
-        // 4. Eksekusi Query dan Kirim Data ke View
-        $orders = $query->orderByDesc('order_date')->get();
+        // Menambahkan link detail pasien pada setiap order untuk kemudahan di view
+        $orders->each(function ($order) {
+            if ($order->registration && $order->registration->patient) {
+                $order->patient_detail_link = route('detail.pendaftaran.pasien', $order->registration->patient->id);
+            } else {
+                $order->patient_detail_link = '#'; // Link default jika data tidak lengkap
+            }
+        });
 
         return view('pages.simrs.laboratorium.list-order', [
             'orders' => $orders
@@ -466,6 +466,60 @@ class LaboratoriumController extends Controller
             return back()->with('success', 'Tarif laboratorium berhasil diimpor!');
         } catch (\Exception $e) {
             return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
+    }
+
+    public function destroy($id)
+    {
+        try {
+            // Cari order berdasarkan ID, jika tidak ketemu akan otomatis error 404
+            $order = OrderLaboratorium::findOrFail($id);
+
+            // Lakukan validasi tambahan jika perlu, misalnya:
+            if ($order->status_billed == 1) {
+                return response()->json(['success' => false, 'message' => 'Order yang sudah ditagih tidak bisa dihapus.'], 400);
+            }
+
+            // Hapus tagihan pasien dan bilingan tagihan pasien yang terkait
+            // Ambil semua parameter order laboratorium
+            $parameterIds = $order->order_parameter_laboratorium()->pluck('id')->toArray();
+
+            // Ambil semua tagihan pasien yang terkait dengan bilingan dan order ini
+            if ($order->bilingan_id) {
+                // Hapus bilingan_tagihan_pasien yang terkait dengan bilingan_id dan tagihan pasien dari order ini
+                $tagihanIds = \App\Models\SIMRS\TagihanPasien::where('bilingan_id', $order->bilingan_id)
+                    ->where('registration_id', $order->registration_id)
+                    ->whereIn('tagihan', function ($query) use ($parameterIds) {
+                        $query->selectRaw("CONCAT('[Biaya Laboratorium] ', parameter)")
+                            ->from('parameter_laboratorium')
+                            ->whereIn('id', function ($sub) use ($parameterIds) {
+                                $sub->select('parameter_laboratorium_id')
+                                    ->from('order_parameter_laboratorium')
+                                    ->whereIn('id', $parameterIds);
+                            });
+                    })
+                    ->pluck('id')
+                    ->toArray();
+
+                if (!empty($tagihanIds)) {
+                    // Hapus bilingan_tagihan_pasien
+                    \App\Models\SIMRS\BilinganTagihanPasien::whereIn('tagihan_pasien_id', $tagihanIds)->delete();
+                    // Hapus tagihan_pasien
+                    \App\Models\SIMRS\TagihanPasien::whereIn('id', $tagihanIds)->delete();
+                }
+            }
+
+            // Hapus order
+            $order->delete();
+
+            // Kirim respons sukses
+            return response()->json(['success' => true, 'message' => 'Order Laboratorium dan tagihan terkait berhasil dihapus.']);
+        } catch (\Exception $e) {
+            // Catat error untuk debugging
+            \Log::error('Gagal menghapus order laboratorium: ' . $e->getMessage());
+
+            // Kirim respons error ke client
+            return response()->json(['success' => false, 'message' => 'Terjadi kesalahan pada server saat menghapus data.'], 500);
         }
     }
 }

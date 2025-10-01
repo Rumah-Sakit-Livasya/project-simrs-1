@@ -103,6 +103,12 @@
                                             @endif
 
                                         <td>
+                                            @if (!Str::contains($order->registration_otc->registration_number ?? '', 'OTC'))
+                                                <a href="{{ url('/daftar-registrasi-pasien/' . $order->registration->id) }}"
+                                                    class="mdi mdi-account pointer mdi-24px text-primary user-btn"
+                                                    title="Detail Pasien" data-id="{{ $order->id }}"></a>
+                                            @endif
+
                                             @if ($order->is_konfirmasi == 1)
                                                 <a class="mdi mdi-printer pointer mdi-24px text-success nota-btn"
                                                     title="Print Nota Order" data-id="{{ $order->id }}"></a>
@@ -116,6 +122,8 @@
                                                 title="Print Label" data-id="{{ $order->id }}"></a>
                                             <a class="mdi mdi-file-document pointer mdi-24px text-warning result-btn"
                                                 title="Print Hasil" data-id="{{ $order->id }}"></a>
+                                            <a class="mdi mdi-delete pointer mdi-24px text-danger delete-btn"
+                                                title="Hapus Order" data-id="{{ $order->id }}"></a>
                                         </td>
                                     </tr>
                                 @endforeach
