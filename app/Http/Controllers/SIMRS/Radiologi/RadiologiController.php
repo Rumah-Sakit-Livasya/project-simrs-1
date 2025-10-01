@@ -397,18 +397,47 @@ class RadiologiController extends Controller
             $order = OrderRadiologi::findOrFail($id);
 
             // Lakukan validasi tambahan jika perlu, misalnya:
-            // if ($order->status_billed == 1) {
-            //     return response()->json(['success' => false, 'message' => 'Order yang sudah ditagih tidak bisa dihapus.'], 400);
-            // }
+            if ($order->status_billed == 1) {
+                return response()->json(['success' => false, 'message' => 'Order yang sudah ditagih tidak bisa dihapus.'], 400);
+            }
+
+            // Hapus tagihan pasien dan bilingan tagihan pasien yang terkait
+            // Ambil semua parameter order radiologi
+            $parameterIds = $order->order_parameter_radiologi()->pluck('id')->toArray();
+
+            // Ambil semua tagihan pasien yang terkait dengan bilingan dan order ini
+            if ($order->bilingan_id) {
+                // Hapus bilingan_tagihan_pasien yang terkait dengan bilingan_id dan tagihan pasien dari order ini
+                $tagihanIds = \App\Models\SIMRS\TagihanPasien::where('bilingan_id', $order->bilingan_id)
+                    ->where('registration_id', $order->registration_id)
+                    ->whereIn('tagihan', function ($query) use ($parameterIds) {
+                        $query->selectRaw("CONCAT('[Biaya Radiologi] ', parameter)")
+                            ->from('parameter_radiologi')
+                            ->whereIn('id', function ($sub) use ($parameterIds) {
+                                $sub->select('parameter_radiologi_id')
+                                    ->from('order_parameter_radiologi')
+                                    ->whereIn('id', $parameterIds);
+                            });
+                    })
+                    ->pluck('id')
+                    ->toArray();
+
+                if (!empty($tagihanIds)) {
+                    // Hapus bilingan_tagihan_pasien
+                    \App\Models\SIMRS\BilinganTagihanPasien::whereIn('tagihan_pasien_id', $tagihanIds)->delete();
+                    // Hapus tagihan_pasien
+                    \App\Models\SIMRS\TagihanPasien::whereIn('id', $tagihanIds)->delete();
+                }
+            }
 
             // Hapus order
             $order->delete();
 
             // Kirim respons sukses
-            return response()->json(['success' => true, 'message' => 'Order Radiologi berhasil dihapus.']);
+            return response()->json(['success' => true, 'message' => 'Order Radiologi dan tagihan terkait berhasil dihapus.']);
         } catch (\Exception $e) {
             // Catat error untuk debugging
-            Log::error('Gagal menghapus order radiologi: ' . $e->getMessage());
+            \Log::error('Gagal menghapus order radiologi: ' . $e->getMessage());
 
             // Kirim respons error ke client
             return response()->json(['success' => false, 'message' => 'Terjadi kesalahan pada server saat menghapus data.'], 500);
