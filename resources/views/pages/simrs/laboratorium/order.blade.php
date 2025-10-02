@@ -203,8 +203,10 @@
                                                             name="doctor_id">
                                                             <option value="">-- Pilih Dokter --</option>
                                                             @foreach ($laboratoriumDoctors as $doctor)
-                                                                <option value="{{ $doctor->id }}">
-                                                                    {{ $doctor->employee->fullname }}</option>
+                                                                <option value="{{ $doctor->id }}"
+                                                                    @if ($doctor->id == 17) selected @endif>
+                                                                    {{ $doctor->employee->fullname }}
+                                                                </option>
                                                             @endforeach
                                                         </select>
                                                     </div>
@@ -360,6 +362,11 @@
             // Inisialisasi Select2
             $('.select2').select2({
                 placeholder: "-- Pilih Dokter --",
+                allowClear: true,
+                dropdownCssClass: "move-up"
+            });
+            $('#tipe_pasien').select2({
+                placeholder: "-- Pilih Tipe Pasien --",
                 allowClear: true,
                 dropdownCssClass: "move-up"
             });

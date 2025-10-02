@@ -1014,7 +1014,6 @@ class RegistrationController extends Controller
                 'alasan' => $request->alasan,
             ]);
 
-
             // Update the status of the registration
             $registration->update([
                 'status' => 'aktif',

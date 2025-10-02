@@ -258,7 +258,7 @@
                                             <td>
                                                 @if ($tagihan && $tagihan->registration && $tagihan->registration->penjamin)
                                                     <a href="{{ route('tagihan.pasien.detail', $tagihan->id) }}">
-                                                        {{ $tagihan->registration->penjamin->nama_perusahaan }}
+                                                        {{ strtolower($tagihan->registration->penjamin->nama_perusahaan) === 'standar' ? 'UMUM' : $tagihan->registration->penjamin->nama_perusahaan }}
                                                     </a>
                                                 @else
                                                     -

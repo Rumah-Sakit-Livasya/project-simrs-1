@@ -75,6 +75,7 @@ use App\Http\Controllers\SIMRS\Operasi\KategoriOperasiController;
 use App\Http\Controllers\SIMRS\Operasi\OperasiController;
 use App\Http\Controllers\SIMRS\Operasi\TindakanOperasiController;
 use App\Http\Controllers\SIMRS\Operasi\TipeOperasiController;
+use App\Http\Controllers\SIMRS\OtorisasiUserController;
 use App\Http\Controllers\SIMRS\ParameterRadiologiController;
 use App\Http\Controllers\SIMRS\PatientController;
 use App\Http\Controllers\SIMRS\Pengkajian\FormBuilderController;
@@ -478,6 +479,16 @@ Route::group(['middleware' => ['auth']], function () {
                 Route::get('tipe-transaksi/{id}/edit', [TipeTransaksiController::class, 'edit'])->name('tipe-transaksi.edit');
                 Route::put('tipe-transaksi/{id}', [TipeTransaksiController::class, 'update'])->name('tipe-transaksi.update');
                 Route::delete('tipe-transaksi/{id}', [TipeTransaksiController::class, 'destroy'])->name('tipe-transaksi.destroy');
+
+                // Otorisasi User Routes
+                Route::prefix('otorisasi-user')->name('otorisasi-user.')->group(function () {
+                    Route::get('/', [OtorisasiUserController::class, 'index'])->name('index');
+                    Route::get('/data', [OtorisasiUserController::class, 'data'])->name('data');
+                    Route::post('/', [OtorisasiUserController::class, 'store'])->name('store');
+                    Route::get('/{id}/edit', [OtorisasiUserController::class, 'edit'])->name('edit');
+                    Route::put('/{id}', [OtorisasiUserController::class, 'update'])->name('update');
+                    Route::delete('/{id}', [OtorisasiUserController::class, 'destroy'])->name('destroy');
+                });
             });
 
             // Medical services routes
@@ -1112,6 +1123,8 @@ Route::group(['middleware' => ['auth']], function () {
             Route::get('popup/pilih-pasien/{poli}', [LaboratoriumController::class, 'popupPilihPasien'])->name('laboratorium.popup.pilih-pasien');
             Route::get('laporan-parameter-view/{fromDate}/{endDate}/{tipe_rawat}/{penjamin}', [LaboratoriumController::class, 'reportParameterView'])->name('laboratorium.report-parameter.view');
             Route::get('laporan-pasien-view/{fromDate}/{endDate}/{tipe_rawat}/{penjamin}/{parameter}', [LaboratoriumController::class, 'reportPatientView'])->name('laboratorium.report-patient.view');
+
+            Route::delete('order/{id}', [LaboratoriumController::class, 'destroy'])->name('laboratorium.order.destroy');
         });
 
         Route::prefix('dokter')->group(function () {
@@ -1446,6 +1459,9 @@ Route::group(['middleware' => ['auth']], function () {
 
             Route::get('/order-notifications/{registration_id}', [BilinganController::class, 'getOrderNotifications'])->name('kasir.order-notifications');
             Route::post('/process-order', [BilinganController::class, 'processOrderIntoBill'])->name('kasir.process-order');
+
+            // Di dalam grup route /simrs/kasir/bilingan atau yang sesuai
+            Route::put('/authorize-and-cancel-bill/{id}', [BilinganController::class, 'authorizeAndCancelBill'])->name('bilingan.authorize-cancel');
         });
 
         Route::prefix('operasi')->group(function () {

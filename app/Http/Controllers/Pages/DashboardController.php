@@ -348,22 +348,26 @@ class DashboardController extends Controller
         return view('pages.master-data.user.assign-permissions', compact('user_name', 'user_id', 'permissions', 'userPermissions'));
     }
 
-    public function getAllAttendances()
+    public function getAllAttendances(Request $request)
     {
-        //====== Data Absensi Hari Ini ==========//
+        // Tentukan tanggal yang akan digunakan untuk query
+        // Jika ada input 'date' dari request, gunakan itu. Jika tidak, gunakan tanggal hari ini.
+        $selectedDate = $request->filled('date') ? Carbon::parse($request->input('date')) : Carbon::now();
+
+        //====== Data Absensi Berdasarkan Tanggal yang Dipilih ==========//
         $total_employee = Employee::where('is_active', 1)->get()->count();
         $total_ontime = Attendance::whereNotNull('clock_in')->where('late_clock_in', null)
-            ->whereDate('date', Carbon::now()->format('Y-m-d'))
+            ->whereDate('date', $selectedDate->format('Y-m-d'))
             ->whereHas('employees', function ($query) {
                 $query->where('is_active', 1); // Hanya untuk karyawan yang aktif
             })->count();
         $total_latein = Attendance::where('clock_in', '!=', null)->where('late_clock_in', '!=', null)->whereHas('employees', function ($query) {
             $query->where('is_active', 1);  // Hanya untuk karyawan yang aktif
-        })->where('date', Carbon::now()->format('Y-m-d'))->count();
+        })->whereDate('date', $selectedDate->format('Y-m-d'))->count();
         $total_no_check_in = Attendance::where('clock_in', null)->where('is_day_off', null)->whereHas('employees', function ($query) {
             $query->where('is_active', 1);  // Hanya untuk karyawan yang aktif
             $query->where('organization_id', '!=', 3);
-        })->where('date', Carbon::now()->format('Y-m-d'))->count();
+        })->whereDate('date', $selectedDate->format('Y-m-d'))->count();
         //buat yng cuti
         $total_time_off = Attendance::where('clock_in', null)
             ->where(function ($query) {
@@ -374,7 +378,7 @@ class DashboardController extends Controller
                 $query->where('is_active', 1); // Hanya untuk karyawan yang aktif
             })
             ->where('is_day_off', 1)
-            ->where('date', Carbon::now()->format('Y-m-d'))
+            ->whereDate('date', $selectedDate->format('Y-m-d'))
             ->count();
         // buat hari libur (minggu, hari nasional, lepas libur)
         $total_day_off = Attendance::where('is_day_off', 1)->where(function ($query) {
@@ -382,14 +386,15 @@ class DashboardController extends Controller
                 ->Where('attendance_code_id', null);
         })->whereHas('employees', function ($query) {
             $query->where('is_active', 1);  // Hanya untuk karyawan yang aktif
-        })->where('date', Carbon::now()->format('Y-m-d'))->count();
+        })->whereDate('date', $selectedDate->format('Y-m-d'))->count();
 
-        $attendance_today = Attendance::where('date', Carbon::now()->format('Y-m-d'))->whereHas('employees', function ($query) {
+        $attendance_today = Attendance::whereDate('date', $selectedDate->format('Y-m-d'))->whereHas('employees', function ($query) {
             $query->where('is_active', 1);  // Hanya untuk karyawan yang aktif
         })->orderBy('clock_in', 'ASC')->get();
+
         if (auth()->user()->hasRole('hr')) {
             $total_employee = Employee::where('company_id', auth()->user()->employee->company_id)->where('is_active', 1)->count();
-            $total_ontime = Attendance::where('clock_in', '!=', null)->where('date', Carbon::now()->format('Y-m-d'))->where('late_clock_in', null)->where('early_clock_out', null)
+            $total_ontime = Attendance::where('clock_in', '!=', null)->whereDate('date', $selectedDate->format('Y-m-d'))->where('late_clock_in', null)->where('early_clock_out', null)
                 ->whereIn('employee_id', function ($query) {
                     $query->select('id')
                         ->from('employees')
@@ -397,7 +402,7 @@ class DashboardController extends Controller
                 })->count();
 
             // Pegawai Yang Telat
-            $total_latein = Attendance::where('clock_in', '!=', null)->where('date', Carbon::now()->format('Y-m-d'))->where('late_clock_in', '!=', null)
+            $total_latein = Attendance::where('clock_in', '!=', null)->whereDate('date', $selectedDate->format('Y-m-d'))->where('late_clock_in', '!=', null)
                 ->whereIn('employee_id', function ($query) {
                     $query->select('id')
                         ->from('employees')
@@ -405,7 +410,7 @@ class DashboardController extends Controller
                 })->count();
 
             // Pegawai yang belum checkin
-            $total_no_check_in = Attendance::where('clock_in', null)->where('is_day_off', null)->where('date', Carbon::now()->format('Y-m-d'))
+            $total_no_check_in = Attendance::where('clock_in', null)->where('is_day_off', null)->whereDate('date', $selectedDate->format('Y-m-d'))
                 ->whereIn('employee_id', function ($query) {
                     $query->select('id')
                         ->from('employees')
@@ -416,7 +421,7 @@ class DashboardController extends Controller
             $total_time_off = Attendance::where('clock_in', null)->where('is_day_off', 1)->where(function ($query) {
                 $query->where('day_off_request_id', '!=', null)
                     ->orWhere('attendance_code_id', '!=', null);
-            })->where('date', Carbon::now()->format('Y-m-d'))
+            })->whereDate('date', $selectedDate->format('Y-m-d'))
                 ->whereIn('employee_id', function ($query) {
                     $query->select('id')
                         ->from('employees')
@@ -427,14 +432,14 @@ class DashboardController extends Controller
             $total_day_off = Attendance::where('is_day_off', 1)->where(function ($query) {
                 $query->where('day_off_request_id',  null)
                     ->Where('attendance_code_id', null);
-            })->where('date', Carbon::now()->format('Y-m-d'))
+            })->whereDate('date', $selectedDate->format('Y-m-d'))
                 ->whereIn('employee_id', function ($query) {
                     $query->select('id')
                         ->from('employees')
                         ->where('company_id', auth()->user()->employee->company_id)->where('is_active', 1);
                 })->count();
 
-            $attendance_today = Attendance::where('date', Carbon::now()->format('Y-m-d'))
+            $attendance_today = Attendance::whereDate('date', $selectedDate->format('Y-m-d'))
                 ->whereIn('employee_id', function ($query) {
                     $query->select('id')
                         ->from('employees')
@@ -466,13 +471,8 @@ class DashboardController extends Controller
                 ->where('is_active', 1)
                 ->whereIn('organization_id', $organizations)
                 ->count();
-            // $total_employee = Employee::where('company_id', auth()->user()->employee->company_id)
-            //     ->where('is_active', 1)
-            //     ->whereIn('organization_id', $organizations)
-            //     ->whereHas('attendances') // Mengambil hanya yang memiliki attendance
-            //     ->count();
-            // dd($total_employee);
-            $total_ontime = Attendance::where('clock_in', '!=', null)->where('date', Carbon::now()->format('Y-m-d'))->where('late_clock_in', null)
+
+            $total_ontime = Attendance::where('clock_in', '!=', null)->whereDate('date', $selectedDate->format('Y-m-d'))->where('late_clock_in', null)
                 ->whereIn('employee_id', function ($query) use ($organizations) {
                     $query->select('id')
                         ->from('employees')
@@ -482,7 +482,7 @@ class DashboardController extends Controller
                 })->count();
 
             // Pegawai Yang Telat
-            $total_latein = Attendance::where('clock_in', '!=', null)->where('date', Carbon::now()->format('Y-m-d'))->where('late_clock_in', '!=', null)
+            $total_latein = Attendance::where('clock_in', '!=', null)->whereDate('date', $selectedDate->format('Y-m-d'))->where('late_clock_in', '!=', null)
                 ->whereIn('employee_id', function ($query) use ($organizations) {
                     $query->select('id')
                         ->from('employees')
@@ -491,7 +491,7 @@ class DashboardController extends Controller
                         ->whereIn('organization_id', $organizations);
                 })->count();
 
-            $total_no_check_in = Attendance::where('clock_in', null)->where('is_day_off', null)->where('date', Carbon::now()->format('Y-m-d'))
+            $total_no_check_in = Attendance::where('clock_in', null)->where('is_day_off', null)->whereDate('date', $selectedDate->format('Y-m-d'))
                 ->whereIn('employee_id', function ($query) use ($organizations) {
                     $query->select('id')
                         ->from('employees')
@@ -504,7 +504,7 @@ class DashboardController extends Controller
             $total_time_off = Attendance::where('clock_in', null)->where('is_day_off', 1)->where(function ($query) {
                 $query->where('day_off_request_id', '!=', null)
                     ->orWhere('attendance_code_id', '!=', null);
-            })->where('date', Carbon::now()->format('Y-m-d'))
+            })->whereDate('date', $selectedDate->format('Y-m-d'))
                 ->whereIn('employee_id', function ($query) use ($organizations) {
                     $query->select('id')
                         ->from('employees')
@@ -516,7 +516,7 @@ class DashboardController extends Controller
             $total_day_off = Attendance::where('is_day_off', 1)->where(function ($query) {
                 $query->where('day_off_request_id',  null)
                     ->Where('attendance_code_id', null);
-            })->where('date', Carbon::now()->format('Y-m-d'))
+            })->whereDate('date', $selectedDate->format('Y-m-d'))
                 ->whereIn('employee_id', function ($query) use ($organizations) {
                     $query->select('id')
                         ->from('employees')
@@ -524,7 +524,7 @@ class DashboardController extends Controller
                         ->where('company_id', auth()->user()->employee->company_id)
                         ->whereIn('organization_id', $organizations);
                 })->count();
-            $attendance_today = Attendance::where('date', Carbon::now()->format('Y-m-d'))
+            $attendance_today = Attendance::whereDate('date', $selectedDate->format('Y-m-d'))
                 ->whereIn('employee_id', function ($query) use ($organizations) {
                     $query->select('id')
                         ->from('employees')
@@ -535,20 +535,20 @@ class DashboardController extends Controller
                 ->orderBy('employee_id')
                 ->get();
         } else if (auth()->user()->hasRole('manager')) {
-            //====== Data Absensi Hari Ini ==========//
+            //====== Data Absensi Berdasarkan Tanggal yang Dipilih ==========//
             $total_employee = Employee::where('is_active', 1)->get()->count();
             $total_ontime = Attendance::whereNotNull('clock_in')->where('late_clock_in', null)
-                ->whereDate('date', Carbon::now()->format('Y-m-d'))
+                ->whereDate('date', $selectedDate->format('Y-m-d'))
                 ->whereHas('employees', function ($query) {
                     $query->where('is_active', 1); // Hanya untuk karyawan yang aktif
                 })->count();
             $total_latein = Attendance::where('clock_in', '!=', null)->where('late_clock_in', '!=', null)->whereHas('employees', function ($query) {
                 $query->where('is_active', 1);  // Hanya untuk karyawan yang aktif
-            })->where('date', Carbon::now()->format('Y-m-d'))->count();
+            })->whereDate('date', $selectedDate->format('Y-m-d'))->count();
             $total_no_check_in = Attendance::where('clock_in', null)->where('is_day_off', null)->whereHas('employees', function ($query) {
                 $query->where('is_active', 1);  // Hanya untuk karyawan yang aktif
                 $query->where('organization_id', '!=', 3);
-            })->where('date', Carbon::now()->format('Y-m-d'))->count();
+            })->whereDate('date', $selectedDate->format('Y-m-d'))->count();
             //buat yng cuti
             $total_time_off = Attendance::where('clock_in', null)
                 ->where(function ($query) {
@@ -559,7 +559,7 @@ class DashboardController extends Controller
                     $query->where('is_active', 1); // Hanya untuk karyawan yang aktif
                 })
                 ->where('is_day_off', 1)
-                ->where('date', Carbon::now()->format('Y-m-d'))
+                ->whereDate('date', $selectedDate->format('Y-m-d'))
                 ->count();
             // buat hari libur (minggu, hari nasional, lepas libur)
             $total_day_off = Attendance::where('is_day_off', 1)->where(function ($query) {
@@ -567,14 +567,13 @@ class DashboardController extends Controller
                     ->Where('attendance_code_id', null);
             })->whereHas('employees', function ($query) {
                 $query->where('is_active', 1);  // Hanya untuk karyawan yang aktif
-            })->where('date', Carbon::now()->format('Y-m-d'))->count();
-            $attendance_today = Attendance::where('date', Carbon::now()->format('Y-m-d'))->whereHas('employees', function ($query) {
+            })->whereDate('date', $selectedDate->format('Y-m-d'))->count();
+            $attendance_today = Attendance::whereDate('date', $selectedDate->format('Y-m-d'))->whereHas('employees', function ($query) {
                 $query->where('is_active', 1);  // Hanya untuk karyawan yang aktif
             })->orderBy('clock_in', 'ASC')->get();
         }
 
         $shifts = Shift::all();
-        // dd(isset($total_time_off));
         return view('pages.monitoring.daftar-absensi.index', [
             'getNotify' => $this->getNotify(),
             'total_employee' => $total_employee,
@@ -585,6 +584,8 @@ class DashboardController extends Controller
             'total_time_off' => $total_time_off,
             'attendance_today' => $attendance_today,
             'shifts' => $shifts,
+            'selected_date' => $selectedDate->format('Y-m-d'),
+            'display_date' => $selectedDate,
         ]);
     }
 

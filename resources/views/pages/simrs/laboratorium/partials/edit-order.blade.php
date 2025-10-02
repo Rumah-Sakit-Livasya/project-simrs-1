@@ -140,7 +140,7 @@
                                     <label class="col-sm-5 col-form-label">Dokter Perujuk</label>
                                     <div class="col-sm-7">
                                         <input type="text" readonly class="form-control-plaintext"
-                                            value="{{ $order->doctor->employee->fullname }}">
+                                            value="{{ $order->registration->doctor->employee->fullname }}">
                                     </div>
                                 </div>
                             </div>

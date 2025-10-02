@@ -214,4 +214,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(WarehouseStockOpnameGudang::class, "finish_user_id");
     }
+
+    public function otorisasi()
+    {
+        return $this->hasMany(OtorisasiUser::class);
+    }
 }

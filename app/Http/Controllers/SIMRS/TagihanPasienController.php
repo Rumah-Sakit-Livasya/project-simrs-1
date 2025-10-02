@@ -17,6 +17,7 @@ use App\Models\SIMRS\TagihanPasien;
 use App\Models\SIMRS\TindakanMedis;
 use App\Models\SIMRS\TipeTransaksi;
 use App\Models\TarifTindakanMedis;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -157,13 +158,21 @@ class TagihanPasienController extends Controller
         $departements = Departement::all();
         $tipe_transaksi = TipeTransaksi::all();
 
+        $authorizedUsers = User::whereHas('otorisasi', function ($query) {
+            $query->where('otorisasi_type', 'Cancel Payment');
+        })
+            ->where('is_active', 1)
+            ->orderBy('name')
+            ->get(['id', 'name', 'email']);
+
         return view('pages.simrs.keuangan.kasir.detail', compact(
             'tipe_transaksi',
             'belum_ditagihkan',
             'bilingan',
             'kelasRawats',
             'doctors',
-            'departements'
+            'departements',
+            'authorizedUsers'
         ));
     }
 
