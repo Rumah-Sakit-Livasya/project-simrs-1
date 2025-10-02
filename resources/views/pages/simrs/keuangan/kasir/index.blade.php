@@ -167,11 +167,18 @@
                     </div>
                     <div class="panel-container show">
                         <div class="panel-content">
+                            <div class="mb-3">
+                                <button id="btn-merge" class="btn btn-warning" disabled>
+                                    <i class="fal fa-compress-alt mr-1"></i>
+                                    Merge Tagihan Terpilih
+                                </button>
+                            </div>
                             <!-- datatable start -->
                             <table id="dt-basic-example" class="table table-bordered table-hover table-striped w-100">
                                 <i id="loading-spinner" class="fas fa-spinner fa-spin"></i>
                                 <thead class="bg-primary-600" style="font-size: .7rem">
                                     <tr>
+                                        <th><input type="checkbox" id="select-all"></th>
                                         <th>#</th>
                                         <th>Tanggal</th>
                                         <th>No. RM</th>
@@ -186,6 +193,8 @@
                                 <tbody>
                                     @foreach ($tagihan_pasien as $tagihan)
                                         <tr style="font-size: .8rem">
+                                            <td><input type="checkbox" class="merge-checkbox"
+                                                    value="{{ $tagihan->id }}"></td>
                                             <td>{{ $loop->iteration }}</td>
 
                                             {{-- Tanggal dibuat --}}
@@ -267,25 +276,24 @@
 
                                             {{-- Status --}}
                                             <td class="text-center">
-                                                @if ($tagihan)
-                                                    <a href="{{ route('tagihan.pasien.detail', $tagihan->id) }}">
-                                                        @if ($tagihan->status === 'final')
-                                                            <i class='bx bx-money text-success'
-                                                                style="font-size: 1.2em;"></i>
-                                                        @else
-                                                            <i class='bx bx-money text-danger'
-                                                                style="font-size: 1.2em;"></i>
-                                                        @endif
-                                                    </a>
-                                                @else
-                                                    -
-                                                @endif
+                                                {{-- {{ $tagihan->tagihanPasien }} --}}
+                                                <a href="{{ route('tagihan.pasien.detail', $tagihan->id) }}">
+                                                    @if (!$tagihan->tagihanPasien()->exists())
+                                                        <i class='bx bx-money text-secondary'
+                                                            style="font-size: 1.2em;"></i>
+                                                    @elseif ($tagihan->status === 'final')
+                                                        <i class='bx bx-money text-success' style="font-size: 1.2em;"></i>
+                                                    @else
+                                                        <i class='bx bx-money text-danger' style="font-size: 1.2em;"></i>
+                                                    @endif
+                                                </a>
                                             </td>
                                         </tr>
                                     @endforeach
                                 </tbody>
                                 <tfoot>
                                     <tr>
+                                        <th></th>
                                         <th>#</th>
                                         <th>Tanggal</th>
                                         <th>No. RM</th>
@@ -305,6 +313,35 @@
             </div>
         </div>
 
+        <!-- Modal Merge -->
+        <div class="modal fade" id="mergeModal" tabindex="-1" role="dialog" aria-labelledby="mergeModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="mergeModalLabel">Pilih Tagihan Tujuan</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Silakan pilih satu tagihan sebagai tujuan utama. Semua item dari tagihan lain akan dipindahkan ke
+                            tagihan ini.</p>
+                        <form id="mergeForm">
+                            @csrf
+                            <div id="destination-options">
+                                {{-- Opsi pilihan akan di-generate oleh JavaScript --}}
+                            </div>
+                            <input type="hidden" name="source_ids" id="source_ids">
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                        <button type="button" id="confirm-merge" class="btn btn-primary">Konfirmasi Merge</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </main>
 @endsection
 @section('plugin')
@@ -425,6 +462,115 @@
                 })
                 .addClass('table-sm');
 
+            const btnMerge = $('#btn-merge');
+            const mergeCheckboxes = $('.merge-checkbox');
+            const selectAllCheckbox = $('#select-all');
+
+            // Fungsi untuk memeriksa status checkbox
+            function checkSelection() {
+                const selectedCount = $('.merge-checkbox:checked').length;
+                btnMerge.prop('disabled', selectedCount < 2);
+            }
+
+            // Event handler untuk checkbox 'select all'
+            selectAllCheckbox.on('change', function() {
+                mergeCheckboxes.prop('checked', $(this).prop('checked'));
+                checkSelection();
+            });
+
+            // Event handler untuk checkbox per baris
+            mergeCheckboxes.on('change', function() {
+                checkSelection();
+            });
+
+            // Event handler saat tombol "Merge Tagihan" diklik
+            btnMerge.on('click', function() {
+                const selectedIds = [];
+                const optionsContainer = $('#destination-options');
+                optionsContainer.html(''); // Kosongkan opsi sebelumnya
+
+                $('.merge-checkbox:checked').each(function() {
+                    const tagihanId = $(this).val();
+                    selectedIds.push(tagihanId);
+
+                    // Ambil data dari baris tabel untuk ditampilkan di modal
+                    const row = $(this).closest('tr');
+                    const noRm = row.find('td').eq(3).text().trim();
+                    const noReg = row.find('td').eq(4).text().trim();
+                    const namaPasien = row.find('td').eq(5).text().trim();
+
+                    // Buat radio button untuk pilihan tujuan
+                    optionsContainer.append(`
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="radio" name="destination_id" id="dest_${tagihanId}" value="${tagihanId}">
+                    <label class="form-check-label" for="dest_${tagihanId}">
+                        <strong>${namaPasien}</strong> (No. Reg: ${noReg}, No. RM: ${noRm})
+                    </label>
+                </div>
+            `);
+                });
+
+                // Setel radio button pertama sebagai default
+                optionsContainer.find('input[type=radio]').first().prop('checked', true);
+
+                $('#mergeModal').modal('show');
+            });
+
+            // Event handler saat tombol "Konfirmasi Merge" di modal diklik
+            // Event handler saat tombol "Konfirmasi Merge" di modal diklik (SUDAH DIPERBAIKI)
+            $('#confirm-merge').on('click', function() {
+                const destinationId = $('input[name="destination_id"]:checked').val();
+
+                // Ambil SEMUA ID yang dicentang
+                const allSelectedIds = [];
+                $('.merge-checkbox:checked').each(function() {
+                    allSelectedIds.push($(this).val());
+                });
+
+                // JANGAN DI-FILTER. Kirim semua ID yang terpilih.
+                // Backend akan menangani logika mana yang perlu dipindah dan mana yang tidak.
+                const idsToProcess = allSelectedIds;
+
+                // Kirim data via AJAX
+                $.ajax({
+                    url: '{{ route('tagihan.pasien.merge') }}',
+                    type: 'POST',
+                    data: {
+                        _token: '{{ csrf_token() }}',
+                        destination_id: destinationId,
+                        source_ids: idsToProcess // Menggunakan variabel baru yang berisi semua ID
+                    },
+                    beforeSend: function() {
+                        $(this).prop('disabled', true).html(
+                            '<i class="fas fa-spinner fa-spin"></i> Memproses...');
+                    },
+                    success: function(response) {
+                        $('#mergeModal').modal('hide');
+                        showSuccessAlert(response.message);
+
+                        // Redirect ke halaman detail bilingan yang dituju, ke bagian #tagihan-pasien
+                        const destinationId = $('input[name="destination_id"]:checked').val();
+                        if (destinationId) {
+                            window.location.href =
+                                '{{ url('simrs/kasir/tagihan-pasien') }}/' + destinationId +
+                                '#tagihan-pasien';
+                        } else {
+                            location.reload();
+                        }
+                    },
+                    error: function(xhr) {
+                        let errorMessage = 'Terjadi kesalahan. Silakan coba lagi.';
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            errorMessage = xhr.responseJSON.message;
+                        }
+                        alert(errorMessage);
+                        console.error(xhr.responseText);
+                    },
+                    complete: function() {
+                        $('#confirm-merge').prop('disabled', false).html('Konfirmasi Merge');
+                    }
+                });
+            });
         });
 
 

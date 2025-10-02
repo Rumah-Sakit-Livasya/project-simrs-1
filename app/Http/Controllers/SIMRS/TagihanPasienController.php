@@ -515,4 +515,89 @@ class TagihanPasienController extends Controller
             return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
         }
     }
+
+    /**
+     * Memindahkan satu atau lebih TagihanPasien ke Bilingan tujuan,
+     * termasuk memperbarui relasi di tabel pivot.
+     */
+    public function merge(Request $request)
+    {
+        $request->validate([
+            'destination_id' => 'required|exists:tagihan_pasien,id',
+            'source_ids'     => 'required|array',
+            'source_ids.*'   => 'exists:tagihan_pasien,id',
+        ]);
+
+        DB::beginTransaction();
+
+        try {
+            // Tentukan Bilingan Tujuan dari ID Bilingan tujuan
+            $destinationBilingan = Bilingan::findOrFail($request->destination_id);
+            $targetBilinganId = $destinationBilingan->id;
+
+            // Ambil semua Bilingan yang akan diproses (termasuk tujuan itu sendiri)
+            $bilingansToProcess = Bilingan::whereIn('id', $request->source_ids)->get();
+
+            $oldBilinganIds = [];
+            $logDebug = [
+                'target_bilingan_id' => $targetBilinganId,
+                'operations' => [],
+            ];
+
+            // Proses pemindahan untuk setiap Bilingan
+            foreach ($bilingansToProcess as $bilingan) {
+                $originalBilinganId = $bilingan->id;
+
+                // Hanya jalankan jika Bilingan-nya berbeda dengan target
+                if ($originalBilinganId && $originalBilinganId != $targetBilinganId) {
+
+                    if (!in_array($originalBilinganId, $oldBilinganIds)) {
+                        $oldBilinganIds[] = $originalBilinganId;
+                    }
+
+                    // Ambil semua TagihanPasien yang terkait dengan Bilingan ini
+                    $tagihanPasienList = $bilingan->tagihanPasien()->get();
+
+                    foreach ($tagihanPasienList as $tagihanPasien) {
+                        // Update bilingan_id pada TagihanPasien ke target
+                        $tagihanPasien->bilingan_id = $targetBilinganId;
+                        $tagihanPasien->save();
+
+                        // Update relasi pivot jika ada
+                        if (method_exists($tagihanPasien, 'bilingan')) {
+                            $tagihanPasien->bilingan()->sync([$targetBilinganId]);
+                        }
+
+                        $logDebug['operations'][] = [
+                            'tagihan_id' => $tagihanPasien->id,
+                            'status' => 'MOVED',
+                            'from_bilingan' => $originalBilinganId,
+                            'to_bilingan' => $targetBilinganId,
+                        ];
+                    }
+                } else {
+                    // Jika Bilingan sudah sama dengan target, lewati saja.
+                    $logDebug['operations'][] = [
+                        'bilingan_id' => $originalBilinganId,
+                        'status' => 'SKIPPED',
+                        'reason' => 'Already in target bilingan.',
+                    ];
+                }
+            }
+
+            // Cleanup: Jangan hapus Bilingan lama yang sudah kosong (tagihan kosongnya jangan di delete)
+            // Kode penghapusan bilingan kosong dihapus sesuai permintaan
+
+            DB::commit();
+
+            Log::info("Merge Bilingan berhasil: " . count($request->source_ids) . " bilingan diproses ke Bilingan {$targetBilinganId}");
+            Log::debug('Debug detail merge bilingan', $logDebug);
+
+            return response()->json(['message' => 'Bilingan berhasil diproses dan dipindahkan ke bilingan yang dituju!']);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Gagal melakukan merge bilingan: ' . $e->getMessage(), ['trace' => $e->getTraceAsString(), 'request_data' => $request->all()]);
+            return response()->json(['message' => 'Terjadi kesalahan fatal saat memindahkan bilingan.'], 500);
+        }
+    }
 }

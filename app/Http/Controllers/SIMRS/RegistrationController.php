@@ -15,6 +15,7 @@ use App\Models\SIMRS\Departement;
 use App\Models\SIMRS\Doctor;
 use App\Models\SIMRS\GantiDiagnosa;
 use App\Models\SIMRS\GantiDokter;
+use App\Models\SIMRS\GantiPenjamin;
 use App\Models\SIMRS\GroupPenjamin;
 use App\Models\SIMRS\JadwalDokter;
 use App\Models\SIMRS\KategoriRadiologi;
@@ -1372,5 +1373,98 @@ class RegistrationController extends Controller
 
             default            => abort(404, 'Layanan tidak ditemukan'),
         };
+    }
+
+    /**
+     * Menampilkan halaman pop-up untuk mengubah penjamin.
+     */
+    public function ubahPenjaminView(Registration $registration)
+    {
+        // Ambil ID penjamin standar (asumsi namanya 'UMUM')
+        $standarPenjamin = Penjamin::where('nama_perusahaan', 'STANDAR')->first();
+
+        // Daftar semua penjamin untuk dropdown
+        $penjamins = Penjamin::orderBy('nama_perusahaan')->get();
+
+        // User verifikator
+        $verifikatorUsers = User::where('is_active', 1)
+            ->whereHas('otorisasiUser', function ($query) {
+                $query->where('otorisasi_type', 'Ganti Penjamin');
+            })
+            ->orderBy('name')
+            ->get();
+
+        // Opsi untuk dropdown Hubungan (masih berguna jika ingin menampilkan/edit)
+        $hubunganOptions = [
+            'Diri Sendiri',
+            'Suami',
+            'Istri',
+            'Anak',
+            'Ayah',
+            'Ibu',
+            'Saudara Kandung Laki-laki',
+            'Saudara Kandung Perempuan',
+            'Lain-lain'
+        ];
+
+        return view('pages.simrs.pendaftaran.popups.ubah-penjamin', [
+            'registration' => $registration,
+            'patient' => $registration->patient, // <-- KIRIM DATA PATIENT KE VIEW
+            'penjamins' => $penjamins,
+            'users' => $verifikatorUsers,
+            'standarPenjaminId' => $standarPenjamin ? $standarPenjamin->id : null,
+            'hubunganOptions' => $hubunganOptions,
+        ]);
+    }
+
+    /**
+     * Memproses perubahan penjamin dari form pop-up.
+     */
+    public function ubahPenjaminAction(Request $request, Registration $registration)
+    {
+        $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'password' => 'required|string',
+            'alasan' => 'required|string|min:10',
+            'penjamin_id' => 'required|exists:penjamins,id',
+            // Data pendukung (opsional, tergantung penjamin)
+            'nama_perusahaan_pegawai' => 'nullable|string|max:255',
+            'nomor_kepegawian' => 'nullable|string|max:255',
+            'bagian_pegawai' => 'nullable|string|max:255',
+            'grup_perusahaan' => 'nullable|string|max:255',
+            'hubungan_pegawai' => 'nullable|string|max:255',
+        ]);
+
+        $user = User::find($request->user_id);
+        if (!$this->zimbraLogin($user->email, $request->password)) {
+            return back()->with('error', 'Password tidak valid untuk user yang dipilih (Verifikasi Gagal).')->withInput();
+        }
+
+        $penjaminLamaId = $registration->penjamin_id;
+
+        // Update penjamin_id di tabel registrations.
+        $registration->update([
+            'penjamin_id' => $request->penjamin_id,
+        ]);
+
+        // Update data pendukung di tabel patients (jika ada input)
+        $patient = $registration->patient;
+        $patient->update([
+            'nama_perusahaan_pegawai' => $request->input('nama_perusahaan_pegawai'),
+            'nomor_kepegawaian' => $request->input('nomor_kepegawian'),
+            'bagian_pegawai' => $request->input('bagian_pegawai'),
+            'grup_perusahaan' => $request->input('grup_perusahaan'),
+            'hubungan_pegawai' => $request->input('hubungan_pegawai'),
+        ]);
+
+        GantiPenjamin::create([
+            'registration_id' => $registration->id,
+            'user_id' => auth()->id(),
+            'penjamin_id_lama' => $penjaminLamaId,
+            'penjamin_id_baru' => $request->penjamin_id,
+            'alasan' => $request->alasan,
+        ]);
+
+        return view('pages.simrs.pendaftaran.popups.close-and-refresh');
     }
 }

@@ -54,6 +54,7 @@
             {{-- <button class="btn btn-info" id="save-partial">Save Partial</button> --}}
             <button class="btn btn-secondary" id="reload-tagihan">Reload Tagihan</button>
             <button class="btn btn-primary" id="add-tagihan">Tambah Tagihan</button>
+            <button class="btn btn-danger" id="ubah-penjamin">Ubah Penjamin</button>
             <button class="btn btn-info position-relative ml-2" id="order-notification-btn">
                 <i class="fa fa-bell"></i>
                 <span class="badge badge-danger position-absolute top-0 start-100 translate-middle"
@@ -738,6 +739,37 @@
                         notifPopup.hide();
                     }
                 });
+
+                // ==================== SCRIPT BARU UNTUK TOMBOL UBAH PENJAMIN ====================
+                $('#ubah-penjamin').on('click', function() {
+                    const registrationId = '{{ $bilingan->registration->id }}';
+                    const url = `/daftar-registrasi-pasien/${registrationId}/ubah-penjamin`;
+
+                    // Properti untuk jendela pop-up fullscreen
+                    const width = screen.availWidth;
+                    const height = screen.availHeight;
+                    const left = 0;
+                    const top = 0;
+                    const params = `width=${width},height=${height},top=${top},left=${left},scrollbars=yes`;
+
+                    // Buka pop-up fullscreen
+                    const popupWindow = window.open(url, 'UbahPenjamin', params);
+
+                    // Fokus ke jendela baru
+                    if (window.focus && popupWindow) {
+                        popupWindow.focus();
+                    }
+
+                    // Cek secara berkala apakah pop-up sudah ditutup, lalu refresh
+                    const checkPopup = setInterval(() => {
+                        if (popupWindow.closed) {
+                            clearInterval(checkPopup);
+                            console.log('Popup ditutup, memuat ulang halaman...');
+                            // Tidak perlu location.reload() di sini karena sudah dihandle oleh view close-and-refresh
+                        }
+                    }, 1000);
+                });
+                // ==================== END SCRIPT BARU ====================
             });
         </script>
     @endsection
