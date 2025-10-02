@@ -172,40 +172,83 @@ class OrderRadiologiController extends Controller
             'id' => 'required|integer',
         ]);
 
-        // Find the radiology order with relationships
+        // Eager load semua relasi yang mungkin dibutuhkan
         $order = OrderRadiologi::with([
-            'registration',
-            'order_parameter_radiologi.parameter_radiologi', // Using the correct relationship name
+            'registration.patient', // Untuk pasien terdaftar
+            'registration_otc',     // Untuk pasien OTC
+            'order_parameter_radiologi.parameter_radiologi',
         ])->findOrFail($validatedData['id']);
 
-        // Update confirmation status
+        // 1. Update status konfirmasi, berlaku untuk semua jenis order
         $order->update(['is_konfirmasi' => 1]);
 
-        // Only create billing if this is not an OTC order and has registration
-        if (! $order->otc_id && $order->registration_id) {
-            // Find or create billing for the registration
+        $billing = null;
+        $patientId = null;
+        $registrationId = null; // Diisi hanya untuk pasien terdaftar
+
+        // 2. Logika untuk menentukan Bilingan
+        // Kasus 1: Pasien terdaftar (punya registration_id dan BUKAN OTC)
+        if (!$order->otc_id && $order->registration_id && $order->registration) {
+            $registrationId = $order->registration_id;
+            $patientId = $order->registration->patient_id;
+
             $billing = Bilingan::firstOrCreate(
-                ['registration_id' => $order->registration_id],
+                ['registration_id' => $registrationId],
                 [
-                    'patient_id' => $order->registration->patient_id,
+                    'patient_id' => $patientId,
                     'status' => 'belum final',
-                    'wajib_bayar' => 0,
+                    'wajib_bayar' => 0, // Inisialisasi wajib bayar, nanti di-increment
                 ]
             );
+        }
+        // Kasus 2: Pasien OTC (punya otc_id)
+        elseif ($order->otc_id && $order->registration_otc) {
+            // AMBIL patient_id DARI RELASI registration_otc
+            // Asumsi: tabel registration_otcs memiliki kolom patient_id
+            $patientId = $order->registration_otc->patient_id;
 
+            // Jika tidak ada patient_id di registration_otc, maka proses billing untuk OTC tidak bisa lanjut
+            if (!$patientId) {
+                // Opsional: Log error bahwa data pasien OTC tidak lengkap
+                \Log::warning('Billing untuk Order Radiologi OTC #' . $order->id . ' gagal dibuat karena patient_id tidak ditemukan.');
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Konfirmasi berhasil, namun billing gagal dibuat karena data pasien OTC tidak lengkap.',
+                ], 422);
+            }
+
+            // Cek apakah bilingan sudah pernah dibuat untuk order ini
+            if ($order->bilingan_id) {
+                $billing = Bilingan::find($order->bilingan_id);
+            }
+
+            // Jika belum ada, buat bilingan baru
+            if (!$billing) {
+                $billing = Bilingan::create([
+                    'patient_id' => $patientId,
+                    'registration_id' => null, // OTC tidak punya registration_id
+                    'status' => 'belum final',
+                    'wajib_bayar' => 0,
+                ]);
+
+                // Simpan bilingan_id ke order agar tidak duplikat
+                $order->update(['bilingan_id' => $billing->id]);
+            }
+        }
+
+        // 3. Proses pembuatan item tagihan jika Bilingan berhasil didapatkan
+        if ($billing) {
             $totalAmount = 0;
 
-            // Create billing items for each radiology parameter
             foreach ($order->order_parameter_radiologi as $parameter) {
-                // Skip if parameter relation doesn't exist
-                if (! $parameter->parameter_radiologi) {
+                if (!$parameter->parameter_radiologi || $parameter->nominal_rupiah <= 0) {
                     continue;
                 }
 
                 $tagihan = TagihanPasien::create([
                     'user_id' => auth()->id(),
                     'bilingan_id' => $billing->id,
-                    'registration_id' => $order->registration_id,
+                    'registration_id' => $registrationId, // Akan berisi ID untuk pasien terdaftar, dan NULL untuk OTC
                     'date' => Carbon::now(),
                     'tagihan' => '[Biaya Radiologi] ' . $parameter->parameter_radiologi->parameter,
                     'quantity' => 1,
@@ -223,18 +266,17 @@ class OrderRadiologiController extends Controller
                 $totalAmount += $parameter->nominal_rupiah;
             }
 
-            // Update the total amount in the billing if we have items
+            // Gunakan increment untuk menambah total tagihan, ini lebih aman
             if ($totalAmount > 0) {
-                $billing->update(['wajib_bayar' => $totalAmount]);
-            }
-
-            // Update the billing_id in the order if needed
-            if ($order->bilingan_id !== $billing->id) {
-                $order->update(['bilingan_id' => $billing->id]);
+                $billing->increment('wajib_bayar', $totalAmount);
             }
         }
 
-        return response('ok');
+        // Mengubah response agar lebih informatif
+        return response()->json([
+            'success' => true,
+            'message' => 'Konfirmasi pembayaran dan pembuatan tagihan berhasil.',
+        ]);
     }
 
     public function verificate(Request $request)
