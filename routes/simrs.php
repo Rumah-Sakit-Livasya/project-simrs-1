@@ -311,6 +311,10 @@ Route::group(['middleware' => ['auth']], function () {
 
         Route::post('/{registrations:id}/ganti-diagnosa', [RegistrationController::class, 'ganti_diagnosa'])
             ->name('ganti.diagnosa');
+
+        // Route untuk menampilkan dan memproses form ubah penjamin
+        Route::get('/{registration}/ubah-penjamin', [RegistrationController::class, 'ubahPenjaminView'])->name('registration.ubah-penjamin.view');
+        Route::post('/{registration}/ubah-penjamin', [RegistrationController::class, 'ubahPenjaminAction'])->name('registration.ubah-penjamin.action');
     });
 
     /*
@@ -1462,6 +1466,8 @@ Route::group(['middleware' => ['auth']], function () {
 
             // Di dalam grup route /simrs/kasir/bilingan atau yang sesuai
             Route::put('/authorize-and-cancel-bill/{id}', [BilinganController::class, 'authorizeAndCancelBill'])->name('bilingan.authorize-cancel');
+
+            Route::post('/tagihan/pasien/merge', [TagihanPasienController::class, 'merge'])->name('tagihan.pasien.merge');
         });
 
         Route::prefix('operasi')->group(function () {

@@ -17,11 +17,22 @@ class Patient extends Model
 
     use HasFactory, SoftDeletes;
 
+    // public function setDateOfBirthAttribute($value)
+    // {
+    //     $this->attributes['date_of_birth'] = Carbon::createFromFormat('d-m-Y', $value)->format('Y-m-d');
+    // }
+
     public function setDateOfBirthAttribute($value)
     {
-        $this->attributes['date_of_birth'] = Carbon::createFromFormat('d-m-Y', $value)->format('Y-m-d');
+        // Jika nilai yang diberikan SUDAH berupa instance Carbon, langsung gunakan.
+        if ($value instanceof \Carbon\Carbon) {
+            $this->attributes['date_of_birth'] = $value;
+        }
+        // Jika BUKAN (misalnya string), baru kita parse.
+        else if ($value) { // Pastikan value tidak null/kosong sebelum parsing
+            $this->attributes['date_of_birth'] = \Carbon\Carbon::parse($value);
+        }
     }
-
     public function family()
     {
         return $this->belongsTo(Family::class);

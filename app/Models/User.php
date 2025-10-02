@@ -219,4 +219,12 @@ class User extends Authenticatable
     {
         return $this->hasMany(OtorisasiUser::class);
     }
+
+    /**
+     * Get the authorization records for the user.
+     */
+    public function otorisasiUser()
+    {
+        return $this->hasMany(OtorisasiUser::class);
+    }
 }
