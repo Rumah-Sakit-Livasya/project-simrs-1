@@ -42,7 +42,12 @@ class WarehouseBarangFarmasi extends Model implements AuditableContract
 
     public function zat_aktif()
     {
-        return $this->hasMany(WarehouseZatAktifBarangFarmasi::class, 'barang_id', 'id');
+        return $this->belongsToMany(
+            WarehouseZatAktif::class,           // 1. Model tujuan
+            'warehouse_zat_aktif_barang_farmasi', // 2. Nama tabel pivot
+            'barang_id',                        // 3. Foreign key di pivot untuk model ini
+            'zat_id'                            // 4. Foreign key di pivot untuk model tujuan
+        );
     }
 
     public function smms()

@@ -39,7 +39,7 @@ class WarehousePenerimaanBarangFarmasiController extends Controller
 
         foreach ($filters as $filter) {
             if ($request->filled($filter)) {
-                $query->where($filter, 'like', '%'.$request->$filter.'%');
+                $query->where($filter, 'like', '%' . $request->$filter . '%');
                 $filterApplied = true;
             }
         }
@@ -56,21 +56,21 @@ class WarehousePenerimaanBarangFarmasiController extends Controller
 
         if ($request->filled('nama_barang')) {
             $query->whereHas('items', function ($q) use ($request) {
-                $q->where('nama_barang', 'like', '%'.$request->nama_barang.'%');
+                $q->where('nama_barang', 'like', '%' . $request->nama_barang . '%');
             });
             $filterApplied = true;
         }
 
         if ($request->filled('batch_no')) {
             $query->whereHas('items', function ($q) use ($request) {
-                $q->where('batch_no', 'like', '%'.$request->batch_no.'%');
+                $q->where('batch_no', 'like', '%' . $request->batch_no . '%');
             });
             $filterApplied = true;
         }
 
         if ($request->filled('kode_po')) {
             $query->whereHas('po', function ($q) use ($request) {
-                $q->where('kode_po', 'like', '%'.$request->kode_po.'%');
+                $q->where('kode_po', 'like', '%' . $request->kode_po . '%');
             });
             $filterApplied = true;
         }
@@ -127,7 +127,7 @@ class WarehousePenerimaanBarangFarmasiController extends Controller
             $code = 'FRGR';
         }
 
-        return $count.'/'.$code.'/'.$year.$month;
+        return $count . '/' . $code . '/' . $year . $month;
     }
 
     private function generate_auto_po_code()
@@ -142,7 +142,7 @@ class WarehousePenerimaanBarangFarmasiController extends Controller
             ->count() + 1;
         $count = str_pad($count, 6, '0', STR_PAD_LEFT);
 
-        return $count.'/FNPO/'.$year.$month;
+        return $count . '/FNPO/' . $year . $month;
     }
 
     private function createAutoPO(Request $request, $kode)
@@ -159,7 +159,7 @@ class WarehousePenerimaanBarangFarmasiController extends Controller
             'tipe' => 'normal',
             'nominal' => $request->get('total_final'),
             'status' => 'final',
-            'keterangan' => 'Auto-Generated Purchase Order from Penerimaan Barang '.$kode.'. '.$request->get('keterangan'),
+            'keterangan' => 'Auto-Generated Purchase Order from Penerimaan Barang ' . $kode . '. ' . $request->get('keterangan'),
             'is_auto' => 1,
         ];
 
@@ -282,7 +282,7 @@ class WarehousePenerimaanBarangFarmasiController extends Controller
                     $poi = ProcurementPurchaseOrderPharmacyItems::findOrFail($validatedData2['poi_id'][$key]);
                     // check if $poi->qty_received + $validatedData2["qty"][$key] doesn't exceed $poi->qty
                     if ($poi->qty_received + $validatedData2['qty'][$key] > $poi->qty) {
-                        throw new \Exception('Qty received exceeds PO qty for item '.$poi->barang->nama.'('.$poi->id.')');
+                        throw new \Exception('Qty received exceeds PO qty for item ' . $poi->barang->nama . '(' . $poi->id . ')');
                     }
                 }
 
@@ -328,7 +328,9 @@ class WarehousePenerimaanBarangFarmasiController extends Controller
                     $type = GoodsType::Pharmacy;
                     $warehouse = WarehouseMasterGudang::findOrFail($validatedData1['gudang_id']);
                     $qty = $validatedData2['qty'][$key];
-                    $args = new CreateStockArguments($user, $source, $type, $warehouse, $pbi, $qty);
+                    // Tambahkan argumen keterangan (misalnya string kosong) sebelum $qty
+                    $keterangan = "Penerimaan barang dari faktur no: {$pb->no_faktur}";
+                    $args = new CreateStockArguments($user, $source, $type, $warehouse, $pbi, $keterangan, $qty); // <-- INI YANG BENAR
                     $this->goodsStockService->createStock($args);
                 }
             }
@@ -448,7 +450,7 @@ class WarehousePenerimaanBarangFarmasiController extends Controller
                     $poi = ProcurementPurchaseOrderPharmacyItems::findOrFail($validatedData2['poi_id'][$key]);
                     // check if $poi->qty_received + $validatedData2["qty"][$key] doesn't exceed $poi->qty
                     if ($poi->qty_received + $validatedData2['qty'][$key] > $poi->qty) {
-                        throw new \Exception('Qty received exceeds PO qty for item '.$poi->barang->nama.'('.$poi->id.')');
+                        throw new \Exception('Qty received exceeds PO qty for item ' . $poi->barang->nama . '(' . $poi->id . ')');
                     }
                 }
 
