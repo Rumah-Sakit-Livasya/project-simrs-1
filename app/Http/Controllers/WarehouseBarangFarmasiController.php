@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\BarangFarmasiExport;
+use App\Imports\BarangFarmasiImport;
 use App\Models\WarehouseBarangFarmasi;
 use App\Models\WarehouseGolonganBarang;
 use App\Models\WarehouseKategoriBarang;
@@ -13,6 +15,8 @@ use App\Models\WarehouseSatuanTambahanBarangFarmasi;
 use App\Models\WarehouseZatAktif;
 use App\Models\WarehouseZatAktifBarangFarmasi;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
+use Maatwebsite\Excel\Facades\Excel;
 
 class WarehouseBarangFarmasiController extends Controller
 {
@@ -265,5 +269,30 @@ class WarehouseBarangFarmasiController extends Controller
                 'message' => $e->getMessage()
             ]);
         }
+    }
+
+    public function export()
+    {
+        return Excel::download(new BarangFarmasiExport, 'barang_farmasi.xlsx');
+    }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file_import' => 'required|mimes:xls,xlsx'
+        ]);
+
+        try {
+            Excel::import(new BarangFarmasiImport, $request->file('file_import'));
+        } catch (ValidationException $e) {
+            $failures = $e->failures();
+            // Handle validasi error, misalnya kirim kembali ke view dengan pesan error
+            return back()->with('import_errors', $failures);
+        } catch (\Exception $e) {
+            // Handle error umum lainnya
+            return back()->with('error', 'Terjadi kesalahan saat mengimpor data: ' . $e->getMessage());
+        }
+
+        return back()->with('success', 'Data Barang Farmasi berhasil diimpor!');
     }
 }

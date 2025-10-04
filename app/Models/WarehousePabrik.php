@@ -13,4 +13,13 @@ class WarehousePabrik extends Model implements AuditableContract
 
     protected $table = "warehouse_pabrik";
     protected $guarded = ["id"];
+
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'aktif' => 'boolean',
+    ];
 }

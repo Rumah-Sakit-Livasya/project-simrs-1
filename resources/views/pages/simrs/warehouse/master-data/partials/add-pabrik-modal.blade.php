@@ -5,7 +5,7 @@
                 @csrf
                 @method('post')
                 <div class="modal-header">
-                    
+
                     <h1 class="modal-title fs-5" id="addModalLabel">Tambah Pabrik</h1>
                 </div>
                 <div class="modal-body">
@@ -82,8 +82,8 @@
                             <td>:</td>
                             <td>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="aktif"
-                                        id="status_aktif_true" value="1" checked>
+                                    <input class="form-check-input" type="radio" name="aktif" id="status_aktif_true"
+                                        value="1" checked>
                                     <label class="form-check-label" for="status_aktif_true">
                                         Aktif
                                     </label>
@@ -98,7 +98,7 @@
                             </td>
                         </tr>
 
-                       
+
                     </table>
 
                 </div>

@@ -43,4 +43,15 @@ class ControlPanelController extends Controller
         $groupPenjamin = GroupPenjamin::all();
         return view('pages.simrs.control-panel.peralatan', compact('groupPenjamin')); // Buat view ini
     }
+
+    public function barangFarmasi()
+    {
+        // Pastikan path view ini benar sesuai struktur folder Anda
+        return view('pages.simrs.control-panel.barang-farmasi.migrasi');
+    }
+
+    public function warehousePabrik()
+    {
+        return view('pages.simrs.control-panel.warehouse-pabrik.migrasi');
+    }
 }
