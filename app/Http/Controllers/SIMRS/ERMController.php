@@ -1234,12 +1234,14 @@ class ERMController extends Controller
 
         $storedFile = $file->storeAs($path, $uniqueFileName, 'public');
 
-        // Pastikan file_size dan user_id benar
         $userId = Auth::id();
         $fileSize = $file->getSize();
 
-        // Debugging: Cek nilai sebelum insert (hapus setelah fix)
-        // \Log::info('user_id: ' . $userId . ', file_size: ' . $fileSize);
+        // Jika file gagal disimpan, file_path akan bernilai false (atau string kosong/0 jika error)
+        // Pastikan file_path hanya diisi jika file benar-benar tersimpan
+        if (!$storedFile || $storedFile === '0' || $storedFile === 0) {
+            return response()->json(['error' => 'Gagal menyimpan file.'], 500);
+        }
 
         \App\Models\UploadedDocument::create([
             'registration_id' => $registrationId,
