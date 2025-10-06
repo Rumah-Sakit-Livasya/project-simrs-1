@@ -1229,24 +1229,31 @@ class ERMController extends Controller
         $registrationId = $validated['registration_id'];
         $path = "documents/{$registrationId}";
 
-        // Membuat nama file yang unik dengan tetap mempertahankan nama asli
         $extension = $file->getClientOriginalExtension();
         $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
         $uniqueFileName = $originalName . '_' . time() . '.' . $extension;
 
-        // Variabel untuk menyimpan path file yang disimpan, untuk rollback jika perlu
         $storedPath = null;
 
         try {
-            // Memulai transaksi database.
-            // Proses akan dibatalkan jika ada error di tengah jalan.
             DB::beginTransaction();
 
-            // storeAs akan otomatis membuat direktori jika belum ada.
-            // Tidak perlu pengecekan manual dengan Storage::exists().
+            // Cek apakah direktori storage/app/public/documents/{$registrationId} dapat ditulis
+            $disk = Storage::disk('public');
+            $directory = $path;
+
+            if (!$disk->exists($directory)) {
+                $disk->makeDirectory($directory);
+            }
+
+            // Double check permission to write
+            $fullPath = $disk->path($directory);
+            if (!is_writable($fullPath)) {
+                throw new \Exception("Direktori tujuan tidak dapat ditulis: {$fullPath}");
+            }
+
             $storedPath = $file->storeAs($path, $uniqueFileName, 'public');
 
-            // Validasi sederhana jika storeAs gagal tanpa melempar exception (jarang terjadi)
             if (!$storedPath) {
                 throw new \Exception("Gagal menyimpan file ke disk.");
             }
@@ -1263,16 +1270,12 @@ class ERMController extends Controller
                 'file_size'            => $file->getSize(),
             ]);
 
-            // Jika semua berhasil, commit transaksi
             DB::commit();
 
             return response()->json(['success' => 'Dokumen berhasil diunggah!', 'path' => $storedPath]);
-        } catch (Throwable $e) {
-            // Jika terjadi error, batalkan semua perubahan di database
+        } catch (\Throwable $e) {
             DB::rollBack();
 
-            // Jika file sudah sempat tersimpan sebelum error, hapus file tersebut
-            // Ini untuk mencegah adanya file "yatim" di storage
             if ($storedPath && Storage::disk('public')->exists($storedPath)) {
                 Storage::disk('public')->delete($storedPath);
             }
@@ -1282,7 +1285,13 @@ class ERMController extends Controller
                 'trace' => $e->getTraceAsString(),
             ]);
 
-            return response()->json(['error' => 'Terjadi kesalahan internal saat mengunggah dokumen.'], 500);
+            // Tambahkan pesan error yang lebih informatif jika masalah permission
+            $errorMessage = $e->getMessage();
+            if (str_contains($errorMessage, 'tidak dapat ditulis')) {
+                $errorMessage .= ' (Pastikan folder storage/app/public dan subfolder-nya dapat ditulis oleh web server)';
+            }
+
+            return response()->json(['error' => 'Terjadi kesalahan internal saat mengunggah dokumen: ' . $errorMessage], 500);
         }
     }
 
