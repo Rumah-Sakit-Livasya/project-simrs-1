@@ -1240,6 +1240,11 @@ class ERMController extends Controller
         // Jika file gagal disimpan, file_path akan bernilai false (atau string kosong/0 jika error)
         // Pastikan file_path hanya diisi jika file benar-benar tersimpan
         if (!$storedFile || $storedFile === '0' || $storedFile === 0) {
+            \Log::error('Gagal menyimpan file dokumen. Path:', [
+                'path' => $path,
+                'uniqueFileName' => $uniqueFileName,
+                'storedFile' => $storedFile,
+            ]);
             return response()->json(['error' => 'Gagal menyimpan file.'], 500);
         }
 
