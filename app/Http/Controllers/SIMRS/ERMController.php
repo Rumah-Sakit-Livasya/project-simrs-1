@@ -1216,7 +1216,7 @@ class ERMController extends Controller
 
     public function storeUploadedDocument(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'file' => 'required|file|max:5120|mimes:pdf,jpg,jpeg,png', // max 5MB
             'registration_id' => 'required|exists:registrations,id',
             'document_category_id' => 'required|exists:document_categories,id',
@@ -1224,10 +1224,9 @@ class ERMController extends Controller
         ]);
 
         $file = $request->file('file');
-        $registrationId = $request->registration_id;
+        $registrationId = $validated['registration_id'];
         $path = "documents/{$registrationId}";
 
-        // Generate a unique filename to avoid duplicate entry on unique index
         $extension = $file->getClientOriginalExtension();
         $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
         $uniqueSuffix = uniqid('_', true);
@@ -1235,16 +1234,23 @@ class ERMController extends Controller
 
         $storedFile = $file->storeAs($path, $uniqueFileName, 'public');
 
+        // Pastikan file_size dan user_id benar
+        $userId = Auth::id();
+        $fileSize = $file->getSize();
+
+        // Debugging: Cek nilai sebelum insert (hapus setelah fix)
+        // \Log::info('user_id: ' . $userId . ', file_size: ' . $fileSize);
+
         \App\Models\UploadedDocument::create([
             'registration_id' => $registrationId,
-            'user_id' => Auth::id(),
-            'document_category_id' => $request->document_category_id,
-            'description' => $request->description,
+            'user_id' => $userId,
+            'document_category_id' => $validated['document_category_id'],
+            'description' => $validated['description'] ?? null,
             'original_filename' => $file->getClientOriginalName(),
             'stored_filename' => $uniqueFileName,
             'file_path' => $storedFile,
             'mime_type' => $file->getMimeType(),
-            'file_size' => $file->getSize(),
+            'file_size' => $fileSize,
         ]);
 
         return response()->json(['success' => 'Dokumen berhasil diunggah!']);
