@@ -52,6 +52,7 @@ use App\Models\SIMRS\ResumeMedisRajal\ResumeMedisRajal;
 use App\Models\SIMRS\Room;
 use App\Models\SIMRS\TindakanMedis;
 use App\Models\SkriningGiziDewasa;
+use App\Models\UploadedDocument;
 use App\Models\WarehouseBarangFarmasi;
 use App\Models\WarehouseMasterGudang;
 use Carbon\Carbon;
@@ -62,6 +63,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\View;
+use Throwable;
 
 class ERMController extends Controller
 {
@@ -1265,7 +1267,6 @@ class ERMController extends Controller
             DB::commit();
 
             return response()->json(['success' => 'Dokumen berhasil diunggah!', 'path' => $storedPath]);
-
         } catch (Throwable $e) {
             // Jika terjadi error, batalkan semua perubahan di database
             DB::rollBack();
