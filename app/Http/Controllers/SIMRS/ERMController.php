@@ -1257,8 +1257,6 @@ class ERMController extends Controller
         if (Storage::disk('public')->exists($document->file_path)) {
             return Storage::disk('public')->response($document->file_path);
         }
-
-        abort(404, 'File tidak ditemukan.');
     }
 
     public function destroyUploadedDocument(\App\Models\UploadedDocument $document)
