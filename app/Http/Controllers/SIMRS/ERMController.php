@@ -1232,6 +1232,20 @@ class ERMController extends Controller
         $uniqueSuffix = uniqid('_', true);
         $uniqueFileName = $originalName . $uniqueSuffix . '.' . $extension;
 
+        // Pastikan folder tujuan ada, jika belum ada maka buat foldernya
+        try {
+            $storageDisk = Storage::disk('public');
+            if (!$storageDisk->exists($path)) {
+                $storageDisk->makeDirectory($path, 0755, true);
+            }
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Gagal membuat direktori penyimpanan dokumen.', [
+                'exception' => $e->getMessage(),
+                'path' => $path,
+            ]);
+            return response()->json(['error' => 'Gagal membuat folder penyimpanan dokumen.'], 500);
+        }
+
         try {
             $storedFile = $file->storeAs($path, $uniqueFileName, 'public');
         } catch (\Throwable $e) {
@@ -1247,13 +1261,13 @@ class ERMController extends Controller
         $fileSize = $file->getSize();
 
         // Validasi hasil penyimpanan file
-        if (!$storedFile || $storedFile === '0' || $storedFile === 0) {
+        if (!$storedFile || $storedFile === '0' || $storedFile === 0 || !Storage::disk('public')->exists($storedFile)) {
             \Illuminate\Support\Facades\Log::error('Gagal menyimpan file dokumen. Path:', [
                 'path' => $path,
                 'uniqueFileName' => $uniqueFileName,
                 'storedFile' => $storedFile,
             ]);
-            return response()->json(['error' => 'Gagal menyimpan file.'], 500);
+            return response()->json(['error' => 'Gagal menyimpan file. Pastikan folder storage/app/public dapat diakses dan memiliki permission yang benar.'], 500);
         }
 
         \App\Models\UploadedDocument::create([
