@@ -1252,7 +1252,9 @@ class ERMController extends Controller
 
     public function viewUploadedDocument(int $id)
     {
-        $document = \App\Models\UploadedDocument::findOrFail($id);
+        $document = \App\Models\UploadedDocument::find($id);
+
+        dd($document->file_path);
 
         if (Storage::disk('public')->exists($document->file_path)) {
             return Storage::disk('public')->response($document->file_path);
