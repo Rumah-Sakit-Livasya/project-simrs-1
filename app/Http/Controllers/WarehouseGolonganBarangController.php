@@ -4,44 +4,42 @@ namespace App\Http\Controllers;
 
 use App\Models\WarehouseGolonganBarang;
 use Illuminate\Http\Request;
+use DataTables;
 
 class WarehouseGolonganBarangController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
+    public function index()
     {
-        $query = WarehouseGolonganBarang::query();
-        $filters = ['nama', 'kode', 'aktif'];
-        $filterApplied = false;
-
-        foreach ($filters as $filter) {
-            if ($request->filled($filter)) {
-                $query->where($filter, 'like', '%' . $request->$filter . '%');
-                $filterApplied = true;
-            }
-        }
-
-        // Get the filtered results if any filter is applied
-        if ($filterApplied) {
-            $golongans = $query->orderBy('created_at', 'desc')->get();
-        } else {
-            // Return all data if no filter is applied
-            $golongans = WarehouseGolonganBarang::all();
-        }
-
-        return view("pages.simrs.warehouse.master-data.golongan-barang", [
-            "golongans" => $golongans
-        ]);
+        return view("pages.simrs.warehouse.master-data.golongan-barang");
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Process datatables ajax request.
+     *
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function create()
+    public function data()
     {
-        //
+        $data = WarehouseGolonganBarang::query();
+        return DataTables::of($data)
+            ->addIndexColumn()
+            ->addColumn('status', function ($row) {
+                return $row->aktif ? '<span class="badge badge-success">Aktif</span>' : '<span class="badge badge-danger">Non Aktif</span>';
+            })
+            ->addColumn('action', function ($row) {
+                $editUrl = route('warehouse.master-data.golongan-barang.show', $row->id);
+                $deleteUrl = route('warehouse.master-data.golongan-barang.destroy', $row->id);
+                $actionBtn = '<div class="d-flex justify-content-center">';
+                $actionBtn .= '<a href="javascript:void(0)" class="btn btn-warning btn-sm edit-btn" data-url="' . $editUrl . '"><i class="fal fa-pencil"></i> Edit</a> ';
+                $actionBtn .= '<a href="javascript:void(0)" class="btn btn-danger btn-sm delete-btn" data-url="' . $deleteUrl . '"><i class="fal fa-trash"></i> Hapus</a>';
+                $actionBtn .= '</div>';
+                return $actionBtn;
+            })
+            ->rawColumns(['action', 'status'])
+            ->make(true);
     }
 
     /**
@@ -49,66 +47,62 @@ class WarehouseGolonganBarangController extends Controller
      */
     public function store(Request $request)
     {
-        $validatedData = $request->validate([
-            'nama' => 'required|string|max:255',
+        $request->validate([
+            'nama' => 'required|string|max:255|unique:warehouse_golongan_barang,nama',
+            'kode' => 'required|string|max:255|unique:warehouse_golongan_barang,kode',
             'aktif' => 'required|boolean',
-            'kode' => 'required|string|max:255'
         ]);
 
-        WarehouseGolonganBarang::create($validatedData);
-        return redirect()->back()->with('success', 'Golongan Barang berhasil ditambahkan!');
+        try {
+            WarehouseGolonganBarang::create($request->all());
+            return response()->json(['success' => true, 'message' => 'Golongan Barang berhasil ditambahkan.']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(WarehouseGolonganBarang $warehouseGolonganBarang)
+    public function show($id)
     {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(WarehouseGolonganBarang $warehouseGolonganBarang)
-    {
-        //
+        $golonganBarang = WarehouseGolonganBarang::find($id);
+        if (!$golonganBarang) {
+            return response()->json(['success' => false, 'message' => 'Data tidak ditemukan.'], 404);
+        }
+        return response()->json(['success' => true, 'data' => $golonganBarang]);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, WarehouseGolonganBarang $warehouseGolonganBarang)
+    public function update(Request $request, $id)
     {
-        $validatedData = $request->validate([
-            'id' => 'required|integer',
-            'nama' => 'required|string|max:255',
-            'kode' => 'required|string|max:255',
+        $request->validate([
+            'nama' => 'required|string|max:255|unique:warehouse_golongan_barang,nama,' . $id,
+            'kode' => 'required|string|max:255|unique:warehouse_golongan_barang,kode,' . $id,
             'aktif' => 'required|boolean',
         ]);
 
-        $warehouseGolonganBarang
-            ->where("id", $validatedData['id'])
-            ->update($validatedData);
-        return redirect()->back()->with('success', 'Golongan Barang berhasil diupdate');
+        try {
+            $golonganBarang = WarehouseGolonganBarang::findOrFail($id);
+            $golonganBarang->update($request->all());
+            return response()->json(['success' => true, 'message' => 'Golongan Barang berhasil diperbarui.']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(WarehouseGolonganBarang $warehouseGolonganBarang, $id)
+    public function destroy($id)
     {
         try {
-            $warehouseGolonganBarang::destroy($id);
-            return response()->json([
-                'success' => true,
-                'message' => 'Golongan barang berhasil dihapus!'
-            ]);
+            WarehouseGolonganBarang::destroy($id);
+            return response()->json(['success' => true, 'message' => 'Golongan Barang berhasil dihapus.']);
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage()
-            ]);
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
 }

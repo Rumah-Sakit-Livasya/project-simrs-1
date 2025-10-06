@@ -5,57 +5,56 @@ namespace App\Http\Controllers;
 use App\Models\Keuangan\ChartOfAccount;
 use App\Models\WarehouseKategoriBarang;
 use Illuminate\Http\Request;
+use Yajra\DataTables\Facades\DataTables;
 
 class WarehouseKategoriBarangController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
+    public function index()
     {
-        $query = WarehouseKategoriBarang::query();
-        $filters = [
-            'nama',
-            'coa_inventory',
-            'coa_sales_outpatient',
-            'coa_cogs_outpatient',
-            'coa_sales_inpatient',
-            'coa_cogs_inpatient',
-            'coa_adjustment_daily',
-            'coa_adjustment_so',
-            'konsinsyasi',
-            'aktif',
-            'kode',
-        ];
-        $filterApplied = false;
-
-        foreach ($filters as $filter) {
-            if ($request->filled($filter)) {
-                $query->where($filter, 'like', '%' . $request->$filter . '%');
-                $filterApplied = true;
-            }
-        }
-
-        // Get the filtered results if any filter is applied
-        if ($filterApplied) {
-            $kategoris = $query->orderBy('created_at', 'desc')->get();
-        } else {
-            // Return all data if no filter is applied
-            $kategoris = WarehouseKategoriBarang::all();
-        }
-
-        return view("pages.simrs.warehouse.master-data.kategori-barang", [
-            "kategoris" => $kategoris,
-            "coas" => ChartOfAccount::all()
-        ]);
+        $coas = ChartOfAccount::get();
+        return view("pages.simrs.warehouse.master-data.kategori-barang", compact('coas'));
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Process datatables ajax request.
+     *
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function create()
+    public function data()
     {
-        //
+        $data = WarehouseKategoriBarang::with([
+            '_coa_inventory',
+            '_coa_sales_outpatient',
+            '_coa_cogs_outpatient',
+            '_coa_sales_inpatient',
+            '_coa_cogs_inpatient',
+            '_coa_adjustment_daily',
+            '_coa_adjustment_so'
+        ])->select('warehouse_kategori_barang.*');
+
+        return DataTables::of($data)
+            ->addIndexColumn()
+            ->addColumn('status', function ($row) {
+                return $row->aktif ? '<span class="badge badge-success">Aktif</span>' : '<span class="badge badge-danger">Non Aktif</span>';
+            })
+            ->addColumn('konsinyasi_status', function ($row) {
+                return $row->konsinyasi ? '<span class="badge badge-info">Ya</span>' : '<span class="badge badge-secondary">Tidak</span>';
+            })
+            ->addColumn('coa_inventory_name', fn($row) => $row->_coa_inventory->name ?? '-')
+            ->addColumn('action', function ($row) {
+                $editUrl = route('warehouse.master-data.kategori-barang.show', $row->id);
+                $deleteUrl = route('warehouse.master-data.kategori-barang.destroy', $row->id);
+                $actionBtn = '<div class="d-flex justify-content-center">';
+                $actionBtn .= '<a href="javascript:void(0)" class="btn btn-warning btn-sm edit-btn" data-url="' . $editUrl . '"><i class="fal fa-pencil"></i> Edit</a> ';
+                $actionBtn .= '<a href="javascript:void(0)" class="btn btn-danger btn-sm delete-btn" data-url="' . $deleteUrl . '"><i class="fal fa-trash"></i> Hapus</a>';
+                $actionBtn .= '</div>';
+                return $actionBtn;
+            })
+            ->rawColumns(['action', 'status', 'konsinyasi_status'])
+            ->make(true);
     }
 
     /**
@@ -63,8 +62,11 @@ class WarehouseKategoriBarangController extends Controller
      */
     public function store(Request $request)
     {
-        $validatedData = $request->validate([
-            'nama' => 'required|string|max:255',
+        $request->validate([
+            'nama' => 'required|string|max:255|unique:warehouse_kategori_barang,nama',
+            'kode' => 'required|string|max:255|unique:warehouse_kategori_barang,kode',
+            'aktif' => 'required|boolean',
+            'konsinyasi' => 'required|boolean',
             'coa_inventory' => 'nullable|exists:chart_of_account,id',
             'coa_sales_outpatient' => 'nullable|exists:chart_of_account,id',
             'coa_cogs_outpatient' => 'nullable|exists:chart_of_account,id',
@@ -72,39 +74,38 @@ class WarehouseKategoriBarangController extends Controller
             'coa_cogs_inpatient' => 'nullable|exists:chart_of_account,id',
             'coa_adjustment_daily' => 'nullable|exists:chart_of_account,id',
             'coa_adjustment_so' => 'nullable|exists:chart_of_account,id',
-            'konsinsyasi' => 'required|boolean',
-            'aktif' => 'required|boolean',
-            'kode' => 'nullable|string|max:255',
         ]);
 
-        WarehouseKategoriBarang::create($validatedData);
-        return redirect()->back()->with('success', 'Kategori Barang berhasil ditambahkan!');
+        try {
+            WarehouseKategoriBarang::create($request->all());
+            return response()->json(['success' => true, 'message' => 'Kategori Barang berhasil ditambahkan.']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(WarehouseKategoriBarang $warehouseKategoriBarang)
+    public function show($id)
     {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(WarehouseKategoriBarang $warehouseKategoriBarang)
-    {
-        //
+        $kategoriBarang = WarehouseKategoriBarang::find($id);
+        if (!$kategoriBarang) {
+            return response()->json(['success' => false, 'message' => 'Data tidak ditemukan.'], 404);
+        }
+        return response()->json(['success' => true, 'data' => $kategoriBarang]);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, WarehouseKategoriBarang $warehouseKategoriBarang)
+    public function update(Request $request, $id)
     {
-        $validatedData = $request->validate([
-            'id' => 'required|integer',
-            'nama' => 'required|string|max:255',
+        $request->validate([
+            'nama' => 'required|string|max:255|unique:warehouse_kategori_barang,nama,' . $id,
+            'kode' => 'required|string|max:255|unique:warehouse_kategori_barang,kode,' . $id,
+            'aktif' => 'required|boolean',
+            'konsinyasi' => 'required|boolean',
             'coa_inventory' => 'nullable|exists:chart_of_account,id',
             'coa_sales_outpatient' => 'nullable|exists:chart_of_account,id',
             'coa_cogs_outpatient' => 'nullable|exists:chart_of_account,id',
@@ -112,33 +113,27 @@ class WarehouseKategoriBarangController extends Controller
             'coa_cogs_inpatient' => 'nullable|exists:chart_of_account,id',
             'coa_adjustment_daily' => 'nullable|exists:chart_of_account,id',
             'coa_adjustment_so' => 'nullable|exists:chart_of_account,id',
-            'konsinsyasi' => 'required|boolean',
-            'aktif' => 'required|boolean',
-            'kode' => 'nullable|string|max:255',
         ]);
 
-        $warehouseKategoriBarang
-            ->where("id", $validatedData['id'])
-            ->update($validatedData);
-        return redirect()->back()->with('success', 'Satuan Barang berhasil diupdate');
+        try {
+            $kategoriBarang = WarehouseKategoriBarang::findOrFail($id);
+            $kategoriBarang->update($request->all());
+            return response()->json(['success' => true, 'message' => 'Kategori Barang berhasil diperbarui.']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(WarehouseKategoriBarang $warehouseKategoriBarang, $id)
+    public function destroy($id)
     {
         try {
-            $warehouseKategoriBarang::destroy($id);
-            return response()->json([
-                'success' => true,
-                'message' => 'Kategori barang berhasil dihapus!'
-            ]);
+            WarehouseKategoriBarang::destroy($id);
+            return response()->json(['success' => true, 'message' => 'Kategori Barang berhasil dihapus.']);
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage()
-            ]);
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
 }

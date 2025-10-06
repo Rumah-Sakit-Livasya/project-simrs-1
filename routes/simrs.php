@@ -716,17 +716,66 @@ Route::group(['middleware' => ['auth']], function () {
 
         Route::prefix('warehouse')->name('warehouse.')->group(function () {
             Route::prefix('master-data')->name('master-data.')->group(function () {
-                Route::get('zat-aktif', [WarehouseZatAktifController::class, 'index'])->name('zat-aktif');
-                Route::get('satuan-barang', [WarehouseSatuanBarangController::class, 'index'])->name('satuan-barang');
-                Route::get('kelompok-barang', [WarehouseKelompokBarangController::class, 'index'])->name('kelompok-barang');
-                Route::get('kategori-barang', [WarehouseKategoriBarangController::class, 'index'])->name('kategori-barang');
-                Route::get('golongan-barang', [WarehouseGolonganBarangController::class, 'index'])->name('golongan-barang');
+                Route::prefix('zat-aktif')->name('zat-aktif.')->group(function () {
+                    Route::get('/', [WarehouseZatAktifController::class, 'index'])->name('index');
+                    Route::get('/data', [WarehouseZatAktifController::class, 'data'])->name('data');
+                    Route::post('/', [WarehouseZatAktifController::class, 'store'])->name('store');
+                    Route::get('/{id}', [WarehouseZatAktifController::class, 'show'])->name('show');
+                    Route::put('/{id}', [WarehouseZatAktifController::class, 'update'])->name('update');
+                    Route::delete('/{id}', [WarehouseZatAktifController::class, 'destroy'])->name('destroy');
+                });
+
+                Route::prefix('satuan-barang')->name('satuan-barang.')->group(function () {
+                    Route::get('/', [WarehouseSatuanBarangController::class, 'index'])->name('index');
+                    Route::get('/data', [WarehouseSatuanBarangController::class, 'data'])->name('data');
+                    Route::post('/', [WarehouseSatuanBarangController::class, 'store'])->name('store');
+                    Route::get('/{id}', [WarehouseSatuanBarangController::class, 'show'])->name('show');
+                    Route::put('/{id}', [WarehouseSatuanBarangController::class, 'update'])->name('update');
+                    Route::delete('/{id}', [WarehouseSatuanBarangController::class, 'destroy'])->name('destroy');
+                });
+
+                Route::prefix('kelompok-barang')->name('kelompok-barang.')->group(function () {
+                    Route::get('/', [WarehouseKelompokBarangController::class, 'index'])->name('index');
+                    Route::get('/data', [WarehouseKelompokBarangController::class, 'data'])->name('data');
+                    Route::post('/', [WarehouseKelompokBarangController::class, 'store'])->name('store');
+                    Route::get('/{id}', [WarehouseKelompokBarangController::class, 'show'])->name('show');
+                    Route::put('/{id}', [WarehouseKelompokBarangController::class, 'update'])->name('update');
+                    Route::delete('/{id}', [WarehouseKelompokBarangController::class, 'destroy'])->name('destroy');
+                });
+
+                Route::prefix('kategori-barang')->name('kategori-barang.')->group(function () {
+                    Route::get('/', [WarehouseKategoriBarangController::class, 'index'])->name('index');
+                    Route::get('/data', [WarehouseKategoriBarangController::class, 'data'])->name('data');
+                    Route::post('/', [WarehouseKategoriBarangController::class, 'store'])->name('store');
+                    Route::get('/{id}', [WarehouseKategoriBarangController::class, 'show'])->name('show');
+                    Route::put('/{id}', [WarehouseKategoriBarangController::class, 'update'])->name('update');
+                    Route::delete('/{id}', [WarehouseKategoriBarangController::class, 'destroy'])->name('destroy');
+                });
+
+                Route::prefix('golongan-barang')->name('golongan-barang.')->group(function () {
+                    Route::get('/', [WarehouseGolonganBarangController::class, 'index'])->name('index');
+                    Route::get('/data', [WarehouseGolonganBarangController::class, 'data'])->name('data');
+                    Route::post('/', [WarehouseGolonganBarangController::class, 'store'])->name('store');
+                    Route::get('/{id}', [WarehouseGolonganBarangController::class, 'show'])->name('show');
+                    Route::put('/{id}', [WarehouseGolonganBarangController::class, 'update'])->name('update');
+                    Route::delete('/{id}', [WarehouseGolonganBarangController::class, 'destroy'])->name('destroy');
+                });
+
                 Route::prefix('pabrik')->group(function () {
                     Route::get('/', [WarehousePabrikController::class, 'index'])->name('pabrik');
                     Route::resource('pabrik', WarehousePabrikController::class);
                     Route::get('pabrik-data', [WarehousePabrikController::class, 'data'])->name('pabrik.data');
                 });
-                Route::get('supplier', [WarehouseSupplierController::class, 'index'])->name('supplier');
+
+                Route::prefix('supplier')->name('supplier.')->group(function () {
+                    Route::get('/', [WarehouseSupplierController::class, 'index'])->name('index');
+                    Route::get('/data', [WarehouseSupplierController::class, 'data'])->name('data');
+                    Route::post('/', [WarehouseSupplierController::class, 'store'])->name('store');
+                    Route::get('/{id}', [WarehouseSupplierController::class, 'show'])->name('show');
+                    Route::put('/{id}', [WarehouseSupplierController::class, 'update'])->name('update');
+                    Route::delete('/{id}', [WarehouseSupplierController::class, 'destroy'])->name('destroy');
+                });
+
                 Route::resource('master-gudang', WarehouseMasterGudangController::class)->except(['create', 'edit', 'index']);
                 Route::get('master-gudang', [WarehouseMasterGudangController::class, 'index'])->name('master-gudang.index');
                 Route::prefix('barang-non-farmasi')->group(function () {
@@ -735,11 +784,32 @@ Route::group(['middleware' => ['auth']], function () {
                     Route::get('/edit/{id}', [WarehouseBarangNonFarmasiController::class, 'edit'])->name('barang-non-farmasi.edit');
                 });
 
-                Route::prefix('barang-farmasi')->group(function () {
-                    Route::get('/', [WarehouseBarangFarmasiController::class, 'index'])->name('barang-farmasi');
-                    Route::get('/create', [WarehouseBarangFarmasiController::class, 'create'])->name('barang-farmasi.create');
-                    Route::get('/edit/{id}', [WarehouseBarangFarmasiController::class, 'edit'])->name('barang-farmasi.edit');
+                Route::prefix('barang-farmasi')->name('barang-farmasi.')->group(function () {
+                    Route::get('/', [WarehouseBarangFarmasiController::class, 'index'])->name('index');
+                    Route::get('/data', [WarehouseBarangFarmasiController::class, 'data'])->name('data');
+                    Route::get('/create', [WarehouseBarangFarmasiController::class, 'create'])->name('create');
+                    Route::post('/', [WarehouseBarangFarmasiController::class, 'store'])->name('store');
+                    Route::get('/{id}/edit', [WarehouseBarangFarmasiController::class, 'edit'])->name('edit');
+                    Route::put('/{id}', [WarehouseBarangFarmasiController::class, 'update'])->name('update');
+                    Route::delete('/{id}', [WarehouseBarangFarmasiController::class, 'destroy'])->name('destroy');
+                    // Export & Import Routes
+                    Route::post('/export', [WarehouseBarangFarmasiController::class, 'export'])->name('export');
+                    Route::post('/import', [WarehouseBarangFarmasiController::class, 'import'])->name('import');
                 });
+
+                Route::prefix('barang-non-farmasi')->name('barang-non-farmasi.')->group(function () {
+                    Route::get('/', [WarehouseBarangNonFarmasiController::class, 'index'])->name('index');
+                    Route::get('/data', [WarehouseBarangNonFarmasiController::class, 'data'])->name('data');
+                    Route::get('/create', [WarehouseBarangNonFarmasiController::class, 'create'])->name('create');
+                    Route::post('/', [WarehouseBarangNonFarmasiController::class, 'store'])->name('store');
+                    Route::get('/{id}/edit', [WarehouseBarangNonFarmasiController::class, 'edit'])->name('edit');
+                    Route::put('/{id}', [WarehouseBarangNonFarmasiController::class, 'update'])->name('update');
+                    Route::delete('/{id}', [WarehouseBarangNonFarmasiController::class, 'destroy'])->name('destroy');
+                    // Export & Import Routes
+                    Route::post('/export', [WarehouseBarangNonFarmasiController::class, 'export'])->name('export');
+                    Route::post('/import', [WarehouseBarangNonFarmasiController::class, 'import'])->name('import');
+                });
+
                 Route::get('setup-min-max-stock', [WarehouseSetupMinMaxStockController::class, 'index'])->name('setup-min-max-stock');
                 Route::get('setup-min-max-stock/setup', [WarehouseSetupMinMaxStockController::class, 'create'])->name('setup-min-max-stock.create');
             });
