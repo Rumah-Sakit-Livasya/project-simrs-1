@@ -1250,12 +1250,14 @@ class ERMController extends Controller
         return response()->json(['success' => 'Dokumen berhasil diunggah!']);
     }
 
-    public function viewUploadedDocument(\App\Models\UploadedDocument $document)
+    public function viewUploadedDocument(int $id)
     {
-        // Pastikan file ada sebelum mencoba menampilkannya
+        $document = \App\Models\UploadedDocument::findOrFail($id);
+
         if (Storage::disk('public')->exists($document->file_path)) {
             return Storage::disk('public')->response($document->file_path);
         }
+
         abort(404, 'File tidak ditemukan.');
     }
 

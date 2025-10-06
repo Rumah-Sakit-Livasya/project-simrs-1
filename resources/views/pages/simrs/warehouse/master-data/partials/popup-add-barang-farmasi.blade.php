@@ -44,498 +44,344 @@
                                 @method('post')
                                 <div class="row justify-content-center">
                                     <div class="col-xl-6">
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-xl-2" style="text-align: right">
-                                                    <label class="form-label text-end" for="kategori_id">
-                                                        Kategori Inventory*
-                                                    </label>
-                                                </div>
-                                                <div class="col-xl">
-                                                    <select name="kategori_id" id="kategori_id" class="form-control"
-                                                        required>
-                                                        <option value="" selected disabled hidden>Pilih Kategori
-                                                        </option>
-                                                        @foreach ($kategoris as $item)
-                                                            <option value="{{ $item->id }}">{{ $item->nama }}</option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        @group(['label' => 'Kategori Inventory*', 'for' => 'kategori_id'])
+                                            @select([
+                                                'name' => 'kategori_id',
+                                                'id' => 'kategori_id',
+                                                'required' => true,
+                                                'options' => $kategoris->mapWithKeys(fn($item) => [$item->id => $item->nama])->prepend('Pilih Kategori', ''),
+                                                'selected' => old('kategori_id'),
+                                            ])
+                                        @endgroup
                                     </div>
-
                                     <div class="col-xl-6">
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-xl-2" style="text-align: right">
-                                                    <label class="form-label text-end" for="hna">
-                                                        Harga Beli (HNA)*
-                                                    </label>
-                                                </div>
-                                                <div class="col-xl">
-                                                    <input type="text" value="{{ old('hna') ? old('hna') : 0 }}"
-                                                        style="border: 0; border-bottom: 1.9px solid #eaeaea; margin-top: -.5rem; border-radius: 0"
-                                                        class="form-control" id="hna" name="hna"
-                                                        onkeyup="formatInputToNumber(this)" required>
-                                                    @error('hna')
-                                                        <div class="invalid-feedback">{{ $message }}</div>
-                                                    @enderror
-                                                </div>
-                                            </div>
-                                        </div>
+                                        @group(['label' => 'Harga Beli (HNA)*', 'for' => 'hna'])
+                                            @input([
+                                                'type' => 'text',
+                                                'name' => 'hna',
+                                                'id' => 'hna',
+                                                'value' => old('hna', 0),
+                                                'class' => 'form-control borderless-input',
+                                                'required' => true,
+                                                'onkeyup' => 'formatInputToNumber(this)',
+                                            ])
+                                            @error('hna')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        @endgroup
                                     </div>
                                 </div>
 
                                 <div class="row justify-content-center">
                                     <div class="col-xl-6">
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-xl-2" style="text-align: right">
-                                                    <label class="form-label text-end" for="kode">
-                                                        Kode Barang*
-                                                    </label>
-                                                </div>
-                                                <div class="col-xl">
-                                                    <input type="text" value="{{ old('kode') }}"
-                                                        style="border: 0; border-bottom: 1.9px solid #eaeaea; margin-top: -.5rem; border-radius: 0"
-                                                        class="form-control" id="kode" name="kode" required>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        @group(['label' => 'Kode Barang*', 'for' => 'kode'])
+                                            @input([
+                                                'type' => 'text',
+                                                'name' => 'kode',
+                                                'id' => 'kode',
+                                                'value' => old('kode'),
+                                                'class' => 'form-control borderless-input',
+                                                'required' => true,
+                                            ])
+                                        @endgroup
                                     </div>
-
                                     <div class="col-xl-6">
-                                        <div class="form-group">
+                                        @group(['label' => 'PPN Beli (%)', 'for' => 'ppn'])
                                             <div class="row">
-                                                <div class="col-xl-2" style="text-align: right">
-                                                    <label class="form-label text-end" for="ppn">
-                                                        PPN Beli (%)
-                                                    </label>
-                                                </div>
                                                 <div class="col-xl-2">
-                                                    <input type="text" value="{{ old('ppn') ? old('ppn') : 0 }}"
-                                                        style="border: 0; border-bottom: 1.9px solid #eaeaea; margin-top: -.5rem; border-radius: 0"
-                                                        class="form-control" id="ppn" name="ppn"
-                                                        onkeyup="formatInputToNumber(this)">
+                                                    @input([
+                                                        'type' => 'text',
+                                                        'name' => 'ppn',
+                                                        'id' => 'ppn',
+                                                        'value' => old('ppn', 0),
+                                                        'class' => 'form-control borderless-input',
+                                                        'onkeyup' => 'formatInputToNumber(this)',
+                                                    ])
                                                     @error('ppn')
                                                         <div class="invalid-feedback">{{ $message }}</div>
                                                     @enderror
                                                 </div>
                                                 <div class="col-xl">
-                                                    <input type="text" value="0"
-                                                        style="border: 0; border-bottom: 1.9px solid #eaeaea; margin-top: -.5rem; border-radius: 0"
-                                                        class="form-control" id="ppn_prev" disabled>
+                                                    @input([
+                                                        'type' => 'text',
+                                                        'id' => 'ppn_prev',
+                                                        'value' => 0,
+                                                        'class' => 'form-control borderless-input',
+                                                        'disabled' => true,
+                                                    ])
                                                 </div>
                                             </div>
-                                        </div>
+                                        @endgroup
                                     </div>
                                 </div>
 
                                 <div class="row justify-content-center">
                                     <div class="col-xl-6">
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-xl-2" style="text-align: right">
-                                                    <label class="form-label text-end" for="nama">
-                                                        Nama Barang*
-                                                    </label>
-                                                </div>
-                                                <div class="col-xl">
-                                                    <input type="text" value="{{ old('nama') }}"
-                                                        style="border: 0; border-bottom: 1.9px solid #eaeaea; margin-top: -.5rem; border-radius: 0"
-                                                        class="form-control" id="nama" name="nama" required>
-                                                    @error('nama')
-                                                        <div class="invalid-feedback">{{ $message }}</div>
-                                                    @enderror
-                                                </div>
-                                            </div>
-                                        </div>
+                                        @group(['label' => 'Nama Barang*', 'for' => 'nama'])
+                                            @input([
+                                                'type' => 'text',
+                                                'name' => 'nama',
+                                                'id' => 'nama',
+                                                'value' => old('nama'),
+                                                'class' => 'form-control borderless-input',
+                                                'required' => true,
+                                            ])
+                                            @error('nama')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        @endgroup
                                     </div>
-
                                     <div class="col-xl-6">
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-xl-2" style="text-align: right">
-                                                    <label class="form-label text-end" for="ppn_rajal">
-                                                        PPN Jual Rawat Jalan (%)
-                                                    </label>
-                                                </div>
-                                                <div class="col-xl">
-                                                    <input type="text"
-                                                        value="{{ old('ppn_rajal') ? old('ppn_rajal') : 0 }}"
-                                                        style="border: 0; border-bottom: 1.9px solid #eaeaea; margin-top: -.5rem; border-radius: 0"
-                                                        class="form-control" id="ppn_rajal" name="ppn_rajal"
-                                                        onkeyup="formatInputToNumber(this)">
-                                                    @error('ppn_rajal')
-                                                        <div class="invalid-feedback">{{ $message }}</div>
-                                                    @enderror
-                                                </div>
-                                            </div>
-                                        </div>
+                                        @group(['label' => 'PPN Jual Rawat Jalan (%)', 'for' => 'ppn_rajal'])
+                                            @input([
+                                                'type' => 'text',
+                                                'name' => 'ppn_rajal',
+                                                'id' => 'ppn_rajal',
+                                                'value' => old('ppn_rajal', 0),
+                                                'class' => 'form-control borderless-input',
+                                                'onkeyup' => 'formatInputToNumber(this)',
+                                            ])
+                                            @error('ppn_rajal')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        @endgroup
                                     </div>
                                 </div>
 
                                 <div class="row justify-content-center">
                                     <div class="col-xl-6">
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-xl-2" style="text-align: right">
-                                                    <label class="form-label text-end" for="golongan_id">
-                                                        Golongan*
-                                                    </label>
-                                                </div>
-                                                <div class="col-xl">
-                                                    <select name="golongan_id" id="golongan_id" class="form-control">
-                                                        <option value="" selected disabled hidden>Pilih Golongan
-                                                        </option>
-                                                        @foreach ($golongans as $item)
-                                                            <option value="{{ $item->id }}">{{ $item->nama }}
-                                                            </option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        @group(['label' => 'Golongan*', 'for' => 'golongan_id'])
+                                            @select([
+                                                'name' => 'golongan_id',
+                                                'id' => 'golongan_id',
+                                                'options' => $golongans->mapWithKeys(fn($item) => [$item->id => $item->nama])->prepend('Pilih Golongan', ''),
+                                                'selected' => old('golongan_id'),
+                                            ])
+                                        @endgroup
                                     </div>
-
                                     <div class="col-xl-6">
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-xl-2" style="text-align: right">
-                                                    <label class="form-label text-end" for="ppn_ranap">
-                                                        PPN Jual Rawat Inap (%)
-                                                    </label>
-                                                </div>
-                                                <div class="col-xl">
-                                                    <input type="text"
-                                                        value="{{ old('ppn_ranap') ? old('ppn_ranap') : 0 }}"
-                                                        style="border: 0; border-bottom: 1.9px solid #eaeaea; margin-top: -.5rem; border-radius: 0"
-                                                        class="form-control" id="ppn_ranap" name="ppn_ranap"
-                                                        onkeyup="formatInputToNumber(this)">
-                                                    @error('ppn_ranap')
-                                                        <div class="invalid-feedback">{{ $message }}</div>
-                                                    @enderror
-                                                </div>
-                                            </div>
-                                        </div>
+                                        @group(['label' => 'PPN Jual Rawat Inap (%)', 'for' => 'ppn_ranap'])
+                                            @input([
+                                                'type' => 'text',
+                                                'name' => 'ppn_ranap',
+                                                'id' => 'ppn_ranap',
+                                                'value' => old('ppn_ranap', 0),
+                                                'class' => 'form-control borderless-input',
+                                                'onkeyup' => 'formatInputToNumber(this)',
+                                            ])
+                                            @error('ppn_ranap')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        @endgroup
                                     </div>
                                 </div>
 
                                 <div class="row justify-content-center">
                                     <div class="col-xl-6">
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-xl-2" style="text-align: right">
-                                                    <label class="form-label text-end" for="restriksi">
-                                                        Restriksi
-                                                    </label>
-                                                </div>
-                                                <div class="col-xl">
-                                                    <textarea name="restriksi" class="form-control" id="restriksi"></textarea>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        @group(['label' => 'Restriksi', 'for' => 'restriksi'])
+                                            @textarea([
+                                                'name' => 'restriksi',
+                                                'id' => 'restriksi',
+                                                'class' => 'form-control',
+                                            ])
+                                        @endgroup
                                     </div>
-
                                     <div class="col-xl-6">
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-xl-2" style="text-align: right">
-                                                    <label class="form-label text-end" for="tipe">
-                                                        Tipe Barang*
-                                                    </label>
-                                                </div>
-                                                <div class="col-xl">
-                                                    <select name="tipe" id="tipe" class="form-control" required>
-                                                        <option value="" selected disabled hidden>Pilih tipe barang
-                                                        </option>
-                                                        <option value="FN">Formularium Nasional</option>
-                                                        <option value="NFN">Non Formularium Nasional</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        @group(['label' => 'Tipe Barang*', 'for' => 'tipe'])
+                                            @select([
+                                                'name' => 'tipe',
+                                                'id' => 'tipe',
+                                                'required' => true,
+                                                'options' => [
+                                                    '' => 'Pilih tipe barang',
+                                                    'FN' => 'Formularium Nasional',
+                                                    'NFN' => 'Non Formularium Nasional',
+                                                ],
+                                                'selected' => old('tipe'),
+                                            ])
+                                        @endgroup
                                     </div>
                                 </div>
 
                                 <div class="row justify-content-center">
                                     <div class="col-xl-6">
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-xl-2" style="text-align: right">
-                                                    <label class="form-label text-end" for="principal">
-                                                        Principal
-                                                    </label>
-                                                </div>
-                                                <div class="col-xl">
-                                                    <select name="principal" id="principal" class="form-control">
-                                                        <option value="" selected disabled hidden>Pilih Principal
-                                                        </option>
-                                                        @foreach ($pabriks as $item)
-                                                            <option value="{{ $item->id }}">{{ $item->nama }}
-                                                            </option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        @group(['label' => 'Principal', 'for' => 'principal'])
+                                            @select([
+                                                'name' => 'principal',
+                                                'id' => 'principal',
+                                                'options' => $pabriks->mapWithKeys(fn($item) => [$item->id => $item->nama])->prepend('Pilih Principal', ''),
+                                                'selected' => old('principal'),
+                                            ])
+                                        @endgroup
                                     </div>
-
                                     <div class="col-xl-6">
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-xl-2" style="text-align: right">
-                                                    <label class="form-label text-end" for="kelompok_id">
-                                                        Kelompok Barang
-                                                    </label>
-                                                </div>
-                                                <div class="col-xl">
-                                                    <select name="kelompok_id" id="kelompok_id" class="form-control">
-                                                        <option value="" selected disabled hidden>Pilih Kelompok
-                                                        </option>
-                                                        @foreach ($kelompoks as $item)
-                                                            <option value="{{ $item->id }}">{{ $item->nama }}
-                                                            </option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        @group(['label' => 'Kelompok Barang', 'for' => 'kelompok_id'])
+                                            @select([
+                                                'name' => 'kelompok_id',
+                                                'id' => 'kelompok_id',
+                                                'options' => $kelompoks->mapWithKeys(fn($item) => [$item->id => $item->nama])->prepend('Pilih Kelompok', ''),
+                                                'selected' => old('kelompok_id'),
+                                            ])
+                                        @endgroup
                                     </div>
                                 </div>
 
                                 <div class="row justify-content-center">
                                     <div class="col-xl-6">
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-xl-2" style="text-align: right">
-                                                    <label class="form-label text-end" for="exp">
-                                                        Info expired
-                                                    </label>
-                                                </div>
-                                                <div class="col-xl">
-                                                    <select name="exp" id="exp" class="form-control">
-                                                        <option value="" selected hidden disabled>Pilih info expired
-                                                        </option>
-                                                        <option value="1w">1 minggu</option>
-                                                        <option value="2w">2 minggu</option>
-                                                        <option value="3w">3 minggu</option>
-                                                        <option value="1mo">1 bulan</option>
-                                                        <option value="2mo">2 bulan</option>
-                                                        <option value="3mo">3 bulan</option>
-                                                        <option value="6mo">6 bulan</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        @group(['label' => 'Info expired', 'for' => 'exp'])
+                                            @select([
+                                                'name' => 'exp',
+                                                'id' => 'exp',
+                                                'options' => [
+                                                    '' => 'Pilih info expired',
+                                                    '1w' => '1 minggu',
+                                                    '2w' => '2 minggu',
+                                                    '3w' => '3 minggu',
+                                                    '1mo' => '1 bulan',
+                                                    '2mo' => '2 bulan',
+                                                    '3mo' => '3 bulan',
+                                                    '6mo' => '6 bulan',
+                                                ],
+                                                'selected' => old('exp'),
+                                            ])
+                                        @endgroup
                                     </div>
-
                                     <div class="col-xl-6">
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-xl-2" style="text-align: right">
-                                                    <label class="form-label text-end" for="zat_aktif">
-                                                        Zat Aktif
-                                                    </label>
-                                                </div>
-                                                <div class="col-xl">
-                                                    <select class="form-control select2 w-100" id="zat_aktif"
-                                                        name="zat_aktif[]" multiple="multiple">
-                                                        @foreach ($zats as $zat)
-                                                            <option value="{{ $zat->id }}">{{ $zat->nama }}
-                                                            </option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        @group(['label' => 'Zat Aktif', 'for' => 'zat_aktif'])
+                                            @select([
+                                                'name' => 'zat_aktif[]',
+                                                'id' => 'zat_aktif',
+                                                'class' => 'form-control select2 w-100',
+                                                'multiple' => true,
+                                                'options' => $zats->mapWithKeys(fn($zat) => [$zat->id => $zat->nama]),
+                                                'selected' => old('zat_aktif', []),
+                                            ])
+                                        @endgroup
                                     </div>
                                 </div>
 
                                 <div class="row justify-content-center">
                                     <div class="col-xl-6">
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-xl-2" style="text-align: right">
-                                                    <label class="form-label text-end" for="satuan_id">
-                                                        Satuan Default*
-                                                    </label>
-                                                </div>
-                                                <div class="col-xl">
-                                                    <select name="satuan_id" id="satuan_id" class="form-control"
-                                                        required>
-                                                        <option value="" selected disabled hidden>Pilih Satuan
-                                                        </option>
-                                                        @foreach ($satuans as $item)
-                                                            <option value="{{ $item->id }}">{{ $item->nama }}
-                                                            </option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        @group(['label' => 'Satuan Default*', 'for' => 'satuan_id'])
+                                            @select([
+                                                'name' => 'satuan_id',
+                                                'id' => 'satuan_id',
+                                                'required' => true,
+                                                'options' => $satuans->mapWithKeys(fn($item) => [$item->id => $item->nama])->prepend('Pilih Satuan', ''),
+                                                'selected' => old('satuan_id'),
+                                            ])
+                                        @endgroup
                                     </div>
-
                                     <div class="col-xl-6">
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-xl-2" style="text-align: right">
-                                                    <label class="form-label text-end" for="aktif">
-                                                        Aktif?
-                                                    </label>
-                                                </div>
-                                                <div class="col-xl">
-                                                    <select name="aktif" id="aktif" class="form-control">
-                                                        <option value="1" selected>Aktif</option>
-                                                        <option value="0">Non Aktif</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        @group(['label' => 'Aktif?', 'for' => 'aktif'])
+                                            @select([
+                                                'name' => 'aktif',
+                                                'id' => 'aktif',
+                                                'options' => [
+                                                    '1' => 'Aktif',
+                                                    '0' => 'Non Aktif',
+                                                ],
+                                                'selected' => old('aktif', 1),
+                                            ])
+                                        @endgroup
                                     </div>
                                 </div>
 
                                 <div class="row justify-content-center">
                                     <div class="col-xl-6">
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-xl-2" style="text-align: right">
-                                                    <label class="form-label text-end" for="satuan_id">
-                                                        Satuan Tambahan
-                                                    </label>
-                                                </div>
-                                                <div class="col-xl">
-                                                    <select id="satuan-tambahan-select" class="form-control">
-                                                        <option value="" selected disabled hidden>Pilih Satuan
-                                                            Tambahan
-                                                        </option>
-                                                        @foreach ($satuans as $item)
-                                                            <option value="{{ $item->id }}">{{ $item->nama }}
-                                                            </option>
-                                                        @endforeach
-                                                    </select>
+                                        @group(['label' => 'Satuan Tambahan', 'for' => 'satuan_id'])
+                                            @select([
+                                                'id' => 'satuan-tambahan-select',
+                                                'options' => $satuans->mapWithKeys(fn($item) => [$item->id => $item->nama])->prepend('Pilih Satuan Tambahan', ''),
+                                            ])
+                                            <table class="table table-bordered table-hover table-striped w-100">
+                                                <thead class="bg-primary-600">
+                                                    <tr>
+                                                        <th>Satuan</th>
+                                                        <th>Isi</th>
+                                                        <th>Aktif?</th>
+                                                        <th>Aksi</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="table-satuan">
 
-                                                    <table class="table table-bordered table-hover table-striped w-100">
-                                                        <thead class="bg-primary-600">
-                                                            <tr>
-                                                                <th>Satuan</th>
-                                                                <th>Isi</th>
-                                                                <th>Aktif?</th>
-                                                                <th>Aksi</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody id="table-satuan">
-
-                                                        </tbody>
-                                                    </table>
-
-                                                </div>
-                                            </div>
-                                        </div>
+                                                </tbody>
+                                            </table>
+                                        @endgroup
                                     </div>
-
                                     <div class="col-xl-6">
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-xl-2" style="text-align: right">
-                                                    <label class="form-label text-end" for="keterangan">
-                                                        Keterangan
-                                                    </label>
-                                                </div>
-                                                <div class="col-xl">
-                                                    <textarea name="keterangan" class="form-control" id="keterangan">{{ old('keterangan') }}</textarea>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        @group(['label' => 'Keterangan', 'for' => 'keterangan'])
+                                            @textarea([
+                                                'name' => 'keterangan',
+                                                'id' => 'keterangan',
+                                                'class' => 'form-control',
+                                                'value' => old('keterangan'),
+                                            ])
+                                        @endgroup
                                     </div>
                                 </div>
 
                                 <div class="row justify-content-center">
                                     <div class="col-xl-6">
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-xl-2" style="text-align: right">
-                                                    <label class="form-label text-end" for="harga_principal">
-                                                        Harga Principal
-                                                    </label>
-                                                </div>
-                                                <div class="col-xl">
-                                                    <input type="text"
-                                                        value="{{ old('harga_principal') ? old('harga_principal') : 0 }}"
-                                                        style="border: 0; border-bottom: 1.9px solid #eaeaea; margin-top: -.5rem; border-radius: 0"
-                                                        class="form-control" id="harga_principal" name="harga_principal"
-                                                        onkeyup="formatInputToNumber(this)">
-                                                    @error('harga_principal')
-                                                        <div class="invalid-feedback">{{ $message }}</div>
-                                                    @enderror
-                                                </div>
-                                            </div>
-                                        </div>
+                                        @group(['label' => 'Harga Principal', 'for' => 'harga_principal'])
+                                            @input([
+                                                'type' => 'text',
+                                                'name' => 'harga_principal',
+                                                'id' => 'harga_principal',
+                                                'value' => old('harga_principal', 0),
+                                                'class' => 'form-control borderless-input',
+                                                'onkeyup' => 'formatInputToNumber(this)',
+                                            ])
+                                            @error('harga_principal')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        @endgroup
                                     </div>
-
                                     <div class="col-xl-6">
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-xl-2" style="text-align: right">
-                                                    <label class="form-label text-end" for="diskon_principal">
-                                                        Diskon Principal (%)
-                                                    </label>
-                                                </div>
-                                                <div class="col-xl">
-                                                    <input type="text"
-                                                        value="{{ old('diskon_principal') ? old('diskon_principal') : 0 }}"
-                                                        style="border: 0; border-bottom: 1.9px solid #eaeaea; margin-top: -.5rem; border-radius: 0"
-                                                        class="form-control" id="diskon_principal"
-                                                        name="diskon_principal" onkeyup="formatInputToNumber(this)">
-                                                    @error('diskon_principal')
-                                                        <div class="invalid-feedback">{{ $message }}</div>
-                                                    @enderror
-                                                </div>
-                                            </div>
-                                        </div>
+                                        @group(['label' => 'Diskon Principal (%)', 'for' => 'diskon_principal'])
+                                            @input([
+                                                'type' => 'text',
+                                                'name' => 'diskon_principal',
+                                                'id' => 'diskon_principal',
+                                                'value' => old('diskon_principal', 0),
+                                                'class' => 'form-control borderless-input',
+                                                'onkeyup' => 'formatInputToNumber(this)',
+                                            ])
+                                            @error('diskon_principal')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        @endgroup
                                     </div>
                                 </div>
 
                                 <div class="row justify-content-center">
                                     <div class="col-xl-6">
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-xl-2" style="text-align: right">
-                                                    <label class="form-label text-end" for="jenis_obat">
-                                                        Jenis Obat
-                                                    </label>
-                                                </div>
-                                                <div class="col-xl">
-                                                    <select name="jenis_obat" id="jenis_obat" class="form-control">
-                                                        <option value="" selected disabled hidden>Pilih Jenis Obat
-                                                        </option>
-                                                        <option value="generik">Generik</option>
-                                                        <option value="paten">Paten</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        @group(['label' => 'Jenis Obat', 'for' => 'jenis_obat'])
+                                            @select([
+                                                'name' => 'jenis_obat',
+                                                'id' => 'jenis_obat',
+                                                'options' => [
+                                                    '' => 'Pilih Jenis Obat',
+                                                    'generik' => 'Generik',
+                                                    'paten' => 'Paten',
+                                                ],
+                                                'selected' => old('jenis_obat'),
+                                            ])
+                                        @endgroup
                                     </div>
-
                                     <div class="col-xl-6">
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-xl-2" style="text-align: right">
-                                                    <label class="form-label text-end" for="formularium">
-                                                        Formularium
-                                                    </label>
-                                                </div>
-                                                <div class="col-xl">
-                                                    <select name="formularium" id="formularium" class="form-control">
-                                                        <option value="" selected disabled hidden>Pilih Formularium
-                                                        </option>
-                                                        <option value="RS">Formularium Rumah Sakit</option>
-                                                        <option value="NRS">Formularium Non Rumah Sakit</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        @group(['label' => 'Formularium', 'for' => 'formularium'])
+                                            @select([
+                                                'name' => 'formularium',
+                                                'id' => 'formularium',
+                                                'options' => [
+                                                    '' => 'Pilih Formularium',
+                                                    'RS' => 'Formularium Rumah Sakit',
+                                                    'NRS' => 'Formularium Non Rumah Sakit',
+                                                ],
+                                                'selected' => old('formularium'),
+                                            ])
+                                        @endgroup
                                     </div>
                                 </div>
 

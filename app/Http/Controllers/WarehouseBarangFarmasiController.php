@@ -8,53 +8,88 @@ use App\Models\WarehouseBarangFarmasi;
 use App\Models\WarehouseGolonganBarang;
 use App\Models\WarehouseKategoriBarang;
 use App\Models\WarehouseKelompokBarang;
-use App\Models\WarehouseMasterBarangEditLog;
 use App\Models\WarehousePabrik;
 use App\Models\WarehouseSatuanBarang;
-use App\Models\WarehouseSatuanTambahanBarangFarmasi;
 use App\Models\WarehouseZatAktif;
-use App\Models\WarehouseZatAktifBarangFarmasi;
 use Illuminate\Http\Request;
-use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Validation\ValidationException;
+use Yajra\DataTables\Facades\DataTables;
 
 class WarehouseBarangFarmasiController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
+    public function index()
     {
-        $query = WarehouseBarangFarmasi::query();
-        $filters = ['nama', 'kode', 'keterangan', 'hna', 'ppn', 'aktif', 'jual_pasien', 'kategori_id', 'kelompok_id', 'satuan_id'];
-        $filterApplied = false;
+        return view("pages.simrs.warehouse.master-data.barang-farmasi");
+    }
 
-        foreach ($filters as $filter) {
-            if ($request->filled($filter)) {
-                if (in_array($filter, ['hna', 'ppn', 'kategori_id', 'kelompok_id', 'satuan_id'])) {
-                    $query->where($filter, $request->$filter);
-                } else {
-                    $query->where($filter, 'like', '%' . $request->$filter . '%');
-                }
-                $filterApplied = true;
+    /**
+     * Process datatables ajax request.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function data(Request $request)
+    {
+        $query = WarehouseBarangFarmasi::with(['satuan', 'kategori', 'golongan', 'kelompok'])
+            ->select('warehouse_barang_farmasi.*');
+
+        // Filtering
+        if ($request->filled('kode')) {
+            $query->where('kode', 'like', '%' . $request->kode . '%');
+        }
+        if ($request->filled('nama')) {
+            $query->where('nama', 'like', '%' . $request->nama . '%');
+        }
+        if ($request->filled('kategori')) {
+            $query->whereHas('kategori', function ($q) use ($request) {
+                $q->where('nama', 'like', '%' . $request->kategori . '%');
+            });
+        }
+        if ($request->filled('kelompok')) {
+            $query->whereHas('kelompok', function ($q) use ($request) {
+                $q->where('nama', 'like', '%' . $request->kelompok . '%');
+            });
+        }
+        if ($request->filled('golongan')) {
+            $query->whereHas('golongan', function ($q) use ($request) {
+                $q->where('nama', 'like', '%' . $request->golongan . '%');
+            });
+        }
+        if ($request->filled('satuan')) {
+            $query->whereHas('satuan', function ($q) use ($request) {
+                $q->where('nama', 'like', '%' . $request->satuan . '%');
+            });
+        }
+        if ($request->filled('aktif')) {
+            if ($request->aktif === 'Aktif') {
+                $query->where('aktif', 1);
+            } elseif ($request->aktif === 'Tidak Aktif') {
+                $query->where('aktif', 0);
             }
         }
 
-        // Get the filtered results if any filter is applied
-        if ($filterApplied) {
-            $barangs = $query->orderBy('created_at', 'desc')->get();
-        } else {
-            // Return all data if no filter is applied
-            $barangs = WarehouseBarangFarmasi::all();
-        }
-
-        return view("pages.simrs.warehouse.master-data.barang-farmasi", [
-            "barangs" => $barangs,
-            "kategoris" => WarehouseKategoriBarang::all(),
-            "kelompoks" => WarehouseKelompokBarang::all(),
-            "golongans" => WarehouseGolonganBarang::all(),
-            "satuans" => WarehouseSatuanBarang::all()
-        ]);
+        return DataTables::of($query)
+            ->addIndexColumn()
+            ->addColumn('kategori_name', fn($row) => $row->kategori->nama ?? '-')
+            ->addColumn('kelompok_name', fn($row) => $row->kelompok->nama ?? '-')
+            ->addColumn('golongan_name', fn($row) => $row->golongan->nama ?? '-')
+            ->addColumn('satuan_name', fn($row) => $row->satuan->nama ?? '-')
+            ->addColumn('status', fn($row) => $row->aktif ? '<span class="badge badge-success">Aktif</span>' : '<span class="badge badge-danger">Non Aktif</span>')
+            ->addColumn('action', function ($row) {
+                $editUrl = route('warehouse.master-data.barang-farmasi.edit', $row->id);
+                $deleteUrl = route('warehouse.master-data.barang-farmasi.destroy', $row->id);
+                $actionBtn = '<div class="d-flex justify-content-center">';
+                $actionBtn .= '<a href="javascript:void(0);" onclick="openPopup(\'' . $editUrl . '\')" class="btn btn-warning btn-sm mr-1"><i class="fal fa-pencil"></i> Edit</a>';
+                $actionBtn .= '<a href="javascript:void(0)" class="btn btn-danger btn-sm delete-btn" data-url="' . $deleteUrl . '"><i class="fal fa-trash"></i> Hapus</a>';
+                $actionBtn .= '</div>';
+                return $actionBtn;
+            })
+            ->rawColumns(['action', 'status'])
+            ->make(true);
     }
 
     /**
@@ -62,14 +97,13 @@ class WarehouseBarangFarmasiController extends Controller
      */
     public function create()
     {
-        return view("pages.simrs.warehouse.master-data.partials.popup-add-barang-farmasi", [
-            "kategoris" => WarehouseKategoriBarang::all(),
-            "kelompoks" => WarehouseKelompokBarang::all(),
-            "golongans" => WarehouseGolonganBarang::all(),
-            "satuans" => WarehouseSatuanBarang::all(),
-            "zats" => WarehouseZatAktif::all(),
-            "pabriks" => WarehousePabrik::all()
-        ]);
+        $kategoris = WarehouseKategoriBarang::where('aktif', 1)->get();
+        $kelompoks = WarehouseKelompokBarang::where('aktif', 1)->get();
+        $golongans = WarehouseGolonganBarang::where('aktif', 1)->get();
+        $satuans = WarehouseSatuanBarang::where('aktif', 1)->get();
+        $zats = WarehouseZatAktif::where('aktif', 1)->get();
+        $pabriks = WarehousePabrik::where('aktif', 1)->get();
+        return view("pages.simrs.warehouse.master-data.partials.popup-add-barang-non-farmasi", compact('kategoris', 'kelompoks', 'golongans', 'satuans', 'zats', 'pabriks'));
     }
 
     /**
@@ -77,197 +111,102 @@ class WarehouseBarangFarmasiController extends Controller
      */
     public function store(Request $request)
     {
-        $validatedData = $request->validate([
-            'nama' => 'required|string|max:255',
-            'kode' => 'required|string|max:255',
-            'keterangan' => 'nullable|string',
-            'restriksi' => 'nullable|string',
-            'hna' => 'required|integer',
-            'ppn' => 'required|integer',
-            'ppn_rajal' => 'required|integer',
-            'ppn_ranap' => 'required|integer',
-            'tipe' => 'required|in:FN,NFN',
-            'formularium' => 'required|in:RS,NRS',
-            'jenis_obat' => 'nullable|in:paten,generik',
-            'exp' => 'nullable|in:1w,2w,3w,1mo,2mo,3mo,6mo',
-            'aktif' => 'required|boolean',
-            'kategori_id' => 'required|exists:warehouse_kategori_barang,id',
-            'golongan_id' => 'nullable|exists:warehouse_golongan_barang,id',
-            'kelompok_id' => 'nullable|exists:warehouse_kelompok_barang,id',
-            'satuan_id' => 'required|exists:warehouse_satuan_barang,id',
-            'principal' => 'nullable|exists:warehouse_pabrik,id',
-            'harga_principal' => 'nullable|integer',
-            'diskon_principal' => 'nullable|integer',
-            "satuans_id" => "nullable|array",
-            "satuans_id.*" => "exists:warehouse_satuan_barang,id",
-            "satuans_jumlah" => "nullable|array",
-            "satuans_jumlah.*" => "integer",
-            "satuans_status" => "nullable|array",
-            "satuans_status.*" => "boolean"
-        ]);
+        $validatedData = $this->validateRequest($request);
 
-        $barang = WarehouseBarangFarmasi::create($validatedData);
+        DB::beginTransaction();
+        try {
+            $barang = WarehouseBarangFarmasi::create($validatedData);
 
-        if (isset($validatedData["satuans_id"])) {
-            foreach ($validatedData['satuans_id'] as $index => $satuanId) {
-                WarehouseSatuanTambahanBarangFarmasi::create([
-                    "barang_id" => $barang->id,
-                    "satuan_id" => $satuanId,
-                    "isi" => $validatedData['satuans_jumlah'][$index],
-                    "aktif" => isset($validatedData['satuans_status'][$index]) ? $validatedData['satuans_status'][$index] : false,
-                ]);
+            // Attach Zat Aktif
+            if ($request->has('zat_aktif')) {
+                $barang->zat_aktif()->attach($request->zat_aktif);
             }
-        }
 
-        // handle zat_aktif here
-        if ($request->has('zat_aktif')) {
-            $zatAktifIds = $request->input('zat_aktif');
-            foreach ($zatAktifIds as $zatAktifId) {
-                WarehouseZatAktifBarangFarmasi::create([
-                    "barang_id" => $barang->id,
-                    "zat_id" => $zatAktifId
-                ]);
+            // Create Satuan Tambahan
+            if ($request->has('satuans_id')) {
+                foreach ($request->satuans_id as $index => $satuanId) {
+                    if ($satuanId && isset($request->satuans_jumlah[$index])) {
+                        $barang->satuan_tambahan()->create([
+                            "satuan_id" => $satuanId,
+                            "isi" => $request->satuans_jumlah[$index],
+                            "aktif" => isset($request->satuans_status[$index]),
+                        ]);
+                    }
+                }
             }
+            DB::commit();
+            return redirect()->route('warehouse.master-data.barang-farmasi.index')->with('success', 'Barang Farmasi berhasil ditambahkan!');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->withInput()->with('error', 'Gagal menambahkan data: ' . $e->getMessage());
         }
-
-        return redirect()->back()->with('success', 'Barang Farmasi berhasil ditambahkan!');
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(WarehouseBarangFarmasi $warehouseBarangFarmasi)
-    {
-        //
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(WarehouseBarangFarmasi $warehouseBarangFarmasi, $id)
+    public function edit($id)
     {
-        return view("pages.simrs.warehouse.master-data.partials.popup-edit-barang-farmasi", [
-            "barang" => $warehouseBarangFarmasi->where("id", $id)->first(),
-            "kategoris" => WarehouseKategoriBarang::all(),
-            "kelompoks" => WarehouseKelompokBarang::all(),
-            "golongans" => WarehouseGolonganBarang::all(),
-            "satuans" => WarehouseSatuanBarang::all(),
-            "zats" => WarehouseZatAktif::all(),
-            "pabriks" => WarehousePabrik::all()
-        ]);
+        $barang = WarehouseBarangFarmasi::with(['satuan_tambahan', 'zat_aktif'])->findOrFail($id);
+        $kategoris = WarehouseKategoriBarang::where('aktif', 1)->get();
+        $kelompoks = WarehouseKelompokBarang::where('aktif', 1)->get();
+        $golongans = WarehouseGolonganBarang::where('aktif', 1)->get();
+        $satuans = WarehouseSatuanBarang::where('aktif', 1)->get();
+        $zats = WarehouseZatAktif::where('aktif', 1)->get();
+        $pabriks = WarehousePabrik::where('aktif', 1)->get();
+        return view("pages.simrs.warehouse.master-data.partials.popup-edit-barang-farmasi", compact('barang', 'kategoris', 'kelompoks', 'golongans', 'satuans', 'zats', 'pabriks'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, WarehouseBarangFarmasi $warehouseBarangFarmasi)
+    public function update(Request $request, $id)
     {
-        $validatedData = $request->validate([
-            'id' => 'required|integer',
-            'nama' => 'required|string|max:255',
-            'kode' => 'required|string|max:255',
-            'keterangan' => 'nullable|string',
-            'restriksi' => 'nullable|string',
-            'hna' => 'required|integer',
-            'ppn' => 'required|integer',
-            'ppn_rajal' => 'required|integer',
-            'ppn_ranap' => 'required|integer',
-            'tipe' => 'required|in:FN,NFN',
-            'formularium' => 'required|in:RS,NRS',
-            'jenis_obat' => 'nullable|in:paten,generik',
-            'exp' => 'nullable|in:1w,2w,3w,1mo,2mo,3mo,6mo',
-            'aktif' => 'required|boolean',
-            'kategori_id' => 'required|exists:warehouse_kategori_barang,id',
-            'golongan_id' => 'nullable|exists:warehouse_golongan_barang,id',
-            'kelompok_id' => 'nullable|exists:warehouse_kelompok_barang,id',
-            'satuan_id' => 'required|exists:warehouse_satuan_barang,id',
-            'principal' => 'nullable|exists:warehouse_pabrik,id',
-            'harga_principal' => 'nullable|integer',
-            'diskon_principal' => 'nullable|integer'
-        ]);
+        $validatedData = $this->validateRequest($request, $id);
 
-        $validatedData2 = $request->validate([
-            'id' => 'required|integer',
-            "satuans_id" => "nullable|array",
-            "satuans_id.*" => "exists:warehouse_satuan_barang,id",
-            "satuans_jumlah" => "nullable|array",
-            "satuans_jumlah.*" => "integer",
-            "satuans_status" => "nullable|array",
-            "satuans_status.*" => "boolean"
-        ]);
+        DB::beginTransaction();
+        try {
+            $barang = WarehouseBarangFarmasi::findOrFail($id);
+            $barang->update($validatedData);
 
-        $validatedData3 = $request->validate([
-            "alasan_edit" => 'required|string',
-            "user_id" => 'required|exists:users,id'
-        ]);
+            // Sync Zat Aktif
+            $barang->zat_aktif()->sync($request->zat_aktif ?? []);
 
-        $warehouseBarangFarmasi
-            ->where("id", $validatedData['id'])
-            ->update($validatedData);
-
-        // delete all data from WarehouseSatuanTambahanBarangFarmasi
-        // where "barang_id" == $validatedData['id']
-        WarehouseSatuanTambahanBarangFarmasi::where('barang_id', $validatedData2['id'])->forceDelete();
-
-        // delete all data from WarehouseZatAktifBarangFarmasi
-        // where "barang_id" == $validatedData['id']
-        WarehouseZatAktifBarangFarmasi::where('barang_id', $validatedData2['id'])->forceDelete();
-
-        if ($request->has('satuans_id')) {
-            foreach ($validatedData2['satuans_id'] as $index => $satuanId) {
-                WarehouseSatuanTambahanBarangFarmasi::create([
-                    "barang_id" => $validatedData2['id'],
-                    "satuan_id" => $satuanId,
-                    "isi" => $validatedData2['satuans_jumlah'][$index],
-                    "aktif" => isset($validatedData2['satuans_status'][$index]) ? $validatedData2['satuans_status'][$index] : false,
-                ]);
+            // Sync Satuan Tambahan
+            $barang->satuan_tambahan()->delete();
+            if ($request->has('satuans_id')) {
+                foreach ($request->satuans_id as $index => $satuanId) {
+                    if ($satuanId && isset($request->satuans_jumlah[$index])) {
+                        $barang->satuan_tambahan()->create([
+                            "satuan_id" => $satuanId,
+                            "isi" => $request->satuans_jumlah[$index],
+                            "aktif" => isset($request->satuans_status[$index]),
+                        ]);
+                    }
+                }
             }
+
+            // Optional: Add log if needed
+            // ...
+
+            DB::commit();
+            return redirect()->route('warehouse.master-data.barang-farmasi.index')->with('success', 'Barang Farmasi berhasil diperbarui!');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->withInput()->with('error', 'Gagal memperbarui data: ' . $e->getMessage());
         }
-
-        if ($request->has('zat_aktif')) {
-            $zatAktifIds = $request->input('zat_aktif');
-            foreach ($zatAktifIds as $zatAktifId) {
-                WarehouseZatAktifBarangFarmasi::create([
-                    "barang_id" => $validatedData2['id'],
-                    "zat_id" => $zatAktifId
-                ]);
-            }
-        }
-
-        // add log
-        WarehouseMasterBarangEditLog::create([
-            "goods_id" => $validatedData['id'],
-            "goods_type" => WarehouseBarangFarmasi::class,
-            "nama_barang" => $validatedData["nama"],
-            "kode_barang" => $validatedData["kode"],
-            "keterangan" => $validatedData3["alasan_edit"],
-            "hna" => $validatedData["hna"],
-            "status_aktif" => $validatedData["aktif"],
-            "golongan_id" => $validatedData["golongan_id"] ?? null,
-            "kelompok_id" => $validatedData["kelompok_id"] ?? null,
-            "satuan_id" => $validatedData["satuan_id"],
-            "performed_by" => $validatedData3["user_id"]
-        ]);
-
-        return redirect()->back()->with('success', 'Barang Farmasi berhasil diupdate');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(WarehouseBarangFarmasi $warehouseBarangFarmasi, $id)
+    public function destroy($id)
     {
         try {
-            $warehouseBarangFarmasi::destroy($id);
-            return response()->json([
-                'success' => true,
-                'message' => 'Barang Farmasi berhasil dihapus!'
-            ]);
+            WarehouseBarangFarmasi::destroy($id);
+            return response()->json(['success' => true, 'message' => 'Barang Farmasi berhasil dihapus.']);
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage()
-            ]);
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
 
@@ -294,5 +233,42 @@ class WarehouseBarangFarmasiController extends Controller
         }
 
         return back()->with('success', 'Data Barang Farmasi berhasil diimpor!');
+    }
+
+    private function validateRequest(Request $request, $id = null)
+    {
+        $kodeRule = 'required|string|max:255|unique:warehouse_barang_farmasi,kode';
+        if ($id) {
+            $kodeRule .= ',' . $id;
+        }
+
+        return $request->validate([
+            'nama' => 'required|string|max:255',
+            'kode' => $kodeRule,
+            'keterangan' => 'nullable|string',
+            'restriksi' => 'nullable|string',
+            'hna' => 'required|numeric',
+            'ppn' => 'required|numeric',
+            'ppn_rajal' => 'required|numeric',
+            'ppn_ranap' => 'required|numeric',
+            'tipe' => 'required|in:FN,NFN',
+            'formularium' => 'required|in:RS,NRS',
+            'jenis_obat' => 'nullable|in:paten,generik',
+            'exp' => 'nullable|in:1w,2w,3w,1mo,2mo,3mo,6mo',
+            'aktif' => 'required|boolean',
+            'kategori_id' => 'required|exists:warehouse_kategori_barang,id',
+            'golongan_id' => 'nullable|exists:warehouse_golongan_barang,id',
+            'kelompok_id' => 'nullable|exists:warehouse_kelompok_barang,id',
+            'satuan_id' => 'required|exists:warehouse_satuan_barang,id',
+            'principal' => 'nullable|exists:warehouse_pabrik,id',
+            'harga_principal' => 'nullable|numeric',
+            'diskon_principal' => 'nullable|numeric',
+            "satuans_id" => "nullable|array",
+            "satuans_id.*" => "nullable|exists:warehouse_satuan_barang,id",
+            "satuans_jumlah" => "nullable|array",
+            "satuans_jumlah.*" => "nullable|numeric",
+            'zat_aktif' => 'nullable|array',
+            'zat_aktif.*' => 'exists:warehouse_zat_aktif,id',
+        ]);
     }
 }

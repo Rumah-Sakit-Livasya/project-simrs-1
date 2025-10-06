@@ -45,73 +45,52 @@
                                 @method('PUT')
                                 <input type="hidden" name="id" value="{{ $barang->id }}">
                                 <input type="hidden" name="user_id" value="{{ auth()->user()->id }}">
-                                <div class="row justify-content-center">
-                                    <div class="col-xl-6">
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-xl-2" style="text-align: right">
-                                                    <label class="form-label text-end" for="kategori_id">
-                                                        Kategori Inventory*
-                                                    </label>
-                                                </div>
-                                                <div class="col-xl">
-                                                    <select name="kategori_id" id="kategori_id" class="form-control"
-                                                        required>
-                                                        <option value="" disabled hidden>Pilih Kategori
-                                                        </option>
-                                                        @foreach ($kategoris as $item)
-                                                            <option value="{{ $item->id }}"
-                                                                {{ $barang->kategori_id == $item->id ? 'selected' : '' }}>
-                                                                {{ $item->nama }}</option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
 
+                                <x-form.group class="row justify-content-center">
                                     <div class="col-xl-6">
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-xl-2" style="text-align: right">
-                                                    <label class="form-label text-end" for="hna">
-                                                        Harga Beli (HNA)*
-                                                    </label>
-                                                </div>
-                                                <div class="col-xl">
-                                                    <input type="text" value="{{ $barang->hna ?? 0 }}"
-                                                        style="border: 0; border-bottom: 1.9px solid #eaeaea; margin-top: -.5rem; border-radius: 0"
-                                                        class="form-control" id="hna" name="hna"
-                                                        onkeyup="formatInputToNumber(this)" required>
-                                                    @error('hna')
-                                                        <div class="invalid-feedback">{{ $message }}</div>
-                                                    @enderror
-                                                </div>
-                                            </div>
-                                        </div>
+                                        <x-form.group>
+                                            @php
+                                                $kategoriOptions = $kategoris
+                                                    ->mapWithKeys(fn($item) => [$item->id => $item->nama])
+                                                    ->toArray();
+                                                $kategoriOptions = ['' => 'Pilih Kategori'] + $kategoriOptions;
+                                            @endphp
+                                            <label for="kategori_id" class="form-label">Kategori Inventory*</label>
+                                            <select name="kategori_id" id="kategori_id" required
+                                                class="form-control{{ $errors->has('kategori_id') ? ' is-invalid' : '' }}">
+                                                @foreach ($kategoriOptions as $optionValue => $optionLabel)
+                                                    <option value="{{ $optionValue }}"
+                                                        @if ((string) $optionValue === (string) $barang->kategori_id) selected @endif>
+                                                        {{ $optionLabel }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                            @error('kategori_id')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </x-form.group>
                                     </div>
-                                </div>
-
-                                <div class="row justify-content-center">
                                     <div class="col-xl-6">
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-xl-2" style="text-align: right">
-                                                    <label class="form-label text-end" for="kode">
-                                                        Kode Barang*
-                                                    </label>
-                                                </div>
-                                                <div class="col-xl">
-                                                    <input type="text" value="{{ $barang->kode }}"
-                                                        style="border: 0; border-bottom: 1.9px solid #eaeaea; margin-top: -.5rem; border-radius: 0"
-                                                        class="form-control" id="kode" name="kode" required>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        <x-form.group>
+                                            <x-form.input :name="'hna'" type="text" id="hna"
+                                                label="Harga Beli (HNA)*" :value="$barang->hna ?? 0" required
+                                                onkeyup="formatInputToNumber(this)" class="borderless-input" />
+                                            @error('hna')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </x-form.group>
                                     </div>
+                                </x-form.group>
 
+                                <x-form.group class="row justify-content-center">
                                     <div class="col-xl-6">
-                                        <div class="form-group">
+                                        <x-form.group>
+                                            <x-form.input :name="'kode'" type="text" id="kode"
+                                                label="Kode Barang*" :value="$barang->kode" required class="borderless-input" />
+                                        </x-form.group>
+                                    </div>
+                                    <div class="col-xl-6">
+                                        <x-form.group>
                                             <div class="row">
                                                 <div class="col-xl-2" style="text-align: right">
                                                     <label class="form-label text-end" for="ppn">
@@ -119,507 +98,382 @@
                                                     </label>
                                                 </div>
                                                 <div class="col-xl-2">
-                                                    <input type="text" value="{{ $barang->ppn ?? 0 }}"
-                                                        style="border: 0; border-bottom: 1.9px solid #eaeaea; margin-top: -.5rem; border-radius: 0"
-                                                        class="form-control" id="ppn" name="ppn"
-                                                        onkeyup="formatInputToNumber(this)">
+                                                    <x-form.input :name="'ppn'" type="text" id="ppn"
+                                                        :value="$barang->ppn ?? 0" onkeyup="formatInputToNumber(this)"
+                                                        class="borderless-input" />
                                                     @error('ppn')
                                                         <div class="invalid-feedback">{{ $message }}</div>
                                                     @enderror
                                                 </div>
                                                 <div class="col-xl">
-                                                    <input type="text" value="{{ $barang->ppn_prev ?? 0 }}"
-                                                        style="border: 0; border-bottom: 1.9px solid #eaeaea; margin-top: -.5rem; border-radius: 0"
-                                                        class="form-control" id="ppn_prev" disabled>
+                                                    <x-form.input :name="'ppn_prev'" type="text" id="ppn_prev"
+                                                        :value="$barang->ppn_prev ?? 0" disabled class="borderless-input" />
                                                 </div>
                                             </div>
-                                        </div>
+                                        </x-form.group>
                                     </div>
-                                </div>
+                                </x-form.group>
 
-                                <div class="row justify-content-center">
+                                <x-form.group class="row justify-content-center">
                                     <div class="col-xl-6">
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-xl-2" style="text-align: right">
-                                                    <label class="form-label text-end" for="nama">
-                                                        Nama Barang*
-                                                    </label>
-                                                </div>
-                                                <div class="col-xl">
-                                                    <input type="text" value="{{ $barang->nama }}"
-                                                        style="border: 0; border-bottom: 1.9px solid #eaeaea; margin-top: -.5rem; border-radius: 0"
-                                                        class="form-control" id="nama" name="nama" required>
-                                                    @error('nama')
-                                                        <div class="invalid-feedback">{{ $message }}</div>
-                                                    @enderror
-                                                </div>
-                                            </div>
-                                        </div>
+                                        <x-form.group>
+                                            <x-form.input :name="'nama'" type="text" id="nama"
+                                                label="Nama Barang*" :value="$barang->nama" required class="borderless-input" />
+                                            @error('nama')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </x-form.group>
                                     </div>
-
                                     <div class="col-xl-6">
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-xl-2" style="text-align: right">
-                                                    <label class="form-label text-end" for="ppn_rajal">
-                                                        PPN Jual Rawat Jalan (%)
-                                                    </label>
-                                                </div>
-                                                <div class="col-xl">
-                                                    <input type="text" value="{{ $barang->ppn_rajal ?? 0 }}"
-                                                        style="border: 0; border-bottom: 1.9px solid #eaeaea; margin-top: -.5rem; border-radius: 0"
-                                                        class="form-control" id="ppn_rajal" name="ppn_rajal"
-                                                        onkeyup="formatInputToNumber(this)">
-                                                    @error('ppn_rajal')
-                                                        <div class="invalid-feedback">{{ $message }}</div>
-                                                    @enderror
-                                                </div>
-                                            </div>
-                                        </div>
+                                        <x-form.group>
+                                            <x-form.input :name="'ppn_rajal'" type="text" id="ppn_rajal"
+                                                label="PPN Jual Rawat Jalan (%)" :value="$barang->ppn_rajal ?? 0"
+                                                onkeyup="formatInputToNumber(this)" class="borderless-input" />
+                                            @error('ppn_rajal')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </x-form.group>
                                     </div>
-                                </div>
+                                </x-form.group>
 
-                                <div class="row justify-content-center">
+                                <x-form.group class="row justify-content-center">
                                     <div class="col-xl-6">
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-xl-2" style="text-align: right">
-                                                    <label class="form-label text-end" for="golongan_id">
-                                                        Golongan*
-                                                    </label>
-                                                </div>
-                                                <div class="col-xl">
-                                                    <select name="golongan_id" id="golongan_id" class="form-control">
-                                                        <option value="" disabled hidden>Pilih Golongan
-                                                        </option>
-                                                        @foreach ($golongans as $item)
-                                                            <option value="{{ $item->id }}"
-                                                                {{ $barang->golongan_id == $item->id ? 'selected' : '' }}>
-                                                                {{ $item->nama }}
-                                                            </option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        <x-form.group>
+                                            @php
+                                                $golonganOptions = $golongans
+                                                    ->mapWithKeys(fn($item) => [$item->id => $item->nama])
+                                                    ->toArray();
+                                                $golonganOptions = ['' => 'Pilih Golongan'] + $golonganOptions;
+                                            @endphp
+                                            <label for="golongan_id" class="form-label">Golongan*</label>
+                                            <select name="golongan_id" id="golongan_id" class="form-control">
+                                                @foreach ($golonganOptions as $optionValue => $optionLabel)
+                                                    <option value="{{ $optionValue }}"
+                                                        @if ((string) $optionValue === (string) $barang->golongan_id) selected @endif>
+                                                        {{ $optionLabel }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </x-form.group>
                                     </div>
-
                                     <div class="col-xl-6">
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-xl-2" style="text-align: right">
-                                                    <label class="form-label text-end" for="ppn_ranap">
-                                                        PPN Jual Rawat Inap (%)
-                                                    </label>
-                                                </div>
-                                                <div class="col-xl">
-                                                    <input type="text" value="{{ $barang->ppn_ranap ?? 0 }}"
-                                                        style="border: 0; border-bottom: 1.9px solid #eaeaea; margin-top: -.5rem; border-radius: 0"
-                                                        class="form-control" id="ppn_ranap" name="ppn_ranap"
-                                                        onkeyup="formatInputToNumber(this)">
-                                                    @error('ppn_ranap')
-                                                        <div class="invalid-feedback">{{ $message }}</div>
-                                                    @enderror
-                                                </div>
-                                            </div>
-                                        </div>
+                                        <x-form.group>
+                                            <x-form.input :name="'ppn_ranap'" type="text" id="ppn_ranap"
+                                                label="PPN Jual Rawat Inap (%)" :value="$barang->ppn_ranap ?? 0"
+                                                onkeyup="formatInputToNumber(this)" class="borderless-input" />
+                                            @error('ppn_ranap')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </x-form.group>
                                     </div>
-                                </div>
+                                </x-form.group>
 
-                                <div class="row justify-content-center">
+                                <x-form.group class="row justify-content-center">
                                     <div class="col-xl-6">
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-xl-2" style="text-align: right">
-                                                    <label class="form-label text-end" for="restriksi">
-                                                        Restriksi
-                                                    </label>
-                                                </div>
-                                                <div class="col-xl">
-                                                    <textarea name="restriksi" class="form-control" id="restriksi">{{ $barang->restriksi }}</textarea>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        <x-form.group>
+                                            <x-form.textarea :name="'restriksi'" id="restriksi" label="Restriksi"
+                                                :value="$barang->restriksi" />
+                                        </x-form.group>
                                     </div>
-
                                     <div class="col-xl-6">
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-xl-2" style="text-align: right">
-                                                    <label class="form-label text-end" for="tipe">
-                                                        Tipe Barang*
-                                                    </label>
-                                                </div>
-                                                <div class="col-xl">
-                                                    <select name="tipe" id="tipe" class="form-control" required>
-                                                        <option value="" disabled hidden>Pilih tipe barang
-                                                        </option>
-                                                        <option value="FN"
-                                                            {{ $barang->tipe == 'FN' ? 'selected' : '' }}>Formularium
-                                                            Nasional</option>
-                                                        <option value="NFN"
-                                                            {{ $barang->tipe == 'NFN' ? 'selected' : '' }}>Non Formularium
-                                                            Nasional</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        <x-form.group>
+                                            @php
+                                                $tipeOptions = [
+                                                    '' => 'Pilih tipe barang',
+                                                    'FN' => 'Formularium Nasional',
+                                                    'NFN' => 'Non Formularium Nasional',
+                                                ];
+                                            @endphp
+                                            <label for="tipe" class="form-label">Tipe Barang*</label>
+                                            <select name="tipe" id="tipe" required class="form-control">
+                                                @foreach ($tipeOptions as $optionValue => $optionLabel)
+                                                    <option value="{{ $optionValue }}"
+                                                        @if ((string) $optionValue === (string) $barang->tipe) selected @endif>
+                                                        {{ $optionLabel }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </x-form.group>
                                     </div>
-                                </div>
+                                </x-form.group>
 
-                                <div class="row justify-content-center">
+                                <x-form.group class="row justify-content-center">
                                     <div class="col-xl-6">
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-xl-2" style="text-align: right">
-                                                    <label class="form-label text-end" for="principal">
-                                                        Principal
-                                                    </label>
-                                                </div>
-                                                <div class="col-xl">
-                                                    <select name="principal" id="principal" class="form-control">
-                                                        <option value="" disabled hidden>Pilih Principal
-                                                        </option>
-                                                        @foreach ($pabriks as $item)
-                                                            <option value="{{ $item->id }}"
-                                                                {{ $barang->principal == $item->id ? 'selected' : '' }}>
-                                                                {{ $item->nama }}
-                                                            </option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        <x-form.group>
+                                            @php
+                                                $principalOptions = $pabriks
+                                                    ->mapWithKeys(fn($item) => [$item->id => $item->nama])
+                                                    ->toArray();
+                                                $principalOptions = ['' => 'Pilih Principal'] + $principalOptions;
+                                            @endphp
+                                            <label for="principal" class="form-label">Principal</label>
+                                            <select name="principal" id="principal" class="form-control">
+                                                @foreach ($principalOptions as $optionValue => $optionLabel)
+                                                    <option value="{{ $optionValue }}"
+                                                        @if ((string) $optionValue === (string) $barang->principal) selected @endif>
+                                                        {{ $optionLabel }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </x-form.group>
                                     </div>
-
                                     <div class="col-xl-6">
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-xl-2" style="text-align: right">
-                                                    <label class="form-label text-end" for="kelompok_id">
-                                                        Kelompok Barang
-                                                    </label>
-                                                </div>
-                                                <div class="col-xl">
-                                                    <select name="kelompok_id" id="kelompok_id" class="form-control">
-                                                        <option value="" disabled hidden>Pilih Kelompok
-                                                        </option>
-                                                        @foreach ($kelompoks as $item)
-                                                            <option value="{{ $item->id }}"
-                                                                {{ $barang->kelompok_id == $item->id ? 'selected' : '' }}>
-                                                                {{ $item->nama }}
-                                                            </option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        <x-form.group>
+                                            @php
+                                                $kelompokOptions = $kelompoks
+                                                    ->mapWithKeys(fn($item) => [$item->id => $item->nama])
+                                                    ->toArray();
+                                                $kelompokOptions = ['' => 'Pilih Kelompok'] + $kelompokOptions;
+                                            @endphp
+                                            <label for="kelompok_id" class="form-label">Kelompok Barang</label>
+                                            <select name="kelompok_id" id="kelompok_id" class="form-control">
+                                                @foreach ($kelompokOptions as $optionValue => $optionLabel)
+                                                    <option value="{{ $optionValue }}"
+                                                        @if ((string) $optionValue === (string) $barang->kelompok_id) selected @endif>
+                                                        {{ $optionLabel }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </x-form.group>
                                     </div>
-                                </div>
+                                </x-form.group>
 
-                                <div class="row justify-content-center">
+                                <x-form.group class="row justify-content-center">
                                     <div class="col-xl-6">
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-xl-2" style="text-align: right">
-                                                    <label class="form-label text-end" for="exp">
-                                                        Info expired
-                                                    </label>
-                                                </div>
-                                                <div class="col-xl">
-                                                    <select name="exp" id="exp" class="form-control">
-                                                        <option value="" selected hidden disabled>Pilih info expired
-                                                        </option>
-                                                        <option value="1w"
-                                                            {{ $barang->exp == '1w' ? 'selected' : '' }}>1 minggu</option>
-                                                        <option value="2w"
-                                                            {{ $barang->exp == '2w' ? 'selected' : '' }}>2 minggu</option>
-                                                        <option value="3w"
-                                                            {{ $barang->exp == '3w' ? 'selected' : '' }}>3 minggu</option>
-                                                        <option value="1mo"
-                                                            {{ $barang->exp == '1mo' ? 'selected' : '' }}>1 bulan</option>
-                                                        <option value="2mo"
-                                                            {{ $barang->exp == '2mo' ? 'selected' : '' }}>2 bulan</option>
-                                                        <option value="3mo"
-                                                            {{ $barang->exp == '3mo' ? 'selected' : '' }}>3 bulan</option>
-                                                        <option value="6mo"
-                                                            {{ $barang->exp == '6mo' ? 'selected' : '' }}>6 bulan</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        <x-form.group>
+                                            @php
+                                                $expOptions = [
+                                                    '' => 'Pilih info expired',
+                                                    '1w' => '1 minggu',
+                                                    '2w' => '2 minggu',
+                                                    '3w' => '3 minggu',
+                                                    '1mo' => '1 bulan',
+                                                    '2mo' => '2 bulan',
+                                                    '3mo' => '3 bulan',
+                                                    '6mo' => '6 bulan',
+                                                ];
+                                            @endphp
+                                            <label for="exp" class="form-label">Info expired</label>
+                                            <select name="exp" id="exp" class="form-control">
+                                                @foreach ($expOptions as $optionValue => $optionLabel)
+                                                    <option value="{{ $optionValue }}"
+                                                        @if ((string) $optionValue === (string) $barang->exp) selected @endif>
+                                                        {{ $optionLabel }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </x-form.group>
                                     </div>
-
                                     <div class="col-xl-6">
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-xl-2" style="text-align: right">
-                                                    <label class="form-label text-end" for="zat_aktif">
-                                                        Zat Aktif
-                                                    </label>
-                                                </div>
-                                                <div class="col-xl">
-                                                    <select class="form-control select2 w-100" id="zat_aktif"
-                                                        name="zat_aktif[]" multiple="multiple">
-                                                        @foreach ($zats as $zat)
-                                                            <option value="{{ $zat->id }}"
-                                                                {{ $barang->zat_aktif->contains('zat_id', $zat->id) ? 'selected' : '' }}>
-                                                                {{ $zat->nama }}
-                                                            </option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        <x-form.group>
+                                            @php
+                                                $zatOptions = $zats
+                                                    ->mapWithKeys(fn($zat) => [$zat->id => $zat->nama])
+                                                    ->toArray();
+                                                $zatSelected = array_map(
+                                                    'strval',
+                                                    $barang->zat_aktif->pluck('zat_id')->toArray(),
+                                                );
+                                            @endphp
+                                            <label for="zat_aktif" class="form-label">Zat Aktif</label>
+                                            <select name="zat_aktif[]" id="zat_aktif" multiple
+                                                class="form-control select2 w-100">
+                                                @foreach ($zatOptions as $optionValue => $optionLabel)
+                                                    <option value="{{ $optionValue }}"
+                                                        @if (in_array((string) $optionValue, $zatSelected, true)) selected @endif>
+                                                        {{ $optionLabel }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </x-form.group>
                                     </div>
-                                </div>
+                                </x-form.group>
 
-                                <div class="row justify-content-center">
+                                <x-form.group class="row justify-content-center">
                                     <div class="col-xl-6">
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-xl-2" style="text-align: right">
-                                                    <label class="form-label text-end" for="satuan_id">
-                                                        Satuan Default*
-                                                    </label>
-                                                </div>
-                                                <div class="col-xl">
-                                                    <select name="satuan_id" id="satuan_id" class="form-control"
-                                                        required>
-                                                        <option value="" disabled hidden>Pilih Satuan
-                                                        </option>
-                                                        @foreach ($satuans as $item)
-                                                            <option value="{{ $item->id }}"
-                                                                {{ $barang->satuan_id == $item->id ? 'selected' : '' }}>
-                                                                {{ $item->nama }}
-                                                            </option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        <x-form.group>
+                                            @php
+                                                $satuanOptions = $satuans
+                                                    ->mapWithKeys(fn($item) => [$item->id => $item->nama])
+                                                    ->toArray();
+                                                $satuanOptions = ['' => 'Pilih Satuan'] + $satuanOptions;
+                                            @endphp
+                                            <label for="satuan_id" class="form-label">Satuan Default*</label>
+                                            <select name="satuan_id" id="satuan_id" required class="form-control">
+                                                @foreach ($satuanOptions as $optionValue => $optionLabel)
+                                                    <option value="{{ $optionValue }}"
+                                                        @if ((string) $optionValue === (string) $barang->satuan_id) selected @endif>
+                                                        {{ $optionLabel }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </x-form.group>
                                     </div>
-
                                     <div class="col-xl-6">
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-xl-2" style="text-align: right">
-                                                    <label class="form-label text-end" for="aktif">
-                                                        Aktif?
-                                                    </label>
-                                                </div>
-                                                <div class="col-xl">
-                                                    <select name="aktif" id="aktif" class="form-control">
-                                                        <option value="1"
-                                                            {{ $barang->aktif == 1 ? 'selected' : '' }}>Aktif</option>
-                                                        <option value="0"
-                                                            {{ $barang->aktif == 0 ? 'selected' : '' }}>Non Aktif</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        <x-form.group>
+                                            @php
+                                                $aktifOptions = [1 => 'Aktif', 0 => 'Non Aktif'];
+                                            @endphp
+                                            <label for="aktif" class="form-label">Aktif?</label>
+                                            <select name="aktif" id="aktif" class="form-control">
+                                                @foreach ($aktifOptions as $optionValue => $optionLabel)
+                                                    <option value="{{ $optionValue }}"
+                                                        @if ((string) $optionValue === (string) $barang->aktif) selected @endif>
+                                                        {{ $optionLabel }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </x-form.group>
                                     </div>
-                                </div>
+                                </x-form.group>
 
-                                <div class="row justify-content-center">
+                                <x-form.group class="row justify-content-center">
                                     <div class="col-xl-6">
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-xl-2" style="text-align: right">
-                                                    <label class="form-label text-end" for="satuan_id">
-                                                        Satuan Tambahan
-                                                    </label>
-                                                </div>
-                                                <div class="col-xl">
-                                                    <select id="satuan-tambahan-select" class="form-control">
-                                                        <option value="" disabled hidden>Pilih Satuan
-                                                            Tambahan
-                                                        </option>
-                                                        @foreach ($satuans as $item)
-                                                            <option value="{{ $item->id }}">{{ $item->nama }}
-                                                            </option>
-                                                        @endforeach
-                                                    </select>
-
-                                                    <table class="table table-bordered table-hover table-striped w-100">
-                                                        <thead class="bg-primary-600">
-                                                            <tr>
-                                                                <th>Satuan</th>
-                                                                <th>Isi</th>
-                                                                <th>Aktif?</th>
-                                                                <th>Aksi</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody id="table-satuan">
-                                                            <script>
-                                                                const tempIds = [];
-                                                            </script>
-                                                            @foreach ($barang->satuan_tambahan as $satuan)
-                                                                <script>
-                                                                    tempIds.push({{ $satuan->satuan->id }})
-                                                                </script>
-                                                                <tr id="satuan{{ $loop->iteration }}"
-                                                                    data-index={{ $loop->iteration - 1 }}>
-                                                                    <td>{{ $satuan->satuan->nama }}</td>
-                                                                    <td>
-                                                                        <input type="hidden"
-                                                                            name="satuans_id[{{ $loop->iteration }}]"
-                                                                            value="{{ $satuan->satuan->id }}">
-                                                                        <input type="number"
-                                                                            name="satuans_jumlah[{{ $loop->iteration }}]"
-                                                                            value="{{ $satuan->isi }}"
-                                                                            class="form-control" min="1">
-                                                                    </td>
-                                                                    <td>
-                                                                        <input type="checkbox"
-                                                                            name="satuans_status[{{ $loop->iteration }}]"
-                                                                            value="1" title="Aktif?" checked>
-                                                                    </td>
-                                                                    <td>
-                                                                        <a class="mdi mdi-close pointer mdi-24px text-danger delete-btn"
-                                                                            title="Hapus"
-                                                                            onclick="PopupBarangFarmasiClass.deleteSatuanTambahan({{ $loop->iteration }})"></a>
-                                                                    </td>
-                                                                </tr>
-                                                            @endforeach
-                                                        </tbody>
-                                                    </table>
-
-                                                </div>
-                                            </div>
-                                        </div>
+                                        <x-form.group>
+                                            <label class="form-label text-end" for="satuan-tambahan-select">
+                                                Satuan Tambahan
+                                            </label>
+                                            @php
+                                                $satuanTambahanOptions = $satuans
+                                                    ->mapWithKeys(fn($item) => [$item->id => $item->nama])
+                                                    ->toArray();
+                                                $satuanTambahanOptions =
+                                                    ['' => 'Pilih Satuan Tambahan'] + $satuanTambahanOptions;
+                                            @endphp
+                                            <select id="satuan-tambahan-select" class="form-control">
+                                                @foreach ($satuanTambahanOptions as $optionValue => $optionLabel)
+                                                    <option value="{{ $optionValue }}">{{ $optionLabel }}</option>
+                                                @endforeach
+                                            </select>
+                                            <table class="table table-bordered table-hover table-striped w-100">
+                                                <thead class="bg-primary-600">
+                                                    <tr>
+                                                        <th>Satuan</th>
+                                                        <th>Isi</th>
+                                                        <th>Aktif?</th>
+                                                        <th>Aksi</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="table-satuan">
+                                                    <script>
+                                                        const tempIds = [];
+                                                    </script>
+                                                    @foreach ($barang->satuan_tambahan as $satuan)
+                                                        <script>
+                                                            tempIds.push({{ $satuan->satuan->id }})
+                                                        </script>
+                                                        <tr id="satuan{{ $loop->iteration }}"
+                                                            data-index={{ $loop->iteration - 1 }}>
+                                                            <td>{{ $satuan->satuan->nama }}</td>
+                                                            <td>
+                                                                <input type="hidden"
+                                                                    name="satuans_id[{{ $loop->iteration }}]"
+                                                                    value="{{ $satuan->satuan->id }}">
+                                                                <input type="number"
+                                                                    name="satuans_jumlah[{{ $loop->iteration }}]"
+                                                                    value="{{ $satuan->isi }}" class="form-control"
+                                                                    min="1">
+                                                            </td>
+                                                            <td>
+                                                                <input type="checkbox"
+                                                                    name="satuans_status[{{ $loop->iteration }}]"
+                                                                    value="1" title="Aktif?" checked>
+                                                            </td>
+                                                            <td>
+                                                                <a class="mdi mdi-close pointer mdi-24px text-danger delete-btn"
+                                                                    title="Hapus"
+                                                                    onclick="PopupBarangFarmasiClass.deleteSatuanTambahan({{ $loop->iteration }})"></a>
+                                                            </td>
+                                                        </tr>
+                                                    @endforeach
+                                                </tbody>
+                                            </table>
+                                        </x-form.group>
                                     </div>
-
                                     <div class="col-xl-6">
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-xl-2" style="text-align: right">
-                                                    <label class="form-label text-end" for="keterangan">
-                                                        Keterangan
-                                                    </label>
-                                                </div>
-                                                <div class="col-xl">
-                                                    <textarea name="keterangan" class="form-control" id="keterangan">{{ $barang->keterangan }}</textarea>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        <x-form.group>
+                                            <x-form.textarea :name="'keterangan'" id="keterangan" label="Keterangan"
+                                                :value="$barang->keterangan" />
+                                        </x-form.group>
                                     </div>
-                                </div>
+                                </x-form.group>
 
-                                <div class="row justify-content-center">
+                                <x-form.group class="row justify-content-center">
                                     <div class="col-xl-6">
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-xl-2" style="text-align: right">
-                                                    <label class="form-label text-end" for="harga_principal">
-                                                        Harga Principal
-                                                    </label>
-                                                </div>
-                                                <div class="col-xl">
-                                                    <input type="text" value="{{ $barang->harga_principal ?? 0 }}"
-                                                        style="border: 0; border-bottom: 1.9px solid #eaeaea; margin-top: -.5rem; border-radius: 0"
-                                                        class="form-control" id="harga_principal" name="harga_principal"
-                                                        onkeyup="formatInputToNumber(this)">
-                                                    @error('harga_principal')
-                                                        <div class="invalid-feedback">{{ $message }}</div>
-                                                    @enderror
-                                                </div>
-                                            </div>
-                                        </div>
+                                        <x-form.group>
+                                            <x-form.input :name="'harga_principal'" type="text" id="harga_principal"
+                                                label="Harga Principal" :value="$barang->harga_principal ?? 0"
+                                                onkeyup="formatInputToNumber(this)" class="borderless-input" />
+                                            @error('harga_principal')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </x-form.group>
                                     </div>
+                                    <div class="col-xl-6">
+                                        <x-form.group>
+                                            <x-form.input :name="'diskon_principal'" type="text" id="diskon_principal"
+                                                label="Diskon Principal (%)" :value="$barang->diskon_principal ?? 0"
+                                                onkeyup="formatInputToNumber(this)" class="borderless-input" />
+                                            @error('diskon_principal')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </x-form.group>
+                                    </div>
+                                </x-form.group>
 
+                                <x-form.group class="row justify-content-center">
                                     <div class="col-xl-6">
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-xl-2" style="text-align: right">
-                                                    <label class="form-label text-end" for="diskon_principal">
-                                                        Diskon Principal (%)
-                                                    </label>
-                                                </div>
-                                                <div class="col-xl">
-                                                    <input type="text" value="{{ $barang->diskon_principal ?? 0 }}"
-                                                        style="border: 0; border-bottom: 1.9px solid #eaeaea; margin-top: -.5rem; border-radius: 0"
-                                                        class="form-control" id="diskon_principal"
-                                                        name="diskon_principal" onkeyup="formatInputToNumber(this)">
-                                                    @error('diskon_principal')
-                                                        <div class="invalid-feedback">{{ $message }}</div>
-                                                    @enderror
-                                                </div>
-                                            </div>
-                                        </div>
+                                        <x-form.group>
+                                            @php
+                                                $jenisObatOptions = [
+                                                    '' => 'Pilih Jenis Obat',
+                                                    'generik' => 'Generik',
+                                                    'paten' => 'Paten',
+                                                ];
+                                            @endphp
+                                            <label for="jenis_obat" class="form-label">Jenis Obat</label>
+                                            <select name="jenis_obat" id="jenis_obat" class="form-control">
+                                                @foreach ($jenisObatOptions as $optionValue => $optionLabel)
+                                                    <option value="{{ $optionValue }}"
+                                                        @if ((string) $optionValue === (string) $barang->jenis_obat) selected @endif>
+                                                        {{ $optionLabel }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </x-form.group>
                                     </div>
-                                </div>
-
-                                <div class="row justify-content-center">
                                     <div class="col-xl-6">
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-xl-2" style="text-align: right">
-                                                    <label class="form-label text-end" for="jenis_obat">
-                                                        Jenis Obat
-                                                    </label>
-                                                </div>
-                                                <div class="col-xl">
-                                                    <select name="jenis_obat" id="jenis_obat" class="form-control">
-                                                        <option value="" disabled hidden>Pilih Jenis Obat
-                                                        </option>
-                                                        <option value="generik"
-                                                            {{ $barang->jenis_obat == 'generik' ? 'selected' : '' }}>
-                                                            Generik</option>
-                                                        <option value="paten"
-                                                            {{ $barang->jenis_obat == 'paten' ? 'selected' : '' }}>Paten
-                                                        </option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        <x-form.group>
+                                            @php
+                                                $formulariumOptions = [
+                                                    '' => 'Pilih Formularium',
+                                                    'RS' => 'Formularium Rumah Sakit',
+                                                    'NRS' => 'Formularium Non Rumah Sakit',
+                                                ];
+                                            @endphp
+                                            <label for="formularium" class="form-label">Formularium</label>
+                                            <select name="formularium" id="formularium" class="form-control">
+                                                @foreach ($formulariumOptions as $optionValue => $optionLabel)
+                                                    <option value="{{ $optionValue }}"
+                                                        @if ((string) $optionValue === (string) $barang->formularium) selected @endif>
+                                                        {{ $optionLabel }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </x-form.group>
                                     </div>
-
-                                    <div class="col-xl-6">
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-xl-2" style="text-align: right">
-                                                    <label class="form-label text-end" for="formularium">
-                                                        Formularium
-                                                    </label>
-                                                </div>
-                                                <div class="col-xl">
-                                                    <select name="formularium" id="formularium" class="form-control">
-                                                        <option value="" disabled hidden>Pilih Formularium
-                                                        </option>
-                                                        <option value="RS"
-                                                            {{ $barang->formularium == 'RS' ? 'selected' : '' }}>
-                                                            Formularium Rumah Sakit</option>
-                                                        <option value="NRS"
-                                                            {{ $barang->formularium == 'NRS' ? 'selected' : '' }}>
-                                                            Formularium Non Rumah Sakit</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                                </x-form.group>
 
                                 <br>
 
-                                <div class="row justify-content-center">
+                                <x-form.group class="row justify-content-center">
                                     <div class="col-xl-12">
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-xl-1" style="text-align: right">
-                                                    <label class="form-label text-end" for="alasan_edit">
-                                                        Alasan Edit*
-                                                    </label>
-                                                </div>
-                                                <div class="col-xl">
-                                                    <input type="text" name="alasan_edit" required
-                                                        class="form-control">
-                                                </div>
-                                            </div>
-                                        </div>
+                                        <x-form.group>
+                                            <x-form.input :name="'alasan_edit'" type="text" id="alasan_edit"
+                                                label="Alasan Edit*" required />
+                                        </x-form.group>
                                     </div>
-                                </div>
+                                </x-form.group>
 
                                 <div class="col-xl-12 mt-5">
                                     <div class="row">

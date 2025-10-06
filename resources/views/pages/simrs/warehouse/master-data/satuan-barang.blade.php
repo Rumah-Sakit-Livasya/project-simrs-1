@@ -1,78 +1,305 @@
 @extends('inc.layout')
-@section('title', 'List Satuan Barang')
+@section('title', 'Master Satuan Barang')
+
 @section('content')
     <main id="js-page-content" role="main" class="page-content">
-
-        @include('pages.simrs.warehouse.master-data.partials.satuan-barang-form')
-
-        @include('pages.simrs.warehouse.master-data.partials.satuan-barang-datatable')
-
-        @include('pages.simrs.warehouse.master-data.partials.add-satuan-barang-modal')
+        <div class="subheader">
+            <h1 class="subheader-title">
+                <i class='subheader-icon fal fa-box-open'></i> Master <span class='fw-300'>Satuan Barang</span>
+                <small>
+                    Manajemen data master untuk satuan barang.
+                </small>
+            </h1>
+        </div>
+        <div class="row">
+            <div class="col-xl-12">
+                <div id="panel-1" class="panel">
+                    <div class="panel-hdr">
+                        <h2>
+                            Daftar <span class="fw-300"><i>Satuan Barang</i></span>
+                        </h2>
+                        <div class="panel-toolbar">
+                            <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#add-modal">
+                                <i class="fal fa-plus"></i> Tambah Satuan
+                            </button>
+                        </div>
+                    </div>
+                    <div class="panel-container show">
+                        <div class="panel-content">
+                            <!-- datatable start -->
+                            <table id="dt-satuan-barang" class="table table-bordered table-hover table-striped w-100">
+                                <thead class="bg-primary-600">
+                                    <tr>
+                                        <th>No</th>
+                                        <th>Kode Satuan</th>
+                                        <th>Nama Satuan</th>
+                                        <th>Status</th>
+                                        <th>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Data akan diisi oleh DataTables -->
+                                </tbody>
+                            </table>
+                            <!-- datatable end -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </main>
+
+    <!-- Add Modal -->
+    <div class="modal fade" id="add-modal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <form id="add-form" method="POST">
+                    @csrf
+                    <div class="modal-header">
+                        <h5 class="modal-title">Tambah Satuan Barang</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true"><i class="fal fa-times"></i></span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label class="form-label" for="add-kode">Kode Satuan</label>
+                            <input type="text" id="add-kode" name="kode" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="add-nama">Nama Satuan</label>
+                            <input type="text" id="add-nama" name="nama" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Status</label>
+                            <div class="frame-wrap">
+                                <div class="custom-control custom-radio custom-control-inline">
+                                    <input type="radio" class="custom-control-input" id="add-aktif-true" name="aktif"
+                                        value="1" checked>
+                                    <label class="custom-control-label" for="add-aktif-true">Aktif</label>
+                                </div>
+                                <div class="custom-control custom-radio custom-control-inline">
+                                    <input type="radio" class="custom-control-input" id="add-aktif-false" name="aktif"
+                                        value="0">
+                                    <label class="custom-control-label" for="add-aktif-false">Non Aktif</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary">Simpan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Modal -->
+    <div class="modal fade" id="edit-modal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <form id="edit-form" method="POST">
+                    @csrf
+                    @method('PUT')
+                    <input type="hidden" id="edit-id" name="id">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Edit Satuan Barang</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true"><i class="fal fa-times"></i></span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label class="form-label" for="edit-kode">Kode Satuan</label>
+                            <input type="text" id="edit-kode" name="kode" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="edit-nama">Nama Satuan</label>
+                            <input type="text" id="edit-nama" name="nama" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Status</label>
+                            <div class="frame-wrap">
+                                <div class="custom-control custom-radio custom-control-inline">
+                                    <input type="radio" class="custom-control-input" id="edit-aktif-true"
+                                        name="aktif" value="1">
+                                    <label class="custom-control-label" for="edit-aktif-true">Aktif</label>
+                                </div>
+                                <div class="custom-control custom-radio custom-control-inline">
+                                    <input type="radio" class="custom-control-input" id="edit-aktif-false"
+                                        name="aktif" value="0">
+                                    <label class="custom-control-label" for="edit-aktif-false">Non Aktif</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-warning">Update</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 @endsection
+
 @section('plugin')
     <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
-    <script src="/js/datagrid/datatables/datatables.export.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous">
-    </script>
-
     <script>
-        var controls = {
-            leftArrow: '<i class="fal fa-angle-left" style="font-size: 1.25rem"></i>',
-            rightArrow: '<i class="fal fa-angle-right" style="font-size: 1.25rem"></i>'
-        }
-
         $(document).ready(function() {
+            // Setup CSRF token for all AJAX requests
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
 
-            $('#loading-spinner').show();
-            // initialize datatable
-            $('#dt-basic-example').dataTable({
-                "drawCallback": function(settings) {
-                    // Menyembunyikan preloader setelah data berhasil dimuat
-                    $('#loading-spinner').hide();
-                },
+            // Initialize DataTables
+            var table = $('#dt-satuan-barang').DataTable({
+                processing: true,
+                serverSide: true,
+                ajax: "{{ route('warehouse.master-data.satuan-barang.data') }}",
+                columns: [{
+                        data: 'DT_RowIndex',
+                        name: 'DT_RowIndex',
+                        orderable: false,
+                        searchable: false
+                    },
+                    {
+                        data: 'kode',
+                        name: 'kode'
+                    },
+                    {
+                        data: 'nama',
+                        name: 'nama'
+                    },
+                    {
+                        data: 'status',
+                        name: 'status'
+                    },
+                    {
+                        data: 'action',
+                        name: 'action',
+                        orderable: false,
+                        searchable: false,
+                        className: 'text-center'
+                    },
+                ],
                 responsive: true,
                 lengthChange: false,
                 dom: "<'row mb-3'<'col-sm-12 col-md-6 d-flex align-items-center justify-content-start'f><'col-sm-12 col-md-6 d-flex align-items-center justify-content-end'lB>>" +
                     "<'row'<'col-sm-12'tr>>" +
                     "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
                 buttons: [{
-                        extend: 'pdfHtml5',
-                        text: 'PDF',
-                        titleAttr: 'Generate PDF',
-                        className: 'btn-outline-danger btn-sm mr-1'
-                    },
-                    {
                         extend: 'excelHtml5',
-                        text: 'Excel',
-                        titleAttr: 'Generate Excel',
+                        text: '<i class="fal fa-file-excel"></i>',
+                        titleAttr: 'Export to Excel',
                         className: 'btn-outline-success btn-sm mr-1'
                     },
                     {
-                        extend: 'csvHtml5',
-                        text: 'CSV',
-                        titleAttr: 'Generate CSV',
-                        className: 'btn-outline-primary btn-sm mr-1'
-                    },
-                    {
-                        extend: 'copyHtml5',
-                        text: 'Copy',
-                        titleAttr: 'Copy to clipboard',
-                        className: 'btn-outline-primary btn-sm mr-1'
-                    },
-                    {
                         extend: 'print',
-                        text: 'Print',
+                        text: '<i class="fal fa-print"></i>',
                         titleAttr: 'Print Table',
                         className: 'btn-outline-primary btn-sm'
                     }
                 ]
             });
 
+            // Store new data
+            $('#add-form').on('submit', function(e) {
+                e.preventDefault();
+                var formData = $(this).serialize();
+
+                $.ajax({
+                    url: "{{ route('warehouse.master-data.satuan-barang.store') }}",
+                    type: "POST",
+                    data: formData,
+                    success: function(response) {
+                        if (response.success) {
+                            $('#add-modal').modal('hide');
+                            showSuccessAlert(response.message);
+                            table.ajax.reload();
+                        }
+                    },
+                    error: function(xhr) {
+                        showErrorAlertNoRefresh(
+                            'Gagal menyimpan data. Pastikan kode unik dan semua field terisi.'
+                            );
+                    }
+                });
+            });
+
+            // Edit button click
+            $('#dt-satuan-barang').on('click', '.edit-btn', function() {
+                var url = $(this).data('url');
+                $.get(url, function(response) {
+                    if (response.success) {
+                        var data = response.data;
+                        $('#edit-modal').modal('show');
+                        $('#edit-id').val(data.id);
+                        $('#edit-nama').val(data.nama);
+                        $('#edit-kode').val(data.kode);
+                        if (data.aktif == 1) {
+                            $('#edit-aktif-true').prop('checked', true);
+                        } else {
+                            $('#edit-aktif-false').prop('checked', true);
+                        }
+                        // Set the form action URL dynamically
+                        var updateUrl = "{{ url('warehouse/master-data/satuan-barang') }}/" + data
+                            .id;
+                        $('#edit-form').attr('action', updateUrl);
+                    }
+                });
+            });
+
+            // Update data
+            $('#edit-form').on('submit', function(e) {
+                e.preventDefault();
+                var url = $(this).attr('action');
+                var formData = $(this).serialize();
+
+                $.ajax({
+                    url: url,
+                    type: "POST", // Method override handled by _method:PUT in form
+                    data: formData,
+                    success: function(response) {
+                        if (response.success) {
+                            $('#edit-modal').modal('hide');
+                            showSuccessAlert(response.message);
+                            table.ajax.reload();
+                        }
+                    },
+                    error: function(xhr) {
+                        showErrorAlertNoRefresh('Gagal memperbarui data. Pastikan kode unik.');
+                    }
+                });
+            });
+
+            // Delete button click
+            $('#dt-satuan-barang').on('click', '.delete-btn', function() {
+                var url = $(this).data('url');
+                showDeleteConfirmation(function() {
+                    $.ajax({
+                        url: url,
+                        type: 'DELETE',
+                        success: function(response) {
+                            if (response.success) {
+                                showSuccessAlert(response.message);
+                                table.ajax.reload();
+                            }
+                        },
+                        error: function(xhr) {
+                            showErrorAlert('Gagal menghapus data.');
+                        }
+                    });
+                });
+            });
+
+            // Clear modal on hidden
+            $('#add-modal, #edit-modal').on('hidden.bs.modal', function() {
+                $(this).find('form')[0].reset();
+            });
         });
     </script>
-
-    <script src="{{ asset('js/simrs/warehouse/master-data/satuan-barang.js') }}?v={{ time() }}"></script>
-
 @endsection
