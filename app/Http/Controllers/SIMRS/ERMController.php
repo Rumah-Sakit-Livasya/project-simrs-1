@@ -1227,62 +1227,62 @@ class ERMController extends Controller
         $registrationId = $validated['registration_id'];
         $path = "documents/{$registrationId}";
 
+        // Membuat nama file yang unik dengan tetap mempertahankan nama asli
         $extension = $file->getClientOriginalExtension();
         $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
-        $uniqueSuffix = uniqid('_', true);
-        $uniqueFileName = $originalName . $uniqueSuffix . '.' . $extension;
+        $uniqueFileName = $originalName . '_' . time() . '.' . $extension;
 
-        // Pastikan folder tujuan ada, jika belum ada maka buat foldernya
+        // Variabel untuk menyimpan path file yang disimpan, untuk rollback jika perlu
+        $storedPath = null;
+
         try {
-            $storageDisk = Storage::disk('public');
-            if (!$storageDisk->exists($path)) {
-                $storageDisk->makeDirectory($path, 0755, true);
+            // Memulai transaksi database.
+            // Proses akan dibatalkan jika ada error di tengah jalan.
+            DB::beginTransaction();
+
+            // storeAs akan otomatis membuat direktori jika belum ada.
+            // Tidak perlu pengecekan manual dengan Storage::exists().
+            $storedPath = $file->storeAs($path, $uniqueFileName, 'public');
+
+            // Validasi sederhana jika storeAs gagal tanpa melempar exception (jarang terjadi)
+            if (!$storedPath) {
+                throw new \Exception("Gagal menyimpan file ke disk.");
             }
-        } catch (\Throwable $e) {
-            \Illuminate\Support\Facades\Log::error('Gagal membuat direktori penyimpanan dokumen.', [
-                'exception' => $e->getMessage(),
-                'path' => $path,
+
+            UploadedDocument::create([
+                'registration_id'      => $registrationId,
+                'user_id'              => Auth::id(),
+                'document_category_id' => $validated['document_category_id'],
+                'description'          => $validated['description'] ?? null,
+                'original_filename'    => $file->getClientOriginalName(),
+                'stored_filename'      => $uniqueFileName,
+                'file_path'            => $storedPath,
+                'mime_type'            => $file->getMimeType(),
+                'file_size'            => $file->getSize(),
             ]);
-            return response()->json(['error' => 'Gagal membuat folder penyimpanan dokumen.'], 500);
-        }
 
-        try {
-            $storedFile = $file->storeAs($path, $uniqueFileName, 'public');
-        } catch (\Throwable $e) {
-            \Illuminate\Support\Facades\Log::error('Exception saat menyimpan file dokumen.', [
-                'exception' => $e->getMessage(),
-                'path' => $path,
-                'uniqueFileName' => $uniqueFileName,
+            // Jika semua berhasil, commit transaksi
+            DB::commit();
+
+            return response()->json(['success' => 'Dokumen berhasil diunggah!', 'path' => $storedPath]);
+
+        } catch (Throwable $e) {
+            // Jika terjadi error, batalkan semua perubahan di database
+            DB::rollBack();
+
+            // Jika file sudah sempat tersimpan sebelum error, hapus file tersebut
+            // Ini untuk mencegah adanya file "yatim" di storage
+            if ($storedPath && Storage::disk('public')->exists($storedPath)) {
+                Storage::disk('public')->delete($storedPath);
+            }
+
+            Log::error('Gagal mengunggah dokumen.', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
             ]);
-            return response()->json(['error' => 'Terjadi kesalahan saat menyimpan file.'], 500);
+
+            return response()->json(['error' => 'Terjadi kesalahan internal saat mengunggah dokumen.'], 500);
         }
-
-        $userId = \Illuminate\Support\Facades\Auth::id();
-        $fileSize = $file->getSize();
-
-        // Validasi hasil penyimpanan file
-        if (!$storedFile || $storedFile === '0' || $storedFile === 0 || !Storage::disk('public')->exists($storedFile)) {
-            \Illuminate\Support\Facades\Log::error('Gagal menyimpan file dokumen. Path:', [
-                'path' => $path,
-                'uniqueFileName' => $uniqueFileName,
-                'storedFile' => $storedFile,
-            ]);
-            return response()->json(['error' => 'Gagal menyimpan file. Pastikan folder storage/app/public dapat diakses dan memiliki permission yang benar.'], 500);
-        }
-
-        \App\Models\UploadedDocument::create([
-            'registration_id' => $registrationId,
-            'user_id' => $userId,
-            'document_category_id' => $validated['document_category_id'],
-            'description' => $validated['description'] ?? null,
-            'original_filename' => $file->getClientOriginalName(),
-            'stored_filename' => $uniqueFileName,
-            'file_path' => $storedFile,
-            'mime_type' => $file->getMimeType(),
-            'file_size' => $fileSize,
-        ]);
-
-        return response()->json(['success' => 'Dokumen berhasil diunggah!']);
     }
 
     public function viewUploadedDocument(int $id)
