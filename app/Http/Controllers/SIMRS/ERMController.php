@@ -1232,15 +1232,23 @@ class ERMController extends Controller
         $uniqueSuffix = uniqid('_', true);
         $uniqueFileName = $originalName . $uniqueSuffix . '.' . $extension;
 
-        $storedFile = $file->storeAs($path, $uniqueFileName, 'public');
+        try {
+            $storedFile = $file->storeAs($path, $uniqueFileName, 'public');
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Exception saat menyimpan file dokumen.', [
+                'exception' => $e->getMessage(),
+                'path' => $path,
+                'uniqueFileName' => $uniqueFileName,
+            ]);
+            return response()->json(['error' => 'Terjadi kesalahan saat menyimpan file.'], 500);
+        }
 
-        $userId = Auth::id();
+        $userId = \Illuminate\Support\Facades\Auth::id();
         $fileSize = $file->getSize();
 
-        // Jika file gagal disimpan, file_path akan bernilai false (atau string kosong/0 jika error)
-        // Pastikan file_path hanya diisi jika file benar-benar tersimpan
+        // Validasi hasil penyimpanan file
         if (!$storedFile || $storedFile === '0' || $storedFile === 0) {
-            \Log::error('Gagal menyimpan file dokumen. Path:', [
+            \Illuminate\Support\Facades\Log::error('Gagal menyimpan file dokumen. Path:', [
                 'path' => $path,
                 'uniqueFileName' => $uniqueFileName,
                 'storedFile' => $storedFile,
