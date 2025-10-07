@@ -50,7 +50,7 @@
                                         </div>
                                         <div class="col-6 px-0">
                                             <small class="text-muted"><strong>Penjamin:</strong>
-                                                {{ $registration->penjamin->nama_perusahaan }}</small>
+                                                {{ strtolower($registration->penjamin->nama_perusahaan) == 'standar' ? 'Inisiatif Pribadi' : $registration->penjamin->nama_perusahaan }}</small>
                                         </div>
                                     </div>
                                     <div class="row mb-1">
