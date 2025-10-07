@@ -697,14 +697,14 @@
                         <td align="center">{{ $loop->iteration }}</td>
                         <td>{{ $orderParameter->parameter_laboratorium->parameter }}</td>
                         <td align="right">
-                            {{ (new NumberFormatter('id_ID', NumberFormatter::CURRENCY))->formatCurrency($orderParameter->nominal_rupiah, 'IDR') }}
+                            {{ 'Rp ' . number_format($orderParameter->nominal_rupiah, 0, ',', '.') }}
                         </td>
                     </tr>
                 @endforeach
                 <tr>
                     <td colspan="2" align="right"><strong>TOTAL</strong></td>
                     <td align="right">
-                        <strong>{{ (new NumberFormatter('id_ID', NumberFormatter::CURRENCY))->formatCurrency($order->order_parameter_laboratorium->sum('nominal_rupiah'), 'IDR') }}</strong>
+                        <strong>{{ 'Rp ' . number_format($order->order_parameter_laboratorium->sum('nominal_rupiah'), 0, ',', '.') }}</strong>
                     </td>
                 </tr>
             </tbody>

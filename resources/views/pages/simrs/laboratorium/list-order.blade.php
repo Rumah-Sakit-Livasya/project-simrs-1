@@ -30,6 +30,7 @@
     <script src="/js/dependency/moment/moment.js"></script>
     <script src="/js/formplugins/bootstrap-daterangepicker/bootstrap-daterangepicker.js"></script>
 
+    @stack('plugin-order-lab')
     <script>
         $(document).ready(function() {
             // Inisialisasi Date Range Picker
@@ -40,119 +41,6 @@
                 }
             });
 
-            // Inisialisasi Datatables
-            let table = $('#dt-lab-orders').DataTable({
-                "drawCallback": function(settings) {
-                    $('#loading-spinner').hide();
-                },
-                responsive: true,
-                lengthChange: false,
-                dom: "<'row mb-3'<'col-sm-12 col-md-6 d-flex align-items-center justify-content-start'f><'col-sm-12 col-md-6 d-flex align-items-center justify-content-end'lB>>" +
-                    "<'row'<'col-sm-12'tr>>" +
-                    "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
-                buttons: [{
-                        extend: 'pdfHtml5',
-                        text: 'PDF',
-                        titleAttr: 'Generate PDF',
-                        className: 'btn-outline-danger btn-sm mr-1'
-                    },
-                    {
-                        extend: 'excelHtml5',
-                        text: 'Excel',
-                        titleAttr: 'Generate Excel',
-                        className: 'btn-outline-success btn-sm mr-1'
-                    },
-                    {
-                        extend: 'csvHtml5',
-                        text: 'CSV',
-                        titleAttr: 'Generate CSV',
-                        className: 'btn-outline-primary btn-sm mr-1'
-                    },
-                    {
-                        extend: 'copyHtml5',
-                        text: 'Copy',
-                        titleAttr: 'Copy to clipboard',
-                        className: 'btn-outline-primary btn-sm mr-1'
-                    },
-                    {
-                        extend: 'print',
-                        text: 'Print',
-                        titleAttr: 'Print Table',
-                        className: 'btn-outline-primary btn-sm'
-                    }
-                ],
-                initComplete: function() {
-                    // Inisialisasi Popovers setelah tabel selesai dimuat
-                    $('[data-toggle="popover"]').each(function() {
-                        var contentId = $(this).data('content-id');
-                        var contentHtml = $('#' + contentId).html();
-                        $(this).popover({
-                            html: true,
-                            content: contentHtml,
-                            sanitize: false // Penting jika kontennya HTML
-                        });
-                    });
-                }
-            });
-
-            // ===================== TAMBAHKAN BLOK KODE INI =====================
-            // Event listener untuk tombol delete
-            $('#dt-lab-orders tbody').on('click', '.delete-btn', function() {
-                var orderId = $(this).data('id');
-                var row = $(this).closest('tr'); // Ambil elemen <tr> dari baris yang akan dihapus
-
-                // Tampilkan konfirmasi menggunakan SweetAlert
-                Swal.fire({
-                    title: 'Apakah Anda yakin?',
-                    text: "Order ini akan dihapus secara permanen!",
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#3085d6',
-                    cancelButtonColor: '#d33',
-                    confirmButtonText: 'Ya, hapus!',
-                    cancelButtonText: 'Batal'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        // Jika user mengonfirmasi, kirim request AJAX
-                        $.ajax({
-                            url: `/simrs/laboratorium/order/${orderId}`, // Sesuaikan dengan URL route Anda
-                            type: 'DELETE',
-                            headers: {
-                                // Kirim CSRF token untuk keamanan
-                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                            },
-                            success: function(response) {
-                                if (response.success) {
-                                    // Hapus baris dari DataTable
-                                    table.row(row).remove().draw();
-
-                                    // Tampilkan notifikasi sukses
-                                    Swal.fire(
-                                        'Dihapus!',
-                                        response.message,
-                                        'success'
-                                    );
-                                } else {
-                                    // Tampilkan notifikasi error dari server
-                                    Swal.fire(
-                                        'Gagal!',
-                                        response.message,
-                                        'error'
-                                    );
-                                }
-                            },
-                            error: function(xhr, status, error) {
-                                // Tangani error AJAX (misal: server down, 404, dll)
-                                Swal.fire(
-                                    'Error!',
-                                    'Tidak dapat menghubungi server. Coba lagi nanti.',
-                                    'error'
-                                );
-                            }
-                        });
-                    }
-                });
-            });
         });
 
         // Fungsi helper untuk format input No. RM
@@ -229,76 +117,6 @@
         $(document).on('click', '.result-btn', function() {
             let orderId = $(this).data('id');
             window.open(`/simrs/laboratorium/hasil-order/${orderId}`, '_blank');
-        });
-    </script>
-
-    <script>
-        $(document).ready(function() {
-            /* Fungsi untuk memformat child row, termasuk total biaya */
-            function format(details) {
-                if (!details || details.length === 0) {
-                    return '<div class="p-3 text-center">Tidak ada detail parameter untuk order ini.</div>';
-                }
-                let totalPrice = 0;
-                let table = `<table class="table table-sm table-striped table-bordered child-table">
-                            <thead class="bg-info-50">
-                                <tr>
-                                    <th style="width: 30px;">#</th>
-                                    <th>Parameter</th>
-                                    <th>Harga</th>
-                                    <th>Catatan</th>
-                                </tr>
-                            </thead>
-                            <tbody>`;
-                details.forEach((item, index) => {
-                    totalPrice += (parseFloat(item.nominal_rupiah) || 0);
-                    const formattedPrice = new Intl.NumberFormat('id-ID', {
-                        style: 'currency',
-                        currency: 'IDR',
-                        minimumFractionDigits: 2
-                    }).format(item.nominal_rupiah || 0);
-                    const parameterName = item.parameter_laboratorium ? item.parameter_laboratorium
-                        .parameter : '<i class="text-muted">N/A</i>';
-                    table += `<tr>
-                            <td>${index + 1}</td>
-                            <td>${parameterName}</td>
-                            <td>${formattedPrice}</td>
-                            <td>${item.catatan || ''}</td>
-                          </tr>`;
-                });
-                table += '</tbody>';
-                const formattedTotal = new Intl.NumberFormat('id-ID', {
-                    style: 'currency',
-                    currency: 'IDR',
-                    minimumFractionDigits: 2
-                }).format(totalPrice);
-                table += `<tfoot>
-                        <tr>
-                            <td colspan="2" class="text-right font-weight-bold">Total Biaya</td>
-                            <td class="font-weight-bold">${formattedTotal}</td>
-                            <td></td>
-                        </tr>
-                      </tfoot>`;
-                table += '</table>';
-                return table;
-            }
-
-            // Event listener untuk membuka dan menutup detail
-            $('#dt-lab-orders tbody').on('click', 'td.details-control', function() {
-                var tr = $(this).closest('tr');
-                var row = table.row(tr);
-                var icon = $(this).find('i');
-                var detailData = JSON.parse(tr.attr('data-details'));
-                if (row.child.isShown()) {
-                    row.child.hide();
-                    tr.removeClass('details-shown');
-                    icon.removeClass('fa-minus-circle text-danger').addClass('fa-plus-circle text-success');
-                } else {
-                    row.child(format(detailData)).show();
-                    tr.addClass('details-shown');
-                    icon.removeClass('fa-plus-circle text-success').addClass('fa-minus-circle text-danger');
-                }
-            });
         });
     </script>
 @endsection
