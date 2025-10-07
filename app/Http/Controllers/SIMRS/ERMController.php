@@ -57,12 +57,14 @@ use App\Models\WarehouseBarangFarmasi;
 use App\Models\WarehouseMasterGudang;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\View;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
+
 use Throwable;
 
 class ERMController extends Controller
@@ -1239,27 +1241,29 @@ class ERMController extends Controller
 
         $file = $request->file('file');
         $registrationId = $validated['registration_id'];
-        $path = "documents/{$registrationId}";
+        $path = "kepustakaan/{$registrationId}";
 
         $extension = $file->getClientOriginalExtension();
         $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
-        $uniqueFileName = time() . '_' . \Str::slug($originalName) . '.' . $extension;
+        $uniqueFileName = time() . '_' . Str::slug($originalName) . '.' . $extension;
 
         $storedPath = null;
 
         try {
-            \DB::beginTransaction();
+            DB::beginTransaction();
 
             // Simpan file menggunakan Storage Laravel
             $storedPath = $file->storeAs($path, $uniqueFileName, 'public');
 
-            if (!$storedPath || !\Storage::disk('public')->exists($storedPath)) {
-                throw new \Exception("Gagal menyimpan file ke disk.");
+            if (!$storedPath || !Storage::disk('public')->exists($storedPath)) {
+                return response()->json([
+                    'error' => 'Terjadi kesalahan internal saat mengunggah dokumen: Gagal menyimpan file ke disk.'
+                ], 500);
             }
 
             \App\Models\UploadedDocument::create([
                 'registration_id'      => $registrationId,
-                'user_id'              => \Auth::id(),
+                'user_id'              => Auth::id(),
                 'document_category_id' => $validated['document_category_id'],
                 'description'          => $validated['description'] ?? null,
                 'original_filename'    => $file->getClientOriginalName(),
@@ -1269,31 +1273,25 @@ class ERMController extends Controller
                 'file_size'            => $file->getSize(),
             ]);
 
-            \DB::commit();
+            DB::commit();
 
             return response()->json(['success' => 'Dokumen berhasil diunggah!', 'path' => $storedPath]);
         } catch (\Throwable $e) {
-            \DB::rollBack();
+            DB::rollBack();
 
             // Hapus file jika sudah sempat tersimpan
-            if ($storedPath && \Storage::disk('public')->exists($storedPath)) {
-                \Storage::disk('public')->delete($storedPath);
+            if ($storedPath && Storage::disk('public')->exists($storedPath)) {
+                Storage::disk('public')->delete($storedPath);
             }
 
-            \Log::error('Gagal mengunggah dokumen.', [
+            Log::error('Gagal mengunggah dokumen.', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
 
-            $errorMessage = $e->getMessage();
-            if (str_contains($errorMessage, 'tidak dapat ditulis')) {
-                $errorMessage .= ' (Pastikan folder storage/app/public dan subfolder-nya dapat ditulis oleh web server)';
-            }
-            if (str_contains($errorMessage, 'file does not exist or is not readable')) {
-                $errorMessage .= ' (File upload gagal: file sementara tidak ditemukan atau tidak dapat dibaca. Silakan coba unggah ulang.)';
-            }
-
-            return response()->json(['error' => 'Terjadi kesalahan internal saat mengunggah dokumen: ' . $errorMessage], 500);
+            return response()->json([
+                'error' => 'Terjadi kesalahan internal saat mengunggah dokumen: Gagal menyimpan file ke disk.'
+            ], 500);
         }
     }
 
