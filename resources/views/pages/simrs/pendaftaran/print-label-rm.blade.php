@@ -36,8 +36,8 @@
         }
 
         .container {
-            width: 100%;
-            height: 280px;
+            width: 150%;
+            height: 150%;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -46,8 +46,8 @@
             transform: rotate(90deg);
             /* Center after rotation */
             position: absolute;
-            right: 40px;
-            top: -40;
+            right: 70px;
+            top: -80px;
             /* Add margin from border */
             margin: 10px;
             /* To keep the rotated content inside the page */
