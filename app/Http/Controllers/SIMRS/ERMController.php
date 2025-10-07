@@ -1311,30 +1311,18 @@ class ERMController extends Controller
             abort(404, 'Dokumen tidak ditemukan.');
         }
 
-        // Path relatif di storage/app/public
         $relativePath = $document->file_path;
 
-        // Path absolut di server (storage/app/public/...)
+        // Pastikan file ada di storage/app/public
         $absolutePath = storage_path('app/public/' . $relativePath);
+        if (!file_exists($absolutePath)) {
+            abort(404, 'File dokumen tidak ditemukan di server.');
+        }
 
-        // Tampilkan data path dan data database
-        return response()->json([
-            'database_data' => [
-                'id' => $document->id,
-                'registration_id' => $document->registration_id,
-                'user_id' => $document->user_id,
-                'document_category_id' => $document->document_category_id,
-                'description' => $document->description,
-                'original_filename' => $document->original_filename,
-                'stored_filename' => $document->stored_filename,
-                'file_path' => $document->file_path,
-                'mime_type' => $document->mime_type,
-                'file_size' => $document->file_size,
-                'created_at' => $document->created_at,
-                'updated_at' => $document->updated_at,
-            ],
-            'server_path' => $absolutePath,
-            'storage_relative_path' => $relativePath,
+        // Tampilkan gambar langsung
+        return response()->file($absolutePath, [
+            'Content-Type' => $document->mime_type,
+            'Content-Disposition' => 'inline; filename="' . $document->original_filename . '"',
         ]);
     }
 
