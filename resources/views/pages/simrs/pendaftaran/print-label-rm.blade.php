@@ -36,7 +36,7 @@
         }
 
         .container {
-            width: 180px;
+            width: 100%;
             height: 280px;
             display: flex;
             flex-direction: column;
@@ -47,7 +47,7 @@
             /* Center after rotation */
             position: absolute;
             right: 40px;
-            top: 0;
+            top: -40;
             /* Add margin from border */
             margin: 10px;
             /* To keep the rotated content inside the page */
