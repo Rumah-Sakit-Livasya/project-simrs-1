@@ -11,34 +11,53 @@
         * {
             font-family: sans-serif;
             margin: 0;
+            box-sizing: border-box;
         }
 
         html,
         body {
-            width: 400px;
-            height: 400px;
+            width: 200px;
+            height: 300px;
             margin: 0;
             padding: 0;
             overflow: hidden;
         }
 
         body {
+            width: 200px;
+            height: 300px;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            /* Center content after rotation */
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 400px;
-            height: 400px;
-            margin: 0;
-            overflow: hidden;
-            position: relative;
         }
 
         .container {
-            transform: rotate(90deg);
+            width: 180px;
+            height: 280px;
             display: flex;
             flex-direction: column;
-            align-items: center;
             justify-content: center;
+            align-items: flex-start;
+            /* Rotate label as before */
+            transform: rotate(90deg);
+            /* Center after rotation */
+            position: absolute;
+            right: 40px;
+            top: 0;
+            /* Add margin from border */
+            margin: 10px;
+            /* To keep the rotated content inside the page */
+            box-sizing: border-box;
+        }
+
+        .container p {
+            margin: 8px 0;
+            padding-left: 8px;
+            /* Text left by default */
         }
     </style>
     <title>Kartu Pasien</title>
