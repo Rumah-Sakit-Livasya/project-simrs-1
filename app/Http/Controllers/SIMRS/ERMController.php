@@ -1278,7 +1278,7 @@ class ERMController extends Controller
             'stored_filename'      => $uniqueFileName,
             'file_path'            => $storedPath,
             'mime_type'            => $file->getClientMimeType(),
-            'file_size'            => $file->getSize(),
+            'file_size'            => filesize($storagePath . '/' . $uniqueFileName),
         ]);
 
         DB::commit();
