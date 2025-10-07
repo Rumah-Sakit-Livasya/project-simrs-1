@@ -1207,8 +1207,7 @@ class ERMController extends Controller
                     return $row->user->name;
                 })
                 ->addColumn('action', function ($row) {
-                    $viewUrl = route('erm.dokumen.view', $row->id);
-                    $btn = '<a href="' . $viewUrl . '" target="_blank" class="btn btn-sm btn-success mr-2" title="Lihat Dokumen"><i class="fas fa-eye"></i></a>';
+                    $btn = '<button type="button" class="btn btn-sm btn-success mr-2 btn-view-document" data-id="' . $row->id . '" title="Lihat Dokumen" data-toggle="modal" data-target="#viewDocumentModal"><i class="fas fa-eye"></i></button>';
                     $btn .= '<button type="button" class="btn btn-sm btn-danger btn-delete-document" data-id="' . $row->id . '" title="Hapus Dokumen"><i class="fas fa-trash"></i></button>';
 
                     return $btn;
@@ -1311,18 +1310,28 @@ class ERMController extends Controller
             abort(404, 'Dokumen tidak ditemukan.');
         }
 
+        // Path relatif di storage/app/private
         $relativePath = $document->file_path;
+        $absolutePath = storage_path('app/private/' . $relativePath);
 
-        // Pastikan file ada di storage/app/public
-        $absolutePath = storage_path('app/public/' . $relativePath);
-        if (!file_exists($absolutePath)) {
-            abort(404, 'File dokumen tidak ditemukan di server.');
-        }
-
-        // Tampilkan gambar langsung
-        return response()->file($absolutePath, [
-            'Content-Type' => $document->mime_type,
-            'Content-Disposition' => 'inline; filename="' . $document->original_filename . '"',
+        // Data untuk frontend (tampil di sini)
+        return response()->json([
+            'id' => $document->id,
+            'registration_id' => $document->registration_id,
+            'user_id' => $document->user_id,
+            'document_category_id' => $document->document_category_id,
+            'description' => $document->description,
+            'original_filename' => $document->original_filename,
+            'stored_filename' => $document->stored_filename,
+            'file_path' => $document->file_path,
+            'mime_type' => $document->mime_type,
+            'file_size' => $document->file_size,
+            'created_at' => $document->created_at,
+            'updated_at' => $document->updated_at,
+            'server_path' => $absolutePath,
+            'storage_relative_path' => $relativePath,
+            // Tambahan: URL untuk preview jika ingin tampil di sini
+            'url' => route('erm.dokumen.view', ['document' => $document->id]),
         ]);
     }
 
