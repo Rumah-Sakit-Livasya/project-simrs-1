@@ -1278,7 +1278,7 @@
             <div id="hhr" class="hrt">
                 <ul style="line-height:1.5em">
                     <li><span>Tgl Order</span>: {{ $order->order_date }}</li>
-                    <li><span>Dokter Perujuk</span>: {{ $order->registration_otc->doctor->employee->fullname }}</li>
+                    {{-- <li><span>Dokter Perujuk</span>: {{ $order->registration_otc->doctor->employee->fullname }}</li> --}}
                     <li><span>Poly/Ruang</span>: {{ $order->registration_otc->poly_ruang }}</li>
                     <li><span>Dokter Penanggung Jawab</span>: {{ $order->doctor->employee->fullname }}</li>
                     <li><span>Tanggal / jam Sampel</span>: {{ $order->inspection_date }}</li>

@@ -128,7 +128,7 @@
                                                     <label class="col-sm-4 col-form-label" for="date_of_birth">Tanggal
                                                         Lahir</label>
                                                     <div class="col-sm-8">
-                                                        <input type="date" readonly class="form-control"
+                                                        <input type="text" readonly class="form-control datepicker"
                                                             id="date_of_birth" name="date_of_birth">
                                                     </div>
                                                 </div>
@@ -357,6 +357,7 @@
 
 @section('plugin')
     <script src="/js/formplugins/select2/select2.bundle.js"></script>
+    <script src="/js/formplugins/bootstrap-datepicker/bootstrap-datepicker.js"></script>
     <script>
         $(document).ready(function() {
             // Inisialisasi Select2
@@ -369,6 +370,13 @@
                 placeholder: "-- Pilih Tipe Pasien --",
                 allowClear: true,
                 dropdownCssClass: "move-up"
+            });
+
+            $('.datepicker').datepicker({
+                format: 'dd-mm-yyyy',
+                autoclose: true,
+                todayHighlight: true,
+                orientation: "bottom left"
             });
 
             // Menyimpan variabel global dari Controller
