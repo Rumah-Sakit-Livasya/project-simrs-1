@@ -1250,24 +1250,16 @@ class ERMController extends Controller
 
         $storedPath = null;
 
-        // dd([
-        //     'registration_id' => $registrationId,
-        //     'path' => $path,
-        //     'extension' => $extension,
-        //     'original_name' => $originalName,
-        //     'unique_file_name' => $uniqueFileName,
-        //     'file_mime_type' => $file->getClientMimeType(),
-        //     'file_size' => $file->getSize(),
-        //     'user_id' => Auth::id(),
-        //     'document_category_id' => $validated['document_category_id'],
-        //     'description' => $validated['description'] ?? null,
-        // ]);
 
         // try {
         DB::beginTransaction();
 
         // Simpan file menggunakan Storage Laravel
         $storedPath = $file->storeAs($path, $uniqueFileName, 'public');
+        dd([
+            'stored_path' => $storedPath,
+            'exists_on_disk' => Storage::disk('public')->exists($storedPath),
+        ]);
 
         if (!$storedPath || !Storage::disk('public')->exists($storedPath)) {
             return response()->json([
