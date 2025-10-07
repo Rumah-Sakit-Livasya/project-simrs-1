@@ -151,9 +151,7 @@ class OrderLaboratoriumController extends Controller
             'jenis_kelamin' => ['nullable', Rule::requiredIf($isOtc), Rule::in(['Laki-laki', 'Perempuan'])],
             'alamat' => 'nullable|string|max:255',
             'no_telp' => 'nullable|string|max:20',
-            // patient_id mungkin tidak dikirim dari form OTC, jadi buat opsional
             'patient_id' => 'nullable|integer|exists:patients,id',
-            // medical_record_number bisa digunakan untuk mencari patient_id jika patient_id tidak ada
             'medical_record_number' => 'nullable|string|max:50',
         ];
 
@@ -183,7 +181,6 @@ class OrderLaboratoriumController extends Controller
         // 3. Proses penyimpanan menggunakan DB Transaction
         try {
             $orderLaboratorium = DB::transaction(function () use ($validatedData, $isOtc, $request) {
-                // Cari employee_id dari doctor_id yang dikirim
                 $dokterLab = Doctor::find($validatedData['doctor_id']);
                 if (!$dokterLab || !$dokterLab->employee_id) {
                     throw new \Exception("Data Employee untuk Dokter Laboratorium tidak ditemukan.");
@@ -191,6 +188,10 @@ class OrderLaboratoriumController extends Controller
                 $dokterLaboratoriumId = $dokterLab->id;
 
                 $no_order = $this->generate_order_number();
+
+                // PERUBAHAN 1: Inisialisasi variabel $registrationId dan $tipePasien
+                $registrationId = null;
+                $tipePasien = '';
                 $orderData = [];
 
                 if ($isOtc) {
@@ -221,17 +222,22 @@ class OrderLaboratoriumController extends Controller
                         'patient_id' => $validatedData['patient_id'],
                     ]);
 
+                    // PERUBAHAN 2: Isi $registrationId dengan ID dari registrasi OTC
+                    $registrationId = $registrationOTC->id;
                     $orderData['otc_id'] = $registrationOTC->id;
                 } else { // Pasien terdaftar
                     $registration = Registration::find($validatedData['registration_id']);
                     $tipePasien = ($registration->registration_type === 'rawat-inap') ? '2' : '1';
 
+                    // PERUBAHAN 3: Isi $registrationId dengan ID dari registrasi biasa
+                    $registrationId = $validatedData['registration_id'];
                     $orderData['registration_id'] = $validatedData['registration_id'];
                 }
 
                 // Siapkan data untuk dimasukkan ke tabel 'order_laboratorium'
+                // PERUBAHAN 4: Gunakan variabel $registrationId yang sudah pasti terisi
                 $orderData += [
-                    'registration_id' => $registrationOTC->id,
+                    'registration_id' => $registrationId,
                     'user_id' => $validatedData['user_id'],
                     'doctor_id' => $dokterLaboratoriumId,
                     'order_date' => Carbon::now(),
