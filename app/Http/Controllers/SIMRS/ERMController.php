@@ -1263,11 +1263,6 @@ class ERMController extends Controller
         $file->move($storagePath, $uniqueFileName);
         $storedPath = $path . '/' . $uniqueFileName;
 
-        dd([
-            'stored_path' => $storedPath,
-            'exists_on_disk' => Storage::disk('public')->exists($storedPath),
-        ]);
-
         if (!$storedPath || !Storage::disk('public')->exists($storedPath)) {
             return response()->json([
                 'error' => 'Terjadi kesalahan internal saat mengunggah dokumen: Gagal menyimpan file ke disk.'
