@@ -13,32 +13,39 @@
             margin: 0;
         }
 
-        .relative {
-            position: relative;
-        }
-
-        .absolute {
-            position: absolute;
-        }
-
-        .container {
-            transform: rotate(90deg);
-            top: 100px;
-            left: -15px;
-        }
-
+        html,
         body {
             width: 400px;
             height: 400px;
             margin: 0;
+            padding: 0;
             overflow: hidden;
+        }
+
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 400px;
+            height: 400px;
+            margin: 0;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .container {
+            transform: rotate(90deg);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
     </style>
     <title>Kartu Pasien</title>
 </head>
 
-<body class="relative">
-    <div class="container absolute">
+<body>
+    <div class="container">
         <p>
             <strong>No RM: {{ $patient->medical_record_number }}</strong>
         </p>
@@ -56,7 +63,6 @@
             <strong>No. Telp: {{ $patient->mobile_phone_number ?? '-' }}</strong>
         </p>
     </div>
-
 </body>
 
 </html>
