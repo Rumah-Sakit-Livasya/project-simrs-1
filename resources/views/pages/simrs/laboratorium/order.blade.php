@@ -129,7 +129,7 @@
                                                         Lahir</label>
                                                     <div class="col-sm-8">
                                                         <input type="text" readonly class="form-control datepicker"
-                                                            id="date_of_birth" name="date_of_birth">
+                                                            autocomplete="off" id="date_of_birth" name="date_of_birth">
                                                     </div>
                                                 </div>
                                                 <div class="form-group row">
