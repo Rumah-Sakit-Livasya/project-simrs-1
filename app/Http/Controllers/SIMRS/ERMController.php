@@ -1242,7 +1242,7 @@ class ERMController extends Controller
 
         $file = $request->file('file');
         $registrationId = $validated['registration_id'];
-        $path = "kepustakaan/{$registrationId}";
+        $path = "documents/{$registrationId}";
 
         $extension = $file->getClientOriginalExtension();
         $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
@@ -1251,56 +1251,56 @@ class ERMController extends Controller
         $storedPath = null;
 
 
-        // try {
-        DB::beginTransaction();
+        try {
+            DB::beginTransaction();
 
-        // Simpan file menggunakan Storage Laravel
-        // Simpan file secara manual ke storage private, mirip KepustakaanController
-        $storagePath = storage_path('app/private/' . $path);
-        if (!file_exists($storagePath)) {
-            mkdir($storagePath, 0755, true);
+            // Simpan file menggunakan Storage Laravel
+            // Simpan file secara manual ke storage private, mirip KepustakaanController
+            $storagePath = storage_path('app/private/' . $path);
+            if (!file_exists($storagePath)) {
+                mkdir($storagePath, 0755, true);
+            }
+            $file->move($storagePath, $uniqueFileName);
+            $storedPath = $path . '/' . $uniqueFileName;
+
+            // if (!$storedPath || !Storage::disk('public')->exists($storedPath)) {
+            //     return response()->json([
+            //         'error' => 'Terjadi kesalahan internal saat mengunggah dokumen: Gagal menyimpan file ke disk.'
+            //     ], 500);
+            // }
+
+            \App\Models\UploadedDocument::create([
+                'registration_id'      => $registrationId,
+                'user_id'              => Auth::id(),
+                'document_category_id' => $validated['document_category_id'],
+                'description'          => $validated['description'] ?? null,
+                'original_filename'    => $file->getClientOriginalName(),
+                'stored_filename'      => $uniqueFileName,
+                'file_path'            => $storedPath,
+                'mime_type'            => $file->getClientMimeType(),
+                'file_size'            => filesize($storagePath . '/' . $uniqueFileName),
+            ]);
+
+            DB::commit();
+
+            return response()->json(['success' => 'Dokumen berhasil diunggah!', 'path' => $storedPath]);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+
+            // Hapus file jika sudah sempat tersimpan
+            if ($storedPath && Storage::disk('public')->exists($storedPath)) {
+                Storage::disk('public')->delete($storedPath);
+            }
+
+            Log::error('Gagal mengunggah dokumen.', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return response()->json([
+                'error' => 'Terjadi kesalahan internal saat mengunggah dokumen: Gagal menyimpan file ke disk.'
+            ], 500);
         }
-        $file->move($storagePath, $uniqueFileName);
-        $storedPath = $path . '/' . $uniqueFileName;
-
-        // if (!$storedPath || !Storage::disk('public')->exists($storedPath)) {
-        //     return response()->json([
-        //         'error' => 'Terjadi kesalahan internal saat mengunggah dokumen: Gagal menyimpan file ke disk.'
-        //     ], 500);
-        // }
-
-        \App\Models\UploadedDocument::create([
-            'registration_id'      => $registrationId,
-            'user_id'              => Auth::id(),
-            'document_category_id' => $validated['document_category_id'],
-            'description'          => $validated['description'] ?? null,
-            'original_filename'    => $file->getClientOriginalName(),
-            'stored_filename'      => $uniqueFileName,
-            'file_path'            => $storedPath,
-            'mime_type'            => $file->getClientMimeType(),
-            'file_size'            => filesize($storagePath . '/' . $uniqueFileName),
-        ]);
-
-        DB::commit();
-
-        return response()->json(['success' => 'Dokumen berhasil diunggah!', 'path' => $storedPath]);
-        // } catch (\Throwable $e) {
-        //     DB::rollBack();
-
-        //     // Hapus file jika sudah sempat tersimpan
-        //     if ($storedPath && Storage::disk('public')->exists($storedPath)) {
-        //         Storage::disk('public')->delete($storedPath);
-        //     }
-
-        //     Log::error('Gagal mengunggah dokumen.', [
-        //         'error' => $e->getMessage(),
-        //         'trace' => $e->getTraceAsString(),
-        //     ]);
-
-        //     return response()->json([
-        //         'error' => 'Terjadi kesalahan internal saat mengunggah dokumen: Gagal menyimpan file ke disk.'
-        //     ], 500);
-        // }
     }
 
     public function viewUploadedDocument(int $id)
