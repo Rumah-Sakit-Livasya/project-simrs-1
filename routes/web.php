@@ -23,6 +23,7 @@ use App\Http\Controllers\Pages\DashboardController;
 use App\Http\Controllers\Pages\UpdateProfileController;
 use App\Http\Controllers\PayrollController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ProjectInternalController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SurveiKebersihanKamarController;
 use App\Http\Controllers\SwitchUserController;
@@ -489,6 +490,9 @@ Route::middleware(['auth'])->group(function () {
         ->middleware(ImpersonateUser::class)
         ->name('impersonate');
     Route::post('/switchback', [SwitchUserController::class, 'switchBack'])->name('switchback');
+
+    Route::get('/project-internal/data', [ProjectInternalController::class, 'data'])->name('project-internal.data');
+    Route::resource('project-internal', ProjectInternalController::class);
 });
 
 
