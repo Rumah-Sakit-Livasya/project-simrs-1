@@ -1227,7 +1227,6 @@ class ERMController extends Controller
             'description' => 'nullable|string|max:255',
         ];
 
-        dd("Kontol");
 
         $messages = [
             'file.required' => 'File harus diunggah.',
@@ -1250,6 +1249,19 @@ class ERMController extends Controller
         $uniqueFileName = time() . '_' . Str::slug($originalName) . '.' . $extension;
 
         $storedPath = null;
+
+        dd([
+            'registration_id' => $registrationId,
+            'path' => $path,
+            'extension' => $extension,
+            'original_name' => $originalName,
+            'unique_file_name' => $uniqueFileName,
+            'file_mime_type' => $file->getClientMimeType(),
+            'file_size' => $file->getSize(),
+            'user_id' => Auth::id(),
+            'document_category_id' => $validated['document_category_id'],
+            'description' => $validated['description'] ?? null,
+        ]);
 
         try {
             DB::beginTransaction();
