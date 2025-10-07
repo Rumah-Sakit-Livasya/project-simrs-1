@@ -1255,7 +1255,14 @@ class ERMController extends Controller
         DB::beginTransaction();
 
         // Simpan file menggunakan Storage Laravel
-        $storedPath = $file->storeAs($path, $uniqueFileName, 'private');
+        // Simpan file secara manual ke storage private, mirip KepustakaanController
+        $storagePath = storage_path('app/private/' . $path);
+        if (!file_exists($storagePath)) {
+            mkdir($storagePath, 0755, true);
+        }
+        $file->move($storagePath, $uniqueFileName);
+        $storedPath = $path . '/' . $uniqueFileName;
+
         dd([
             'stored_path' => $storedPath,
             'exists_on_disk' => Storage::disk('public')->exists($storedPath),
