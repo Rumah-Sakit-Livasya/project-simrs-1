@@ -14,15 +14,22 @@
                             <th>Nama Barang</th>
                             <th>Satuan</th>
                             <th>Harga</th>
+                            <th>Aksi</th>
                         </tr>
                     </thead>
                     <tbody id="itemTable">
                         @foreach ($barangs as $barang)
-                            <tr class="pointer item" onclick="PopupPBPharmacyClass.addItem({{ json_encode($barang) }})">
+                            <tr class="item">
                                 <td>{{ $barang->kode }}</td>
                                 <td>{{ $barang->nama }}</td>
                                 <td>{{ $barang->satuan->nama }}</td>
                                 <td>{{ rp($barang->hna) }}</td>
+                                <td>
+                                    <button type="button" class="btn btn-primary btn-sm"
+                                        onclick="PopupPBPharmacyClass.addItem({{ json_encode($barang) }})">
+                                        Pilih
+                                    </button>
+                                </td>
                             </tr>
                         @endforeach
                     </tbody>
