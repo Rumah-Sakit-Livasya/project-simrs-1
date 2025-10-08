@@ -62,6 +62,7 @@ use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
@@ -1251,18 +1252,12 @@ class ERMController extends Controller
         try {
             DB::beginTransaction();
 
-            $storagePath = storage_path('app/public/' . $path);
+            $storagePath = storage_path('app/private/' . $path);
             if (!file_exists($storagePath)) {
                 mkdir($storagePath, 0755, true);
             }
-
-            // Simpan file ke storage Laravel (public disk)
-            $storedPath = $file->storeAs($path, $uniqueFileName, ['disk' => 'public']);
-
-            // Jaga fallback jika storeAs gagal (harusnya tidak, tapi untuk safety)
-            if (! $storedPath) {
-                throw new \Exception('Gagal menyimpan file ke storage.');
-            }
+            $file->move($storagePath, $uniqueFileName);
+            $storedPath = $path . '/' . $uniqueFileName;
 
             \App\Models\UploadedDocument::create([
                 'registration_id'      => $registrationId,
@@ -1273,7 +1268,7 @@ class ERMController extends Controller
                 'stored_filename'      => $uniqueFileName,
                 'file_path'            => $storedPath,
                 'mime_type'            => $file->getClientMimeType(),
-                'file_size'            => $file->getSize(),
+                'file_size'            => filesize($storagePath . '/' . $uniqueFileName),
             ]);
 
             DB::commit();
@@ -1292,8 +1287,8 @@ class ERMController extends Controller
             DB::rollBack();
 
             // Hapus file jika sudah sempat tersimpan
-            if (isset($storedPath) && $storedPath && \Storage::disk('public')->exists($storedPath)) {
-                \Storage::disk('public')->delete($storedPath);
+            if ($storedPath && Storage::disk('public')->exists($storedPath)) {
+                Storage::disk('public')->delete($storedPath);
             }
 
             // Log error ke laravel.log
@@ -1301,7 +1296,7 @@ class ERMController extends Controller
                 'user_id' => Auth::id(),
                 'registration_id' => $registrationId ?? null,
                 'document_category_id' => $validated['document_category_id'] ?? null,
-                'stored_path' => $storedPath ?? null,
+                'stored_path' => $storedPath,
                 'original_filename' => $file->getClientOriginalName() ?? null,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
@@ -1343,6 +1338,25 @@ class ERMController extends Controller
             'storage_relative_path' => $relativePath,
             // Tambahan: URL untuk preview jika ingin tampil di sini
             'url' => route('erm.dokumen.view', ['document' => $document->id]),
+        ]);
+    }
+
+    public function streamUploadedDocument(int $id)
+    {
+        $document = \App\Models\UploadedDocument::findOrFail($id);
+
+        $relativePath = $document->file_path; // misal: documents/12345abc.pdf
+        $absolutePath = storage_path('app/private/' . $relativePath);
+
+        if (!file_exists($absolutePath)) {
+            abort(404, 'File tidak ditemukan.');
+        }
+
+        $mime = File::mimeType($absolutePath);
+
+        return response()->file($absolutePath, [
+            'Content-Type' => $mime,
+            'Content-Disposition' => 'inline; filename="' . $document->original_filename . '"'
         ]);
     }
 

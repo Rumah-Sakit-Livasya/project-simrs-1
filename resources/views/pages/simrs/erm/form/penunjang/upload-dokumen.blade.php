@@ -136,11 +136,10 @@
                     success: function(response) {
                         // response: { id, registration_id, user_id, document_category_id, description, original_filename, stored_filename, file_path, mime_type, file_size, created_at, updated_at }
                         let previewUrl = '';
-                        if (response.file_path) {
-                            previewUrl = '/storage/' + response.file_path.replace(
-                                /^documents\//, 'documents/');
-                        } else if (response.url) {
+                        if (response.url) {
                             previewUrl = response.url;
+                        } else {
+                            previewUrl = '/erm/dokumen/view-file/' + response.id;
                         }
 
                         if (response.mime_type === 'application/pdf') {
