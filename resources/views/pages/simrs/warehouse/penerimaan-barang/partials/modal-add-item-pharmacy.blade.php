@@ -1,5 +1,5 @@
 <div class="modal fade" id="pilihItemModal" tabindex="-1" aria-labelledby="pilihItemModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
                 <h1 class="modal-title fs-5" id="addModalLabel">Pilih barang</h1>
@@ -17,7 +17,7 @@
                         </tr>
                     </thead>
                     <tbody id="itemTable">
-                        @foreach($barangs as $barang)
+                        @foreach ($barangs as $barang)
                             <tr class="pointer item" onclick="PopupPBPharmacyClass.addItem({{ json_encode($barang) }})">
                                 <td>{{ $barang->kode }}</td>
                                 <td>{{ $barang->nama }}</td>

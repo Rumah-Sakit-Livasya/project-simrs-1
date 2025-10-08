@@ -54,7 +54,8 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <form id="projectForm">
+                    {{-- PENTING: Tambahkan enctype untuk upload file --}}
+                    <form id="projectForm" enctype="multipart/form-data">
                         <input type="hidden" name="id" id="projectId">
                         <div class="form-group">
                             <label for="name">Nama Proyek</label>
@@ -83,6 +84,16 @@
                                 placeholder="Deskripsi singkat proyek"></textarea>
                             <div class="invalid-feedback"></div>
                         </div>
+                        {{-- Form Group untuk Lampiran --}}
+                        <div class="form-group">
+                            <label class="form-label">Lampiran Gambar (Opsional)</label>
+                            <div class="custom-file">
+                                <input type="file" class="custom-file-input" id="attachment" name="attachment">
+                                <label class="custom-file-label" for="attachment">Pilih file...</label>
+                                <div class="invalid-feedback"></div>
+                            </div>
+                            <div class="mt-2" id="current-attachment"></div>
+                        </div>
                         <div class="form-group">
                             <label for="status">Status</label>
                             <select class="form-control" id="status" name="status">
@@ -106,6 +117,24 @@
             </div>
         </div>
     </div>
+
+    <!-- Modal Lihat Attachment -->
+    <div class="modal fade" id="viewAttachmentModal" tabindex="-1" role="dialog"
+        aria-labelledby="viewAttachmentModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="viewAttachmentModalLabel">Lihat Lampiran</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center" id="view-attachment-body">
+                    <!-- Konten lampiran akan dimasukkan via JS -->
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 @section('plugin')
     <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
@@ -122,6 +151,12 @@
             // Inisialisasi Select2
             $('.select2').select2({
                 dropdownParent: $('#formModal') // Penting untuk modal
+            });
+
+            // Tampilkan nama file saat dipilih
+            $('.custom-file-input').on('change', function() {
+                let fileName = $(this).val().split('\\').pop();
+                $(this).next('.custom-file-label').addClass("selected").html(fileName);
             });
 
             // Inisialisasi Datatables
@@ -182,6 +217,9 @@
                 $('.invalid-feedback').text('');
                 $('#user_id').val(null).trigger('change');
                 $('#done_at_group').hide();
+                // Reset tampilan lampiran
+                $('#current-attachment').html('');
+                $('.custom-file-label').html('Pilih file...');
             }
 
             // Tombol Tambah
@@ -190,17 +228,24 @@
                 $('#formModalLabel').text('Tambah Proyek Baru');
             });
 
-            // Tombol Simpan (Create & Update)
+            // Tombol Simpan (Create & Update) - PERUBAHAN PENTING DI SINI
             $('#btn-save').on('click', function() {
                 var id = $('#projectId').val();
                 var url = id ? "{{ url('project-internal') }}/" + id :
                     "{{ route('project-internal.store') }}";
-                var method = id ? 'PUT' : 'POST';
+
+                // Gunakan FormData untuk mengirim file via AJAX
+                var formData = new FormData($('#projectForm')[0]);
+                if (id) {
+                    formData.append('_method', 'PUT'); // Method spoofing untuk update
+                }
 
                 $.ajax({
                     url: url,
-                    type: method,
-                    data: $('#projectForm').serialize(),
+                    type: 'POST', // Selalu POST untuk FormData dengan method spoofing
+                    data: formData,
+                    contentType: false, // Wajib false
+                    processData: false, // Wajib false
                     success: function(response) {
                         if (response.success) {
                             $('#formModal').modal('hide');
@@ -213,14 +258,20 @@
                         $('.form-control').removeClass('is-invalid');
                         $('.invalid-feedback').text('');
                         $.each(errors, function(key, value) {
-                            $('#' + key).addClass('is-invalid');
-                            $('#' + key).next('.invalid-feedback').text(value[0]);
+                            var el = $('#' + key);
+                            el.addClass('is-invalid');
+                            // Handle custom file input error
+                            if (el.hasClass('custom-file-input')) {
+                                el.next().next('.invalid-feedback').text(value[0]);
+                            } else {
+                                el.next('.invalid-feedback').text(value[0]);
+                            }
                         });
                     }
                 });
             });
 
-            // Tombol Edit
+            // Tombol Edit - PERUBAHAN UNTUK MENAMPILKAN LAMPIRAN
             $('body').on('click', '.btn-edit', function() {
                 var id = $(this).data('id');
                 $.get("{{ url('project-internal') }}/" + id, function(response) {
@@ -231,9 +282,20 @@
                         $('#projectId').val(data.id);
                         $('#name').val(data.name);
                         $('#user_id').val(data.user_id).trigger('change');
-                        $('#datetime').val(data.datetime.substring(0, 16));
+                        $('#datetime').val(data.datetime ? data.datetime.substring(0, 16) : '');
                         $('#description').val(data.description);
                         $('#status').val(data.status);
+
+                        // Tampilkan lampiran yang ada
+                        if (data.attachment) {
+                            var attachmentUrl = '{{ asset('storage') }}/' + data.attachment;
+                            // Ganti link menjadi tombol untuk lihat modal attachment
+                            $('#current-attachment').html(
+                                '<button type="button" class="btn btn-info btn-sm btn-view-attachment" data-url="' +
+                                attachmentUrl +
+                                '"><i class="fas fa-image"></i> Lihat Lampiran Saat Ini</button>'
+                            );
+                        }
 
                         if (data.status === 'done') {
                             $('#done_at_group').show();
@@ -263,6 +325,22 @@
                         }
                     });
                 });
+            });
+
+            // Tombol Lihat Lampiran di modal edit
+            $('body').on('click', '.btn-view-attachment', function() {
+                var url = $(this).data('url');
+                var ext = url.split('.').pop().toLowerCase();
+                var content = '';
+                if (['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'].includes(ext)) {
+                    content = '<img src="' + url +
+                        '" alt="Lampiran" class="img-fluid" style="max-height:500px;">';
+                } else {
+                    content = '<a href="' + url +
+                        '" target="_blank" class="btn btn-primary">Download Lampiran</a>';
+                }
+                $('#view-attachment-body').html(content);
+                $('#viewAttachmentModal').modal('show');
             });
 
         });

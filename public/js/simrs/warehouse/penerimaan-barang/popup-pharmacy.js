@@ -6,135 +6,32 @@
 const Swal = /** @type {import("sweetalert2").default} */ (window.Swal);
 
 class PopupPBPharmacyHandler {
-    /**
-     * @type {JQuery<HTMLElement>}
-     */
-    #$AddModal;
-
-    /**
-     * @type {JQuery<HTMLElement>}
-     */
-    #$LoadingIcon;
-
-    /**
-     * @type {JQuery<HTMLElement>}
-     */
-    #$LoadingPage;
-
-    /**
-     * @type {JQuery<HTMLElement>}
-     */
-    #$Table;
-
-    /**
-     * @type {JQuery<HTMLElement>}
-     */
-    #$ModalTable;
-
-    /**
-     * @type {JQuery<HTMLElement>}
-     */
-    #$diskonTotal;
-
-    /**
-     * @type {JQuery<HTMLElement>}
-     */
-    #$Total;
-
-    /**
-     * @type {JQuery<HTMLElement>}
-     */
-    #$TotalFinalDisplay;
-
-    /**
-     * @type {JQuery<HTMLElement>}
-     */
-    #$TotalFinal;
-
-    /**
-     * @type {JQuery<HTMLElement>}
-     */
-    #$PPN;
-
-    /**
-     * @type {JQuery<HTMLElement>}
-     */
-    #$PPNNominal;
-
-    /**
-     * @type {JQuery<HTMLElement>}
-     */
-    #$Materai;
-
-    /**
-     * @type {JQuery<HTMLElement>}
-     */
-    #$DiskonFaktur;
-
-    /**
-     * @type {JQuery<HTMLElement>}
-     */
-    #$NoFaktur;
-
-    /**
-     * @type {JQuery<HTMLElement>}
-     */
-    #$TipeTerima;
-
-    /**
-     * @type {JQuery<HTMLElement>}
-     */
-    #$KodePO;
-
-    /**
-     * @type {JQuery<HTMLElement>}
-     */
-    #$POid;
-
-    /**
-     * @type {JQuery<HTMLElement>}
-     */
-    #$PICPenerima;
-
-    /**
-     * @type {JQuery<HTMLElement>}
-     */
-    #$TipeBayar;
-
-    /**
-     * @type {JQuery<HTMLElement>}
-     */
-    #$Supplier;
-
-    /**
-     * @type {JQuery<HTMLElement>}
-     */
-    #$SupplierId;
-
-    /**
-     * @type {JQuery<HTMLElement>}
-     */
-    #$Keterangan;
-
-    /**
-     * @type {JQuery<HTMLElement>}
-     */
-    #$Kas;
-
-    /**
-     * @type {JQuery<HTMLElement>}
-     */
-    #$TanggalFaktur;
-
-    /**
-     * @type {JQuery<HTMLElement>}
-     */
-    #$Gudang;
-
-    /**
-     * @type {JQuery<HTMLElement>}
-     */
-    #$SelectPOButton;
+    /** @type {JQuery<HTMLElement>} */ #$AddModal;
+    /** @type {JQuery<HTMLElement>} */ #$LoadingIcon;
+    /** @type {JQuery<HTMLElement>} */ #$LoadingPage;
+    /** @type {JQuery<HTMLElement>} */ #$Table;
+    /** @type {JQuery<HTMLElement>} */ #$ModalTable;
+    /** @type {JQuery<HTMLElement>} */ #$diskonTotal;
+    /** @type {JQuery<HTMLElement>} */ #$Total;
+    /** @type {JQuery<HTMLElement>} */ #$TotalFinalDisplay;
+    /** @type {JQuery<HTMLElement>} */ #$TotalFinal;
+    /** @type {JQuery<HTMLElement>} */ #$PPN;
+    /** @type {JQuery<HTMLElement>} */ #$PPNNominal;
+    /** @type {JQuery<HTMLElement>} */ #$Materai;
+    /** @type {JQuery<HTMLElement>} */ #$DiskonFaktur;
+    /** @type {JQuery<HTMLElement>} */ #$NoFaktur;
+    /** @type {JQuery<HTMLElement>} */ #$TipeTerima;
+    /** @type {JQuery<HTMLElement>} */ #$KodePO;
+    /** @type {JQuery<HTMLElement>} */ #$POid;
+    /** @type {JQuery<HTMLElement>} */ #$PICPenerima;
+    /** @type {JQuery<HTMLElement>} */ #$TipeBayar;
+    /** @type {JQuery<HTMLElement>} */ #$Supplier;
+    /** @type {JQuery<HTMLElement>} */ #$SupplierId;
+    /** @type {JQuery<HTMLElement>} */ #$Keterangan;
+    /** @type {JQuery<HTMLElement>} */ #$Kas;
+    /** @type {JQuery<HTMLElement>} */ #$TanggalFaktur;
+    /** @type {JQuery<HTMLElement>} */ #$Gudang;
+    /** @type {JQuery<HTMLElement>} */ #$SelectPOButton;
 
     #API_URL = "/api/simrs/procurement/penerimaan-barang/pharmacy";
 
@@ -227,7 +124,6 @@ class PopupPBPharmacyHandler {
     }
 
     /**
-     * Handle supplier select change
      * @param {JQuery.Event} event
      */
     #handleSupplierChange(event) {
@@ -237,13 +133,11 @@ class PopupPBPharmacyHandler {
     }
 
     /**
-     * Handle tipe bayar select change
      * @param {Event} event
      */
     #handleTipeBayarChange(event) {
         const Select = /**@type {HTMLSelectElement} */ (event.target);
         if (Select.value == "cash") {
-            // enable #$Kas
             this.#$Kas.removeAttr("disabled");
         } else {
             this.#$Kas.attr("disabled", "disabled");
@@ -251,15 +145,10 @@ class PopupPBPharmacyHandler {
     }
 
     /**
-     * Handle tipe terima select change
      * @param {Event} event
      */
     #handleTipeTerimaChange(event) {
         this.#reset();
-        // if selected option value == po
-        // disable #$Kas, hide #$SelectPOButton, and enable #$Supplier
-        // all of them are JQuery selector variable
-        // and vice versa
         const Select = /**@type {HTMLSelectElement} */ (event.target);
         if (Select.value === "npo") {
             this.#$Kas.prop("disabled", true);
@@ -273,60 +162,43 @@ class PopupPBPharmacyHandler {
     }
 
     /**
-     * Enforce number input min max limit on manual input
      * @param {Event} event
      */
     enforceNumberLimit(event) {
         const inputField = /** @type {HTMLInputElement} */ (event.target);
         let value = parseFloat(inputField.value);
-        let min = parseInt(String(inputField.min || 0)); // Default to 0 if not set
-        let max = parseInt(String(inputField.max || Number.MAX_SAFE_INTEGER)); // Set default to a large number
-
+        let min = parseInt(String(inputField.min || 0));
+        let max = parseInt(String(inputField.max || Number.MAX_SAFE_INTEGER));
         if (isNaN(value)) {
-            inputField.value = ""; // Reset to empty on invalid input
+            inputField.value = "";
             return this;
         }
-
         if (value < min) {
-            inputField.value = String(min); // Clamp value at min
+            inputField.value = String(min);
         } else if (value > max) {
-            inputField.value = String(max); // Clamp value at max
+            inputField.value = String(max);
         }
-
         return this;
     }
 
     /**
-     * Handle modal select PO event
      * @param {PurchaseOrder} po
      */
     SelectPO(po) {
-        this.#reset(); // reset to initial state
-
-        // first, update value of #$KodePO and #$POid in the class
+        this.#reset();
         this.#$POid.val(po.id);
         this.#$KodePO.val(po.kode_po);
-
-        // next, change the selected #$Supplier option
         this.#$SupplierId.val(po.supplier_id);
         this.#$Supplier.val(po.supplier_id);
-        // trigger Select2 change
         this.#$Supplier.trigger("change");
-
-        // update ppn too
         this.#$PPN.val(po.ppn);
-
-        // finally, for each item, give it to addPOItem
-        po.items?.forEach((item) => this.#addPOItem(item)); // addPOItem is a method that will be defined later
+        po.items?.forEach((item) => this.#addPOItem(item));
         this.refreshTotal();
     }
 
     #reset() {
-        // empty the table
-        this.#$Table.empty(); // #$Table is a reference to the table element in the class
-        // refresh total
+        this.#$Table.empty();
         this.refreshTotal();
-        // also empty NoFaktur, TanggalFaktur, PICPenerima, Keterangan, Gudang, Supplier, KodePO, POid
         this.#$NoFaktur.val("");
         this.#$TanggalFaktur.val("");
         this.#$PICPenerima.val("");
@@ -343,32 +215,24 @@ class PopupPBPharmacyHandler {
         this.#$TotalFinal.val(0);
         this.#$TotalFinalDisplay.val(0);
         this.#$diskonTotal.val(0);
-
-        // trigger change on Gudang and Supplier
         this.#$Gudang.trigger("change");
         this.#$Supplier.trigger("change");
     }
 
     /**
-     * Add item from PO select
      * @param {ItemPO} item
      */
     #addPOItem(item) {
-        // if qty equals or more than received qty, return
         if (item.qty <= item.qty_received) return;
         const HTML = this.#getItemPOTableCol(item);
         this.#$Table.append(HTML);
     }
 
     /**
-     * Handle save order final button click
      * @param {Event} event
      */
     #handleFinalButtonClick(event) {
         const button = /** @type {HTMLButtonElement} */ (event.target);
-        // insert hidden input
-        // with name "status"
-        // and value "final"
         const input = document.createElement("input");
         input.type = "hidden";
         input.name = "status";
@@ -377,14 +241,10 @@ class PopupPBPharmacyHandler {
     }
 
     /**
-     * Handle save order draft button click
      * @param {Event} event
      */
     #handleDraftButtonClick(event) {
         const button = /** @type {HTMLButtonElement} */ (event.target);
-        // insert hidden input
-        // with name "status"
-        // and value "draft"
         const input = document.createElement("input");
         input.type = "hidden";
         input.name = "status";
@@ -393,51 +253,50 @@ class PopupPBPharmacyHandler {
     }
 
     /**
-     * Handle item search bar on key up
      * @param {Event} event
      */
     #handleItemSearchBar(event) {
+        // Perbaikan: filter berdasarkan seluruh kolom (kode, nama, satuan, harga) sesuai modal-add-item-pharmacy.blade.php
         const searchInput = /** @type {HTMLInputElement} */ (event.target);
         const value = searchInput.value.toLowerCase();
-        const items = document.querySelectorAll("tr.item");
-
+        // Ambil semua baris item di modal
+        const items = document.querySelectorAll("#itemTable tr.item");
         items.forEach((item) => {
             if (!item) return;
-            const itemNameElement = item.querySelector(".item-name");
-            if (!itemNameElement) return;
-            const itemName = itemNameElement.textContent;
-            if (!itemName) return;
-
+            // Ambil semua kolom (td) pada baris
+            const tds = item.querySelectorAll("td");
+            let found = false;
+            tds.forEach((td) => {
+                if (
+                    td.textContent &&
+                    td.textContent.toLowerCase().includes(value)
+                ) {
+                    found = true;
+                }
+            });
+            // Tampilkan jika ada kolom yang cocok, sembunyikan jika tidak
             // @ts-ignore
-            item.style.display = itemName.toLowerCase().includes(value)
-                ? ""
-                : "none";
+            item.style.display = found ? "" : "none";
         });
     }
 
     /**
-     * Handle PO search bar on key up
      * @param {Event} event
      */
     #handlePOSearchBar(event) {
         const searchInput = /** @type {HTMLInputElement} */ (event.target);
         const value = searchInput.value.toLowerCase();
         const items = document.querySelectorAll("tr.po-row");
-
         items.forEach((item) => {
             if (!item) return;
-
             let kode_po = "";
             let supplier_po = "";
-
             const kodePOElement = item.querySelector(".kode-po");
             if (!kodePOElement) return;
             kode_po = kodePOElement.textContent || "";
-
             const supplierPOElement = item.querySelector(".supplier-po");
             if (!supplierPOElement) return;
             supplier_po = supplierPOElement.textContent || "";
-
             // @ts-ignore
             if (
                 kode_po.toLowerCase().includes(value) ||
@@ -453,21 +312,18 @@ class PopupPBPharmacyHandler {
     }
 
     /**
-     * Handle PO Supplier search bar on key up
      * @param {Event} event
      */
     #handlePOSupplierSearchBar(event) {
         const searchInput = /** @type {HTMLInputElement} */ (event.target);
         const value = searchInput.value.toLowerCase();
         const items = document.querySelectorAll("tr.po-row");
-
         items.forEach((item) => {
             if (!item) return;
             const itemNameElement = item.querySelector(".supplier-po");
             if (!itemNameElement) return;
             const itemName = itemNameElement.textContent;
             if (!itemName) return;
-
             // @ts-ignore
             item.style.display = itemName.toLowerCase().includes(value)
                 ? ""
@@ -476,7 +332,6 @@ class PopupPBPharmacyHandler {
     }
 
     /**
-     * Add item from item select
      * @param {BarangFarmasi} barang
      */
     addItem(barang) {
@@ -486,14 +341,13 @@ class PopupPBPharmacyHandler {
     }
 
     /**
-     * Generate HTML string for Item table collumn
      * @param {BarangFarmasi} item
      */
     #getItemTableCol(item) {
         const key = Math.round(Math.random() * 100000);
-
+        // Use Tailwind utility classes for table row and cell styling
         return /*html*/ `
-            <tr id="item${key}">
+            <tr id="item${key}" class="border-b border-gray-200 hover:bg-gray-50">
                 <input type="hidden" name="kode_barang[${key}]" value="${
             item.kode
         }">
@@ -511,27 +365,47 @@ class PopupPBPharmacyHandler {
         }">
                 <input type="hidden" name="subtotal[${key}]" value="0">
 
-                <td><input type="checkbox" class="form-control" name="is_bonus[${key}]" onclick="PopupPBPharmacyClass.refreshTotal()"></td>
-                <td>${item.kode}</td>
-                <td>${item.nama}</td>
-                <td>${item.satuan?.nama}</td>
-                <td><input type="date" name="tanggal_exp[${key}]" class="form-control" required></td>
-                <td><input type="text" name="batch_no[${key}]" class="form-control" required></td>
-                <td> - </td>
-                <td> - </td>
-                <td><input type="number" name="qty[${key}]" class="form-control qty" min="0" step="1"
-                 onkeyup="PopupPBPharmacyClass.enforceNumberLimit(event).refreshTotal()" onchange="PopupPBPharmacyClass.enforceNumberLimit(event).refreshTotal()" required></td>
-                <td>${this.#rp(item.hna || 0)}</td>
-                <td><input type="number" name="harga[${key}]" class="form-control" value="${
+                <td class="text-center align-middle">
+                    <input type="checkbox" class="form-control rounded border-gray-300" name="is_bonus[${key}]" onclick="PopupPBPharmacyClass.refreshTotal()">
+                </td>
+                <td class="px-2 py-1 align-middle">${item.kode}</td>
+                <td class="px-2 py-1 align-middle">${item.nama}</td>
+                <td class="px-2 py-1 align-middle">${item.satuan?.nama}</td>
+                <td class="px-2 py-1 align-middle">
+                    <input type="date" name="tanggal_exp[${key}]" class="form-control table-input" required>
+                </td>
+                <td class="px-2 py-1 align-middle">
+                    <input type="text" name="batch_no[${key}]" class="form-control table-input" required>
+                </td>
+                <td class="px-2 py-1 align-middle text-center">-</td>
+                <td class="px-2 py-1 align-middle text-center">-</td>
+                <td class="px-2 py-1 align-middle">
+                    <input type="number" name="qty[${key}]" class="form-control qty table-input" min="0" step="1"
+                        onkeyup="PopupPBPharmacyClass.enforceNumberLimit(event).refreshTotal()"
+                        onchange="PopupPBPharmacyClass.enforceNumberLimit(event).refreshTotal()" required>
+                </td>
+                <td class="px-2 py-1 align-middle text-right">${this.#rp(
+                    item.hna || 0
+                )}</td>
+                <td class="px-2 py-1 align-middle">
+                    <input type="number" name="harga[${key}]" class="form-control table-input text-right" value="${
             item.hna || ""
         }"
-                 onkeyup="PopupPBPharmacyClass.refreshTotal()" onchange="PopupPBPharmacyClass.refreshTotal()" required></td>
-                <td><input type="number" name="diskon_percent[${key}]" class="form-control" min="0" value="0" step="1" max="100"
-                 onkeyup="PopupPBPharmacyClass.enforceNumberLimit(event).diskonPercentChange(event)" onchange="PopupPBPharmacyClass.enforceNumberLimit(event).diskonPercentChange(event)"></td>
-                <td><input type="number" name="diskon_nominal[${key}]" min="0" step="1" value="0" class="form-control"
-                 onkeyup="PopupPBPharmacyClass.enforceNumberLimit(event).diskonNominalChange(event)" onchange="PopupPBPharmacyClass.enforceNumberLimit(event).diskonNominalChange(event)"></td>
-                <td class="subtotal-display">Rp 0</td>
-                <td>
+                        onkeyup="PopupPBPharmacyClass.refreshTotal()"
+                        onchange="PopupPBPharmacyClass.refreshTotal()" required>
+                </td>
+                <td class="px-2 py-1 align-middle">
+                    <input type="number" name="diskon_percent[${key}]" class="form-control table-input text-right" min="0" value="0" step="1" max="100"
+                        onkeyup="PopupPBPharmacyClass.enforceNumberLimit(event).diskonPercentChange(event)"
+                        onchange="PopupPBPharmacyClass.enforceNumberLimit(event).diskonPercentChange(event)">
+                </td>
+                <td class="px-2 py-1 align-middle">
+                    <input type="number" name="diskon_nominal[${key}]" min="0" step="1" value="0" class="form-control table-input text-right"
+                        onkeyup="PopupPBPharmacyClass.enforceNumberLimit(event).diskonNominalChange(event)"
+                        onchange="PopupPBPharmacyClass.enforceNumberLimit(event).diskonNominalChange(event)">
+                </td>
+                <td class="px-2 py-1 align-middle subtotal-display text-right">Rp 0</td>
+                <td class="px-2 py-1 align-middle text-center">
                     <a class="mdi mdi-close pointer mdi-24px text-danger delete-btn"
                         title="Hapus" onclick="PopupPBPharmacyClass.deleteItem(${key})"></a>
                 </td>
@@ -540,14 +414,13 @@ class PopupPBPharmacyHandler {
     }
 
     /**
-     * Generate HTML string for PO Item table collumn
      * @param {ItemPO} item
      */
     #getItemPOTableCol(item) {
         const key = Math.round(Math.random() * 100000);
-
+        // Use Tailwind utility classes for table row and cell styling
         return /*html*/ `
-            <tr id="item${key}">
+            <tr id="item${key}" class="border-b border-gray-200 hover:bg-gray-50">
                 <input type="hidden" name="kode_barang[${key}]" value="${
             item.kode_barang
         }">
@@ -566,29 +439,51 @@ class PopupPBPharmacyHandler {
                 <input type="hidden" name="poi_id[${key}]" value="${item.id}">
                 <input type="hidden" name="subtotal[${key}]" value="0">
 
-                <td><input type="checkbox" class="form-control" name="is_bonus[${key}]" onclick="PopupPBPharmacyClass.refreshTotal()"></td>
-                <td>${item.kode_barang}</td>
-                <td>${item.nama_barang}</td>
-                <td>${item.unit_barang}</td>
-                <td><input type="date" name="tanggal_exp[${key}]" class="form-control" required></td>
-                <td><input type="text" name="batch_no[${key}]" class="form-control" required></td>
-                <td>${item.qty}</td>
-                <td>${item.qty - item.qty_received}</td>
-                <td><input type="number" name="qty[${key}]" class="form-control qty" min="0" step="1" max="${
+                <td class="px-2 py-1 text-center align-middle">
+                    <input type="checkbox" class="form-control rounded border-gray-300" name="is_bonus[${key}]" onclick="PopupPBPharmacyClass.refreshTotal()">
+                </td>
+                <td class="px-2 py-1 align-middle">${item.kode_barang}</td>
+                <td class="px-2 py-1 align-middle">${item.nama_barang}</td>
+                <td class="px-2 py-1 align-middle">${item.unit_barang}</td>
+                <td class="px-2 py-1 align-middle">
+                    <input type="date" name="tanggal_exp[${key}]" class="form-control table-input" required>
+                </td>
+                <td class="px-2 py-1 align-middle">
+                    <input type="text" name="batch_no[${key}]" class="form-control table-input" required>
+                </td>
+                <td class="px-2 py-1 align-middle text-center">${item.qty}</td>
+                <td class="px-2 py-1 align-middle text-center">${
+                    item.qty - item.qty_received
+                }</td>
+                <td class="px-2 py-1 align-middle">
+                    <input type="number" name="qty[${key}]" class="form-control qty table-input" min="0" step="1" max="${
             item.qty - item.qty_received
         }"
-                 onkeyup="PopupPBPharmacyClass.enforceNumberLimit(event).refreshTotal()" onchange="PopupPBPharmacyClass.enforceNumberLimit(event).refreshTotal()" required></td>
-                <td>${this.#rp(item.barang?.hna || 0)}</td>
-                <td><input type="number" name="harga[${key}]" class="form-control" value="${
+                        onkeyup="PopupPBPharmacyClass.enforceNumberLimit(event).refreshTotal()"
+                        onchange="PopupPBPharmacyClass.enforceNumberLimit(event).refreshTotal()" required>
+                </td>
+                <td class="px-2 py-1 align-middle text-right">${this.#rp(
+                    item.barang?.hna || 0
+                )}</td>
+                <td class="px-2 py-1 align-middle">
+                    <input type="number" name="harga[${key}]" class="form-control table-input text-right" value="${
             item.barang?.hna || ""
         }"
-                 onkeyup="PopupPBPharmacyClass.refreshTotal()" onchange="PopupPBPharmacyClass.refreshTotal()" required></td>
-                <td><input type="number" name="diskon_percent[${key}]" class="form-control" min="0" value="0" step="1" max="100"
-                 onkeyup="PopupPBPharmacyClass.enforceNumberLimit(event).diskonPercentChange(event)" onchange="PopupPBPharmacyClass.enforceNumberLimit(event).diskonPercentChange(event)"></td>
-                <td><input type="number" name="diskon_nominal[${key}]" min="0" step="1" value="0" class="form-control"
-                 onkeyup="PopupPBPharmacyClass.enforceNumberLimit(event).diskonNominalChange(event)" onchange="PopupPBPharmacyClass.enforceNumberLimit(event).diskonNominalChange(event)"></td>
-                <td class="subtotal-display">Rp 0</td>
-                <td>
+                        onkeyup="PopupPBPharmacyClass.refreshTotal()"
+                        onchange="PopupPBPharmacyClass.refreshTotal()" required>
+                </td>
+                <td class="px-2 py-1 align-middle">
+                    <input type="number" name="diskon_percent[${key}]" class="form-control table-input text-right" min="0" value="0" step="1" max="100"
+                        onkeyup="PopupPBPharmacyClass.enforceNumberLimit(event).diskonPercentChange(event)"
+                        onchange="PopupPBPharmacyClass.enforceNumberLimit(event).diskonPercentChange(event)">
+                </td>
+                <td class="px-2 py-1 align-middle">
+                    <input type="number" name="diskon_nominal[${key}]" min="0" step="1" value="0" class="form-control table-input text-right"
+                        onkeyup="PopupPBPharmacyClass.enforceNumberLimit(event).diskonNominalChange(event)"
+                        onchange="PopupPBPharmacyClass.enforceNumberLimit(event).diskonNominalChange(event)">
+                </td>
+                <td class="px-2 py-1 align-middle subtotal-display text-right">Rp 0</td>
+                <td class="px-2 py-1 align-middle text-center">
                     <!-- <a class="mdi mdi-close pointer mdi-24px text-danger delete-btn"
                         title="Hapus" onclick="PopupPBPharmacyClass.deleteItem(${key})"></a> -->
                 </td>
@@ -597,83 +492,63 @@ class PopupPBPharmacyHandler {
     }
 
     /**
-     * Handle diskon percent input change
      * @param {Event} event
      */
     diskonPercentChange(event) {
         const input = /** @type {HTMLInputElement} */ (event.target);
         const diskonPercent = parseInt(input.value);
         if (isNaN(diskonPercent)) return this;
-
         const tr = input.closest("tr");
         if (!tr) {
             alert("TR Not found!");
             return this;
         }
-
         const dscnEl = $(tr).find("input[name^=diskon_nominal]");
         if (!dscnEl) {
             alert("Input Not found!");
             return this;
         }
-
         const qty = /** @type {number | undefined} */ (
             $(tr).find("input[name^=qty]").val()
         );
-        // if quantity is not set, skip calculating this row
         if (!qty) return;
-
         const cost = /** @type {number | undefined} */ (
             $(tr).find("input[name^=harga]").val()
         );
-        // if cost is not set, skip calculating this row
         if (!cost) return;
-
         const harga = qty * cost;
-
         dscnEl.val((diskonPercent * harga) / 100);
-
         this.refreshTotal({ updatediskon: false });
         return this;
     }
 
     /**
-     * Handle diskon nominal input change
      * @param {Event} event
      */
     diskonNominalChange(event) {
         const input = /** @type {HTMLInputElement} */ (event.target);
         const diskonNominal = parseInt(input.value);
         if (isNaN(diskonNominal)) return;
-
         const tr = input.closest("tr");
         if (!tr) {
             alert("TR Not found!");
             return this;
         }
-
         const dscpEl = $(tr).find("input[name^=diskon_percent]");
         if (!dscpEl) {
             alert("Input Not found!");
             return this;
         }
-
         const qty = /** @type {number | undefined} */ (
             $(tr).find("input[name^=qty]").val()
         );
-        // if quantity is not set, skip calculating this row
         if (!qty) return;
-
         const cost = /** @type {number | undefined} */ (
             $(tr).find("input[name^=harga]").val()
         );
-        // if cost is not set, skip calculating this row
         if (!cost) return;
-
         const harga = qty * cost;
-
         dscpEl.val((diskonNominal / harga) * 100);
-
         this.refreshTotal({ updatediskon: false });
         return this;
     }
@@ -683,29 +558,21 @@ class PopupPBPharmacyHandler {
         let diskon_total = 0;
         this.#$Table.find("tr").each((i, tr) => {
             const bonusCheckbox = $(tr).find("input[name^=is_bonus]");
-            console.log(bonusCheckbox.is(":checked"));
-
-            // if bonus is checked, skip calculating this row
+            // console.log(bonusCheckbox.is(":checked"));
             if (bonusCheckbox.is(":checked")) {
                 $(tr).find("td.subtotal-display").text(this.#rp(0));
                 $(tr).find("input[name^='subtotal']").val(0);
                 return;
-            } // skip if bonus checkbox is checked
-
+            }
             const qty = /** @type {number | undefined} */ (
                 $(tr).find("input[name^=qty]").val()
             );
-            // if quantity is not set, skip calculating this row
             if (!qty) return;
-
             const cost = /** @type {number | undefined} */ (
                 $(tr).find("input[name^=harga]").val()
             );
-            // if cost is not set, skip calculating this row
             if (!cost) return;
-
             const harga = qty * cost;
-
             const discountNominalElement = $(tr).find(
                 "input[name^=diskon_nominal]"
             );
@@ -718,16 +585,13 @@ class PopupPBPharmacyHandler {
             const discountPercent = parseInt(
                 /** @type {string} */ (discountPercentElement.val()) || "0"
             );
-
             if (option.updatediskon) {
                 discountPercentElement.val((discountNominal / harga) * 100);
                 discountNominalElement.val((discountPercent * harga) / 100);
             }
-
             const subtotal = harga - discountNominal;
             total += harga;
             diskon_total += discountNominal;
-
             $(tr).find("td.subtotal-display").text(this.#rp(subtotal));
             $(tr).find("input[name^='subtotal']").val(subtotal);
         });
@@ -741,7 +605,6 @@ class PopupPBPharmacyHandler {
         const PPN_Nominal = (total * PPN) / 100;
         const grandtotal =
             total + PPN_Nominal - diskon_total - DiskonFaktur + Materai;
-
         this.#$PPNNominal.val(PPN_Nominal);
         this.#$diskonTotal.text(this.#rp(diskon_total));
         this.#$TotalFinalDisplay.text(this.#rp(grandtotal));
@@ -750,7 +613,6 @@ class PopupPBPharmacyHandler {
     }
 
     /**
-     * Delete item from table and variable
      * @param {string} key
      */
     deleteItem(key) {
@@ -759,7 +621,6 @@ class PopupPBPharmacyHandler {
     }
 
     /**
-     * Handle add button click
      * @param {Event} event
      */
     #handleAddButtonClick(event) {
@@ -774,12 +635,10 @@ class PopupPBPharmacyHandler {
             );
             return;
         }
-
         this.#$AddModal.modal("show");
     }
 
     /**
-     * Add event listeners
      * @param {string} selector
      * @param {Function} handler
      * @param {string} event
@@ -792,7 +651,6 @@ class PopupPBPharmacyHandler {
     }
 
     /**
-     * Show or hide the loading icon
      * @param {boolean} show
      */
     #showLoading(show) {
@@ -801,7 +659,6 @@ class PopupPBPharmacyHandler {
     }
 
     /**
-     * Make a fetch call with API URL as base URL
      * @param {string} url
      * @param {any | null} body
      * @param {"GET" | "POST" | "PATCH" | "PUT" | "DELETE"} method
@@ -827,10 +684,8 @@ class PopupPBPharmacyHandler {
                 })
                 .catch((error) => {
                     console.log("Error:", error);
-
                     // @ts-ignore
-                    if (this.#showLoading) this.#showLoading(false); // assert
-
+                    if (this.#showLoading) this.#showLoading(false);
                     showErrorAlertNoRefresh(`Error: ${error}`);
                     return reject(error);
                 });
@@ -838,13 +693,11 @@ class PopupPBPharmacyHandler {
     }
 
     /**
-     * Format angka menjadi mata uang rupiah
      * @param {number} amount
-     * @returns
+     * @returns {string}
      */
     #rp(amount) {
-        const formattedAmount = "Rp " + amount.toLocaleString("id-ID");
-        return formattedAmount;
+        return "Rp " + amount.toLocaleString("id-ID");
     }
 }
 
