@@ -1226,7 +1226,6 @@ class ERMController extends Controller
             'description' => 'nullable|string|max:255',
         ];
 
-
         $messages = [
             'file.required' => 'File harus diunggah.',
             'file.mimes' => 'Format file harus PDF, JPG, JPEG, atau PNG.',
@@ -1249,24 +1248,21 @@ class ERMController extends Controller
 
         $storedPath = null;
 
-
         try {
             DB::beginTransaction();
 
-            // Simpan file menggunakan Storage Laravel
-            // Simpan file secara manual ke storage private, mirip KepustakaanController
-            $storagePath = storage_path('app/private/' . $path);
+            $storagePath = storage_path('app/public/' . $path);
             if (!file_exists($storagePath)) {
                 mkdir($storagePath, 0755, true);
             }
-            $file->move($storagePath, $uniqueFileName);
-            $storedPath = $path . '/' . $uniqueFileName;
 
-            // if (!$storedPath || !Storage::disk('public')->exists($storedPath)) {
-            //     return response()->json([
-            //         'error' => 'Terjadi kesalahan internal saat mengunggah dokumen: Gagal menyimpan file ke disk.'
-            //     ], 500);
-            // }
+            // Simpan file ke storage Laravel (public disk)
+            $storedPath = $file->storeAs($path, $uniqueFileName, ['disk' => 'public']);
+
+            // Jaga fallback jika storeAs gagal (harusnya tidak, tapi untuk safety)
+            if (! $storedPath) {
+                throw new \Exception('Gagal menyimpan file ke storage.');
+            }
 
             \App\Models\UploadedDocument::create([
                 'registration_id'      => $registrationId,
@@ -1277,21 +1273,36 @@ class ERMController extends Controller
                 'stored_filename'      => $uniqueFileName,
                 'file_path'            => $storedPath,
                 'mime_type'            => $file->getClientMimeType(),
-                'file_size'            => filesize($storagePath . '/' . $uniqueFileName),
+                'file_size'            => $file->getSize(),
             ]);
 
             DB::commit();
+
+            // Log sukses ke laravel.log
+            Log::info('Dokumen berhasil diunggah.', [
+                'user_id' => Auth::id(),
+                'registration_id' => $registrationId,
+                'document_category_id' => $validated['document_category_id'],
+                'stored_path' => $storedPath,
+                'original_filename' => $file->getClientOriginalName(),
+            ]);
 
             return response()->json(['success' => 'Dokumen berhasil diunggah!', 'path' => $storedPath]);
         } catch (\Throwable $e) {
             DB::rollBack();
 
             // Hapus file jika sudah sempat tersimpan
-            if ($storedPath && Storage::disk('public')->exists($storedPath)) {
-                Storage::disk('public')->delete($storedPath);
+            if (isset($storedPath) && $storedPath && \Storage::disk('public')->exists($storedPath)) {
+                \Storage::disk('public')->delete($storedPath);
             }
 
+            // Log error ke laravel.log
             Log::error('Gagal mengunggah dokumen.', [
+                'user_id' => Auth::id(),
+                'registration_id' => $registrationId ?? null,
+                'document_category_id' => $validated['document_category_id'] ?? null,
+                'stored_path' => $storedPath ?? null,
+                'original_filename' => $file->getClientOriginalName() ?? null,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
