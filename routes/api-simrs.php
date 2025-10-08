@@ -636,6 +636,8 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
         Route::post('/dokumen/store', [ERMController::class, 'storeUploadedDocument'])->name('erm.dokumen.store');
         Route::get('/dokumen/view/{document}', [ERMController::class, 'viewUploadedDocument'])->name('erm.dokumen.view');
         Route::delete('/dokumen/destroy/{document}', [ERMController::class, 'destroyUploadedDocument'])->name('erm.dokumen.destroy');
+        Route::get('/dokumen/view-file/{document}', [ERMController::class, 'streamUploadedDocument'])->name('erm.dokumen.view');
+
 
         // ==========================================================
         // DATA UMUM & PENDUKUNG
