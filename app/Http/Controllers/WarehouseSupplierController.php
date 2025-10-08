@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\WarehouseSupplier;
 use Illuminate\Http\Request;
-use DataTables;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
+use Yajra\DataTables\Facades\DataTables;
 
 class WarehouseSupplierController extends Controller
 {
@@ -47,13 +49,50 @@ class WarehouseSupplierController extends Controller
      */
     public function store(Request $request)
     {
-        $this->validateRequest($request);
+        $rules = [
+            'nama' => 'required|string|max:255|unique:warehouse_supplier,nama',
+            'kategori' => 'required|in:FARMASI,UMUM',
+            'alamat' => 'nullable|string|max:500',
+            'phone' => 'nullable|string|max:50',
+            'fax' => 'nullable|string|max:50',
+            'email' => 'nullable|email|max:255',
+            'contact_person' => 'nullable|string|max:255',
+            'contact_person_phone' => 'nullable|string|max:50',
+            'contact_person_email' => 'nullable|email|max:255',
+            'no_rek' => 'nullable|string|max:100',
+            'bank' => 'nullable|string|max:100',
+            'top' => 'nullable|string|max:20',
+            'tipe_top' => 'nullable|in:SETELAH_TUKAR_FAKTUR,SETELAH_TERIMA_BARANG',
+            'ppn' => 'required|numeric|min:0',
+            'aktif' => 'required|boolean', // Field ini bernama 'aktif' dari form
+        ];
+
+        $messages = [
+            'nama.required' => 'Nama supplier wajib diisi.',
+            'nama.unique' => 'Nama supplier sudah terdaftar, silakan gunakan nama lain.',
+            'kategori.required' => 'Kategori supplier wajib dipilih.',
+            'email.email' => 'Format email perusahaan tidak valid.',
+            'contact_person_email.email' => 'Format email contact person tidak valid.',
+            'ppn.required' => 'Nilai PPN wajib diisi.',
+            'ppn.numeric' => 'PPN harus berupa angka.',
+            'tipe_top.in' => 'Tipe TOP tidak valid.',
+        ];
+
+        $validator = Validator::make($request->all(), $rules, $messages);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'errors' => $validator->errors()
+            ], 422);
+        }
 
         try {
-            WarehouseSupplier::create($request->all());
+            WarehouseSupplier::create($validator->validated());
             return response()->json(['success' => true, 'message' => 'Supplier berhasil ditambahkan.']);
         } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+            Log::error('Error storing supplier: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Terjadi kesalahan pada server.'], 500);
         }
     }
 
@@ -74,14 +113,51 @@ class WarehouseSupplierController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $this->validateRequest($request);
+        $rules = [
+            'nama' => 'required|string|max:255|unique:warehouse_supplier,nama,' . $id,
+            'kategori' => 'required|in:FARMASI,UMUM',
+            'alamat' => 'nullable|string|max:500',
+            'phone' => 'nullable|string|max:50',
+            'fax' => 'nullable|string|max:50',
+            'email' => 'nullable|email|max:255',
+            'contact_person' => 'nullable|string|max:255',
+            'contact_person_phone' => 'nullable|string|max:50',
+            'contact_person_email' => 'nullable|email|max:255',
+            'no_rek' => 'nullable|string|max:100',
+            'bank' => 'nullable|string|max:100',
+            'top' => 'nullable|string|max:20',
+            'tipe_top' => 'nullable|in:SETELAH_TUKAR_FAKTUR,SETELAH_TERIMA_BARANG',
+            'ppn' => 'required|numeric|min:0',
+            'aktif' => 'required|boolean',
+        ];
+
+        $messages = [
+            'nama.required' => 'Nama supplier wajib diisi.',
+            'nama.unique' => 'Nama supplier sudah terdaftar, silakan gunakan nama lain.',
+            'kategori.required' => 'Kategori supplier wajib dipilih.',
+            'email.email' => 'Format email perusahaan tidak valid.',
+            'contact_person_email.email' => 'Format email contact person tidak valid.',
+            'ppn.required' => 'Nilai PPN wajib diisi.',
+            'ppn.numeric' => 'PPN harus berupa angka.',
+            'tipe_top.in' => 'Tipe TOP tidak valid.',
+        ];
+
+        $validator = Validator::make($request->all(), $rules, $messages);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'errors' => $validator->errors()
+            ], 422);
+        }
 
         try {
             $supplier = WarehouseSupplier::findOrFail($id);
-            $supplier->update($request->all());
+            $supplier->update($validator->validated());
             return response()->json(['success' => true, 'message' => 'Supplier berhasil diperbarui.']);
         } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+            \Log::error('Error updating supplier: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Terjadi kesalahan pada server.'], 500);
         }
     }
 
@@ -96,29 +172,5 @@ class WarehouseSupplierController extends Controller
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
-    }
-
-    /**
-     * Validate the request for store and update.
-     */
-    private function validateRequest(Request $request)
-    {
-        $request->validate([
-            'kategori' => 'required|in:FARMASI,UMUM',
-            'nama' => 'required|string|max:255',
-            'alamat' => 'nullable|string|max:255',
-            'phone' => 'nullable|string|max:20',
-            'fax' => 'nullable|string|max:20',
-            'email' => 'nullable|email|max:255',
-            'contact_person' => 'nullable|string|max:255',
-            'contact_person_phone' => 'nullable|string|max:20',
-            'contact_person_email' => 'nullable|email|max:255',
-            'no_rek' => 'nullable|string|max:50',
-            'bank' => 'nullable|string|max:100',
-            'top' => 'nullable|in:COD,7HARI,14HARI,21HARI,24HARI,30HARI,37HARI,40HARI,45HARI',
-            'tipe_top' => 'nullable|in:SETELAH_TUKAR_FAKTUR,SETELAH_TERIMA_BARANG',
-            'ppn' => 'required|integer|min:0',
-            'aktif' => 'required|boolean'
-        ]);
     }
 }

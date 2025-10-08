@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Yajra\DataTables\Facades\DataTables;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Storage;
 
 class ProjectInternalController extends Controller
 {
@@ -50,6 +51,9 @@ class ProjectInternalController extends Controller
                     $btn = '<div class="d-flex">';
                     $btn .= '<button type="button" class="btn btn-sm btn-primary btn-edit mr-1" data-id="' . $row->id . '"><i class="fas fa-edit"></i></button>';
                     $btn .= '<button type="button" class="btn btn-sm btn-danger btn-delete" data-id="' . $row->id . '"><i class="fas fa-trash"></i></button>';
+                    if ($row->attachment) {
+                        $btn .= '<button type="button" class="btn btn-sm btn-info btn-view-attachment ml-1" data-url="' . asset('storage/' . $row->attachment) . '"><i class="fas fa-image"></i></button>';
+                    }
                     $btn .= '</div>';
                     return $btn;
                 })
@@ -68,6 +72,7 @@ class ProjectInternalController extends Controller
             'user_id' => 'required|exists:users,id',
             'datetime' => 'required|date',
             'description' => 'nullable|string',
+            'attachment' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // max 2MB
             'status' => 'required|in:pending,on-progress,done',
             'done_at' => 'nullable|date|required_if:status,done',
         ]);
@@ -77,6 +82,11 @@ class ProjectInternalController extends Controller
         }
 
         $data = $validator->validated();
+        if ($request->hasFile('attachment')) {
+            $filePath = $request->file('attachment')->store('projects', 'public');
+            $data['attachment'] = $filePath;
+        }
+
         if ($data['status'] == 'done' && empty($data['done_at'])) {
             $data['done_at'] = now();
         }
@@ -99,6 +109,28 @@ class ProjectInternalController extends Controller
     }
 
     /**
+     * Endpoint to get the attachment for modal view.
+     */
+    public function attachment($id)
+    {
+        $project = ProjectInternal::find($id);
+        if (!$project || !$project->attachment) {
+            return response()->json(['success' => false, 'message' => 'Lampiran tidak ditemukan.'], 404);
+        }
+
+        $url = asset('storage/' . $project->attachment);
+        $ext = strtolower(pathinfo($project->attachment, PATHINFO_EXTENSION));
+        $isImage = in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp']);
+
+        return response()->json([
+            'success' => true,
+            'url' => $url,
+            'is_image' => $isImage,
+            'filename' => basename($project->attachment),
+        ]);
+    }
+
+    /**
      * Update the specified resource in storage.
      */
     public function update(Request $request, $id)
@@ -113,6 +145,7 @@ class ProjectInternalController extends Controller
             'user_id' => 'required|exists:users,id',
             'datetime' => 'required|date',
             'description' => 'nullable|string',
+            'attachment' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'status' => 'required|in:pending,on-progress,done',
             'done_at' => 'nullable|date|required_if:status,done',
         ]);
@@ -122,6 +155,18 @@ class ProjectInternalController extends Controller
         }
 
         $data = $validator->validated();
+
+        // Handle file update
+        if ($request->hasFile('attachment')) {
+            // Hapus file lama jika ada
+            if ($project->attachment) {
+                Storage::disk('public')->delete($project->attachment);
+            }
+            // Simpan file baru
+            $filePath = $request->file('attachment')->store('projects', 'public');
+            $data['attachment'] = $filePath;
+        }
+
         if ($data['status'] == 'done' && empty($data['done_at'])) {
             $data['done_at'] = now();
         } elseif ($data['status'] != 'done') {
@@ -141,6 +186,11 @@ class ProjectInternalController extends Controller
         $project = ProjectInternal::find($id);
         if (!$project) {
             return response()->json(['success' => false, 'message' => 'Proyek tidak ditemukan.'], 404);
+        }
+
+        // Hapus file attachment dari storage sebelum menghapus record
+        if ($project->attachment) {
+            Storage::disk('public')->delete($project->attachment);
         }
 
         $project->delete();

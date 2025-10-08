@@ -832,7 +832,7 @@ Route::group(['middleware' => ['auth']], function () {
 
             Route::prefix('penerimaan-barang')->group(function () {
                 Route::prefix('pharmacy')->group(function () {
-                    Route::get('/', [WarehousePenerimaanBarangFarmasiController::class, 'index'])->name('penerimaan-barang.pharmacy');
+                    Route::get('/', [WarehousePenerimaanBarangFarmasiController::class, 'index'])->name('penerimaan-barang.pharmacy.index');
                     Route::get('/create', [WarehousePenerimaanBarangFarmasiController::class, 'create'])->name('procurement.penerimaan-barang.pharmacy.create');
                     Route::get('/print/{id}', [WarehousePenerimaanBarangFarmasiController::class, 'print'])->name('penerimaan-barang.pharmacy.print');
                     Route::get('/edit/{id}', [WarehousePenerimaanBarangFarmasiController::class, 'edit'])->name('penerimaan-barang.pharmacy.edit');

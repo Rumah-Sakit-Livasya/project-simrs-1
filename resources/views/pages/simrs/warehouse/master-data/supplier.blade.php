@@ -19,13 +19,13 @@
                             Daftar <span class="fw-300"><i>Supplier</i></span>
                         </h2>
                         <div class="panel-toolbar">
-                            <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#add-modal">
+                            <button type="button" class="btn btn-primary btn-sm" id="btn-tambah-supplier">
                                 <i class="fal fa-plus"></i> Tambah Supplier
                             </button>
                         </div>
                     </div>
                     <div class="panel-container show">
-                        <div class="panel-content">
+                        <div class="panel-content" style="overflow-x: auto;">
                             <!-- datatable start -->
                             <table id="dt-supplier" class="table table-bordered table-hover table-striped w-100">
                                 <thead class="bg-primary-600">
@@ -57,60 +57,31 @@
         $tipeTopOptions = ['SETELAH_TUKAR_FAKTUR', 'SETELAH_TERIMA_BARANG'];
     @endphp
 
-    <!-- Add Modal -->
-    <div class="modal fade" id="add-modal" tabindex="-1" role="dialog" aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
+    <!-- Unified Supplier Modal (Add/Edit) -->
+    <div class="modal fade" id="supplier-modal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable" role="document">
             <div class="modal-content">
-                <form id="add-form" method="POST">
+                <form id="supplier-form" method="POST">
                     @csrf
+                    <input type="hidden" id="supplier-id" name="id">
                     <div class="modal-header">
-                        <h5 class="modal-title">Tambah Supplier</h5>
+                        <h5 class="modal-title" id="supplier-modal-title">Tambah Supplier Baru</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true"><i class="fal fa-times"></i></span>
                         </button>
                     </div>
-                    <div class="modal-body">
-                        {{-- Form fields will be included here --}}
+                    <div class="modal-body" style="overflow-y: auto; max-height: 70vh;">
                         @include('pages.simrs.warehouse.master-data.partials.supplier-form-fields', [
-                            'prefix' => 'add',
+                            'prefix' => 'supplier',
                             'topOptions' => $topOptions,
                             'tipeTopOptions' => $tipeTopOptions,
                         ])
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
-                        <button type="submit" class="btn btn-primary">Simpan</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Edit Modal -->
-    <div class="modal fade" id="edit-modal" tabindex="-1" role="dialog" aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <form id="edit-form" method="POST">
-                    @csrf
-                    @method('PUT')
-                    <input type="hidden" id="edit-id" name="id">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Edit Supplier</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true"><i class="fal fa-times"></i></span>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
+                        <button type="submit" class="btn btn-primary" id="supplier-modal-submit">
+                            <i class="fal fa-save"></i> Simpan
                         </button>
-                    </div>
-                    <div class="modal-body">
-                        {{-- Form fields will be included here --}}
-                        @include('pages.simrs.warehouse.master-data.partials.supplier-form-fields', [
-                            'prefix' => 'edit',
-                            'topOptions' => $topOptions,
-                            'tipeTopOptions' => $tipeTopOptions,
-                        ])
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
-                        <button type="submit" class="btn btn-warning">Update</button>
                     </div>
                 </form>
             </div>
@@ -120,6 +91,7 @@
 
 @section('plugin')
     <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
+    <script src="/js/formplugins/select2/select2.bundle.js"></script>
     <script>
         $(document).ready(function() {
             // Setup CSRF token
@@ -129,7 +101,36 @@
                 }
             });
 
-            // Initialize DataTables
+            // Helper: clear validation errors
+            function clearValidationErrors(formId) {
+                $(`#${formId} .form-control`).removeClass('is-invalid');
+                $(`#${formId} .invalid-feedback`).text('');
+            }
+
+            // Helper: show validation errors
+            function showValidationErrors(prefix, errors) {
+                for (const key in errors) {
+                    if (Object.hasOwnProperty.call(errors, key)) {
+                        const message = errors[key][0];
+                        let fieldKey = key;
+                        if (key === 'aktif') fieldKey = 'status';
+                        const field = $(`#${prefix}-${fieldKey}`);
+                        field.addClass('is-invalid');
+                        field.next('.invalid-feedback').text(message);
+                    }
+                }
+            }
+
+            // Select2 init
+            $('#supplier-top, #supplier-tipe_top').select2({
+                placeholder: function() {
+                    return $(this).attr('id').includes('tipe_top') ? "Pilih Tipe TOP..." :
+                        "Pilih TOP...";
+                },
+                dropdownParent: $('#supplier-modal')
+            });
+
+            // DataTables init
             var table = $('#dt-supplier').DataTable({
                 processing: true,
                 serverSide: true,
@@ -205,73 +206,166 @@
                 ]
             });
 
-            // Store new data
-            $('#add-form').on('submit', function(e) {
+            // Open modal for Add
+            $('#btn-tambah-supplier').on('click', function() {
+                // Reset seluruh field form supplier (termasuk select2, radio, dan nilai default) di partial supplier-form-fields.blade.php
+                $('#supplier-form')[0].reset();
+                clearValidationErrors('supplier-form');
+
+                // Reset Select2 ke placeholder
+                $('#supplier-top, #supplier-tipe_top').val(null).trigger('change');
+
+                // Reset radio button kategori & status ke default (harus sesuai default di partial)
+                $('#supplier-kategori-farmasi').prop('checked', true);
+                $('#supplier-aktif-true').prop('checked', true);
+
+                // Set nilai default PPN (harus sesuai default di partial)
+                $('#supplier-ppn').val('11');
+
+                // Reset semua field input di partial supplier-form-fields.blade.php
+                $('#supplier-nama').val('');
+                $('#supplier-alamat').val('');
+                $('#supplier-phone').val('');
+                $('#supplier-fax').val('');
+                $('#supplier-email').val('');
+                $('#supplier-contact_person').val('');
+                $('#supplier-contact_person_phone').val('');
+                $('#supplier-contact_person_email').val('');
+                $('#supplier-no_rek').val('');
+                $('#supplier-bank').val('');
+
+                // Hapus method spoofing jika ada dari edit sebelumnya
+                $('#supplier-form').find('input[name="_method"]').remove();
+                $('#supplier-id').val('');
+
+                // Set judul dan tombol untuk mode 'Tambah'
+                $('#supplier-modal-title').text('Tambah Supplier Baru');
+                $('#supplier-modal-submit').removeClass('btn-warning').addClass('btn-primary').html(
+                    '<i class="fal fa-save"></i> Simpan');
+
+                // Set action form untuk 'store'
+                $('#supplier-form').attr('action', "{{ route('warehouse.master-data.supplier.store') }}");
+
+                $('#supplier-modal').modal('show');
+            });
+
+            // Prevent double submit
+            let supplierFormSubmitting = false;
+
+            // Submit (add/edit) - refactor: use form.serialize()
+            $('#supplier-form').on('submit', function(e) {
                 e.preventDefault();
+
+                // Cegah submit ganda
+                if (supplierFormSubmitting) {
+                    return false;
+                }
+                supplierFormSubmitting = true;
+
+                var form = $(this);
+                var url = form.attr('action');
+                var isEdit = $('#supplier-id').val() !== '';
+
+                // Disable submit button, show spinner
+                $('#supplier-modal-submit').prop('disabled', true).html(
+                    '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...'
+                );
+
+                clearValidationErrors('supplier-form');
+
                 $.ajax({
-                    url: "{{ route('warehouse.master-data.supplier.store') }}",
+                    url: url,
                     type: "POST",
-                    data: $(this).serialize(),
+                    data: form.serialize(),
                     success: function(response) {
                         if (response.success) {
-                            $('#add-modal').modal('hide');
+                            $('#supplier-modal').modal('hide');
                             showSuccessAlert(response.message);
                             table.ajax.reload();
                         }
                     },
                     error: function(xhr) {
-                        showErrorAlertNoRefresh('Gagal menyimpan data.');
+                        if (xhr.status === 422) {
+                            var errors = xhr.responseJSON.errors;
+                            showValidationErrors('supplier', errors);
+                        } else {
+                            showErrorAlertNoRefresh(isEdit ? 'Gagal memperbarui data.' :
+                                'Gagal menyimpan data.');
+                        }
+                    },
+                    complete: function() {
+                        var buttonText = isEdit ? '<i class="fal fa-save"></i> Update' :
+                            '<i class="fal fa-save"></i> Simpan';
+                        $('#supplier-modal-submit').prop('disabled', false).html(buttonText);
+                        supplierFormSubmitting = false;
                     }
                 });
             });
 
-            // Edit button click
+            // Edit button click - refactor
             $('#dt-supplier').on('click', '.edit-btn', function() {
                 var url = $(this).data('url');
+
+                // Reset form sebelum diisi
+                $('#supplier-form')[0].reset();
+                clearValidationErrors('supplier-form');
+                $('#supplier-top, #supplier-tipe_top').val(null).trigger('change');
+
                 $.get(url, function(response) {
                     if (response.success) {
                         var data = response.data;
-                        $('#edit-modal').modal('show');
-                        // Populate form
-                        $('#edit-id').val(data.id);
-                        for (const key in data) {
-                            if (Object.hasOwnProperty.call(data, key)) {
-                                const value = data[key];
-                                if ($(`#edit-${key}`).is(':radio')) {
-                                    $(`input[name=${key}][value="${value}"]`).prop('checked', true);
-                                } else {
-                                    $(`#edit-${key}`).val(value);
-                                }
-                            }
+
+                        // Set judul dan tombol untuk mode 'Edit'
+                        $('#supplier-modal-title').text('Edit Data Supplier');
+                        $('#supplier-modal-submit').removeClass('btn-primary').addClass(
+                            'btn-warning').html('<i class="fal fa-save"></i> Update');
+
+                        // Set ID dan method spoofing untuk PUT
+                        $('#supplier-id').val(data.id);
+                        if ($('#supplier-form').find('input[name="_method"]').length === 0) {
+                            $('#supplier-form').append(
+                                '<input type="hidden" name="_method" value="PUT">');
                         }
-                        // Set form action URL
-                        var updateUrl = "{{ url('warehouse/master-data/supplier') }}/" + data.id;
-                        $('#edit-form').attr('action', updateUrl);
+
+                        // Set action form untuk 'update'
+                        var updateUrl =
+                            "{{ route('warehouse.master-data.supplier.update', ':id') }}".replace(
+                                ':id', data.id);
+                        $('#supplier-form').attr('action', updateUrl);
+
+                        // Isi semua field dari data
+                        $('#supplier-nama').val(data.nama);
+                        $(`input[name="kategori"][value="${data.kategori}"]`).prop('checked', true);
+                        $('#supplier-alamat').val(data.alamat);
+
+                        $('#supplier-phone').val(data.phone);
+                        $('#supplier-fax').val(data.fax);
+                        $('#supplier-email').val(data.email);
+
+                        $('#supplier-contact_person').val(data.contact_person);
+                        $('#supplier-contact_person_phone').val(data.contact_person_phone);
+                        $('#supplier-contact_person_email').val(data.contact_person_email);
+
+                        $('#supplier-no_rek').val(data.no_rek);
+                        $('#supplier-bank').val(data.bank);
+
+                        $('#supplier-top').val(data.top).trigger('change');
+                        $('#supplier-tipe_top').val(data.tipe_top).trigger('change');
+
+                        $('#supplier-ppn').val(data.ppn);
+
+                        if (data.aktif == 1) {
+                            $('#supplier-aktif-true').prop('checked', true);
+                        } else {
+                            $('#supplier-aktif-false').prop('checked', true);
+                        }
+
+                        $('#supplier-modal').modal('show');
                     }
                 });
             });
 
-            // Update data
-            $('#edit-form').on('submit', function(e) {
-                e.preventDefault();
-                $.ajax({
-                    url: $(this).attr('action'),
-                    type: "POST",
-                    data: $(this).serialize(),
-                    success: function(response) {
-                        if (response.success) {
-                            $('#edit-modal').modal('hide');
-                            showSuccessAlert(response.message);
-                            table.ajax.reload();
-                        }
-                    },
-                    error: function(xhr) {
-                        showErrorAlertNoRefresh('Gagal memperbarui data.');
-                    }
-                });
-            });
-
-            // Delete button click
+            // Delete button click (tidak diubah)
             $('#dt-supplier').on('click', '.delete-btn', function() {
                 var url = $(this).data('url');
                 showDeleteConfirmation(function() {
@@ -291,9 +385,15 @@
                 });
             });
 
-            // Clear modal on hidden
-            $('#add-modal, #edit-modal').on('hidden.bs.modal', function() {
-                $(this).find('form')[0].reset();
+            // Clear modal on hidden - Disederhanakan
+            $('#supplier-modal').on('hidden.bs.modal', function() {
+                $('#supplier-form')[0].reset();
+                clearValidationErrors('supplier-form');
+                $('#supplier-top, #supplier-tipe_top').val(null).trigger('change');
+                $('#supplier-id').val('');
+                $('#supplier-form').find('input[name="_method"]').remove();
+                supplierFormSubmitting = false; // Reset flag ketika modal ditutup
+                $('#supplier-modal-submit').prop('disabled', false); // Pastikan tombol aktif lagi
             });
         });
     </script>

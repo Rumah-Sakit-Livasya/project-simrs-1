@@ -27,9 +27,11 @@ class ProjectInternal extends Model
         'datetime',
         'name',
         'description',
+        'attachment',
         'status',
         'done_at',
     ];
+
 
     /**
      * The attributes that should be cast.
