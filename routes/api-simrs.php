@@ -369,6 +369,7 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
                 Route::post('/store', [WarehousePenerimaanBarangFarmasiController::class, 'store'])->name('warehouse.penerimaan-barang.pharmacy.store');
                 Route::put('/update/{id}', [WarehousePenerimaanBarangFarmasiController::class, 'update'])->name('warehouse.penerimaan-barang.pharmacy.update');
                 Route::delete('/destroy/{id}', [WarehousePenerimaanBarangFarmasiController::class, 'destroy'])->name('warehouse.penerimaan-barang.pharmacy.delete');
+                Route::get('/{pb_id}/details', [WarehousePenerimaanBarangFarmasiController::class, 'details'])->name('warehouse.penerimaan-barang.pharmacy.details');
             });
 
             Route::prefix('non-pharmacy')->group(function () {
