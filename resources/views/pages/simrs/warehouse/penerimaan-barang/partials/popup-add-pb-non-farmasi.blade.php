@@ -14,23 +14,58 @@
             max-width: 70%;
         }
 
-        .borderless-input {
-            border: 0;
-            border-bottom: 1.9px solid #eaeaea;
-            margin-top: -.5rem;
-            border-radius: 0
+        /* Custom input and select styling: border-bottom only */
+        .form-control,
+        .form-select,
+        .select2-selection--single {
+            border: none !important;
+            border-bottom: 2px solid #e0e0e0 !important;
+            border-radius: 0 !important;
+            background: transparent !important;
+            box-shadow: none !important;
+            padding-left: 0.5rem !important;
+            padding-right: 0.5rem !important;
+            min-height: 38px;
         }
 
-        .qty {
-            min-width: 100px;
-            margin-left: 10px;
+        .form-control:focus,
+        .form-select:focus,
+        .select2-selection--single:focus {
+            border-bottom: 2px solid #007bff !important;
+            outline: none !important;
+            background: transparent !important;
         }
 
-        input {
-            border: 0;
-            border-bottom: 1.9px solid #eaeaea;
-            margin-top: -.5rem;
-            border-radius: 0;
+        .select2-container--default .select2-selection--single {
+            height: 38px !important;
+            padding-top: 4px;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            line-height: 34px !important;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 36px !important;
+        }
+
+        /* Spacing between form rows and groups */
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+
+        .row.justify-content-center {
+            margin-bottom: 0.7rem;
+        }
+
+        .form-label {
+            margin-bottom: 0.2rem;
+            font-weight: 500;
+        }
+
+        .table th,
+        .table td {
+            vertical-align: middle !important;
         }
 
         #loading-page {
@@ -40,6 +75,26 @@
             background: rgba(0, 0, 0, 0.75);
             border-radius: 0 0 4px 4px;
             z-index: 1000;
+        }
+
+        /* Remove background and border from disabled selects */
+        select[disabled],
+        .form-select[disabled],
+        .select2-container--disabled .select2-selection--single {
+            background: transparent !important;
+            color: #888 !important;
+        }
+
+        /* Table footer input alignment */
+        tfoot .form-group {
+            margin-bottom: 0;
+        }
+
+        /* Responsive tweaks for better spacing */
+        @media (max-width: 1200px) {
+            .col-xl-4 {
+                margin-bottom: 1rem;
+            }
         }
     </style>
 @endsection
@@ -67,9 +122,9 @@
                                 <div class="row justify-content-center">
                                     <div class="col-xl-4">
                                         <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-xl-4" style="text-align: right">
-                                                    <label class="form-label text-end" for="tanggal_terima">
+                                            <div class="row align-items-center">
+                                                <div class="col-xl-4 text-end">
+                                                    <label class="form-label" for="tanggal_terima">
                                                         Tanggal Penerimaan
                                                     </label>
                                                 </div>
@@ -84,9 +139,9 @@
 
                                     <div class="col-xl-4">
                                         <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-xl-4" style="text-align: right">
-                                                    <label class="form-label text-end" for="no_faktur">
+                                            <div class="row align-items-center">
+                                                <div class="col-xl-4 text-end">
+                                                    <label class="form-label" for="no_faktur">
                                                         No Faktur / Surat Jalan*
                                                     </label>
                                                 </div>
@@ -99,15 +154,14 @@
 
                                     <div class="col-xl-4">
                                         <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-xl-4" style="text-align: right">
-                                                    <label class="form-label text-end" for="tipe_terima">
+                                            <div class="row align-items-center">
+                                                <div class="col-xl-4 text-end">
+                                                    <label class="form-label" for="tipe_terima">
                                                         Tipe Terima
                                                     </label>
                                                 </div>
                                                 <div class="col-xl">
-                                                    <select class="form-control" name="tipe_terima" id="tipe_terima">
-                                                        {{-- po / npo --}}
+                                                    <select class="form-select" name="tipe_terima" id="tipe_terima">
                                                         <option value="po"
                                                             {{ old('tipe_terima') == 'po' ? 'selected' : '' }}>Purchase
                                                             Order</option>
@@ -124,22 +178,22 @@
                                 <div class="row justify-content-center">
                                     <div class="col-xl-4">
                                         <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-xl-4" style="text-align: right">
-                                                    <label class="form-label text-end" for="kode_po">
+                                            <div class="row align-items-center">
+                                                <div class="col-xl-4 text-end">
+                                                    <label class="form-label" for="kode_po">
                                                         Kode PO*
                                                     </label>
                                                 </div>
-
                                                 <div class="col-xl">
                                                     <input type="hidden" name="po_id" value="" required>
                                                     <input type="text" class="form-control" name="kode_po" readonly
                                                         required>
                                                 </div>
-                                                <div class="col-xl-1" id="select-po-btn">
+                                                <div class="col-xl-1 d-flex align-items-center" id="select-po-btn">
                                                     <i class="pointer" id="pilih-po-btn" title="Pilih Purchase Order"
                                                         data-bs-toggle="modal" data-bs-target="#pilihPOModal">
-                                                        <span class="fal fa-search mr-1 text-primary"></span></i>
+                                                        <span class="fal fa-search mr-1 text-primary"></span>
+                                                    </i>
                                                     @include('pages.simrs.warehouse.penerimaan-barang.partials.modal-pilih-po-non-pharmacy')
                                                 </div>
                                             </div>
@@ -148,9 +202,9 @@
 
                                     <div class="col-xl-4">
                                         <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-xl-4" style="text-align: right">
-                                                    <label class="form-label text-end" for="pic_penerima">
+                                            <div class="row align-items-center">
+                                                <div class="col-xl-4 text-end">
+                                                    <label class="form-label" for="pic_penerima">
                                                         PIC Penerima
                                                     </label>
                                                 </div>
@@ -163,16 +217,14 @@
 
                                     <div class="col-xl-4">
                                         <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-xl-4" style="text-align: right">
-                                                    <label class="form-label text-end" for="tipe_bayar">
+                                            <div class="row align-items-center">
+                                                <div class="col-xl-4 text-end">
+                                                    <label class="form-label" for="tipe_bayar">
                                                         Tipe Pembayaran
                                                     </label>
                                                 </div>
                                                 <div class="col-xl">
-                                                    {{-- cash / non_cash --}}
-                                                    <select class="form-control form-select" id="tipe_bayar"
-                                                        name="tipe_bayar">
+                                                    <select class="form-select" id="tipe_bayar" name="tipe_bayar">
                                                         <option value="non_cash">Non Cash</option>
                                                         <option value="cash">Cash</option>
                                                     </select>
@@ -185,9 +237,9 @@
                                 <div class="row justify-content-center">
                                     <div class="col-xl-4">
                                         <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-xl-4" style="text-align: right">
-                                                    <label class="form-label text-end" for="supplier">
+                                            <div class="row align-items-center">
+                                                <div class="col-xl-4 text-end">
+                                                    <label class="form-label" for="supplier">
                                                         Supplier*
                                                     </label>
                                                 </div>
@@ -208,9 +260,9 @@
 
                                     <div class="col-xl-4">
                                         <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-xl-4" style="text-align: right">
-                                                    <label class="form-label text-end" for="keterangan">
+                                            <div class="row align-items-center">
+                                                <div class="col-xl-4 text-end">
+                                                    <label class="form-label" for="keterangan">
                                                         Keterangan
                                                     </label>
                                                 </div>
@@ -223,9 +275,9 @@
 
                                     <div class="col-xl-4">
                                         <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-xl-4" style="text-align: right">
-                                                    <label class="form-label text-end" for="kas">
+                                            <div class="row align-items-center">
+                                                <div class="col-xl-4 text-end">
+                                                    <label class="form-label" for="kas">
                                                         Kas
                                                     </label>
                                                 </div>
@@ -240,9 +292,9 @@
                                 <div class="row justify-content-center">
                                     <div class="col-xl-4">
                                         <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-xl-4" style="text-align: right">
-                                                    <label class="form-label text-end" for="tanggal_faktur">
+                                            <div class="row align-items-center">
+                                                <div class="col-xl-4 text-end">
+                                                    <label class="form-label" for="tanggal_faktur">
                                                         Tanggal Faktur
                                                     </label>
                                                 </div>
@@ -256,14 +308,14 @@
 
                                     <div class="col-xl-4">
                                         <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-xl-4" style="text-align: right">
-                                                    <label class="form-label text-end" for="gudang_id">
+                                            <div class="row align-items-center">
+                                                <div class="col-xl-4 text-end">
+                                                    <label class="form-label" for="gudang_id">
                                                         Gudang*
                                                     </label>
                                                 </div>
                                                 <div class="col-xl">
-                                                    <select class="form-control select2" name="gudang_id" id="gudang"
+                                                    <select class="form-select select2" name="gudang_id" id="gudang"
                                                         required>
                                                         <option value="" selected disabled hidden>Pilih Gudang
                                                         </option>
@@ -319,25 +371,26 @@
                                                     @include('pages.simrs.warehouse.penerimaan-barang.partials.modal-add-item-non-pharmacy')
                                                 </td>
                                                 <td>
-                                                    <div class="form-group">
-                                                        <div class="row">
-                                                            <div class="col-xl-6" style="text-align: right">
-                                                                <label class="form-label text-end" for="diskon_faktur">
+                                                    <div class="form-group mb-0">
+                                                        <div class="row align-items-center">
+                                                            <div class="col-xl-6 text-end">
+                                                                <label class="form-label" for="diskon_faktur">
                                                                     Diskon Faktur (Rp)
                                                                 </label>
                                                             </div>
                                                             <div class="col-xl">
-                                                                <input type="number" class="form-control" id="diskon-faktur"
-                                                                    name="diskon_faktur" value="0" min="0">
+                                                                <input type="number" class="form-control"
+                                                                    id="diskon-faktur" name="diskon_faktur"
+                                                                    value="0" min="0">
                                                             </div>
                                                         </div>
                                                     </div>
                                                 </td>
                                                 <td>
-                                                    <div class="form-group">
-                                                        <div class="row">
-                                                            <div class="col-xl-3" style="text-align: right">
-                                                                <label class="form-label text-end" for="materai">
+                                                    <div class="form-group mb-0">
+                                                        <div class="row align-items-center">
+                                                            <div class="col-xl-3 text-end">
+                                                                <label class="form-label" for="materai">
                                                                     Materai (Rp)
                                                                 </label>
                                                             </div>
@@ -349,10 +402,10 @@
                                                     </div>
                                                 </td>
                                                 <td>
-                                                    <div class="form-group">
-                                                        <div class="row">
-                                                            <div class="col-xl-3" style="text-align: right">
-                                                                <label class="form-label text-end" for="ppn">
+                                                    <div class="form-group mb-0">
+                                                        <div class="row align-items-center">
+                                                            <div class="col-xl-3 text-end">
+                                                                <label class="form-label" for="ppn">
                                                                     PPN (%)
                                                                 </label>
                                                             </div>
@@ -389,7 +442,7 @@
                                                 <span class="text-primary">Kembali</span>
                                             </a>
                                         </div>
-                                        <div class="col-xl text-right">
+                                        <div class="col-xl text-end">
                                             <button type="submit" id="order-submit-draft"
                                                 class="btn btn-lg btn-primary waves-effect waves-themed">
                                                 <span class="fal fa-save mr-1"></span>
@@ -423,5 +476,6 @@
     <script>
         $(".select2").select2();
     </script>
-    <script src="{{ asset('js/simrs/warehouse/penerimaan-barang/popup-non-pharmacy.js') }}?v={{ time() }}"></script>
+    <script src="{{ asset('js/simrs/warehouse/penerimaan-barang/popup-non-pharmacy.js') }}?v={{ time() }}">
+    </script>
 @endsection

@@ -564,4 +564,23 @@ class WarehousePenerimaanBarangFarmasiController extends Controller
             'pb' => WarehousePenerimaanBarangFarmasi::findorfail($id),
         ]);
     }
+
+    /**
+     * Menampilkan childrow untuk penerimaan barang farmasi.
+     * @param int $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function details($id)
+    {
+        // Ambil data items untuk penerimaan barang farmasi tertentu
+        $items = WarehousePenerimaanBarangFarmasiItems::with(['item', 'satuan'])
+            ->where('pb_id', $id)
+            ->get();
+
+        // Anda bisa menyesuaikan struktur data yang dikembalikan sesuai kebutuhan frontend
+        return response()->json([
+            'success' => true,
+            'data' => $items,
+        ]);
+    }
 }
