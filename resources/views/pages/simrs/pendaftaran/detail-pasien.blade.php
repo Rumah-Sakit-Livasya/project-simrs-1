@@ -257,129 +257,129 @@
 
         <div class="row">
             <div class="col-xl-12">
-                <div id="panel-1" class="panel">
-                    <div class="panel-hdr bg-success">
-                        <h2 class="text-light">
-                            <i class="mdi mdi-hospital-building mdi-24px"></i> Biodata <span
-                                class="fw-300"><i>Pasien</i></span>
+                <div id="panel-2" class="panel">
+                    <div class="panel-hdr">
+                        <h2>
+                            <i class='bx bxs-user-plus' style="transform: scale(1.5); margin-right: .5rem;"></i>
+                            Pendaftaran <span class="fw-300"><i>Registrasi Baru</i></span>
                         </h2>
                     </div>
                     <div class="panel-container show">
                         <div class="panel-content">
-                            {{-- Ganti seluruh blok <ul class="box-menu"> dengan ini --}}
-                            <ul class="box-menu">
-                                <div class="tab-pane fade show active" id="awal" role="tabpanel"
-                                    aria-labelledby="awal">
-                                    <div class="row justify-content-center">
-                                        <div class="col-md-8">
-                                            <div class="row justify-content-center">
 
-                                                {{-- Rawat Jalan --}}
-                                                <div class="col-md-4">
-                                                    <li class="menu-layanan blue-box">
-                                                        <a class="nav-link service-link"
-                                                            href="/patients/{{ $patient->id }}/rawat-jalan"
-                                                            data-layanan="reg_rajal">
-                                                            <div
-                                                                class="circle-menu waves-effect waves-light blue darken-3">
-                                                                <i class="mdi mdi-stethoscope"></i>
-                                                            </div>
-                                                            <p>Rawat Jalan</p>
-                                                        </a>
-                                                    </li>
-                                                </div>
+                            {{-- ======================================================= --}}
+                            {{-- ===== LOGIKA UTAMA ADA DI SINI ======================== --}}
+                            {{-- ======================================================= --}}
 
-                                                {{-- IGD --}}
-                                                <div class="col-md-4">
-                                                    <li class="menu-layanan red-box">
-                                                        <a class="nav-link service-link"
-                                                            href="/patients/{{ $patient->id }}/igd"
-                                                            data-layanan="reg_igd">
-                                                            <div class="circle-menu waves-effect waves-light red">
-                                                                <i class="mdi mdi-hospital"></i>
-                                                            </div>
-                                                            <p>I G D</p>
-                                                        </a>
-                                                    </li>
-                                                </div>
-
-                                                {{-- ODC --}}
-                                                <div class="col-md-4">
-                                                    <li class="menu-layanan green-box">
-                                                        <a class="nav-link service-link"
-                                                            href="/patients/{{ $patient->id }}/odc"
-                                                            data-layanan="reg_odc">
-                                                            <div class="circle-menu waves-effect waves-light greencx">
-                                                                <i class="mdi mdi-bed"></i>
-                                                            </div>
-                                                            <p>O D C</p>
-                                                        </a>
-                                                    </li>
-                                                </div>
-
-                                                {{-- Rawat Inap --}}
-                                                <div class="col-md-4">
-                                                    <li class="menu-layanan cyan-box">
-                                                        <a class="nav-link service-link"
-                                                            href="/patients/{{ $patient->id }}/rawat-inap"
-                                                            data-layanan="reg_ranap">
-                                                            <div class="circle-menu waves-effect waves-light cyan">
-                                                                <i class="mdi mdi-bed"></i>
-                                                            </div>
-                                                            <p>Rawat Inap</p>
-                                                        </a>
-                                                    </li>
-                                                </div>
-
-                                                {{-- Laboratorium --}}
-                                                <div class="col-md-4">
-                                                    <li class="menu-layanan orange-box">
-                                                        <a class="nav-link service-link"
-                                                            href="/patients/{{ $patient->id }}/laboratorium"
-                                                            data-layanan="reg_lab">
-                                                            <div
-                                                                class="circle-menu waves-effect waves-light orange lighten-2">
-                                                                <i class="mdi mdi-flask-outline"></i>
-                                                            </div>
-                                                            <p>Laboratorium</p>
-                                                        </a>
-                                                    </li>
-                                                </div>
-
-                                                {{-- Radiologi --}}
-                                                <div class="col-md-4">
-                                                    <li class="menu-layanan purple-box">
-                                                        <a class="nav-link service-link"
-                                                            href="/patients/{{ $patient->id }}/radiologi"
-                                                            data-layanan="reg_rad">
-                                                            <div
-                                                                class="circle-menu waves-effect waves-light purple lighten-2">
-                                                                <i class="mdi mdi-radioactive"></i>
-                                                            </div>
-                                                            <p>Radiologi</p>
-                                                        </a>
-                                                    </li>
-                                                </div>
-
-                                                {{-- Hemodialisa --}}
-                                                <div class="col-md-4">
-                                                    <li class="menu-layanan brown-box">
-                                                        <a class="nav-link service-link"
-                                                            href="/patients/{{ $patient->id }}/hemodialisa"
-                                                            data-layanan="reg_hemo">
-                                                            <div class="circle-menu waves-effect waves-light browncx">
-                                                                <i class="mdi mdi-high-definition-box"></i>
-                                                            </div>
-                                                            <p>Hemodialisa</p>
-                                                        </a>
-                                                    </li>
-                                                </div>
-
-                                            </div>
-                                        </div>
+                            @if ($patient->status == 'digabung')
+                                <div class="d-flex flex-column align-items-center gap-2">
+                                    <div class="mb-3">
+                                        <span
+                                            class="d-inline-flex align-items-center justify-content-center rounded-circle bg-white border border-info shadow-sm"
+                                            style="width: 64px; height: 64px;">
+                                            <i class="mdi mdi-information-outline text-info"
+                                                style="font-size: 2.2rem;"></i>
+                                        </span>
                                     </div>
+                                    <h3 class="fw-bold text-info mb-2">
+                                        Data Pasien Digabungkan
+                                    </h3>
+                                    <p class="fs-5 text-secondary mb-3" style="max-width: 420px; margin: 0 auto;">
+                                        Pasien ini <span class="fw-semibold text-danger">tidak dapat didaftarkan</span>
+                                        karena datanya telah digabungkan dengan nomor rekam medis lain.
+                                    </p>
+                                    <div class="mb-2">
+                                        <span class="text-muted small">Gunakan Nomor Rekam Medis baru berikut:</span>
+                                    </div>
+                                    @php
+                                        $mergedPatient = \App\Models\SIMRS\Patient::where(
+                                            'medical_record_number',
+                                            $patient->merged_to_rm,
+                                        )->first();
+                                    @endphp
+                                    <a href="{{ route('detail.pendaftaran.pasien', ['patient' => $mergedPatient?->id]) }}"
+                                        class="btn btn-outline-info btn-lg fw-semibold px-5 py-2 d-inline-flex align-items-center gap-2 mt-2 shadow-sm"
+                                        style="font-size: 1.15rem;">
+                                        <i class="mdi mdi-account-card-details-outline"></i>
+                                        <span>{{ $patient->merged_to_rm }}</span>
+                                    </a>
                                 </div>
-                            </ul>
+                            @else
+                                {{-- Jika status pasien AKTIF, tampilkan menu registrasi --}}
+                                <ul class="box-menu list-unstyled row text-center gy-3 justify-content-center">
+                                    <li class="col-lg-2 col-md-3 col-sm-4 col-6 p-3">
+                                        <a href="{{ route('form.registrasi', ['patient' => $patient->id, 'registrasi' => 'rawat-jalan']) }}"
+                                            class="d-block text-decoration-none service-link">
+                                            <div class="rounded-circle mx-auto d-flex align-items-center justify-content-center bg-primary shadow border border-white"
+                                                style="width: 64px; height: 64px;">
+                                                <i class="mdi mdi-stethoscope text-white h1 mt-2"></i>
+                                            </div>
+                                            <h5 class="mt-3 fw-semibold text-primary">Rawat Jalan</h5>
+                                        </a>
+                                    </li>
+                                    <li class="col-lg-2 col-md-3 col-sm-4 col-6 p-3">
+                                        <a href="{{ route('form.registrasi', ['patient' => $patient->id, 'registrasi' => 'igd']) }}"
+                                            class="d-block text-decoration-none service-link">
+                                            <div class="rounded-circle mx-auto d-flex align-items-center justify-content-center bg-danger shadow border border-white"
+                                                style="width: 64px; height: 64px;">
+                                                <i class="mdi mdi-hospital text-white h1 mt-2"></i>
+                                            </div>
+                                            <h5 class="mt-3 fw-semibold text-danger">IGD</h5>
+                                        </a>
+                                    </li>
+                                    <li class="col-lg-2 col-md-3 col-sm-4 col-6 p-3">
+                                        <a href="{{ route('form.registrasi', ['patient' => $patient->id, 'registrasi' => 'odc']) }}"
+                                            class="d-block text-decoration-none service-link">
+                                            <div class="rounded-circle mx-auto d-flex align-items-center justify-content-center bg-success shadow border border-white"
+                                                style="width: 64px; height: 64px;">
+                                                <i class="mdi mdi-bed text-white h1 mt-2"></i>
+                                            </div>
+                                            <h5 class="mt-3 fw-semibold text-success">ODC</h5>
+                                        </a>
+                                    </li>
+                                    <li class="col-lg-2 col-md-3 col-sm-4 col-6 p-3">
+                                        <a href="{{ route('form.registrasi', ['patient' => $patient->id, 'registrasi' => 'rawat-inap']) }}"
+                                            class="d-block text-decoration-none service-link">
+                                            <div class="rounded-circle mx-auto d-flex align-items-center justify-content-center bg-info shadow border border-white"
+                                                style="width: 64px; height: 64px;">
+                                                <i class="mdi mdi-bed text-white h1 mt-2"></i>
+                                            </div>
+                                            <h5 class="mt-3 fw-semibold text-info">Rawat Inap</h5>
+                                        </a>
+                                    </li>
+                                    <li class="col-lg-2 col-md-3 col-sm-4 col-6 p-3">
+                                        <a href="{{ route('form.registrasi', ['patient' => $patient->id, 'registrasi' => 'laboratorium']) }}"
+                                            class="d-block text-decoration-none service-link">
+                                            <div class="rounded-circle mx-auto d-flex align-items-center justify-content-center bg-warning shadow border border-white"
+                                                style="width: 64px; height: 64px;">
+                                                <i class="mdi mdi-flask-outline text-white h1 mt-2"></i>
+                                            </div>
+                                            <h5 class="mt-3 fw-semibold text-warning">Laboratorium</h5>
+                                        </a>
+                                    </li>
+                                    <li class="col-lg-2 col-md-3 col-sm-4 col-6 p-3">
+                                        <a href="{{ route('form.registrasi', ['patient' => $patient->id, 'registrasi' => 'radiologi']) }}"
+                                            class="d-block text-decoration-none service-link">
+                                            <div class="rounded-circle mx-auto d-flex align-items-center justify-content-center bg-purple shadow border border-white"
+                                                style="width: 64px; height: 64px; background-color: #6f42c1;">
+                                                <i class="mdi mdi-radioactive text-white h1 mt-2"></i>
+                                            </div>
+                                            <h5 class="mt-3 fw-semibold" style="color: #6f42c1;">Radiologi</h5>
+                                        </a>
+                                    </li>
+                                    <li class="col-lg-2 col-md-3 col-sm-4 col-6 p-3">
+                                        <a href="{{ route('form.registrasi', ['patient' => $patient->id, 'registrasi' => 'hemodialisa']) }}"
+                                            class="d-block text-decoration-none service-link">
+                                            <div class="rounded-circle mx-auto d-flex align-items-center justify-content-center bg-secondary shadow border border-white"
+                                                style="width: 64px; height: 64px; background-color: #ffc107;">
+                                                <i class="mdi mdi-high-definition-box text-white h1 mt-2"></i>
+                                            </div>
+                                            <h5 class="mt-3 fw-semibold" style="color: #ffc107;">Hemodialisa</h5>
+                                        </a>
+                                    </li>
+                                </ul>
+                            @endif
+
                         </div>
                     </div>
                 </div>
