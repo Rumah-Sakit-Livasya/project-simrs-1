@@ -99,13 +99,13 @@ class PatientController extends Controller
 
     public function simpan_pendaftaran_pasien(Request $request)
     {
-        $validatedData = $request->validate([
+        $rules = [
             'name' => 'required|max:255',
             'nickname' => 'max:255',
             'title' => 'required|max:255',
             'gender' => 'required|max:255',
             'place' => 'required|max:255',
-            'date_of_birth' => 'required|date_format:d-m-Y', // Ubah ini! // Sebaiknya gunakan tipe date
+            'date_of_birth' => 'required|date_format:d-m-Y',
             'religion' => 'required|max:255',
             'blood_group' => 'nullable|max:255',
             'allergy' => 'nullable|max:255',
@@ -114,10 +114,26 @@ class PatientController extends Controller
             'citizenship' => 'nullable|max:255',
             'id_card' => 'required|max:255',
             'address' => 'required|max:255',
-            'province' => 'nullable|max:255', // Dibuat nullable karena di-disable
-            'regency' => 'required|max:255',
-            'subdistrict' => 'required|max:255',
-            'ward' => 'required|max:255',
+
+            'is_manual_address' => 'required|boolean',
+
+            // Conditional validation for address fields
+            'province' => ['required_if:is_manual_address,1', 'nullable', 'string', 'max:255'],
+            'regency' => ['required_if:is_manual_address,1', 'nullable', 'string', 'max:255'],
+            'subdistrict' => ['required_if:is_manual_address,1', 'nullable', 'string', 'max:255'],
+            'ward' => [
+                Rule::requiredIf($request->is_manual_address == '1'),
+                Rule::requiredIf($request->is_manual_address == '0'),
+                'nullable',
+                // Only validate existence if not manual address
+                Rule::when(
+                    $request->is_manual_address == '0',
+                    Rule::exists('kelurahan', 'id'),
+                ),
+                'string',
+                'max:255'
+            ],
+
             'mobile_phone_number' => 'nullable|max:255',
             'email' => 'nullable|email|max:255',
             'last_education' => 'required|max:255',
@@ -134,7 +150,7 @@ class PatientController extends Controller
             'family_relation' => 'nullable|max:255',
             'family_address' => 'nullable|max:255',
 
-            // Informasi Penjamin (MODIFIED: Tambahkan semua field agar terbawa oleh old())
+            // Informasi Penjamin
             'penjamin_id' => 'nullable|integer',
             'nomor_penjamin' => 'nullable|string|max:255',
             'nama_pegawai' => 'nullable|string|max:255',
@@ -142,9 +158,10 @@ class PatientController extends Controller
             'hubungan_pegawai' => 'nullable|string|max:255',
             'nomor_kepegawaian' => 'nullable|string|max:255',
             'bagian_pegawai' => 'nullable|string|max:255',
-            'grup_pegawai' => 'nullable|string|max:255', // PERBAIKAN: nama field disamakan dengan form
-        ], [
-            // ... (Pesan error custom Anda tidak saya ubah)
+            'grup_pegawai' => 'nullable|string|max:255',
+        ];
+
+        $messages = [
             'name.required' => 'Nama wajib diisi.',
             'title.required' => 'Gelar wajib diisi.',
             'gender.required' => 'Jenis kelamin wajib diisi.',
@@ -154,32 +171,51 @@ class PatientController extends Controller
             'language.required' => 'Bahasa wajib diisi.',
             'id_card.required' => 'Nomor KTP wajib diisi.',
             'address.required' => 'Alamat wajib diisi.',
-            'regency.required' => 'Kabupaten/Kota wajib diisi.',
-            'subdistrict.required' => 'Kecamatan wajib diisi.',
-            'ward.required' => 'Kelurahan wajib diisi.',
+            'regency.required_if' => 'Kabupaten/Kota wajib diisi saat mode manual.',
+            'subdistrict.required_if' => 'Kecamatan wajib diisi saat mode manual.',
+            'province.required_if' => 'Provinsi wajib diisi saat mode manual.',
+            'ward.required' => 'Kelurahan/Desa wajib diisi.',
+            'ward.exists' => 'Kelurahan yang dipilih tidak valid.',
             'last_education.required' => 'Pendidikan terakhir wajib diisi.',
             'ethnic.required' => 'Suku wajib diisi.',
             'job.required' => 'Pekerjaan wajib diisi.',
-        ]);
+        ];
 
-        // Logika untuk menambahkan data penjamin sudah benar,
-        // hanya perlu memastikan nama field 'grup_pegawai' konsisten.
+        $validatedData = $request->validate($rules, $messages);
+
+        // If it's NOT manual address, fetch province/regency/subdistrict from DB
+        if ($validatedData['is_manual_address'] == '0' && isset($validatedData['ward'])) {
+            $kelurahan = Kelurahan::with('kecamatan.kabupaten.provinsi')->find($validatedData['ward']);
+            if (!$kelurahan) {
+                return back()
+                    ->withErrors(['ward' => 'Kelurahan yang dipilih tidak valid.'])
+                    ->withInput();
+            }
+            $validatedData['subdistrict'] = $kelurahan->kecamatan->name;
+            $validatedData['regency'] = $kelurahan->kecamatan->kabupaten->name;
+            $validatedData['province'] = $kelurahan->kecamatan->kabupaten->provinsi->name;
+        }
+
+        unset($validatedData['is_manual_address']);
+
+        // Penjamin logic
         if ($request['penjamin_id']) {
-            if ($request['penjamin_id'] !== 1) { // Asumsi 1 adalah penjamin umum
+            if ($request['penjamin_id'] !== 1) {
                 $validatedData['nomor_penjamin'] = $request->nomor_penjamin;
                 $validatedData['nama_pegawai'] = $request->nama_pegawai;
                 $validatedData['nama_perusahaan_pegawai'] = $request->nama_perusahaan_pegawai;
                 $validatedData['hubungan_pegawai'] = $request->hubungan_pegawai;
                 $validatedData['nomor_kepegawaian'] = $request->nomor_kepegawaian;
                 $validatedData['bagian_pegawai'] = $request->bagian_pegawai;
-                $validatedData['grup_pegawai'] = $request->grup_pegawai; // PERBAIKAN: dari 'grup_perusahaan'
+                $validatedData['grup_pegawai'] = $request->grup_pegawai;
             }
         }
 
-        $validatedData['medical_record_number'] = MedicalRecordHelper::generateMedicalRecordNumber();
+        $validatedData['medical_record_number'] = \App\Helpers\MedicalRecordHelper::generateMedicalRecordNumber();
         $family = Family::create($validatedData);
         $validatedData['family_id'] = $family->id;
         $patient = Patient::create($validatedData);
+
         return redirect("/patients/$patient->id")->with('success', 'Pasien berhasil ditambahkan!');
     }
 

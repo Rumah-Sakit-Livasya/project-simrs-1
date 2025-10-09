@@ -379,6 +379,10 @@
                                                 </div>
                                             </div>
                                         </div>
+                                        {{-- =============================================== --}}
+                                        {{-- ========= MODIFIKASI DIMULAI DARI SINI ========= --}}
+                                        {{-- =============================================== --}}
+
                                         <div class="form-group">
                                             <div class="row align-items-center">
                                                 <div class="col-sm-4" style="text-align: right">
@@ -395,85 +399,157 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        {{-- GANTI SELURUH BLOK ALAMAT DARI SINI --}}
 
+                                        {{-- Toggle Input Manual --}}
                                         <div class="form-group">
-                                            <div class="row align-items-center">
-                                                <div class="col-sm-4" style="text-align: right">
-                                                    <label for="province" class="form-label">Provinsi *</label>
-                                                </div>
-                                                <div class="col-sm-8">
-                                                    {{-- Dibuat disabled, akan diisi dan diaktifkan oleh Javascript --}}
-                                                    <select
-                                                        class="@error('province') is-invalid @enderror form-control w-100"
-                                                        id="province" name="province" disabled>
-                                                        {{-- Dibiarkan kosong --}}
-                                                    </select>
-                                                    @error('province')
-                                                        <p class="invalid-feedback">{{ $message }}</p>
-                                                    @enderror
+                                            <div class="row">
+                                                <div class="col-sm-8 offset-sm-4">
+                                                    <div class="custom-control custom-switch">
+                                                        <input type="checkbox" class="custom-control-input"
+                                                            id="manual_address_toggle"
+                                                            {{ old('is_manual_address', $patient->is_manual_address ?? 0) == 1 ? 'checked' : '' }}>
+                                                        <label class="custom-control-label"
+                                                            for="manual_address_toggle">Input Alamat Manual (Luar
+                                                            Wilayah)</label>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="form-group">
-                                            <div class="row align-items-center">
-                                                <div class="col-sm-4" style="text-align: right">
-                                                    <label class="form-label" for="regency">Kota / Kabupaten *</label>
-                                                </div>
-                                                <div class="col-sm-8">
-                                                    <select
-                                                        class="@error('regency') is-invalid @enderror form-control w-100"
-                                                        id="regency" name="regency" disabled>
-                                                        {{-- Dibiarkan kosong --}}
-                                                    </select>
-                                                    @error('regency')
-                                                        <p class="invalid-feedback">{{ $message }}</p>
-                                                    @enderror
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <div class="row align-items-center">
-                                                <div class="col-sm-4" style="text-align: right">
-                                                    <label class="form-label" for="subdistrict">Kecamatan *</label>
-                                                </div>
-                                                <div class="col-sm-8">
-                                                    <select
-                                                        class="@error('subdistrict') is-invalid @enderror form-control w-100"
-                                                        id="subdistrict" name="subdistrict" disabled>
-                                                        {{-- Dibiarkan kosong --}}
-                                                    </select>
-                                                    @error('subdistrict')
-                                                        <p class="invalid-feedback">{{ $message }}</p>
-                                                    @enderror
+                                        <input type="hidden" name="is_manual_address" id="is_manual_address"
+                                            value="{{ old('is_manual_address', $patient->is_manual_address ?? 0) }}">
+
+                                        {{-- Wrapper untuk Input Dropdown (Default) --}}
+                                        <div id="address-dropdown-wrapper">
+                                            <div class="form-group">
+                                                <div class="row align-items-center">
+                                                    <div class="col-sm-4" style="text-align: right">
+                                                        <label class="form-label" for="ward_select">Cari Kelurahan
+                                                            *</label>
+                                                    </div>
+                                                    <div class="col-sm-8">
+                                                        <select class="form-control w-100" id="ward_select"
+                                                            name="ward_select">
+                                                            @if ($patient->ward && $patient->kelurahan)
+                                                                <option value="{{ $patient->ward }}" selected>
+                                                                    {{ $patient->kelurahan->name }} -
+                                                                    {{ $patient->kelurahan->kecamatan->name }}
+                                                                </option>
+                                                            @endif
+                                                        </select>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <div class="row align-items-center">
-                                                <div class="col-sm-4" style="text-align: right">
-                                                    <label class="form-label" for="ward">Kelurahan *</label>
+                                            {{-- Kecamatan, Kabupaten, Provinsi (otomatis) --}}
+                                            <div class="form-group">
+                                                <div class="row align-items-center">
+                                                    <div class="col-sm-4" style="text-align: right">
+                                                        <label for="province" class="form-label">Provinsi *</label>
+                                                    </div>
+                                                    <div class="col-sm-8">
+                                                        <select
+                                                            class="@error('province') is-invalid @enderror form-control w-100"
+                                                            id="province" name="province" disabled>
+                                                        </select>
+                                                        @error('province')
+                                                            <p class="invalid-feedback">{{ $message }}</p>
+                                                        @enderror
+                                                    </div>
                                                 </div>
-                                                <div class="col-sm-8">
-                                                    {{-- Ini adalah bagian kunci. Kita cetak <option> awal jika data ada. --}}
-                                                    <select class="@error('ward') is-invalid @enderror form-control w-100"
-                                                        id="ward" name="ward" required>
-                                                        @if ($patient->ward && $patient->kelurahan)
-                                                            <option value="{{ $patient->ward }}" selected>
-                                                                {{ $patient->kelurahan->name }} -
-                                                                {{ $patient->kelurahan->kecamatan->name }}
-                                                            </option>
-                                                        @endif
-                                                    </select>
-                                                    @error('ward')
-                                                        <p class="invalid-feedback">{{ $message }}</p>
-                                                    @enderror
+                                            </div>
+                                            <div class="form-group">
+                                                <div class="row align-items-center">
+                                                    <div class="col-sm-4" style="text-align: right">
+                                                        <label class="form-label" for="regency">Kota / Kabupaten
+                                                            *</label>
+                                                    </div>
+                                                    <div class="col-sm-8">
+                                                        <select
+                                                            class="@error('regency') is-invalid @enderror form-control w-100"
+                                                            id="regency" name="regency" disabled>
+                                                        </select>
+                                                        @error('regency')
+                                                            <p class="invalid-feedback">{{ $message }}</p>
+                                                        @enderror
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <div class="row align-items-center">
+                                                    <div class="col-sm-4" style="text-align: right">
+                                                        <label class="form-label" for="subdistrict">Kecamatan *</label>
+                                                    </div>
+                                                    <div class="col-sm-8">
+                                                        <select
+                                                            class="@error('subdistrict') is-invalid @enderror form-control w-100"
+                                                            id="subdistrict" name="subdistrict" disabled>
+                                                        </select>
+                                                        @error('subdistrict')
+                                                            <p class="invalid-feedback">{{ $message }}</p>
+                                                        @enderror
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
 
-                                        {{-- SAMPAI SINI --}}
-                                        <div class="form-group">
+                                        {{-- Wrapper untuk Input Manual (Hidden by default) --}}
+                                        <div id="address-manual-wrapper" style="display: none;">
+                                            <div class="form-group">
+                                                <div class="row align-items-center">
+                                                    <div class="col-sm-4" style="text-align: right">
+                                                        <label for="manual_province" class="form-label">Provinsi (Manual)
+                                                            *</label>
+                                                    </div>
+                                                    <div class="col-sm-8">
+                                                        <input type="text" class="form-control" name="province"
+                                                            id="manual_province"
+                                                            value="{{ old('province', $patient->province) }}">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <div class="row align-items-center">
+                                                    <div class="col-sm-4" style="text-align: right">
+                                                        <label for="manual_regency" class="form-label">Kabupaten/Kota
+                                                            (Manual) *</label>
+                                                    </div>
+                                                    <div class="col-sm-8">
+                                                        <input type="text" class="form-control" name="regency"
+                                                            id="manual_regency"
+                                                            value="{{ old('regency', $patient->regency) }}">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <div class="row align-items-center">
+                                                    <div class="col-sm-4" style="text-align: right">
+                                                        <label for="manual_subdistrict" class="form-label">Kecamatan
+                                                            (Manual) *</label>
+                                                    </div>
+                                                    <div class="col-sm-8">
+                                                        <input type="text" class="form-control" name="subdistrict"
+                                                            id="manual_subdistrict"
+                                                            value="{{ old('subdistrict', $patient->subdistrict) }}">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <div class="row align-items-center">
+                                                    <div class="col-sm-4" style="text-align: right">
+                                                        <label for="manual_ward" class="form-label">Kelurahan/Desa
+                                                            (Manual) *</label>
+                                                    </div>
+                                                    <div class="col-sm-8">
+                                                        <input type="text" class="form-control" name="ward"
+                                                            id="manual_ward" value="{{ old('ward', $patient->ward) }}">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {{-- =============================================== --}}
+                                        {{-- =========== MODIFIKASI BERAKHIR DI SINI =========== --}}
+                                        {{-- =============================================== --}}
+
+                                        <div class="form-group mt-3">
                                             <div class="row align-items-center">
                                                 <div class="col-sm-4" style="text-align: right">
                                                     <label for="mobile_phone_number" class="form-label">No. HP/Telp
@@ -729,7 +805,7 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="form-group">
+                                        <div class="form-group mt-3">
                                             <div class="row align-items-center">
                                                 <div class="col-sm-4" style="text-align: right">
                                                     <label for="family_number" class="form-label">No. HP / Telp</label>
@@ -896,9 +972,8 @@
                 placeholder: 'Pilih Penjamin'
             });
 
-
             // =================================================================
-            // LOGIKA ALAMAT (TIDAK BERUBAH)
+            // LOGIKA ALAMAT (MODIFIKASI: ward_select, toggle manual)
             // =================================================================
             $('#province').select2({
                 placeholder: 'Provinsi (Otomatis)'
@@ -910,7 +985,8 @@
                 placeholder: 'Kecamatan (Otomatis)'
             });
 
-            $('#ward').select2({
+            // Ganti ke ward_select
+            $('#ward_select').select2({
                 placeholder: 'Cari dan Pilih Kelurahan',
                 ajax: {
                     url: "{{ route('getKelurahan') }}",
@@ -954,7 +1030,8 @@
                 }
             }
 
-            $('#ward').on('select2:select', function(e) {
+            // Ganti ke ward_select
+            $('#ward_select').on('select2:select', function(e) {
                 const data = e.params.data.full_data;
                 if (data && data.kecamatan) {
                     populateStaticAddressFields(
@@ -965,15 +1042,57 @@
                 }
             });
 
+            // ===============================================
+            // ========= LOGIKA BARU UNTUK TOGGLE ALAMAT ========
+            // ===============================================
+            const $toggleSwitch = $('#manual_address_toggle');
+            const $dropdownWrapper = $('#address-dropdown-wrapper');
+            const $manualWrapper = $('#address-manual-wrapper');
+            const $isManualInput = $('#is_manual_address');
 
-            // =================================================================
-            // OTOMATISASI SAAT HALAMAN DIMUAT (VERSI FINAL & AMAN)
-            // =================================================================
-            // Cek apakah variabel $alamatData yang dikirim dari controller itu ada (tidak null)
+            const $wardSelect = $('#ward_select');
+            const $manualProvince = $('#manual_province');
+            const $manualRegency = $('#manual_regency');
+            const $manualSubdistrict = $('#manual_subdistrict');
+            const $manualWard = $('#manual_ward');
+
+            function toggleAddressInputs(isManual) {
+                if (isManual) {
+                    $dropdownWrapper.hide();
+                    $manualWrapper.show();
+                    $isManualInput.val('1');
+
+                    $wardSelect.prop('disabled', true).prop('required', false);
+
+                    $manualProvince.prop('disabled', false).prop('required', true);
+                    $manualRegency.prop('disabled', false).prop('required', true);
+                    $manualSubdistrict.prop('disabled', false).prop('required', true);
+                    $manualWard.prop('disabled', false).prop('required', true);
+                } else {
+                    $dropdownWrapper.show();
+                    $manualWrapper.hide();
+                    $isManualInput.val('0');
+
+                    $wardSelect.prop('disabled', false).prop('required', true);
+
+                    $manualProvince.prop('disabled', true).prop('required', false);
+                    $manualRegency.prop('disabled', true).prop('required', false);
+                    $manualSubdistrict.prop('disabled', true).prop('required', false);
+                    $manualWard.prop('disabled', true).prop('required', false);
+                }
+            }
+
+            $toggleSwitch.on('change', function() {
+                toggleAddressInputs(this.checked);
+            });
+
+            // PANGGIL FUNGSI INI SAAT HALAMAN DIMUAT
+            toggleAddressInputs($toggleSwitch.is(':checked'));
+
+            // Otomatisasi pengisian field alamat statis jika data ada
             @if ($alamatData)
                 (function() {
                     const existingAddress = @json($alamatData);
-
                     populateStaticAddressFields(
                         existingAddress.provinsi,
                         existingAddress.kabupaten,
