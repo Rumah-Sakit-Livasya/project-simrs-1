@@ -491,15 +491,6 @@ class PatientController extends Controller
                 ]);
                 break;
 
-            // case 'radiologi':
-            //     return view('pages.simrs.pendaftaran.form-registrasi', [
-            //         'title' => "Radiologi",
-            //         'case' => 'radiologi',
-            //         'patient' => $patient,
-            //         'age' => $age
-            //     ]);
-            //     break;
-
             case 'hemodialisa':
                 return view('pages.simrs.pendaftaran.form-registrasi', [
                     'title' => "Hemodialisa",

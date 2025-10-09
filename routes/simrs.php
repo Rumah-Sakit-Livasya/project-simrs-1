@@ -69,6 +69,7 @@ use App\Http\Controllers\SIMRS\Laboratorium\LaboratoriumController;
 use App\Http\Controllers\SIMRS\Laboratorium\NilaiNormalLaboratoriumController;
 use App\Http\Controllers\SIMRS\Laboratorium\ParameterLaboratoriumController;
 use App\Http\Controllers\SIMRS\Laboratorium\TipeLaboratoriumController;
+use App\Http\Controllers\SIMRS\MergeRMController;
 use App\Http\Controllers\SIMRS\Obat\OrderObatController;
 use App\Http\Controllers\SIMRS\Operasi\JenisOperasiController;
 use App\Http\Controllers\SIMRS\Operasi\KategoriOperasiController;
@@ -1621,6 +1622,12 @@ Route::group(['middleware' => ['auth']], function () {
 
             // CRUD detail persalinan
 
+        });
+
+        // Route untuk Modul Penggabungan Rekam Medis
+        Route::prefix('rekam-medis')->name('rekam-medis.')->group(function () {
+            Route::get('merge', [MergeRMController::class, 'index'])->name('merge.form');
+            Route::post('merge', [MergeRMController::class, 'mergeAction'])->name('merge.action');
         });
     });
 });

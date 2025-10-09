@@ -62,6 +62,7 @@ use App\Http\Controllers\SIMRS\Laboratorium\ParameterLaboratoriumController;
 use App\Http\Controllers\SIMRS\Laboratorium\TarifParameterLaboratoriumController;
 use App\Http\Controllers\SIMRS\Laboratorium\TipeLaboratoriumController;
 use App\Http\Controllers\SIMRS\LocationController;
+use App\Http\Controllers\SIMRS\MergeRMController;
 use App\Http\Controllers\SIMRS\Operasi\JenisOperasiController;
 use App\Http\Controllers\SIMRS\Operasi\KategoriOperasiController;
 use App\Http\Controllers\SIMRS\Operasi\TindakanOperasiController;
@@ -614,6 +615,9 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
     Route::prefix('poliklinik')->group(function () {
         Route::post('/filter-pasien', [ERMController::class, 'filterPasien'])->name('poliklinik.filter-pasien');
         Route::get('/obat/{gudang_id}', [ERMController::class, 'get_obat'])->name('poliklinik.get-obat');
+    });
+    Route::prefix('rekam-medis')->group(function () {
+        Route::get('/search-patient', [MergeRMController::class, 'searchPatient'])->name('api.patient.search');
     });
 
     Route::prefix('erm')->group(function () {
