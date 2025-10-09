@@ -691,7 +691,7 @@
                         <td>{{ $loop->iteration }}</td>
                         <td>{{ $item->nama_barang }}</td>
                         <td align="right">{{ tgl($item->tanggal_exp) }}</td>
-                        <td align="right">{{ $item->no_batch }}</td>
+                        <td align="right">{{ $item->batch_no }}</td>
                         <td align="right">{{ $item->qty }}</td>
                         <td>{{ $item->unit_barang }}</td>
                         <td align="right">{{ rp($item->harga) }}</td>
@@ -710,7 +710,7 @@
                     <td align="right"><b>{{ rp($pb->diskon_faktur) }}</b></td>
                 </tr>
                 <tr>
-                    <td colspan="9" align="right"><b>PPN ({{$pb->ppn}}%)</b></td>
+                    <td colspan="9" align="right"><b>PPN ({{ $pb->ppn }}%)</b></td>
                     <td align="right"><b>{{ rp($pb->ppn_nominal) }}</b></td>
                 </tr>
                 <tr>
