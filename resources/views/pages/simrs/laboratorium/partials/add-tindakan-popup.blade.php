@@ -197,15 +197,33 @@
             // Handler untuk tombol "Tambahkan Pilihan"
             $('#btn-confirm-add-tindakan-popup').on('click', function() {
                 let selectedData = [];
-                // Cari checkbox yang dicentang
-                $('.parameter_laboratorium_checkbox_popup:checked').each(function() {
-                    let id = $(this).val();
-                    // Ambil jumlah dari input quantity yang sesuai
-                    let jumlah = $('#jumlah_popup_' + id).val();
+                let processedIds = new Set();
+
+                // Fungsi untuk menambahkan parameter dan sub-parameter secara rekursif
+                function addParameterWithSubs(id, jumlah) {
+                    if (processedIds.has(id)) {
+                        return;
+                    }
+                    processedIds.add(id);
                     selectedData.push({
                         id: id,
                         jumlah: parseInt(jumlah)
                     });
+
+                    // Cari sub-parameter dari relasi yang sudah di-push ke window
+                    if (window.relasiParameterLaboratorium && window.relasiParameterLaboratorium[id]) {
+                        window.relasiParameterLaboratorium[id].forEach(function(subId) {
+                            // Sub-parameter default jumlah 1
+                            addParameterWithSubs(subId, 1);
+                        });
+                    }
+                }
+
+                // Cari checkbox yang dicentang
+                $('.parameter_laboratorium_checkbox_popup:checked').each(function() {
+                    let id = $(this).val();
+                    let jumlah = $('#jumlah_popup_' + id).val();
+                    addParameterWithSubs(id, jumlah);
                 });
 
                 if (selectedData.length === 0) {

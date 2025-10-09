@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Imports\LaboratoriumTarifImport;
 use App\Models\Employee;
 use App\Models\OrderParameterLaboratorium;
+use App\Models\RelasiParameterLaboratorium;
 use App\Models\SIMRS\Doctor;
 use App\Models\SIMRS\GroupPenjamin;
 use App\Models\SIMRS\KelasRawat;
@@ -19,6 +20,8 @@ use App\Models\SIMRS\Penjamin;
 use App\Models\SIMRS\Registration;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
 
 class LaboratoriumController extends Controller
@@ -145,29 +148,30 @@ class LaboratoriumController extends Controller
 
     public function editOrder($id)
     {
-        $order = OrderLaboratorium::findOrFail($id);
-        $parameters = $order->order_parameter_laboratorium;
-        $parameterCategories = [];
+        // Eager load relationships recursively if needed, but this setup is usually sufficient
+        $order = OrderLaboratorium::with([
+            'order_parameter_laboratorium.parameter_laboratorium.kategori_laboratorium',
+            'order_parameter_laboratorium.parameter_laboratorium.mainParameters', // Crucial for identifying sub-items
+            'order_parameter_laboratorium.parameter_laboratorium.subParameters', // Crucial for recursion
+            'order_parameter_laboratorium.verifikator'
+        ])->findOrFail($id);
 
-        foreach ($parameters as $parameter) {
-            $category = $parameter->parameter_laboratorium->kategori_laboratorium->nama_kategori;
-            if (!isset($parameterCategories[$category])) {
-                $parameterCategories[$category] = [];
-            }
-            $parameterCategories[$category][] = $parameter;
-        }
+        $parametersCollection = $order->order_parameter_laboratorium;
 
-        // --- TAMBAHAN BARU: Muat semua kategori dan tarif untuk modal ---
+        $parametersInCategory = $parametersCollection->groupBy(function ($item) {
+            return $item->parameter_laboratorium->kategori_laboratorium->nama_kategori ?? 'Tanpa Kategori';
+        });
+
         $all_laboratorium_categories = KategoriLaboratorium::with('parameter_laboratorium')->get();
         $all_tarifs = TarifParameterLaboratorium::all();
-        // --- AKHIR TAMBAHAN ---
 
         return view('pages.simrs.laboratorium.partials.edit-order', [
             'order' => $order,
-            'parametersInCategory' => $parameterCategories,
+            'parametersInCategory' => $parametersInCategory,
+            'all_parameters_ordered' => $parametersCollection, // We need this flat collection
             'nilai_normals' => NilaiNormalLaboratorium::all(),
-            'all_laboratorium_categories' => $all_laboratorium_categories, // Kirim ke view
-            'all_tarifs' => $all_tarifs, // Kirim ke view
+            'all_laboratorium_categories' => $all_laboratorium_categories,
+            'all_tarifs' => $all_tarifs,
         ]);
     }
 
@@ -180,58 +184,61 @@ class LaboratoriumController extends Controller
             'parameter_data.*.jumlah' => 'required|integer|min:1',
         ]);
 
-        // Eager load relasi yang dibutuhkan untuk efisiensi
-        $order = OrderLaboratorium::with('registration.penjamin', 'registration.kelas_rawat')->findOrFail($request->order_id);
+        $order = OrderLaboratorium::with('registration.penjamin', 'registration.kelas_rawat', 'registration_otc.penjamin')->findOrFail($request->order_id);
 
-        // --- INI BAGIAN YANG DIPERBAIKI (1) ---
-        // Mengambil ID GRUP Penjamin, bukan ID Penjamin-nya.
-        // Asumsi: Relasi `penjamin` pada model `Registration` ada, dan model `Penjamin` punya kolom `group_penjamin_id`
-        // Jika order OTC atau data tidak lengkap, default ke grup 1 (UMUM)
-        $groupPenjaminId = $order->registration->penjamin->group_penjamin_id ?? 1;
-        $kelasRawatId = $order->registration->kelas_rawat_id ?? 1; // Default ke kelas 1 (atau sesuaikan)
-        // --- AKHIR BAGIAN PERBAIKAN (1) ---
+        if ($order->registration) {
+            $groupPenjaminId = $order->registration->penjamin->group_penjamin_id ?? 1;
+            $kelasRawatId = $order->registration->kelas_rawat_id ?? 1;
+        } elseif ($order->registration_otc) {
+            $groupPenjaminId = $order->registration_otc->penjamin->group_penjamin_id ?? 1;
+            $kelasRawatId = 1;
+        } else {
+            $groupPenjaminId = 1;
+            $kelasRawatId = 1;
+        }
 
         $addedCount = 0;
-        foreach ($request->parameter_data as $data) {
-            $parameterId = $data['id'];
-            $jumlah = $data['jumlah'];
+        DB::beginTransaction();
+        try {
+            $processedIds = [];
 
-            $exists = OrderParameterLaboratorium::where('order_laboratorium_id', $order->id)
-                ->where('parameter_laboratorium_id', $parameterId)
-                ->exists();
+            foreach ($request->parameter_data as $data) {
+                $tarif = TarifParameterLaboratorium::where('parameter_laboratorium_id', $data['id'])
+                    ->where('group_penjamin_id', $groupPenjaminId)
+                    ->where('kelas_rawat_id', $kelasRawatId)
+                    ->first();
 
-            if ($exists) {
-                continue;
+                $price = $tarif->total ?? 0;
+                $initialCount = count($processedIds);
+
+                // Rekursif untuk menambah parameter utama dan seluruh sub-parameter
+                $this->addParameterRecursive(
+                    $order->id,
+                    $data['id'],
+                    $price,
+                    $processedIds,
+                    $groupPenjaminId,
+                    $kelasRawatId
+                );
+
+                if (count($processedIds) > $initialCount) {
+                    $addedCount++;
+                }
             }
 
-            // --- INI BAGIAN YANG DIPERBAIKI (2) ---
-            // Menggunakan kolom 'group_penjamin_id' sesuai dengan skema database
-            $tarif = TarifParameterLaboratorium::where('parameter_laboratorium_id', $parameterId)
-                ->where('group_penjamin_id', $groupPenjaminId) // Menggunakan kolom dan variabel yang benar
-                ->where('kelas_rawat_id', $kelasRawatId)
-                ->first();
-            // --- AKHIR BAGIAN PERBAIKAN (2) ---
+            DB::commit();
 
-            // Loop untuk menambahkan item sebanyak 'jumlah'
-            for ($i = 0; $i < $jumlah; $i++) {
-                OrderParameterLaboratorium::create([
-                    'order_laboratorium_id' => $order->id,
-                    'parameter_laboratorium_id' => $parameterId,
-                    'nominal_rupiah' => $tarif->total ?? 0,
-                    'user_id' => auth()->id(),
-                    'employee_id' => auth()->user()->employee->id,
-                ]);
+            if ($addedCount > 0) {
+                return response()->json(['success' => true, 'message' => "$addedCount jenis tindakan baru dan seluruh sub-parameternya berhasil ditambahkan."]);
             }
-            $addedCount++;
-        }
 
-        if ($addedCount > 0) {
-            return response()->json(['success' => true, 'message' => "$addedCount jenis tindakan berhasil ditambahkan."]);
+            return response()->json(['success' => false, 'message' => "Tidak ada tindakan baru yang ditambahkan (semua pilihan sudah ada dalam order)."]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error in addTindakan: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => "Terjadi kesalahan pada server: " . $e->getMessage()], 500);
         }
-
-        return response()->json(['success' => false, 'message' => "Tidak ada tindakan baru yang ditambahkan (mungkin sudah ada)."]);
     }
-
 
     public function addTindakanPopup($order_id)
     {
@@ -520,6 +527,56 @@ class LaboratoriumController extends Controller
 
             // Kirim respons error ke client
             return response()->json(['success' => false, 'message' => 'Terjadi kesalahan pada server saat menghapus data.'], 500);
+        }
+    }
+
+    /**
+     * Recursive helper to add a parameter and all its descendants to an order.
+     *
+     * @param int $orderId The ID of the current lab order.
+     * @param int $parameterId The ID of the parameter to add.
+     * @param float $price The price for this specific parameter (only non-zero for top-level items).
+     * @param array &$processedIds An array passed by reference to track already added parameters and prevent infinite loops.
+     * @param int $groupPenjaminId
+     * @param int $kelasRawatId
+     * @return void
+     */
+    private function addParameterRecursive(int $orderId, int $parameterId, float $price, array &$processedIds, int $groupPenjaminId, int $kelasRawatId)
+    {
+        // 1. Base case: If this parameter has already been processed in this run, stop.
+        if (in_array($parameterId, $processedIds)) {
+            return;
+        }
+
+        // 2. Check if this parameter already exists in the database for this order.
+        $exists = OrderParameterLaboratorium::where('order_laboratorium_id', $orderId)
+            ->where('parameter_laboratorium_id', $parameterId)
+            ->exists();
+
+        // If it exists in DB, mark as processed and stop this branch of recursion.
+        if ($exists) {
+            $processedIds[] = $parameterId;
+            return;
+        }
+
+        // 3. Add the current parameter to the order.
+        OrderParameterLaboratorium::create([
+            'order_laboratorium_id' => $orderId,
+            'parameter_laboratorium_id' => $parameterId,
+            'nominal_rupiah' => $price,
+            'user_id' => auth()->id(),
+            'employee_id' => auth()->user()->employee->id,
+        ]);
+
+        // 4. Mark this parameter as processed for this run.
+        $processedIds[] = $parameterId;
+
+        // 5. Recursive step: Find all direct children (sub-parameters) and call this function for each of them.
+        $relations = RelasiParameterLaboratorium::where('main_parameter_id', $parameterId)->get();
+
+        foreach ($relations as $relasi) {
+            // Sub-parameters always have a price of 0.
+            $this->addParameterRecursive($orderId, $relasi->sub_parameter_id, 0, $processedIds, $groupPenjaminId, $kelasRawatId);
         }
     }
 }
