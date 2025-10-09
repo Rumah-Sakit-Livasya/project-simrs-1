@@ -498,7 +498,7 @@
                                             <div class="form-group">
                                                 <div class="row align-items-center">
                                                     <div class="col-sm-4" style="text-align: right">
-                                                        <label for="manual_province" class="form-label">Provinsi (Manual)
+                                                        <label for="manual_province" class="form-label">Provinsi
                                                             *</label>
                                                     </div>
                                                     <div class="col-sm-8">
@@ -511,7 +511,7 @@
                                                 <div class="row align-items-center">
                                                     <div class="col-sm-4" style="text-align: right">
                                                         <label for="manual_regency" class="form-label">Kabupaten/Kota
-                                                            (Manual) *</label>
+                                                            *</label>
                                                     </div>
                                                     <div class="col-sm-8">
                                                         <input type="text" class="form-control" name="regency"
@@ -523,7 +523,7 @@
                                                 <div class="row align-items-center">
                                                     <div class="col-sm-4" style="text-align: right">
                                                         <label for="manual_subdistrict" class="form-label">Kecamatan
-                                                            (Manual) *</label>
+                                                            *</label>
                                                     </div>
                                                     <div class="col-sm-8">
                                                         <input type="text" class="form-control" name="subdistrict"
@@ -535,7 +535,7 @@
                                                 <div class="row align-items-center">
                                                     <div class="col-sm-4" style="text-align: right">
                                                         <label for="manual_ward" class="form-label">Kelurahan/Desa
-                                                            (Manual) *</label>
+                                                            *</label>
                                                     </div>
                                                     <div class="col-sm-8">
                                                         <input type="text" class="form-control" name="ward"
