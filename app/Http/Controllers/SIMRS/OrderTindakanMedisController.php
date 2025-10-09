@@ -46,8 +46,6 @@ class OrderTindakanMedisController extends Controller
 
     public function store(Request $request)
     {
-        dd($request->all());
-
         try {
             // Validasi data
             $validatedData = $request->validate([
