@@ -19,7 +19,6 @@
             border-width: 1px 0;
         }
 
-        /* CSS untuk Indikator Hasil */
         .hasil-abnormal {
             border-color: #fd3995 !important;
             color: #fd3995;
@@ -63,12 +62,10 @@
             border-bottom-left-radius: 0;
         }
 
-        /* Sesuaikan posisi indikator jika ada tombol autofill */
         .input-group-append+.hasil-indicator {
             right: 45px;
         }
 
-        /* CSS untuk input di dalam tabel */
         .td-hasil {
             vertical-align: middle !important;
         }
@@ -226,6 +223,7 @@
                     <div class="panel-content p-0">
                         <div class="table-responsive">
                             <table class="table table-bordered table-hover mb-0">
+                                {{-- ... (kode sebelum tbody) ... --}}
                                 <thead class="bg-primary-600">
                                     <tr>
                                         <th class="text-center" style="width: 40px;">#</th>
@@ -239,152 +237,27 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @php $totalCount = 0; @endphp
+                                    @php
+                                        // We create an object so it can be passed by reference
+                                        $totalCount = (object) ['value' => 1];
+                                    @endphp
+
                                     @foreach ($parametersInCategory as $categoryName => $parameters)
                                         <tr class="table-info">
                                             <td colspan="8" class="fw-500 text-center">{{ $categoryName }}</td>
                                         </tr>
+
                                         @foreach ($parameters as $parameter)
-                                            @php
-                                                $nilai_normal_parameter = null;
-                                                $dob =
-                                                    $order->registration->patient->date_of_birth ??
-                                                    $order->registration_otc->date_of_birth;
-                                                $jenis_kelamin =
-                                                    $order->registration->patient->gender ??
-                                                    $order->registration_otc->jenis_kelamin;
-                                                foreach ($nilai_normals as $nilai_normal) {
-                                                    if (
-                                                        $nilai_normal->parameter_laboratorium_id ==
-                                                            $parameter->parameter_laboratorium_id &&
-                                                        isWithinAgeRange(
-                                                            $dob,
-                                                            $nilai_normal->dari_umur,
-                                                            $nilai_normal->sampai_umur,
-                                                        ) &&
-                                                        ($nilai_normal->jenis_kelamin == $jenis_kelamin ||
-                                                            $nilai_normal->jenis_kelamin == 'Semuanya')
-                                                    ) {
-                                                        $nilai_normal_parameter = $nilai_normal;
-                                                        break;
-                                                    }
-                                                }
-                                                $tipe_hasil = $parameter->parameter_laboratorium->tipe_hasil;
-                                            @endphp
-                                            <tr>
-                                                <td class="text-center">{{ ++$totalCount }}</td>
-                                                <td>
-                                                    <strong>{{ $parameter->parameter_laboratorium->parameter }}</strong>
-                                                    @if ($order->tipe_order == 'cito')
-                                                        <span class="badge badge-danger ml-2">CITO</span>
-                                                    @endif
-                                                </td>
-                                                <td class="p-2 td-hasil" data-tipe-hasil="{{ $tipe_hasil }}"
-                                                    data-nilai-normal="{{ $nilai_normal_parameter->nilai_normal ?? '' }}"
-                                                    data-min="{{ $nilai_normal_parameter->min ?? '' }}"
-                                                    data-max="{{ $nilai_normal_parameter->max ?? '' }}">
-
-                                                    @if (!$parameter->parameter_laboratorium->is_hasil)
-                                                        <span class="text-muted"> (Tidak ada hasil) </span>
-                                                    @elseif ($tipe_hasil == 'Negatif/Positif')
-                                                        <div class="custom-control custom-radio">
-                                                            <input type="radio" id="hasil_{{ $parameter->id }}_neg"
-                                                                name="hasil_{{ $parameter->id }}"
-                                                                class="custom-control-input input-hasil" value="Negatif"
-                                                                {{ old('hasil_' . $parameter->id, $parameter->hasil) == 'Negatif' ? 'checked' : '' }}>
-                                                            <label class="custom-control-label"
-                                                                for="hasil_{{ $parameter->id }}_neg">Negatif</label>
-                                                        </div>
-                                                        <div class="custom-control custom-radio">
-                                                            <input type="radio" id="hasil_{{ $parameter->id }}_pos"
-                                                                name="hasil_{{ $parameter->id }}"
-                                                                class="custom-control-input input-hasil" value="Positif"
-                                                                {{ old('hasil_' . $parameter->id, $parameter->hasil) == 'Positif' ? 'checked' : '' }}>
-                                                            <label class="custom-control-label"
-                                                                for="hasil_{{ $parameter->id }}_pos">Positif</label>
-                                                        </div>
-                                                    @elseif ($tipe_hasil == 'Reaktif/NonReaktif')
-                                                        <div class="custom-control custom-radio">
-                                                            <input type="radio" id="hasil_{{ $parameter->id }}_non"
-                                                                name="hasil_{{ $parameter->id }}"
-                                                                class="custom-control-input input-hasil"
-                                                                value="NonReaktif"
-                                                                {{ old('hasil_' . $parameter->id, $parameter->hasil) == 'NonReaktif' ? 'checked' : '' }}>
-                                                            <label class="custom-control-label"
-                                                                for="hasil_{{ $parameter->id }}_non">Non Reaktif</label>
-                                                        </div>
-                                                        <div class="custom-control custom-radio">
-                                                            <input type="radio" id="hasil_{{ $parameter->id }}_rea"
-                                                                name="hasil_{{ $parameter->id }}"
-                                                                class="custom-control-input input-hasil" value="Reaktif"
-                                                                {{ old('hasil_' . $parameter->id, $parameter->hasil) == 'Reaktif' ? 'checked' : '' }}>
-                                                            <label class="custom-control-label"
-                                                                for="hasil_{{ $parameter->id }}_rea">Reaktif</label>
-                                                        </div>
-                                                    @else
-                                                        <div class="input-group input-group-sm input-group-hasil">
-                                                            <input type="text"
-                                                                class="form-control form-control-sm input-hasil"
-                                                                name="hasil_{{ $parameter->id }}"
-                                                                value="{{ old('hasil_' . $parameter->id, $parameter->hasil) }}"
-                                                                autocomplete="off">
-
-                                                            <i class="fal fa-exclamation-triangle hasil-indicator"
-                                                                title="Hasil di luar rentang normal"></i>
-
-                                                            @if ($tipe_hasil == 'Teks' && $nilai_normal_parameter && strpos($nilai_normal_parameter->nilai_normal, '/') === false)
-                                                                <div class="input-group-append">
-                                                                    <button class="btn btn-primary btn-sm btn-autofill"
-                                                                        type="button" title="Isi dengan nilai normal">
-                                                                        <i class="fal fa-magic"></i>
-                                                                    </button>
-                                                                </div>
-                                                            @endif
-                                                        </div>
-                                                    @endif
-                                                </td>
-                                                <td>{{ $parameter->parameter_laboratorium->satuan }}</td>
-                                                <td>
-                                                    @if ($nilai_normal_parameter)
-                                                        {{ $tipe_hasil == 'Angka' ? $nilai_normal_parameter->min . ' - ' . $nilai_normal_parameter->max : str_replace('/', ' / ', $nilai_normal_parameter->nilai_normal) }}
-                                                    @else
-                                                        -
-                                                    @endif
-                                                </td>
-                                                <td>
-                                                    <textarea class="form-control form-control-sm" name="catatan_{{ $parameter->id }}"
-                                                        id="catatan_{{ $parameter->id }}" rows="1">{{ old('catatan_' . $parameter->id, $parameter->catatan) }}</textarea>
-                                                </td>
-                                                <td class="text-center">
-                                                    @if (isset($parameter->verifikator_id))
-                                                        <div class="text-success">
-                                                            <i class="fas fa-check-circle fa-2x"></i>
-                                                            <div class="fs-xs text-muted mt-1">
-                                                                oleh
-                                                                <strong>{{ $parameter->verifikator->fullname }}</strong><br>
-                                                                {{ \Carbon\Carbon::parse($parameter->verifikasi_date)->format('d-m-Y H:i') }}
-                                                            </div>
-                                                        </div>
-                                                    @else
-                                                        <button type="button" data-id="{{ $parameter->id }}"
-                                                            class="btn btn-sm btn-primary verify-btn">
-                                                            Verifikasi
-                                                        </button>
-                                                    @endif
-                                                </td>
-                                                <td class="text-center">
-                                                    @if ($parameter->parameter_laboratorium->is_order && $order->order_parameter_laboratorium->count() > 1)
-                                                        <a href="javascript:void(0);"
-                                                            class="btn btn-xs btn-icon btn-danger delete-btn"
-                                                            title="Hapus Pemeriksaan" data-id="{{ $parameter->id }}">
-                                                            <i class="fas fa-times"></i>
-                                                        </a>
-                                                    @endif
-                                                </td>
-                                            </tr>
+                                            {{-- We only start the process for TOP-LEVEL parameters. The component will handle the rest. --}}
+                                            @if ($parameter->parameter_laboratorium->mainParameters->isEmpty())
+                                                {{-- Call the recursive component for each top-level parameter --}}
+                                                <x-parameter-row :parameterOrder="$parameter" :allParametersOrdered="$all_parameters_ordered" :nilaiNormals="$nilai_normals"
+                                                    :level="0" :totalCount="$totalCount" :order="$order" />
+                                            @endif
                                         @endforeach
                                     @endforeach
                                 </tbody>
+                                {{-- ... (kode setelah tbody) ... --}}
                             </table>
                         </div>
                     </div>

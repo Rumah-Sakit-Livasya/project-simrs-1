@@ -189,7 +189,6 @@ class OrderLaboratoriumController extends Controller
 
                 $no_order = $this->generate_order_number();
 
-                // PERUBAHAN 1: Inisialisasi variabel $registrationId dan $tipePasien
                 $registrationId = null;
                 $tipePasien = '';
                 $orderData = [];
@@ -222,20 +221,16 @@ class OrderLaboratoriumController extends Controller
                         'patient_id' => $validatedData['patient_id'],
                     ]);
 
-                    // PERUBAHAN 2: Isi $registrationId dengan ID dari registrasi OTC
                     $registrationId = $registrationOTC->id;
                     $orderData['otc_id'] = $registrationOTC->id;
-                } else { // Pasien terdaftar
+                } else {
                     $registration = Registration::find($validatedData['registration_id']);
                     $tipePasien = ($registration->registration_type === 'rawat-inap') ? '2' : '1';
 
-                    // PERUBAHAN 3: Isi $registrationId dengan ID dari registrasi biasa
                     $registrationId = $validatedData['registration_id'];
                     $orderData['registration_id'] = $validatedData['registration_id'];
                 }
 
-                // Siapkan data untuk dimasukkan ke tabel 'order_laboratorium'
-                // PERUBAHAN 4: Gunakan variabel $registrationId yang sudah pasti terisi
                 $orderData += [
                     'registration_id' => $registrationId,
                     'user_id' => $validatedData['user_id'],
@@ -251,22 +246,49 @@ class OrderLaboratoriumController extends Controller
 
                 $orderLaboratorium = OrderLaboratorium::create($orderData);
 
-                // Proses detail parameter (tidak berubah)
+                /**
+                 * Blok kode berikut bertanggung jawab untuk menyimpan detail parameter laboratorium yang diorder,
+                 * termasuk parameter utama dan sub-parameter (jika ada relasi).
+                 *
+                 * 1. Melakukan iterasi pada setiap parameter yang dipilih user pada form order laboratorium.
+                 * 2. Untuk setiap parameter, dilakukan pengulangan sebanyak jumlah 'qty' yang diinput user.
+                 * 3. Setiap parameter utama disimpan ke tabel OrderParameterLaboratorium dengan harga sesuai input.
+                 * 4. Kemudian, dicari apakah parameter utama tersebut memiliki sub-parameter (relasi) di tabel RelasiParameterLaboratorium.
+                 *    - Jika ada, setiap sub-parameter juga disimpan ke OrderParameterLaboratorium dengan nominal 0.
+                 *    - Selanjutnya, dicek apakah sub-parameter tersebut juga punya sub-parameter (nested).
+                 *      Jika ya, sub-parameter tingkat berikutnya juga disimpan ke OrderParameterLaboratorium dengan nominal 0.
+                 *
+                 * Dengan demikian, struktur parameter dan sub-parameter (hingga 2 tingkat) akan tercatat pada order laboratorium.
+                 */
                 foreach ($validatedData['parameters'] as $parameter) {
                     for ($i = 0; $i < $parameter['qty']; $i++) {
-                        OrderParameterLaboratorium::create([
+                        // Simpan parameter utama
+                        $orderParameter = OrderParameterLaboratorium::create([
                             'order_laboratorium_id' => $orderLaboratorium->id,
                             'parameter_laboratorium_id' => $parameter['id'],
                             'nominal_rupiah' => $parameter['price'],
                         ]);
 
+                        // Cari sub parameter dari relasi
                         $relasiParameters = RelasiParameterLaboratorium::where('main_parameter_id', $parameter['id'])->get();
+
                         foreach ($relasiParameters as $relasi) {
+                            // Simpan sub parameter ke order parameter
                             OrderParameterLaboratorium::create([
                                 'order_laboratorium_id' => $orderLaboratorium->id,
                                 'parameter_laboratorium_id' => $relasi->sub_parameter_id,
                                 'nominal_rupiah' => 0,
                             ]);
+
+                            // Cek apakah sub parameter ini juga punya sub parameter (nested)
+                            $nestedRelasi = RelasiParameterLaboratorium::where('main_parameter_id', $relasi->sub_parameter_id)->get();
+                            foreach ($nestedRelasi as $nested) {
+                                OrderParameterLaboratorium::create([
+                                    'order_laboratorium_id' => $orderLaboratorium->id,
+                                    'parameter_laboratorium_id' => $nested->sub_parameter_id,
+                                    'nominal_rupiah' => 0,
+                                ]);
+                            }
                         }
                     }
                 }
