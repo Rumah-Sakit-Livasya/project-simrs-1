@@ -131,7 +131,12 @@ class PopupReturBarangHandler {
         // <-- MASUKKAN GUDANG ID KE URL
         const url = `/simrs/warehouse/penerimaan-barang/retur-barang/popup-items/${supplierId}/${gudangId}`;
         const windowName = "pilihItemPopup";
-        const windowFeatures = `width=${screen.availWidth},height=${screen.availHeight},scrollbars=yes,resizable=yes`;
+        // Membuka popup setengah layar dan di tengah
+        const width = Math.floor(screen.availWidth / 2);
+        const height = Math.floor(screen.availHeight / 2);
+        const left = Math.floor((screen.availWidth - width) / 2);
+        const top = Math.floor((screen.availHeight - height) / 2);
+        const windowFeatures = `width=${width},height=${height},left=${left},top=${top},scrollbars=yes,resizable=yes`;
 
         window.open(url, windowName, windowFeatures);
     }
