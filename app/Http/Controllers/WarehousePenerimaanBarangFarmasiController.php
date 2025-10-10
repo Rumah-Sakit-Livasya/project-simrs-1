@@ -382,8 +382,6 @@ class WarehousePenerimaanBarangFarmasiController extends Controller
      */
     public function update(Request $request, WarehousePenerimaanBarangFarmasi $warehousePenerimaanBarangFarmasi, $id)
     {
-        // dd($request->all());
-
         $validatedData1 = $request->validate([
             'user_id' => 'required|exists:users,id',
             'po_id' => 'nullable|exists:procurement_purchase_order_pharmacy,id',

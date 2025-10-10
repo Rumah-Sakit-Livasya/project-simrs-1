@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\StoredBarangFarmasi;
 use App\Models\StoredBarangNonFarmasi;
 use App\Models\User;
+use App\Models\WarehouseMasterGudang;
 use App\Models\WarehouseReturBarang;
 use App\Models\WarehouseReturBarangItems;
 use App\Models\WarehouseSupplier;
@@ -29,46 +30,84 @@ class WarehouseReturBarangController extends Controller
      */
     public function index(Request $request)
     {
-        $query = WarehouseReturBarang::query()->with(['items', 'items.stored', 'items.stored.pbi']);
-        $filters = ['supplier_id', 'kode_retur'];
-        $filterApplied = false;
+        // Query dasar dengan eager loading relasi utama
+        $query = WarehouseReturBarang::with(['supplier', 'user']);
 
-        foreach ($filters as $filter) {
-            if ($request->filled($filter)) {
-                $query->where($filter, 'like', '%'.$request->$filter.'%');
-                $filterApplied = true;
-            }
+        // --- Blok Pencarian ---
+        if ($request->filled('supplier_id')) {
+            $query->where('supplier_id', $request->supplier_id);
         }
-
+        if ($request->filled('kode_retur')) {
+            $query->where('kode_retur', 'like', '%' . $request->kode_retur . '%');
+        }
         if ($request->filled('tanggal_retur')) {
-            $dateRange = explode(' - ', $request->tanggal_retur);
+            // Menggunakan 'to' sebagai pemisah standar dari daterangepicker
+            $dateRange = explode(' to ', $request->tanggal_retur);
             if (count($dateRange) === 2) {
-                $startDate = date('Y-m-d 00:00:00', strtotime($dateRange[0]));
-                $endDate = date('Y-m-d 23:59:59', strtotime($dateRange[1]));
+                $startDate = Carbon::createFromFormat('Y-m-d', $dateRange[0])->startOfDay();
+                $endDate = Carbon::createFromFormat('Y-m-d', $dateRange[1])->endOfDay();
                 $query->whereBetween('tanggal_retur', [$startDate, $endDate]);
             }
-            $filterApplied = true;
         }
-
         if ($request->filled('nama_barang')) {
-            $query->whereHas('items.stored.pbi', function ($q) use ($request) {
-                $q->where('nama_barang', 'like', '%'.$request->nama_barang.'%');
+            // Pencarian berdasarkan relasi yang lebih dalam
+            $query->where(function ($q) use ($request) {
+                $q->whereHas('items.storedFarmasi.pbi', function ($subq) use ($request) {
+                    $subq->where('nama_barang', 'like', '%' . $request->nama_barang . '%');
+                })->orWhereHas('items.storedNonFarmasi.pbi', function ($subq) use ($request) {
+                    $subq->where('nama_barang', 'like', '%' . $request->nama_barang . '%');
+                });
             });
-            $filterApplied = true;
         }
+        // --- Akhir Blok Pencarian ---
 
-        // Get the filtered results if any filter is applied
-        if ($filterApplied) {
-            $rb = $query->orderBy('created_at', 'desc')->get();
-        } else {
-            // Return all data if no filter is applied
-            $rb = WarehouseReturBarang::all();
-        }
+        $rbs = $query->orderBy('created_at', 'desc')->get();
 
         return view('pages.simrs.warehouse.retur-barang.index', [
-            'rbs' => $rb,
+            'rbs' => $rbs,
             'suppliers' => WarehouseSupplier::all(),
         ]);
+    }
+
+    /**
+     * Menyediakan data detail item untuk DataTables child row.
+     * @param int $id ID dari WarehouseReturBarang
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function details($id)
+    {
+        $items = WarehouseReturBarangItems::with([
+            // Eager load semua relasi yang dibutuhkan untuk detail
+            'storedFarmasi.pbi.pb.po',
+            'storedFarmasi.pbi.satuan',
+            'storedNonFarmasi.pbi.pb.po',
+            'storedNonFarmasi.pbi.satuan',
+        ])
+            ->where('rb_id', $id)
+            ->get();
+
+        // Menggunakan accessor 'stored' untuk menyederhanakan pengambilan data
+        $formattedItems = $items->map(function ($item) {
+            $stored = $item->stored;
+            if (!$stored || !$stored->pbi) {
+                return null; // Handle jika ada data yang tidak konsisten
+            }
+
+            return [
+                'kode_penerimaan' => $stored->pbi->pb->kode_penerimaan ?? '-',
+                'kode_po' => $stored->pbi->pb->po->kode_po ?? 'N/A',
+                'kode_barang' => $stored->pbi->kode_barang ?? '-',
+                'nama_barang' => $stored->pbi->nama_barang ?? '-',
+                'satuan' => $stored->pbi->unit_barang ?? '-',
+                'tanggal_exp' => $stored->pbi->tanggal_exp ? Carbon::parse($stored->pbi->tanggal_exp)->format('d-m-Y') : '-',
+                'batch_no' => $stored->pbi->batch_no ?? '-',
+                'qty' => $item->qty,
+                'harga' => $item->harga,
+                'subtotal' => $item->subtotal,
+            ];
+        })->filter(); // Menghapus item null dari koleksi
+
+        return response()->json(['data' => $formattedItems]);
     }
 
     /**
@@ -76,16 +115,51 @@ class WarehouseReturBarangController extends Controller
      */
     public function create()
     {
-
         return view('pages.simrs.warehouse.penerimaan-barang.partials.popup-add-rb', [
             'suppliers' => WarehouseSupplier::all(),
+            'gudangs' => WarehouseMasterGudang::where('aktif', 1)->get()
+        ]);
+    }
+
+    /**
+     * Menampilkan halaman popup untuk memilih item retur dengan filter gudang.
+     * URL: /warehouse/retur-barang/popup-items/{supplier_id}/{gudang_id}
+     */
+    public function popupItems(Request $request, $supplier_id, $gudang_id)
+    {
+        $query1 = StoredBarangFarmasi::query()->with(['pbi.pb.supplier', 'pbi.satuan', 'gudang']);
+        $query2 = StoredBarangNonFarmasi::query()->with(['pbi.pb.supplier', 'pbi.satuan', 'gudang']);
+
+        // Filter berdasarkan gudang_id yang dipilih
+        $query1->where('gudang_id', $gudang_id);
+        $query2->where('gudang_id', $gudang_id);
+
+        // Filter qty > 0 dan supplier_id
+        $query1->where('qty', '>', 0)->whereHas('pbi.pb', function ($q) use ($supplier_id) {
+            $q->where('supplier_id', $supplier_id);
+        });
+        $query2->where('qty', '>', 0)->whereHas('pbi.pb', function ($q) use ($supplier_id) {
+            $q->where('supplier_id', $supplier_id);
+        });
+
+        $sbf = $query1->get();
+        $sbnf = $query2->get();
+
+        $sbs = collect(array_merge($sbf->all(), $sbnf->all()));
+        $supplier = WarehouseSupplier::find($supplier_id);
+        $gudang = \App\Models\WarehouseMasterGudang::find($gudang_id);
+
+        return view('pages.simrs.warehouse.penerimaan-barang.partials.popup-items', [
+            'sbs' => $sbs,
+            'supplier' => $supplier,
+            'gudang' => $gudang
         ]);
     }
 
     public function get_items(Request $request, $supplier_id)
     {
-        $query1 = StoredBarangFarmasi::query()->with(['pbi', 'pbi.pb']);
-        $query2 = StoredBarangNonFarmasi::query()->with(['pbi', 'pbi.pb']);
+        $query1 = StoredBarangFarmasi::query()->with(['pbi.pb', 'pbi.satuan']);
+        $query2 = StoredBarangNonFarmasi::query()->with(['pbi.pb', 'pbi.satuan']);
 
         $query1->where('qty', '>', 0);
         $query2->where('qty', '>', 0);
@@ -119,16 +193,11 @@ class WarehouseReturBarangController extends Controller
             ->count() + 1;
         $count = str_pad($count, 6, '0', STR_PAD_LEFT);
 
-        return 'NRS'.$year.'-'.$count;
+        return 'NRS' . $year . '-' . $count;
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        // dd($request->all());
-
         $validatedData1 = $request->validate([
             'user_id' => 'required|exists:users,id',
             'supplier_id' => 'required|exists:warehouse_supplier,id',
@@ -139,17 +208,13 @@ class WarehouseReturBarangController extends Controller
             'nominal' => 'required|integer',
         ]);
 
-        // dd($validatedData1);
-
         $validatedData2 = $request->validate([
             'item_type.*' => 'required|in:si_f_id,si_nf_id',
             'item_si_id.*' => 'required|integer',
             'item_harga.*' => 'required|integer',
             'item_subtotal.*' => 'required|integer',
-            'item_qty.*' => 'required|integer|min:0',
+            'item_qty.*' => 'required|integer|min:1',
         ]);
-
-        // dd($validatedData2);
 
         $validatedData1['kode_retur'] = $this->generate_rb_code();
         DB::beginTransaction();
@@ -159,19 +224,14 @@ class WarehouseReturBarangController extends Controller
             $user = User::findOrFail($validatedData1['user_id']);
 
             foreach ($validatedData2['item_si_id'] as $key => $id) {
-                if ($validatedData2['item_qty'][$key] == 0) {
-                    continue; // ignore if qty is 0
-                }
+                if ($validatedData2['item_qty'][$key] == 0) continue;
 
-                $si = StoredBarangFarmasi::query();
-                if ($validatedData2['item_type'][$key] == 'si_nf_id') {
-                    $si = StoredBarangNonFarmasi::query();
-                }
+                $si_item = ($validatedData2['item_type'][$key] == 'si_nf_id')
+                    ? StoredBarangNonFarmasi::findOrFail($id)
+                    : StoredBarangFarmasi::findOrFail($id);
 
-                $si_item = $si->findOrFail($id);
                 if ($si_item->qty < $validatedData2['item_qty'][$key]) {
-                    // throw error
-                    throw new \Exception('Qty tidak cukup'); // throw error
+                    throw new \Exception('Kuantitas stok tidak mencukupi untuk retur.');
                 }
 
                 WarehouseReturBarangItems::create([
@@ -182,26 +242,16 @@ class WarehouseReturBarangController extends Controller
                     $validatedData2['item_type'][$key] => $id,
                 ]);
 
-                // $si_item->update([
-                // "qty" => $si_item->qty - $validatedData2["item_qty"][$key]
-                // ]);
-                // $si_item->save();
-
-                // ...
-
-                // use the GoodsStockService
-                $qty = $validatedData2['item_qty'][$key];
-                $args = new IncreaseDecreaseStockArguments($user, $rb, $si_item, $qty);
+                $keteranganRetur = "Retur barang dengan kode: {$rb->kode_retur}";
+                $args = new IncreaseDecreaseStockArguments($user, $rb, $si_item, $validatedData2['item_qty'][$key], $keteranganRetur);
                 $this->goodsStockService->decreaseStock($args);
             }
 
             DB::commit();
-
-            return back()->with('success', 'Data berhasil disimpan');
+            return redirect()->route('warehouse.penerimaan-barang.retur-barang')->with('success', 'Data retur berhasil disimpan.');
         } catch (\Exception $e) {
             DB::rollBack();
-
-            return back()->with('error', $e->getMessage());
+            return back()->with('error', $e->getMessage())->withInput();
         }
     }
 
@@ -212,42 +262,33 @@ class WarehouseReturBarangController extends Controller
         ]);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(WarehouseReturBarang $warehouseReturBarang, $id)
+    public function destroy(Request $request, $id)
     {
-        $rb = $warehouseReturBarang->findOrFail($id);
+        $rb = WarehouseReturBarang::findOrFail($id);
 
         DB::beginTransaction();
         try {
+            $user = $request->user();
             foreach ($rb->items as $rbi) {
-                // $rbi->stored->update([
-                //     'qty' => $rbi->stored->qty + $rbi->qty,
-                // ]);
-                // $rbi->stored->save();
-
-                // use the GoodsStockService
-                $user = request()->user();
-                $args = new IncreaseDecreaseStockArguments($user, $rb, $rbi->stored, $rbi->qty);
+                $keteranganBatal = "Pembatalan retur barang dengan kode: {$rb->kode_retur}";
+                $args = new IncreaseDecreaseStockArguments($user, $rb, $rbi->stored, $rbi->qty, $keteranganBatal);
                 $this->goodsStockService->increaseStock($args);
-
-                $rbi->delete();
             }
+            $rb->items()->delete();
             $rb->delete();
 
             DB::commit();
 
             return response()->json([
                 'success' => true,
-                'message' => 'Data berhasil dihapus',
+                'message' => 'Data retur berhasil dibatalkan dan stok dikembalikan.',
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
 
             return response()->json([
                 'success' => false,
-                'message' => $e->getMessage(),
+                'message' => 'Gagal membatalkan retur: ' . $e->getMessage(),
             ]);
         }
     }
