@@ -433,12 +433,6 @@ class WarehousePenerimaanBarangFarmasiController extends Controller
             $pb = WarehousePenerimaanBarangFarmasi::findOrFail($id);
             $pb->update($validatedData1);
 
-            // $validatedData2["item_id"] is a key => pair array
-            // delete everything from WarehousePenerimaanBarangFarmasiItems
-            // where pr_id == $pr->id
-            // and id IS NOT IN $validatedData2["item_id"]
-            // because if it is not in $validatedData2["item_id"]
-            // it means it has been deleted
             if (count($validatedData2['item_id']) > 0) {
                 WarehousePenerimaanBarangFarmasiItems::where('pb_id', $pb->id)
                     ->whereNotIn('id', $validatedData2['item_id'])
@@ -478,13 +472,18 @@ class WarehousePenerimaanBarangFarmasiController extends Controller
                 ];
 
                 if ($request->has('item_id') && isset($validatedData2['item_id'][$key])) {
-                    $pbi = WarehousePenerimaanBarangFarmasiItems::findorfail($validatedData2['item_id'][$key]);
+                    $pbi = WarehousePenerimaanBarangFarmasiItems::findOrFail($validatedData2['item_id'][$key]);
                     $pbi->update($attributes);
                 } else {
                     $pbi = new WarehousePenerimaanBarangFarmasiItems($attributes);
+                    $pbi->save(); // Make sure $pbi has an ID before passing to stock creation
                 }
 
-                if ($validatedData1['status'] == 'final') {
+                // !!! Penting !!!
+                // Simpan terlebih dahulu supaya $pbi->id tidak null.
+                // Lalu createStock dengan $pbi yang sudah ada id-nya.
+
+                if ($validatedData1['status'] === 'final') {
                     if (! $auto) {
                         $poi->update([
                             'qty_received' => $poi->qty_received + $validatedData2['qty'][$key], // update POI received quantity
@@ -492,21 +491,15 @@ class WarehousePenerimaanBarangFarmasiController extends Controller
                         $poi->save();
                     }
 
-                    // StoredBarangFarmasi::create([
-                    //     "pbi_id" => $pbi->id,
-                    //     "gudang_id" => $validatedData1["gudang_id"],
-                    //     "qty" => $validatedData2["qty"][$key]
-                    // ]);
                     $user = User::findOrFail($validatedData1['user_id']);
                     $source = $pb;
                     $type = GoodsType::Pharmacy;
                     $warehouse = WarehouseMasterGudang::findOrFail($validatedData1['gudang_id']);
                     $qty = $validatedData2['qty'][$key];
-                    $args = new CreateStockArguments($user, $source, $type, $warehouse, $pbi, $qty);
+                    $keterangan = "Update penerimaan barang dari faktur no: {$pb->no_faktur}";
+                    $args = new CreateStockArguments($user, $source, $type, $warehouse, $pbi, $keterangan, $qty);
                     $this->goodsStockService->createStock($args);
                 }
-
-                $pbi->save();
             }
 
             if ($validatedData1['status'] == 'final') {
