@@ -1,5 +1,5 @@
 <div class="modal fade" id="pilihItemModal" tabindex="-1" aria-labelledby="pilihItemModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header">
                 <h1 class="modal-title fs-5" id="addModalLabel">Pilih barang</h1>
@@ -26,6 +26,7 @@
                             <th>Qty</th>
                             <th>Telah Diretur</th>
                             <th>Harga</th>
+                            <th>Aksi</th>
                         </tr>
                     </thead>
                     <tbody id="itemTable">

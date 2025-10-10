@@ -850,6 +850,14 @@ Route::group(['middleware' => ['auth']], function () {
                     Route::get('/', [WarehouseReturBarangController::class, 'index'])->name('penerimaan-barang.retur-barang');
                     Route::get('/create', [WarehouseReturBarangController::class, 'create'])->name('procurement.penerimaan-barang.retur-barang.create');
                     Route::get('/print/{id}', [WarehouseReturBarangController::class, 'print'])->name('penerimaan-barang.retur-barang.print');
+
+                    // Route baru untuk child row
+                    Route::get('/{id}/details', [WarehouseReturBarangController::class, 'details'])->name('retur-barang.details');
+
+                    // Route untuk mengambil item berdasarkan supplier
+                    Route::get('/get-items/{supplier_id}', [WarehouseReturBarangController::class, 'get_items'])->name('retur-barang.get-items');
+
+                    Route::get('/popup-items/{supplier_id}/{gudang_id}', [WarehouseReturBarangController::class, 'popupItems'])->name('retur-barang.popup-items');
                 });
 
                 Route::prefix('report')->group(function () {
