@@ -85,6 +85,7 @@
 @push('script-detail-regis')
     <script>
         let dtTindakanBidan;
+
         $(document).ready(function() {
             // Sembunyikan elemen 'tindakan-medis' saat pertama kali dimuat
             $('#tindakan-medis').hide();
@@ -139,10 +140,80 @@
                         name: 'aksi',
                         orderable: false,
                         searchable: false
-                    }
+                    },
                 ],
                 data: []
             });
+
+            // =======================
+            // TAMBAH: LOAD DATA LANGSUNG SAAT PAGE DILOAD
+            // =======================
+            function loadMedicalActionsOnPageLoad() {
+                const registrationId = $('#registration').val();
+                if (!registrationId) {
+                    return;
+                }
+                $.ajax({
+                    url: `/api/simrs/get-medical-actions/${registrationId}`,
+                    method: 'GET',
+                    dataType: 'json',
+                    success: function(response) {
+                        $('#modal-tambah-tindakan').modal('hide');
+                        if (response.success) {
+                            const data = response.data;
+                            let rows = [];
+                            let idx = 1;
+                            data.forEach(action => {
+                                rows.push({
+                                    no: idx++,
+                                    tanggal_tindakan: action.tanggal_tindakan ||
+                                        'Tidak Diketahui',
+                                    doctor: action.doctor?.employee?.fullname ||
+                                        'Tidak Diketahui',
+                                    tindakan: action.tindakan_medis?.nama_tindakan ||
+                                        'Tidak Diketahui',
+                                    kelas: action.departement?.name ||
+                                        'Tidak Diketahui',
+                                    qty: action.qty || 0,
+                                    entry_by: action.user?.employee?.fullname ||
+                                        'Tidak Diketahui',
+                                    foc: action.foc || 'Tidak Diketahui',
+                                    aksi: `<button class="btn btn-danger btn-sm delete-action" data-id="${action.id}">Hapus</button>`
+                                });
+                            });
+                            dtTindakanBidan.clear().rows.add(rows).draw();
+
+                            // Tampilkan tabel tindakan-medis
+                            $('#tindakan-medis').show();
+                        } else {
+                            $('#modal-tambah-tindakan').modal('hide');
+                            showErrorAlertNoRefresh('Gagal memuat tindakan medis: ' + response.message);
+                        }
+                    },
+                    error: function(xhr) {
+                        $('#modal-tambah-tindakan').modal('hide');
+                        let errorMessage =
+                            'Terjadi kesalahan yang tidak diketahui. Silakan coba lagi nanti.';
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            errorMessage = xhr.responseJSON.message;
+                        } else if (xhr.status === 0) {
+                            errorMessage =
+                                'Tidak terhubung ke server. Silakan periksa koneksi internet Anda.';
+                        } else if (xhr.status === 404) {
+                            errorMessage = 'Tindakan medis tidak ditemukan.';
+                        } else if (xhr.status === 500) {
+                            errorMessage = 'Terjadi kesalahan pada server. Silakan coba lagi nanti.';
+                        } else {
+                            errorMessage =
+                                `Gagal memuat tindakan medis. Status: ${xhr.status}, Pesan: ${xhr.statusText}`;
+                        }
+                        // showErrorAlertNoRefresh(errorMessage);
+                    }
+                });
+            }
+            // Panggil saat halaman diload
+            loadMedicalActionsOnPageLoad();
+
 
             // Event listener untuk menu item "Tindakan Medis"
             $('.menu-layanan[data-layanan="tindakan-medis"]').on('click', function() {
@@ -177,6 +248,8 @@
                                 });
                             });
                             dtTindakanBidan.clear().rows.add(rows).draw();
+                            $('#tindakan-medis')
+                        .show(); // pastikan tetap muncul ketika dari tombol menu juga
                         } else {
                             $('#modal-tambah-tindakan').modal('hide');
                             showErrorAlertNoRefresh('Gagal memuat tindakan medis: ' + response
@@ -237,7 +310,7 @@
                                     dtTindakanBidan.row($row).remove().draw();
                                     $('#modal-tambah-tindakan').modal('hide');
                                     showSuccessAlert(
-                                        'Tindakan medis berhasil dihapus.');
+                                    'Tindakan medis berhasil dihapus.');
                                 } else {
                                     $('#modal-tambah-tindakan').modal('hide');
                                     showErrorAlertNoRefresh(
@@ -322,6 +395,9 @@
                     foc: data.foc || 'Tidak Diketahui',
                     aksi: `<button class="btn btn-danger btn-sm delete-action" data-id="${data.id}">Hapus</button>`
                 }).draw();
+
+                // Pastikan tabel muncul jika baris bertambah
+                $('#tindakan-medis').show();
             }
 
             // Event listener untuk pengiriman form untuk menambahkan tindakan medis baru

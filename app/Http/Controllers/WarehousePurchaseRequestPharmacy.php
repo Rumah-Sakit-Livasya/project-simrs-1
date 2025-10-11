@@ -18,134 +18,89 @@ class WarehousePurchaseRequestPharmacy extends Controller
      */
     public function index(Request $request)
     {
-        $query = ProcurementPurchaseRequestPharmacy::query()->with(['items']);
-        $filters = ['kode_pr', 'approval'];
-        $filterApplied = false;
+        $query = ProcurementPurchaseRequestPharmacy::with(['gudang', 'user.employee']);
 
-        foreach ($filters as $filter) {
-            if ($request->filled($filter)) {
-                $query->where($filter, 'like', '%'.$request->$filter.'%');
-                $filterApplied = true;
+        // --- Blok Pencarian ---
+        if ($request->filled('kode_pr')) {
+            $query->where('kode_pr', 'like', '%' . $request->kode_pr . '%');
+        }
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+        if ($request->filled('tanggal_pr')) {
+            $dateRange = explode(' to ', $request->tanggal_pr);
+            if (count($dateRange) === 2) {
+                $startDate = Carbon::createFromFormat('Y-m-d', $dateRange[0])->startOfDay();
+                $endDate = Carbon::createFromFormat('Y-m-d', $dateRange[1])->endOfDay();
+                $query->whereBetween('tanggal_pr', [$startDate, $endDate]);
             }
         }
-
-        if ($request->filled('tanggal_pr')) {
-            $query->where('tanggal_pr', $request->tanggal_pr);
-            $filterApplied = true;
-        }
-
         if ($request->filled('nama_barang')) {
             $query->whereHas('items', function ($q) use ($request) {
-                $q->where('nama_barang', 'like', '%'.$request->nama_barang.'%');
+                $q->where('nama_barang', 'like', '%' . $request->nama_barang . '%');
             });
-            $filterApplied = true;
         }
+        // --- Akhir Blok Pencarian ---
 
-        // Get the filtered results if any filter is applied
-        if ($filterApplied) {
-            $pr = $query->orderBy('created_at', 'desc')->get();
-        } else {
-            // Return all data if no filter is applied
-            $pr = ProcurementPurchaseRequestPharmacy::all();
-        }
+        $prs = $query->orderBy('created_at', 'desc')->get();
 
         return view('pages.simrs.warehouse.purchase-request.pharmacy', [
-            'prs' => $pr,
+            'prs' => $prs,
         ]);
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Menyediakan data detail item untuk DataTables child row.
+     */
+    public function details($id)
+    {
+        $items = ProcurementPurchaseRequestPharmacyItems::where('pr_id', $id)->get();
+        return response()->json(['data' => $items]);
+    }
+
+    /**
+     * Show the form for creating a new resource in a popup window.
      */
     public function create()
     {
-        return view('pages.simrs.warehouse.purchase-request.partials.popup-add-pr-farmasi', [
-            'satuans' => WarehouseSatuanBarang::all(),
-            'gudangs' => WarehouseMasterGudang::where('aktif', 1)->where('apotek', 1)->where('warehouse', 1)->get(),
-            'barangs' => WarehouseBarangFarmasi::all(),
-        ]);
-    }
+        $gudangs = WarehouseMasterGudang::where('aktif', 1)
+            ->where('apotek', 1)
+            ->where('warehouse', 1)
+            ->get();
 
-    public function print($id)
-    {
-        return view('pages.simrs.warehouse.purchase-request.partials.pr-print-pharmacy', [
-            'pr' => ProcurementPurchaseRequestPharmacy::findorfail($id),
-        ]);
-    }
-
-    public function get_item_gudang($gudang_id)
-    {
-        // logic coming soon
-        return view('pages.simrs.warehouse.purchase-request.partials.table-items-pharmacy', [
-            'items' => WarehouseBarangFarmasi::all(),
+        return view('pages.simrs.warehouse.purchase-request.partials.form-popup', [
+            'gudangs' => $gudangs,
+            'action' => route('warehouse.purchase-request.pharmacy.store'),
+            'method' => 'POST',
+            'pr' => null,
         ]);
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Show the form for editing the specified resource in a popup window.
      */
-    public function store(Request $request)
+    public function edit($id)
     {
-        $validatedData1 = $request->validate([
-            'tanggal_pr' => 'required|date',
-            'user_id' => 'required|exists:users,id',
-            'gudang_id' => 'required|exists:warehouse_master_gudang,id',
-            'tipe' => 'required|in:normal,urgent',
-            'nominal' => 'required|integer',
-            'status' => 'required|in:draft,final,reviewed',
-            'keterangan' => 'nullable|string',
+        $pr = ProcurementPurchaseRequestPharmacy::with('items.barang.satuan')->findOrFail($id);
+        $gudangs = WarehouseMasterGudang::where('aktif', 1)
+            ->where('apotek', 1)
+            ->where('warehouse', 1)
+            ->get();
+
+        return view('pages.simrs.warehouse.purchase-request.partials.form-popup', [
+            'pr' => $pr,
+            'gudangs' => $gudangs,
+            'action' => route('warehouse.purchase-request.pharmacy.update', $id),
+            'method' => 'PUT',
         ]);
+    }
 
-        $validatedData2 = $request->validate([
-            'kode_barang' => 'required|array',
-            'kode_barang.*' => 'required|string',
-            'nama_barang' => 'required|array',
-            'nama_barang.*' => 'required|string',
-            'barang_id' => 'required|array',
-            'barang_id.*' => 'required|exists:warehouse_barang_farmasi,id',
-            'unit_barang' => 'required|array',
-            'unit_barang.*' => 'required|string',
-            'satuan_id' => 'required|array',
-            'satuan_id.*' => 'required|exists:warehouse_satuan_barang,id',
-            'keterangan_item' => 'array',
-            'keterangan_item.*' => 'nullable|string',
-            'qty' => 'required|array',
-            'qty.*' => 'required|integer',
-            'hna' => 'required|array',
-            'hna.*' => 'required|integer',
+    public function popupItems()
+    {
+        $barangs = WarehouseBarangFarmasi::with('satuan')->where('aktif', 1)->get();
+        return view('pages.simrs.warehouse.purchase-request.partials.popup-items-pharmacy', [
+            'barangs' => $barangs
         ]);
-
-        $validatedData1['kode_pr'] = $this->generate_pr_code();
-
-        DB::beginTransaction();
-        try {
-            $pr = ProcurementPurchaseRequestPharmacy::create($validatedData1);
-
-            foreach ($validatedData2['barang_id'] as $key => $barang_id) {
-                ProcurementPurchaseRequestPharmacyItems::create([
-                    'pr_id' => $pr->id,
-                    'barang_id' => $validatedData2['barang_id'][$key],
-                    'satuan_id' => $validatedData2['satuan_id'][$key],
-                    'kode_barang' => $validatedData2['kode_barang'][$key],
-                    'nama_barang' => $validatedData2['nama_barang'][$key],
-                    'unit_barang' => $validatedData2['unit_barang'][$key],
-                    'harga_barang' => $validatedData2['hna'][$key],
-                    'qty' => $validatedData2['qty'][$key],
-                    'subtotal' => $validatedData2['hna'][$key] * $validatedData2['qty'][$key],
-                    'status' => 'unprocessed',
-                    'approved_qty' => null,
-                    'keterangan' => $validatedData2['keterangan_item'][$key] ?? null,
-                ]);
-            }
-
-            DB::commit();
-
-            return back()->with('success', 'Data berhasil disimpan');
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            return back()->with('error', $e->getMessage());
-        }
     }
 
     private function generate_pr_code()
@@ -160,132 +115,144 @@ class WarehousePurchaseRequestPharmacy extends Controller
             ->count() + 1;
         $count = str_pad($count, 6, '0', STR_PAD_LEFT);
 
-        return $count.'/PRF/'.$year.$month;
+        return $count . '/PRF/' . $year . $month;
     }
 
     /**
-     * Display the specified resource.
+     * Store a newly created resource in storage.
      */
-    public function show(ProcurementPurchaseRequestPharmacy $procurementPurchaseRequestPharmacy)
+    public function store(Request $request)
     {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(ProcurementPurchaseRequestPharmacy $procurementPurchaseRequestPharmacy, $id)
-    {
-        return view('pages.simrs.warehouse.purchase-request.partials.popup-edit-pr-farmasi', [
-            'pr' => $procurementPurchaseRequestPharmacy::findorfail($id),
-            'satuans' => WarehouseSatuanBarang::all(),
-            'gudangs' => WarehouseMasterGudang::where('aktif', 1)->where('apotek', 1)->where('warehouse', 1)->get(),
-            'barangs' => WarehouseBarangFarmasi::all(),
+        $validatedData1 = $request->validate([
+            'tanggal_pr' => 'required|date',
+            'user_id' => 'required|exists:users,id',
+            'gudang_id' => 'required|exists:warehouse_master_gudang,id',
+            'tipe' => 'required|in:normal,urgent',
+            'nominal' => 'required|numeric|min:0',
+            'status' => 'required|in:draft,final',
+            'keterangan' => 'nullable|string',
         ]);
+
+        $validatedData2 = $request->validate([
+            'barang_id.*' => 'required|exists:warehouse_barang_farmasi,id',
+            'satuan_id.*' => 'required|exists:warehouse_satuan_barang,id',
+            'qty.*' => 'required|integer|min:1',
+            'hna.*' => 'required|numeric|min:0',
+            'keterangan_item.*' => 'nullable|string',
+        ]);
+
+        $validatedData1['kode_pr'] = $this->generate_pr_code();
+
+        DB::beginTransaction();
+        try {
+            $pr = ProcurementPurchaseRequestPharmacy::create($validatedData1);
+
+            foreach ($validatedData2['barang_id'] as $key => $barang_id) {
+                $barang = WarehouseBarangFarmasi::find($barang_id);
+                $satuan = WarehouseSatuanBarang::find($validatedData2['satuan_id'][$key]);
+
+                ProcurementPurchaseRequestPharmacyItems::create([
+                    'pr_id' => $pr->id,
+                    'barang_id' => $barang_id,
+                    'satuan_id' => $validatedData2['satuan_id'][$key],
+                    'kode_barang' => $barang->kode,
+                    'nama_barang' => $barang->nama,
+                    'unit_barang' => $satuan->nama,
+                    'harga_barang' => $validatedData2['hna'][$key],
+                    'qty' => $validatedData2['qty'][$key],
+                    'subtotal' => $validatedData2['hna'][$key] * $validatedData2['qty'][$key],
+                    'status' => 'unprocessed',
+                    'keterangan' => $validatedData2['keterangan_item'][$key] ?? null,
+                ]);
+            }
+
+            DB::commit();
+
+            return response()->json(['success' => true, 'message' => 'Data PR berhasil disimpan!']);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, ProcurementPurchaseRequestPharmacy $procurementPurchaseRequestPharmacy, $id)
+    public function update(Request $request, $id)
     {
         $validatedData1 = $request->validate([
-            'id' => 'required|exists:procurement_purchase_request_pharmacy,id',
-            'kode_pr' => 'required|string',
             'tanggal_pr' => 'required|date',
             'user_id' => 'required|exists:users,id',
             'gudang_id' => 'required|exists:warehouse_master_gudang,id',
             'tipe' => 'required|in:normal,urgent',
-            'nominal' => 'required|integer',
-            'status' => 'required|in:draft,final,reviewed',
+            'nominal' => 'required|numeric|min:0',
+            'status' => 'required|in:draft,final',
             'keterangan' => 'nullable|string',
         ]);
 
         $validatedData2 = $request->validate([
-            'kode_barang' => 'required|array',
-            'kode_barang.*' => 'required|string',
-            'nama_barang' => 'required|array',
-            'nama_barang.*' => 'required|string',
-            'barang_id' => 'required|array',
+            'item_id.*' => 'nullable|integer|exists:procurement_purchase_request_pharmacy_items,id',
             'barang_id.*' => 'required|exists:warehouse_barang_farmasi,id',
-            'unit_barang' => 'required|array',
-            'unit_barang.*' => 'required|string',
-            'satuan_id' => 'required|array',
             'satuan_id.*' => 'required|exists:warehouse_satuan_barang,id',
-            'keterangan_item' => 'array',
+            'qty.*' => 'required|integer|min:1',
+            'hna.*' => 'required|numeric|min:0',
             'keterangan_item.*' => 'nullable|string',
-            'qty' => 'required|array',
-            'qty.*' => 'required|integer',
-            'hna' => 'required|array',
-            'hna.*' => 'required|integer',
-            'item_id' => 'nullable|array',
-            'item_id.*' => 'integer',
         ]);
 
         DB::beginTransaction();
         try {
-            $pr = $procurementPurchaseRequestPharmacy->findOrFail($id);
+            $pr = ProcurementPurchaseRequestPharmacy::findOrFail($id);
+
+            if ($pr->status !== 'draft') {
+                return response()->json(['success' => false, 'message' => 'Hanya PR dengan status DRAFT yang bisa diubah.'], 403);
+            }
             $pr->update($validatedData1);
 
-            // $validatedData["item_id"] is a key => pair array
-            // delete everything from ProcurementPurchaseRequestPharmacyItems
-            // where pr_id == $pr->id
-            // and id IS NOT IN $validatedData["item_id"]
-            // because if it is not in $validatedData["item_id"]
-            // it means it has been deleted
-            if (count($validatedData2['item_id']) > 0) {
-                ProcurementPurchaseRequestPharmacyItems::where('pr_id', $pr->id)
-                    ->whereNotIn('id', $validatedData2['item_id'])
-                    ->delete(); // don't force delete to retain history
-            }
+            $existingItemIds = array_filter($validatedData2['item_id'] ?? []);
+            $pr->items()->whereNotIn('id', $existingItemIds)->delete();
 
-            foreach ($validatedData2['barang_id'] as $key => $item_id) {
+            foreach ($validatedData2['barang_id'] as $key => $barang_id) {
+                $barang = WarehouseBarangFarmasi::find($barang_id);
+                $satuan = WarehouseSatuanBarang::find($validatedData2['satuan_id'][$key]);
+
                 $attributes = [
-                    'pr_id' => $id,
-                    'barang_id' => $validatedData2['barang_id'][$key],
+                    'barang_id' => $barang_id,
                     'satuan_id' => $validatedData2['satuan_id'][$key],
-                    'kode_barang' => $validatedData2['kode_barang'][$key],
-                    'nama_barang' => $validatedData2['nama_barang'][$key],
-                    'unit_barang' => $validatedData2['unit_barang'][$key],
+                    'kode_barang' => $barang->kode,
+                    'nama_barang' => $barang->nama,
+                    'unit_barang' => $satuan->nama,
                     'harga_barang' => $validatedData2['hna'][$key],
                     'qty' => $validatedData2['qty'][$key],
                     'subtotal' => $validatedData2['hna'][$key] * $validatedData2['qty'][$key],
                     'status' => 'unprocessed',
-                    'approved_qty' => null,
                     'keterangan' => $validatedData2['keterangan_item'][$key] ?? null,
                 ];
 
-                if ($request->has('item_id') && isset($validatedData2['item_id'][$key])) {
-                    $pri = ProcurementPurchaseRequestPharmacyItems::findorfail($validatedData2['item_id'][$key]);
-                    $pri->update($attributes);
-                } else {
-                    $pri = new ProcurementPurchaseRequestPharmacyItems($attributes);
-                }
-
-                $pri->save();
+                $pr->items()->updateOrCreate(
+                    ['id' => $validatedData2['item_id'][$key] ?? null],
+                    $attributes
+                );
             }
 
             DB::commit();
-
-            return back()->with('success', 'Data berhasil disimpan');
+            return response()->json(['success' => true, 'message' => 'Data PR berhasil diperbarui!']);
         } catch (\Exception $e) {
             DB::rollBack();
-
-            return back()->with('error', $e->getMessage());
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(ProcurementPurchaseRequestPharmacy $procurementPurchaseRequestPharmacy, $id)
+    public function destroy($id)
     {
-        $pr = $procurementPurchaseRequestPharmacy->findorfail($id);
-        if ($pr->status == 'final') {
+        $pr = ProcurementPurchaseRequestPharmacy::findOrFail($id);
+        if ($pr->status !== 'draft') {
             return response()->json([
                 'success' => false,
-                'message' => 'PR sudah final, tidak bisa dihapus!',
-            ]);
+                'message' => 'Hanya PR dengan status DRAFT yang bisa dihapus!',
+            ], 403);
         }
 
         try {
@@ -293,13 +260,19 @@ class WarehousePurchaseRequestPharmacy extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'PR berhasil dihapus!',
+                'message' => 'Data PR berhasil dihapus!',
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage(),
-            ]);
+            ], 500);
         }
+    }
+
+    public function print($id)
+    {
+        $pr = ProcurementPurchaseRequestPharmacy::findOrFail($id);
+        return view('pages.simrs.warehouse.purchase-request.partials.pr-print-pharmacy', compact('pr'));
     }
 }

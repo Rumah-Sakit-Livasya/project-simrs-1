@@ -1,176 +1,130 @@
-// @ts-check
-/// <reference types="jquery" />
-/// <reference path="../../../types.d.ts" />
-
-// @ts-ignore
-const Swal = /** @type {import("sweetalert2").default} */ (window.Swal);
-
-class PRPharmacyHandler {
-    constructor() {
-        this.#addEventListeners(".delete-btn", this.#handleDeleteButtonClick);
-        this.#addEventListeners(".print-btn", this.#handlePrintButtonClick);
-        this.#addEventListeners(".edit-btn", this.#handleEditButtonClick);
-        this.#addEventListeners("#tambah-btn", this.#handleTambahButtonClick);
-    }
-
-    /**
-     * Handle edit button click
-     * @param {Event} event
-     */
-    #handleEditButtonClick(event) {
-        event.preventDefault();
-        const button = /** @type {HTMLButtonElement} */ (event.target);
-        const id = parseInt(button.getAttribute("data-id") || "0");
-        if (!id) return;
-
-        const url = "/simrs/warehouse/purchase-request/pharmacy/edit/" + id;
-        const width = screen.width;
-        const height = screen.height;
-        const left = width - width / 2;
-        const top = height - height / 2;
-        window.open(
-            url,
-            "popupWindow_editPRFarmasi" + id,
-            "width=" +
-                width +
-                ",height=" +
-                height +
-                ",scrollbars=yes,resizable=yes,left=" +
-                left +
-                ",top=" +
-                top
-        );
-    }
-
-    /**
-     * Handle print button click
-     * @param {Event} event
-     */
-    #handlePrintButtonClick(event) {
-        event.preventDefault();
-        const button = /** @type {HTMLButtonElement} */ (event.target);
-        const id = parseInt(button.getAttribute("data-id") || "0");
-        if (!id) return;
-
-        const url = "/simrs/warehouse/purchase-request/pharmacy/print/" + id;
-        const width = screen.width;
-        const height = screen.height;
-        const left = width - width / 2;
-        const top = height - height / 2;
-        window.open(
-            url,
-            "popupWindow_printPRFarmasi",
-            "width=" +
-                width +
-                ",height=" +
-                height +
-                ",scrollbars=yes,resizable=yes,left=" +
-                left +
-                ",top=" +
-                top
-        );
-    }
-
-    /**
-     * Add event listeners
-     * @param {string} selector
-     * @param {Function} handler
-     * @param {string} event
-     */
-    #addEventListeners(selector, handler, event = "click") {
-        const buttons = document.querySelectorAll(selector);
-        buttons.forEach((button) => {
-            button.addEventListener(event, handler.bind(this));
-        });
-    }
-
-    /**
-     * Handle tambah button click
-     * @param {Event} event
-     */
-    #handleTambahButtonClick(event) {
-        event.preventDefault();
-        const url = "/simrs/warehouse/purchase-request/pharmacy/create";
-        const width = screen.width;
-        const height = screen.height;
-        const left = width - width / 2;
-        const top = height - height / 2;
-        window.open(
-            url,
-            "popupWindow_addPRFarmasi",
-            "width=" +
-                width +
-                ",height=" +
-                height +
-                ",scrollbars=yes,resizable=yes,left=" +
-                left +
-                ",top=" +
-                top
-        );
-    }
-
-    /**
-     * Handle delete button click
-     * @param {Event} event
-     */
-    #handleDeleteButtonClick(event) {
-        event.preventDefault();
-        const button = /** @type {HTMLButtonElement} */ (event.target);
-        const id = parseInt(button.getAttribute("data-id") || "0");
-        if (!id) return;
-
-        Swal.fire({
-            title: "Hapus PR?",
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#3085d6",
-            cancelButtonColor: "#d33",
-            confirmButtonText: "Ya, hapus!",
-            cancelButtonText: "Batal",
-        }).then((result) => {
-            if (result.isConfirmed) {
-                this.#deleteItem(id);
-            }
-        });
-    }
-
-    /**
-     * Delete after confirmation
-     * @param {number} id
-     */
-    #deleteItem(id) {
-        const formData = new FormData();
-        formData.append("id", String(id));
-        formData.append(
-            "csrf-token",
-            document
-                .querySelector('meta[name="csrf-token"]')
-                ?.getAttribute("content") || ""
-        );
-
-        fetch("/api/simrs/warehouse/purchase-request/pharmacy/destroy/" + id, {
-            method: "DELETE",
-            body: formData,
-            headers: {
-                "X-CSRF-TOKEN":
-                    document
-                        .querySelector('meta[name="csrf-token"]')
-                        ?.getAttribute("content") || "",
+$(document).ready(function () {
+    // --- Inisialisasi Plugin ---
+    $(".select2").select2({ width: "100%" });
+    $("#tanggal_pr_filter")
+        .daterangepicker({
+            opens: "left",
+            autoUpdateInput: false,
+            locale: {
+                format: "YYYY-MM-DD",
+                cancelLabel: "Clear",
+                separator: " to ",
             },
         })
-            .then(async (response) => {
-                const data = await response.json();
-                if (!data.success) {
-                    throw new Error(data.message);
-                }
-                showSuccessAlert("Data berhasil dihapus!");
-                setTimeout(() => window.location.reload(), 2000);
-            })
-            .catch((error) => {
-                console.log("Error:", error);
-                showErrorAlertNoRefresh(`Error: ${error}`);
-            });
-    }
-}
+        .on("apply.daterangepicker", function (ev, picker) {
+            $(this).val(
+                picker.startDate.format("YYYY-MM-DD") +
+                    " to " +
+                    picker.endDate.format("YYYY-MM-DD")
+            );
+        })
+        .on("cancel.daterangepicker", function (ev, picker) {
+            $(this).val("");
+        });
 
-const PRPharmacyClass = new PRPharmacyHandler();
+    // --- Inisialisasi DataTable ---
+    var table = $("#pr-table").DataTable({
+        responsive: true,
+        columnDefs: [
+            { orderable: false, className: "details-control", targets: 0 },
+        ],
+        order: [[1, "desc"]],
+    });
+
+    // --- Event Listeners ---
+    // Child Row
+    $("#pr-table tbody").on("click", "td.details-control", function () {
+        var tr = $(this).closest("tr");
+        var row = table.row(tr);
+        var prId = tr.data("id");
+        var url = `/simrs/procurement/purchase-request/pharmacy/${prId}/details`;
+
+        if (row.child.isShown()) {
+            row.child.hide();
+            tr.removeClass("shown");
+        } else {
+            row.child(
+                '<tr><td colspan="8" class="text-center"><i class="fas fa-spinner fa-spin"></i> Memuat...</td></tr>'
+            ).show();
+            tr.addClass("shown");
+            $.get(url, function (response) {
+                row.child(formatChildRow(response.data)).show();
+            }).fail(function () {
+                row.child(
+                    '<tr><td colspan="8" class="text-center text-danger">Gagal memuat data.</td></tr>'
+                ).show();
+            });
+        }
+    });
+
+    // Mengambil URL dari data-url
+    $("#add-pr-btn").on("click", function () {
+        openPopup($(this).data("url"));
+    });
+
+    $("#pr-table").on("click", ".edit-btn", function () {
+        openPopup($(this).data("url"));
+    });
+
+    $("#pr-table").on("click", ".print-btn", function () {
+        window.open($(this).data("url"), "_blank");
+    });
+
+    $("#pr-table").on("click", ".delete-btn", function () {
+        var url = $(this).data("url");
+        showDeleteConfirmation(function () {
+            $.ajax({
+                url: url,
+                method: "DELETE",
+                headers: {
+                    "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr(
+                        "content"
+                    ),
+                },
+                success: function (response) {
+                    if (response.success) {
+                        showSuccessAlert(response.message);
+                        window.location.reload();
+                    }
+                },
+                error: function (xhr) {
+                    showErrorAlert(xhr.responseJSON.message);
+                },
+            });
+        });
+    });
+
+    // --- Helper Functions ---
+    function openPopup(url) {
+        window.open(url, "prPopup", `width=1200,height=800,scrollbars=yes`);
+    }
+
+    function formatChildRow(data) {
+        if (!data || data.length === 0)
+            return '<tr><td colspan="7" class="text-center">Tidak ada item dalam permintaan ini.</td></tr>';
+        let rows = "";
+        data.forEach((d, i) => {
+            rows += `<tr>
+                <td class="text-center">${i + 1}</td>
+                <td>${d.nama_barang} (${d.kode_barang})</td>
+                <td class="text-center">${d.qty}</td>
+                <td>${d.unit_barang}</td>
+                <td class="text-right">${rp(d.harga_barang)}</td>
+                <td class="text-right">${rp(d.subtotal)}</td>
+                <td>${d.keterangan || ""}</td>
+            </tr>`;
+        });
+        return `<div class="p-2 bg-white"><table class="child-table">
+            <thead><tr><th>#</th><th>Barang</th><th>Qty</th><th>Satuan</th><th>HNA</th><th>Subtotal</th><th>Keterangan</th></tr></thead>
+            <tbody>${rows}</tbody>
+        </table></div>`;
+    }
+
+    function rp(number) {
+        return new Intl.NumberFormat("id-ID", {
+            style: "currency",
+            currency: "IDR",
+            minimumFractionDigits: 0,
+        }).format(number);
+    }
+});
