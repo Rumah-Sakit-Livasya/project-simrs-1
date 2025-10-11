@@ -943,72 +943,77 @@ Route::group(['middleware' => ['auth']], function () {
             });
         });
 
-        Route::prefix('procurement')->group(function () {
-            Route::prefix('purchase-request')->group(function () {
-                Route::prefix('pharmacy')->group(function () {
-                    Route::get('/', [ProcurementPurchaseRequestPharmacyController::class, 'index'])->name('procurement.purchase-request.pharmacy');
-                    Route::get('/create', [ProcurementPurchaseRequestPharmacyController::class, 'create'])->name('procurement.purchase-request.pharmacy.create');
-                    Route::get('/print/{id}', [ProcurementPurchaseRequestPharmacyController::class, 'print'])->name('procurement.purchase-request.pharmacy.print');
-                    Route::get('/edit/{id}', [ProcurementPurchaseRequestPharmacyController::class, 'edit'])->name('procurement.purchase-request.pharmacy.edit');
+        Route::prefix('procurement')->name('procurement.')->group(function () {
+            Route::prefix('purchase-request')->name('purchase-request.')->group(function () {
+                Route::prefix('pharmacy')->name('pharmacy')->group(function () {
+                    Route::get('/', [WarehousePurchaseRequestPharmacy::class, 'index']);
+                    Route::get('/create', [WarehousePurchaseRequestPharmacy::class, 'create'])->name('.create');
+                    Route::post('/store', [WarehousePurchaseRequestPharmacy::class, 'store'])->name('.store');
+                    Route::get('/{id}/edit', [WarehousePurchaseRequestPharmacy::class, 'edit'])->name('.edit');
+                    Route::put('/{id}', [WarehousePurchaseRequestPharmacy::class, 'update'])->name('.update');
+                    Route::delete('/{id}', [WarehousePurchaseRequestPharmacy::class, 'destroy'])->name('.destroy');
+                    Route::get('/{id}/details', [WarehousePurchaseRequestPharmacy::class, 'details'])->name('.details');
+                    Route::get('/print/{id}', [WarehousePurchaseRequestPharmacy::class, 'print'])->name('.print');
+                    Route::get('/popup-items', [WarehousePurchaseRequestPharmacy::class, 'popupItems'])->name('.popup-items');
                 });
 
                 Route::prefix('non-pharmacy')->group(function () {
-                    Route::get('/', [ProcurementPurchaseRequestNonPharmacyController::class, 'index'])->name('procurement.purchase-request.non-pharmacy');
-                    Route::get('/create', [ProcurementPurchaseRequestNonPharmacyController::class, 'create'])->name('procurement.purchase-request.non-pharmacy.create');
-                    Route::get('/print/{id}', [ProcurementPurchaseRequestNonPharmacyController::class, 'print'])->name('procurement.purchase-request.non-pharmacy.print');
-                    Route::get('/edit/{id}', [ProcurementPurchaseRequestNonPharmacyController::class, 'edit'])->name('procurement.purchase-request.non-pharmacy.edit');
+                    Route::get('/', [ProcurementPurchaseRequestNonPharmacyController::class, 'index'])->name('purchase-request.non-pharmacy');
+                    Route::get('/create', [ProcurementPurchaseRequestNonPharmacyController::class, 'create'])->name('purchase-request.non-pharmacy.create');
+                    Route::get('/print/{id}', [ProcurementPurchaseRequestNonPharmacyController::class, 'print'])->name('purchase-request.non-pharmacy.print');
+                    Route::get('/edit/{id}', [ProcurementPurchaseRequestNonPharmacyController::class, 'edit'])->name('purchase-request.non-pharmacy.edit');
                 });
             });
 
             Route::prefix('approval-pr')->group(function () {
                 Route::prefix('pharmacy')->group(function () {
-                    Route::get('/', [ProcurementPRApprovalPharmacy::class, 'index'])->name('procurement.approval-pr.pharmacy');
-                    Route::get('/print/{id}', [ProcurementPRApprovalPharmacy::class, 'print'])->name('procurement.approval-pr.pharmacy.print');
-                    Route::get('/edit/{id}', [ProcurementPRApprovalPharmacy::class, 'edit'])->name('procurement.approval-pr.pharmacy.edit');
+                    Route::get('/', [ProcurementPRApprovalPharmacy::class, 'index'])->name('approval-pr.pharmacy');
+                    Route::get('/print/{id}', [ProcurementPRApprovalPharmacy::class, 'print'])->name('approval-pr.pharmacy.print');
+                    Route::get('/edit/{id}', [ProcurementPRApprovalPharmacy::class, 'edit'])->name('approval-pr.pharmacy.edit');
                 });
 
                 Route::prefix('non-pharmacy')->group(function () {
-                    Route::get('/', [ProcurementPRApprovalNonPharmacy::class, 'index'])->name('procurement.approval-pr.non-pharmacy');
-                    Route::get('/print/{id}', [ProcurementPRApprovalNonPharmacy::class, 'print'])->name('procurement.approval-pr.non-pharmacy.print');
-                    Route::get('/edit/{id}', [ProcurementPRApprovalNonPharmacy::class, 'edit'])->name('procurement.approval-pr.non-pharmacy.edit');
+                    Route::get('/', [ProcurementPRApprovalNonPharmacy::class, 'index'])->name('approval-pr.non-pharmacy');
+                    Route::get('/print/{id}', [ProcurementPRApprovalNonPharmacy::class, 'print'])->name('approval-pr.non-pharmacy.print');
+                    Route::get('/edit/{id}', [ProcurementPRApprovalNonPharmacy::class, 'edit'])->name('approval-pr.non-pharmacy.edit');
                 });
             });
 
             Route::prefix('purchase-order')->group(function () {
                 Route::prefix('pharmacy')->group(function () {
-                    Route::get('/', [ProcurementPurchaseOrderPharmacyController::class, 'index'])->name('procurement.purchase-order.pharmacy');
-                    Route::get('/create', [ProcurementPurchaseOrderPharmacyController::class, 'create'])->name('procurement.purchase-order.pharmacy.create');
-                    Route::get('/print/{id}', [ProcurementPurchaseOrderPharmacyController::class, 'print'])->name('procurement.purchase-order.pharmacy.print');
-                    Route::get('/edit/{id}', [ProcurementPurchaseOrderPharmacyController::class, 'edit'])->name('procurement.purchase-order.pharmacy.edit');
+                    Route::get('/', [ProcurementPurchaseOrderPharmacyController::class, 'index'])->name('purchase-order.pharmacy');
+                    Route::get('/create', [ProcurementPurchaseOrderPharmacyController::class, 'create'])->name('purchase-order.pharmacy.create');
+                    Route::get('/print/{id}', [ProcurementPurchaseOrderPharmacyController::class, 'print'])->name('purchase-order.pharmacy.print');
+                    Route::get('/edit/{id}', [ProcurementPurchaseOrderPharmacyController::class, 'edit'])->name('purchase-order.pharmacy.edit');
                 });
 
                 Route::prefix('non-pharmacy')->group(function () {
-                    Route::get('/', [ProcurementPurchaseOrderNonPharmacyController::class, 'index'])->name('procurement.purchase-order.non-pharmacy');
-                    Route::get('/create', [ProcurementPurchaseOrderNonPharmacyController::class, 'create'])->name('procurement.purchase-order.non-pharmacy.create');
-                    Route::get('/print/{id}', [ProcurementPurchaseOrderNonPharmacyController::class, 'print'])->name('procurement.purchase-order.non-pharmacy.print');
-                    Route::get('/edit/{id}', [ProcurementPurchaseOrderNonPharmacyController::class, 'edit'])->name('procurement.purchase-order.non-pharmacy.edit');
+                    Route::get('/', [ProcurementPurchaseOrderNonPharmacyController::class, 'index'])->name('purchase-order.non-pharmacy');
+                    Route::get('/create', [ProcurementPurchaseOrderNonPharmacyController::class, 'create'])->name('purchase-order.non-pharmacy.create');
+                    Route::get('/print/{id}', [ProcurementPurchaseOrderNonPharmacyController::class, 'print'])->name('purchase-order.non-pharmacy.print');
+                    Route::get('/edit/{id}', [ProcurementPurchaseOrderNonPharmacyController::class, 'edit'])->name('purchase-order.non-pharmacy.edit');
                 });
             });
 
             Route::prefix('approval-po')->group(function () {
                 Route::prefix('pharmacy')->group(function () {
-                    Route::get('/', [ProcurementPOApprovalPharmacy::class, 'index'])->name('procurement.approval-po.pharmacy');
-                    Route::get('/edit/{id}', [ProcurementPOApprovalPharmacy::class, 'edit'])->name('procurement.approval-po.pharmacy.edit');
+                    Route::get('/', [ProcurementPOApprovalPharmacy::class, 'index'])->name('approval-po.pharmacy');
+                    Route::get('/edit/{id}', [ProcurementPOApprovalPharmacy::class, 'edit'])->name('approval-po.pharmacy.edit');
                 });
 
                 Route::prefix('non-pharmacy')->group(function () {
-                    Route::get('/', [ProcurementPOApprovalNonPharmacy::class, 'index'])->name('procurement.approval-po.non-pharmacy');
-                    Route::get('/edit/{id}', [ProcurementPOApprovalNonPharmacy::class, 'edit'])->name('procurement.approval-po.non-pharmacy.edit');
+                    Route::get('/', [ProcurementPOApprovalNonPharmacy::class, 'index'])->name('approval-po.non-pharmacy');
+                    Route::get('/edit/{id}', [ProcurementPOApprovalNonPharmacy::class, 'edit'])->name('approval-po.non-pharmacy.edit');
                 });
 
                 Route::prefix('ceo')->group(function () {
-                    Route::get('/', [ProcurementPOApprovalCEO::class, 'index'])->name('procurement.approval-po.ceo');
-                    Route::get('/edit/{type}/{id}', [ProcurementPOApprovalCEO::class, 'edit'])->name('procurement.approval-po.ceo.edit');
+                    Route::get('/', [ProcurementPOApprovalCEO::class, 'index'])->name('approval-po.ceo');
+                    Route::get('/edit/{type}/{id}', [ProcurementPOApprovalCEO::class, 'edit'])->name('approval-po.ceo.edit');
                 });
             });
 
             Route::prefix('setup')->group(function () {
-                Route::get('supplier', [ProcurementSetupSupplier::class, 'index'])->name('procurement.setup.supplier');
+                Route::get('supplier', [ProcurementSetupSupplier::class, 'index'])->name('setup.supplier');
             });
         });
 
