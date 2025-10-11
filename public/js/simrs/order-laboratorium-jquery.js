@@ -1,24 +1,29 @@
-// Penyesuaian struktur dan pola dengan @order-radiologi.js
+// File: public/js/simrs/order-laboratorium-jquery.js (Refactored)
+
 jQuery(function ($) {
     const OrderLaboratorium = {
-        _KategoriLaboratorium: window._kategoriLaboratorium || [],
+        // _KategoriLaboratorium: window._kategoriLaboratorium || [], // HAPUS: Tidak lagi digunakan.
         _TarifLaboratorium: window._tarifLaboratorium || [],
         _Penjamins: window._penjamins || [],
         _KelasRawat: window._kelasRawats || [],
         _Registration: null,
         _totalHarga: 0,
-        _groupTarif: 1,
-        _kelasPerawatan: 1,
+        _groupTarif: 1, // Default
+        _kelasPerawatan: 1, // Default
         _patienType: "rajal",
         _CITO: false,
         _elementHarga: null,
         _elementForm: null,
         _pilihPasienButton: null,
+        _allParameters: [],
 
         init: function () {
             this._elementHarga = $("#laboratorium-total");
             this._elementForm = $("form[name='form-laboratorium']");
             this._pilihPasienButton = $("#pilih-pasien-btn");
+
+            // --- EKSTRAKSI SEMUA PARAMETER DARI HTML ---
+            this.extractParametersFromDOM();
 
             $("#searchLaboratorium").on(
                 "keyup",
@@ -80,6 +85,29 @@ jQuery(function ($) {
             );
 
             this.updateAllParameterPricesUI();
+        },
+
+        // ==========================================================
+        // FUNGSI BARU: Mengambil data parameter dari elemen HTML
+        // ==========================================================
+        extractParametersFromDOM: function () {
+            const self = this;
+            $(".parameter_laboratorium_checkbox").each(function () {
+                const $checkbox = $(this);
+                const id = parseInt($checkbox.val());
+                // Ambil label setelah checkbox
+                // Bisa menggunakan .next('label'), atau fallback ke .attr('data-label') jika ada
+                let parameter = "";
+                const $label = $checkbox.next("label");
+                if ($label.length && $label.text().trim()) {
+                    parameter = $label.text().trim();
+                } else if ($checkbox.attr("data-label")) {
+                    parameter = $checkbox.attr("data-label").trim();
+                } else {
+                    parameter = "Parameter #" + id;
+                }
+                self._allParameters.push({ id, parameter });
+            });
         },
 
         handleSearchBarChange: function (event) {
@@ -170,9 +198,8 @@ jQuery(function ($) {
         },
 
         handleTipePasienChange: function (event) {
-            // this.clearInputs();
             this._patienType = $(event.target).val();
-            console.log(this._patienType);
+            // console.log(this._patienType);
 
             if (this._patienType === "otc") {
                 $("#nama_pasien").prop("readonly", false);
@@ -206,37 +233,42 @@ jQuery(function ($) {
             this.calculateCost();
         },
 
+        // ==========================================================
+        // PERBAIKAN UTAMA 1: Update Harga UI
+        // ==========================================================
         updateAllParameterPricesUI: function () {
-            for (const kategori of this._KategoriLaboratorium) {
-                for (const parameter of kategori.parameter_laboratorium) {
-                    const $hargaElement = $(
-                        `#harga_parameter_laboratorium_${parameter.id}`
+            for (const parameter of this._allParameters) {
+                const $hargaElement = $(
+                    `#harga_parameter_laboratorium_${parameter.id}`
+                );
+                if (!$hargaElement.length) continue;
+                const tarif = this.findApplicableTarif(parameter);
+                if (tarif) {
+                    $hargaElement.text(
+                        tarif.total.toLocaleString("id-ID", {
+                            style: "currency",
+                            currency: "IDR",
+                            minimumFractionDigits: 0,
+                        })
                     );
-                    if (!$hargaElement.length) continue;
-                    const tarif = this.findApplicableTarif(parameter);
-                    if (tarif) {
-                        $hargaElement.text(
-                            tarif.total.toLocaleString("id-ID", {
-                                style: "currency",
-                                currency: "IDR",
-                            })
-                        );
-                    } else {
-                        $hargaElement.text("N/A");
-                    }
+                } else {
+                    $hargaElement.text("N/A");
                 }
             }
         },
 
+        // ==========================================================
+        // PERBAIKAN UTAMA 2: Kalkulasi Biaya
+        // ==========================================================
         calculateCost: function () {
             this._totalHarga = 0;
             const self = this;
             $("input.parameter_laboratorium_checkbox:checked").each(
                 function () {
                     const parameterId = parseInt($(this).val());
-                    const parameter = self._KategoriLaboratorium
-                        .flatMap((k) => k.parameter_laboratorium)
-                        .find((p) => p.id === parameterId);
+                    const parameter = self._allParameters.find(
+                        (p) => p.id === parameterId
+                    );
                     if (parameter) {
                         const tarif = self.findApplicableTarif(parameter);
                         if (!tarif) {
@@ -260,6 +292,7 @@ jQuery(function ($) {
                 this._totalHarga.toLocaleString("id-ID", {
                     style: "currency",
                     currency: "IDR",
+                    minimumFractionDigits: 0,
                 })
             );
         },
@@ -301,7 +334,7 @@ jQuery(function ($) {
                     } else {
                         isCorrectKelasRawat =
                             t.kelas_rawat_id ==
-                            (this._Registration.kelas_rawat_id ?? -1);
+                            (this._Registration.kelas_rawat_id ?? 1);
                     }
                     const penjamin = this._Penjamins.find(
                         (p) => p.id == this._Registration.penjamin_id
@@ -318,13 +351,14 @@ jQuery(function ($) {
             });
         },
 
+        // ==========================================================
+        // PERBAIKAN UTAMA 3: Submit Form
+        // ==========================================================
         submit: function (event) {
-            // Proses submit hanya jika tombol diklik (bukan submit form default)
             if (event) {
                 event.preventDefault();
             }
 
-            // Disable tombol submit agar tidak bisa diklik berkali-kali
             const $submitBtn = $(event && event.target).closest(
                 "button.submit-btn"
             );
@@ -358,19 +392,17 @@ jQuery(function ($) {
             $("input.parameter_laboratorium_checkbox:checked").each(
                 function () {
                     const parameterId = parseInt($(this).val());
-                    const parameter = self._KategoriLaboratorium
-                        .flatMap((k) => k.parameter_laboratorium)
-                        .find((p) => p.id === parameterId);
+                    const parameter = self._allParameters.find(
+                        (p) => p.id === parameterId
+                    );
+
                     if (parameter) {
                         const tarif = self.findApplicableTarif(parameter);
                         if (tarif) {
                             const jumlah =
                                 parseInt($(`#jumlah_${parameter.id}`).val()) ||
                                 1;
-                            let price = tarif.total;
-                            if (self._CITO) {
-                                price *= 1.3;
-                            }
+                            const price = tarif.total;
                             parameters.push({
                                 id: parameter.id,
                                 qty: jumlah,
@@ -401,11 +433,15 @@ jQuery(function ($) {
                 headers: { "X-CSRF-TOKEN": CSRF_TOKEN },
                 success: function (response) {
                     if (!response.success) {
-                        showErrorAlertNoRefresh(
-                            `Terjadi kesalahan: ${
-                                response.errors || "Unknown error"
-                            }`
-                        );
+                        let errorMsg = "Terjadi kesalahan.";
+                        if (response.message) {
+                            errorMsg = response.message;
+                        } else if (response.errors) {
+                            errorMsg = Object.values(response.errors).join(
+                                "\n"
+                            );
+                        }
+                        showErrorAlertNoRefresh(errorMsg);
                         $submitBtn
                             .prop("disabled", false)
                             .removeClass("btn-loading");
@@ -416,9 +452,13 @@ jQuery(function ($) {
                         window.location.href = "/simrs/laboratorium/list-order";
                     }, 2000);
                 },
-                error: function (jqXHR, textStatus, errorThrown) {
+                error: function (jqXHR) {
                     showErrorAlertNoRefresh(
-                        `Gagal mengirim data: ${errorThrown}`
+                        `Gagal mengirim data: ${
+                            jqXHR.responseJSON && jqXHR.responseJSON.message
+                                ? jqXHR.responseJSON.message
+                                : "Error tidak diketahui"
+                        }`
                     );
                     $submitBtn
                         .prop("disabled", false)
