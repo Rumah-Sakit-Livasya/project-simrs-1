@@ -11,6 +11,7 @@ use App\Models\RelasiParameterLaboratorium;
 use App\Models\SIMRS\Doctor;
 use App\Models\SIMRS\GroupPenjamin;
 use App\Models\SIMRS\KelasRawat;
+use App\Models\SIMRS\Laboratorium\GrupParameterLaboratorium;
 use App\Models\SIMRS\Laboratorium\KategoriLaboratorium;
 use App\Models\SIMRS\Laboratorium\NilaiNormalLaboratorium;
 use App\Models\SIMRS\Laboratorium\OrderLaboratorium;
@@ -26,17 +27,60 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class LaboratoriumController extends Controller
 {
+    /**
+     * Menampilkan form untuk membuat order laboratorium baru.
+     * Logikanya diubah untuk mengelompokkan berdasarkan GRUP PARAMETER.
+     */
     public function order()
     {
+        // 1. Ambil semua parameter yang bisa diorder dan relasi grup_parameter_laboratorium-nya
+        $allParameters = ParameterLaboratorium::with('grup_parameter_laboratorium')
+            ->where('is_order', true)
+            ->orderBy('parameter', 'asc')
+            ->get();
+
+        // 2. Kelompokkan parameter berdasarkan nama grupnya menggunakan Eloquent Collection
+        $groupedParameters = $allParameters->groupBy('grup_parameter_laboratorium.nama_grup');
+
+        // 3. Hitung jumlah parameter per grup
+        $grupCounts = $groupedParameters->map(function ($items) {
+            return $items->count();
+        });
+
+        // 4. Ambil semua grup dan urutkan DESC berdasarkan jumlah parameter grup
+        // 5. Hanya tampilkan grup yang memiliki data/parameter (tidak kosong)
+        $allGroups = GrupParameterLaboratorium::all()
+            ->sortByDesc(function ($group) use ($grupCounts) {
+                return $grupCounts->get($group->nama_grup, 0);
+            })
+            ->filter(function ($group) use ($grupCounts) {
+                return $grupCounts->get($group->nama_grup, 0) > 0;
+            })
+            ->values();
+
+        // 6. Buat struktur data final (Collection) yang terurut berdasarkan jumlah parameter terbanyak dan hanya grup yang ada datanya
+        $finalGroupedData = collect();
+        foreach ($allGroups as $group) {
+            $parametersInGroup = $groupedParameters->get($group->nama_grup, collect());
+            $finalGroupedData->put($group->nama_grup, $parametersInGroup);
+        }
+
+        // Ambil data lain yang diperlukan oleh form (logika ini tetap sama)
         $laboratoriumDoctors = Doctor::whereHas('department_from_doctors', function ($query) {
             $query->where('name', 'like', '%lab%');
         })->get();
+
+        $tarifs = TarifParameterLaboratorium::all();
+        $penjamins = Penjamin::all();
+        $kelas_rawats = KelasRawat::all();
+
+        // Kirim data yang sudah dikelompokkan berdasarkan GRUP ke view
         return view('pages.simrs.laboratorium.order', [
+            'groupedParameters' => $finalGroupedData,
             'laboratoriumDoctors' => $laboratoriumDoctors,
-            'penjamins' => Penjamin::all(),
-            'kelas_rawats' => KelasRawat::all(),
-            'laboratorium_categories' => KategoriLaboratorium::all(),
-            'tarifs' => TarifParameterLaboratorium::all(),
+            'penjamins' => $penjamins,
+            'kelas_rawats' => $kelas_rawats,
+            'tarifs' => $tarifs,
         ]);
     }
 
