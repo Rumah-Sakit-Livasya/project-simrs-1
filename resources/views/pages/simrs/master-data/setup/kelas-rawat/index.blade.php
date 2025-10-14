@@ -113,8 +113,16 @@
                                         @endforeach
                                     </tbody>
                                     <tfoot>
+                                        <tr class="bg-gray-200">
+                                            <th colspan="2" class="text-right">Total</th>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                            <th colspan="3"></th>
+                                        </tr>
                                         <tr>
-                                            <th colspan="8" class="text-center">
+                                            <th colspan="9" class="text-center">
                                                 <button type="button"
                                                     class="btn btn-outline-primary waves-effect waves-themed"
                                                     id="btn-tambah-kelas" data-toggle="modal"
@@ -197,7 +205,7 @@
                                     <label for="tarif-${tarif.group_penjamin_id}" class="form-label">
                                         ${tarif.group_penjamin.name}
                                     </label>
-                                    <input type="number" class="form-control" id="tarif-${tarif.group_penjamin_id}" 
+                                    <input type="number" class="form-control" id="tarif-${tarif.group_penjamin_id}"
                                         name="tarif[${tarif.group_penjamin_id}]" value="${tarif.tarif}" placeholder="Masukkan tarif untuk ${tarif.group_penjamin.name}">
                                 </div>`;
                         }).join('');
@@ -360,18 +368,61 @@
                 });
             });
 
-            // initialize datatable
+            // initialize datatable tanpa pagination & update footer totals
             $('#dt-basic-example').DataTable({
-                "drawCallback": function(settings) {
-                    // Menyembunyikan preloader setelah data berhasil dimuat
+                drawCallback: function(settings) {
                     $('#loading-spinner').hide();
                 },
-                responsive: false, // Responsif diaktifkan
-                scrollX: true, // Tambahkan scroll horizontal
+                footerCallback: function(row, data, start, end, display) {
+                    var api = this.api();
+
+                    // Helper to parse int from value
+                    var intVal = function(i) {
+                        return typeof i === 'string' ?
+                            i.replace(/[\$,]/g, '') * 1 :
+                            typeof i === 'number' ?
+                            i :
+                            0;
+                    };
+
+                    // Indeks kolom: 2 (Jml Ruangan), 3 (Jml T. Tidur), 4 (Bed Tambahan), 5 (Jml Bed BOR)
+                    var totalRuangan = api.column(2, {
+                        page: 'current'
+                    }).data().reduce(function(a, b) {
+                        return intVal(a) + intVal(b);
+                    }, 0);
+
+                    var totalTempatTidur = api.column(3, {
+                        page: 'current'
+                    }).data().reduce(function(a, b) {
+                        return intVal(a) + intVal(b);
+                    }, 0);
+
+                    var totalBedTambahan = api.column(4, {
+                        page: 'current'
+                    }).data().reduce(function(a, b) {
+                        return intVal(a) + intVal(b);
+                    }, 0);
+
+                    var totalBedBor = api.column(5, {
+                        page: 'current'
+                    }).data().reduce(function(a, b) {
+                        return intVal(a) + intVal(b);
+                    }, 0);
+
+                    // Update total di footer
+                    $(api.column(2).footer()).html(totalRuangan);
+                    $(api.column(3).footer()).html(totalTempatTidur);
+                    $(api.column(4).footer()).html(totalBedTambahan);
+                    $(api.column(5).footer()).html(totalBedBor);
+                },
+                responsive: false,
+                scrollX: true,
                 lengthChange: false,
+                paging: false,
+                info: false,
                 dom: "<'row mb-3'<'col-sm-12 col-md-6 d-flex align-items-center justify-content-start'f><'col-sm-12 col-md-6 d-flex align-items-center justify-content-end buttons-container'B>>" +
-                    "<'row'<'col-sm-12'tr>>" +
-                    "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+                    "<'row'<'col-sm-12'tr>>",
                 buttons: [{
                         extend: 'pdfHtml5',
                         text: 'PDF',
