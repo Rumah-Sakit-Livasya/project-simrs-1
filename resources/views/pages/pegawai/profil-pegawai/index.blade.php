@@ -29,11 +29,13 @@
             @include('pages.pegawai.profil-pegawai.partials.modal.edit-employee')
             @include('pages.pegawai.profil-pegawai.partials.modal.edit-identity')
             @include('pages.pegawai.profil-pegawai.partials.modal.edit-profile-picture')
+            @include('pages.pegawai.profil-pegawai.partials.modal.edit-dokumen')
             @include('pages.pegawai.profil-pegawai.partials.modal.create-attendance-request')
             @include('pages.pegawai.profil-pegawai.partials.modal.create-dokumen')
 
     </main>
 @endsection
+
 @section('plugin')
     <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
     <script src="/js/formplugins/select2/select2.bundle.js"></script>
@@ -43,26 +45,19 @@
         $('#ubah-profil').on('click', function() {
             var employeeId = $(this).data('id');
             $('#employee-id').val(employeeId);
-            var formData = new FormData($('#update-profile-picture')[0]);
 
             $.ajax({
                 type: 'GET',
                 url: '/employees/edit-profil/' + employeeId,
-                // data: formData,
-                // contentType: false,
-                // processData: false,
                 success: function(data) {
-                    // Set attribut src pada elemen gambar berdasarkan data image dari respons
                     var previewImage = $('.img-preview');
                     if (previewImage.length) {
                         previewImage.attr('src', '/storage/employee/profile/' + data.foto);
                     }
-
-                    // Show the modal
                     $('#changeProfileModal').modal('show');
                 },
                 error: function(error) {
-                    showErrorAlert('Terjadi kesalahan:', error.message);
+                    showErrorAlertNoRefresh('Terjadi kesalahan:', error.message);
                 }
             });
         });
@@ -72,30 +67,24 @@
             e.preventDefault();
 
             var employeeId = $('#employee-id').val();
-            var formData = new FormData(this); // Gunakan 'this' untuk mengambil data dari form saat ini
+            var formData = new FormData(this);
 
             $.ajax({
-                type: 'post', // Sesuaikan dengan method form
+                type: 'post',
                 url: '/employees/update-profil/' + employeeId,
                 data: formData,
                 processData: false,
                 contentType: false,
                 success: function(response) {
-                    // Handle success, e.g., close modal or update UI
                     $('#changeProfileModal').modal('hide');
-
-                    // Tampilkan pesan
                     showSuccessAlert('Foto Profil Diubah!');
-
-                    // Tunda reload selama 2 detik
                     setTimeout(function() {
                         location.reload();
                     }, 1000);
                 },
                 error: function(error) {
                     $('#changeProfileModal').modal('hide');
-                    // Handle errors, e.g., display validation errors
-                    showErrorAlert('Cek kembali data yang dikirim');
+                    showErrorAlertNoRefresh('Cek kembali data yang dikirim');
                 }
             });
         });
@@ -104,12 +93,9 @@
         function previewImage() {
             const image = document.querySelector('#foto');
             const imgPreview = document.querySelector('.img-preview')
-
             imgPreview.style.display = 'block';
-
             const oFReader = new FileReader();
             oFReader.readAsDataURL(image.files[0])
-
             oFReader.onload = function(oFREvent) {
                 imgPreview.src = oFREvent.target.result;
             }
@@ -122,70 +108,173 @@
                 responsive: false
             });
 
-            $('.js-thead-colors a').on('click', function() {
-                var theadColor = $(this).attr("data-bg");
-                console.log(theadColor);
-                $('#dt-basic-example thead').removeClassPrefix('bg-').addClass(theadColor);
-            });
-
-            $('.js-tbody-colors a').on('click', function() {
-                var theadColor = $(this).attr("data-bg");
-                console.log(theadColor);
-                $('#dt-basic-example').removeClassPrefix('bg-').addClass(theadColor);
-            });
-
-            $('#tambah-dokumen').click(function(e) {
-                $('#tambah-dokumen-modal').modal('show');
-            });
-
-            // Update Form
-            $('#tambah-dokumen-form').on('submit', function(e) {
+            // Action untuk tombol download dokumen
+            $(document).on('click', '.btn-download-dokumen', function(e) {
                 e.preventDefault();
-
-                const employeeId = "{{ auth()->user()->employee->id }}";
-                var formData = new FormData(this);
-                formData.append('employee_id', employeeId);
-
+                var $btn = $(this);
+                var id = $btn.data('id');
+                $btn.find('.ikon-download-dokumen').hide();
+                $btn.find('.spinner-text').removeClass('d-none');
+                // Proses download versi window.open agar bisa untuk file apapun
                 $.ajax({
-                    type: 'post', // Sesuaikan dengan method form
-                    url: '/api/dashboard/files/store',
-                    data: formData,
-                    processData: false,
-                    contentType: false,
-                    success: function(response) {
-                        // Handle success, e.g., close modal or update UI
-                        $('#tambah-dokumen-modal').modal('hide');
-                        showSuccessAlert(response.message);
-                        setTimeout(function() {
-                            location.reload();
-                        }, 1000);
+                    url: '/api/dashboard/files/' + id + '/download',
+                    type: 'GET',
+                    xhrFields: {
+                        responseType: 'blob'
                     },
-                    error: function(error) {
-                        $('#tambah-dokumen-modal').modal('hide');
-                        showErrorAlert(error.error);
+                    success: function(data, status, xhr) {
+                        // Get filename from header if present
+                        var disposition = xhr.getResponseHeader('Content-Disposition');
+                        var filename = 'file.pdf';
+                        if (disposition && disposition.indexOf('filename=') !== -1) {
+                            filename = disposition.split('filename=')[1].split(';')[0].replace(
+                                /"/g, "");
+                        }
+                        var url = window.URL.createObjectURL(data);
+                        var a = document.createElement('a');
+                        a.href = url;
+                        a.download = filename;
+                        document.body.appendChild(a);
+                        a.click();
+                        setTimeout(function() {
+                            window.URL.revokeObjectURL(url);
+                            document.body.removeChild(a);
+                        }, 0);
+                        showSuccessAlert('File berhasil diunduh.');
+                    },
+                    error: function(xhr) {
+                        showErrorAlertNoRefresh('Gagal mengunduh file.');
+                    },
+                    complete: function() {
+                        $btn.find('.ikon-download-dokumen').show();
+                        $btn.find('.spinner-text').addClass('d-none');
                     }
                 });
             });
 
-            $('a.download').on('click', function(e) {
+            // Edit and Hapus tombol
+            // Edit dokumen: tampilkan modal sesuai struktur form modal edit-dokumen.blade.php
+            $(document).on('click', '.btn-edit-dokumen', function(e) {
+                e.preventDefault();
+                var docId = $(this).data('id');
+                $.ajax({
+                    type: 'GET',
+                    url: '/api/dashboard/files/' + docId + '/edit',
+                    success: function(response) {
+                        // Set input modal sesuai partial modal edit-dokumen.blade.php
+                        $('#edit-dokumen-form #edit-dokumen-id').val(response.id ?? "");
+                        $('#edit-dokumen-form #edit-nama').val(response.nama ?? "");
+                        $('#edit-dokumen-form #edit-expire').val(response.masa_berlaku ??
+                            ""
+                        ); // field backend: masa_berlaku; field modal: expire (pastikan disamakan)
+                        if (response.hard_copy == 1) {
+                            $('#edit-dokumen-form #edit-hard-copy').prop('checked', true);
+                        } else {
+                            $('#edit-dokumen-form #edit-hard-copy').prop('checked', false);
+                        }
+
+                        // Tampilkan/link file sebelumnya jika ada
+                        if (response.file) {
+                            $('#file-sekarang').html('<a href="/storage/uploads/' + response
+                                .file +
+                                '" target="_blank" class="text-sm text-blue-600 underline">Lihat file saat ini</a>'
+                            );
+                        } else {
+                            $('#file-sekarang').html(
+                                '<span class="text-danger text-sm">File tidak tersedia</span>'
+                            );
+                        }
+
+                        // Bersihkan input file & label
+                        $('#edit-dokumen-form #edit-file').val('');
+                        $('#edit-dokumen-form .custom-file-label').text('Pilih file baru...');
+
+                        $('#edit-dokumen-modal').modal('show');
+                    },
+                    error: function(xhr) {
+                        showErrorAlertNoRefresh('Gagal memuat data dokumen.');
+                    }
+                });
+            });
+
+            // Update dokumen sesuai struktur modal
+            $('#edit-dokumen-form').on('submit', function(e) {
                 e.preventDefault();
 
-                // Ambil ID dokumen dari atribut data-id
+                var formData = new FormData(this);
+                var id = $('#edit-dokumen-id').val();
+
+                // Disable button dan tampilkan spinner
+                var $btn = $('#edit-dokumen-form button[type=submit]');
+                $btn.prop('disabled', true);
+                $btn.find('.spinner-border').removeClass('d-none');
+
+                $.ajax({
+                    type: 'POST',
+                    url: '/api/dashboard/files/update/' + id,
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function(res) {
+                        $('#edit-dokumen-modal').modal('hide');
+                        showSuccessAlert('Dokumen berhasil diupdate!');
+                        setTimeout(function() {
+                            location.reload();
+                        }, 1000);
+                    },
+                    error: function(xhr) {
+                        $('#edit-dokumen-modal').modal('hide');
+                        if (xhr.responseJSON && xhr.responseJSON.error) {
+                            showErrorAlertNoRefresh(xhr.responseJSON.error);
+                        } else {
+                            showErrorAlertNoRefresh('Gagal mengedit dokumen.');
+                        }
+                    },
+                    complete: function() {
+                        $btn.prop('disabled', false);
+                        $btn.find('.spinner-border').addClass('d-none');
+                    }
+                });
+            });
+
+            $(document).on('click', '.btn-delete-dokumen', function(e) {
+                e.preventDefault();
+                var idDihapus = $(this).data('id');
+                if (confirm('Yakin ingin menghapus dokumen ini?')) {
+                    $.ajax({
+                        type: 'DELETE',
+                        url: '/api/dashboard/files/delete/' + idDihapus,
+                        data: {
+                            _token: '{{ csrf_token() }}'
+                        },
+                        success: function(response) {
+                            showSuccessAlert("Dokumen berhasil dihapus");
+                            setTimeout(function() {
+                                location.reload();
+                            }, 800);
+                        },
+                        error: function(xhr) {
+                            showErrorAlertNoRefresh("Gagal menghapus dokumen.");
+                        }
+                    });
+                }
+            });
+
+            // Tombol download
+            $('a.download').on('click', function(e) {
+                e.preventDefault();
                 var documentId = $(this).data('id');
                 var url = "/api/dashboard/files/download-document/" + documentId;
                 $.ajax({
                     type: "GET",
                     url: url,
                     xhrFields: {
-                        responseType: 'blob' // Mengatur responseType ke blob
+                        responseType: 'blob'
                     },
                     success: function(data, status, xhr) {
-                        // Ambil nama file dari header Content-Disposition
                         var disposition = xhr.getResponseHeader('Content-Disposition');
                         var filename = disposition ? disposition.split('filename=')[1] :
                             'document.pdf';
-
-                        // Membuat link download
                         var link = document.createElement('a');
                         link.href = window.URL.createObjectURL(data);
                         link.download = filename;
@@ -194,14 +283,41 @@
                         document.body.removeChild(link);
                     },
                     error: function(xhr) {
-                        showErrorAlert(xhr.responseJSON.error);
+                        showErrorAlertNoRefresh(xhr.responseJSON.error);
                     }
                 });
             });
 
-            $('.btn-delete-dokumen').click(function(e) {
-                dokumenId = $(this).attr('data-id');
+            $('#tambah-dokumen').click(function(e) {
+                $('#tambah-dokumen-modal').modal('show');
             });
+
+            $('#tambah-dokumen-form').on('submit', function(e) {
+                e.preventDefault();
+                const employeeId = "{{ auth()->user()->employee->id }}";
+                var formData = new FormData(this);
+                formData.append('employee_id', employeeId);
+                $.ajax({
+                    type: 'post',
+                    url: '/api/dashboard/files/store',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function(response) {
+                        $('#tambah-dokumen-modal').modal('hide');
+                        showSuccessAlert(response.message);
+                        setTimeout(function() {
+                            location.reload();
+                        }, 1000);
+                    },
+                    error: function(error) {
+                        $('#tambah-dokumen-modal').modal('hide');
+                        showErrorAlertNoRefresh(error.error);
+                    }
+                });
+            });
+
+            // --- Existing forms & step logic, attendance, etc. remains unchanged below ---
 
             $('.btn-ubah-personal').click(function(e) {
                 e.preventDefault();
@@ -209,10 +325,9 @@
                 let id = button.attr('data-id');
                 button.find('.ikon-edit').hide();
                 button.find('.spinner-text').removeClass('d-none');
-
                 $.ajax({
-                    type: "GET", // Method pengiriman data bisa dengan GET atau POST
-                    url: `/api/dashboard/employee/get/${id}`, // Isi dengan url/path file php yang dituju
+                    type: "GET",
+                    url: `/api/dashboard/employee/get/${id}`,
                     dataType: "json",
                     success: function(data) {
                         button.find('.ikon-edit').show();
@@ -240,13 +355,12 @@
                         $('#ubah-personal #blood-type').val(data.blood_type);
                     },
                     error: function(xhr) {
-                        // Handle errors, e.g., display validation errors
                         $('#ubah-personal').modal('hide');
-                        showErrorAlert(xhr.responseText);
+                        showErrorAlertNoRefresh(xhr.responseText);
                     }
                 });
 
-                $('#update-personal-form').on('submit', function(e) {
+                $('#update-personal-form').off('submit').on('submit', function(e) {
                     e.preventDefault();
                     let formData = $(this).serialize();
                     $.ajax({
@@ -256,8 +370,7 @@
                         beforeSend: function() {
                             $('#update-personal-form').find('.ikon-edit').hide();
                             $('#update-personal-form').find('.spinner-text')
-                                .removeClass(
-                                    'd-none');
+                                .removeClass('d-none');
                         },
                         success: function(response) {
                             $('#ubah-personal').modal('hide');
@@ -267,7 +380,7 @@
                             }, 1000);
                         },
                         error: function(xhr) {
-                            showErrorAlert(xhr.responseText);
+                            showErrorAlertNoRefresh(xhr.responseText);
                         }
                     });
                 });
@@ -276,17 +389,14 @@
             $('.btn-ubah-identitas').click(function(e) {
                 e.preventDefault();
                 let button = $(this);
-                // console.log('clicked');
                 let id = button.attr('data-id');
                 button.find('.ikon-edit').hide();
                 button.find('.spinner-text').removeClass('d-none');
-
                 $.ajax({
-                    type: "GET", // Method pengiriman data bisa dengan GET atau POST
-                    url: `/api/dashboard/employee/get/${id}`, // Isi dengan url/path file php yang dituju
+                    type: "GET",
+                    url: `/api/dashboard/employee/get/${id}`,
                     dataType: "json",
                     success: function(data) {
-                        console.log(data);
                         button.find('.ikon-edit').show();
                         button.find('.spinner-text').addClass('d-none');
                         $('#ubah-identitas').modal('show');
@@ -296,7 +406,6 @@
                         if (!identityNumberExpired) {
                             $('#ubah-identitas #identity-expire-date').prop('disabled', true);
                         } else {
-                            // Jika ada data, maka atur nilai input
                             $('#ubah-identitas #identity-expire-date').val(
                                 identityNumberExpired);
                         }
@@ -305,13 +414,12 @@
                         $('#ubah-identitas #residental-address').val(data.residental_address);
                     },
                     error: function(xhr) {
-
                         $('#ubah-identitas').modal('hide');
-                        showErrorAlert(xhr.responseText);
+                        showErrorAlertNoRefresh(xhr.responseText);
                     }
                 });
 
-                $('#update-identity-form').on('submit', function(e) {
+                $('#update-identity-form').off('submit').on('submit', function(e) {
                     e.preventDefault();
                     let formData = $(this).serialize();
                     $.ajax({
@@ -321,8 +429,7 @@
                         beforeSend: function() {
                             $('#update-identity-form').find('.ikon-edit').hide();
                             $('#update-identity-form').find('.spinner-text')
-                                .removeClass(
-                                    'd-none');
+                                .removeClass('d-none');
                         },
                         success: function(response) {
                             $('#ubah-identitas').modal('hide');
@@ -333,7 +440,7 @@
                         },
                         error: function(xhr) {
                             $('#ubah-identitas').modal('hide');
-                            showErrorAlert(xhr.responseText);
+                            showErrorAlertNoRefresh(xhr.responseText);
                         }
                     });
                 });
@@ -345,13 +452,11 @@
                 let id = button.attr('data-id');
                 button.find('.ikon-edit').hide();
                 button.find('.spinner-text').removeClass('d-none');
-
                 $.ajax({
-                    type: "GET", // Method pengiriman data bisa dengan GET atau POST
-                    url: `/api/dashboard/employee/get/${id}`, // Isi dengan url/path file php yang dituju
+                    type: "GET",
+                    url: `/api/dashboard/employee/get/${id}`,
                     dataType: "json",
                     success: function(data) {
-                        console.log(data);
                         button.find('.ikon-edit').show();
                         button.find('.spinner-text').addClass('d-none');
                         $('#ubah-identitas').modal('show');
@@ -361,7 +466,6 @@
                         if (!identityNumberExpired) {
                             $('#ubah-identitas #identity-expire-date').prop('disabled', true);
                         } else {
-                            // Jika ada data, maka atur nilai input
                             $('#ubah-identitas #identity-expire-date').val(
                                 identityNumberExpired);
                         }
@@ -370,13 +474,12 @@
                         $('#ubah-identitas #residental-address').val(data.residental_address);
                     },
                     error: function(xhr) {
-
                         $('#ubah-identitas').modal('hide');
-                        showErrorAlert(xhr.responseText);
+                        showErrorAlertNoRefresh(xhr.responseText);
                     }
                 });
 
-                $('#update-identity-form').on('submit', function(e) {
+                $('#update-identity-form').off('submit').on('submit', function(e) {
                     e.preventDefault();
                     let formData = $(this).serialize();
                     $.ajax({
@@ -386,8 +489,7 @@
                         beforeSend: function() {
                             $('#update-identity-form').find('.ikon-edit').hide();
                             $('#update-identity-form').find('.spinner-text')
-                                .removeClass(
-                                    'd-none');
+                                .removeClass('d-none');
                         },
                         success: function(response) {
                             $('#ubah-identitas').modal('hide');
@@ -398,16 +500,14 @@
                         },
                         error: function(xhr) {
                             $('#ubah-identitas').modal('hide');
-                            showErrorAlert(xhr.responseText);
+                            showErrorAlertNoRefresh(xhr.responseText);
                         }
                     });
                 });
             });
 
             $('.btn-ajukan').click(function(e) {
-                // Mendapatkan tanggal hari ini
                 var today = new Date();
-                // Mendapatkan tanggal satu hari sebelumnya
                 var yesterday = new Date(today);
                 yesterday.setDate(today.getDate() - 1);
 
@@ -416,18 +516,17 @@
                     clearBtn: false,
                     todayHighlight: true,
                     format: "yyyy-mm-dd",
-                    startDate: yesterday, // Mengatur tanggal mulai satu hari sebelumnya
-                    endDate: today // Mengatur tanggal akhir hari ini
+                    startDate: yesterday,
+                    endDate: today
                 });
 
                 $('#create-attendance-form').modal('show');
 
-                $('#store-attendance-request').on('submit', function(e) {
+                $('#store-attendance-request').off('submit').on('submit', function(e) {
                     e.preventDefault();
                     let formData = $(this).serialize();
                     $.ajax({
                         type: "POST",
-
                         url: '/attendance-request/store/',
                         data: formData,
                         beforeSend: function() {
@@ -447,7 +546,7 @@
                         },
                         error: function(xhr) {
                             $('#tambah-data').modal('hide');
-                            showErrorAlert(xhr.responseText);
+                            showErrorAlertNoRefresh(xhr.responseText);
                         }
                     });
                 });
@@ -462,10 +561,8 @@
             $('#sama-alamat').change(function() {
                 if ($(this).is(':checked')) {
                     $('#residental_address').val($('#citizen_id_address').val());
-                    // Lakukan sesuatu jika checkbox tercentang di sini
                 } else {
                     $('#residental_address').val("");
-                    // Lakukan sesuatu jika checkbox tidak tercentang di sini
                 }
             });
 
@@ -521,7 +618,6 @@
                     scrollTop: 0
                 }, 500);
                 parent.fadeOut(300, function() {
-                    // Callback akan dipanggil setelah animasi selesai
                     parent.addClass('hidden-content');
                     parent.removeAttr('style');
 
@@ -553,7 +649,6 @@
                         $('#step-round-4').addClass('btn-primary');
                     }
                 });
-
             });
 
             $('#datepicker-3').datepicker({

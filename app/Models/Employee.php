@@ -150,4 +150,9 @@ class Employee extends Model
     {
         return $this->hasOne(Driver::class);
     }
+
+    public function documents()
+    {
+        return $this->hasMany(UploadFile::class);
+    }
 }
