@@ -259,15 +259,22 @@
                                                 <td class="text-center">
                                                     @php
                                                         $statusClass = 'secondary';
+                                                        $gearColor = null;
                                                         if ($pr->status == 'final') {
                                                             $statusClass = 'primary';
+                                                            $gearColor = 'text-danger';
                                                         }
                                                         if ($pr->status == 'reviewed') {
                                                             $statusClass = 'success';
+                                                            $gearColor = 'text-success';
                                                         }
                                                     @endphp
-                                                    <span
-                                                        class="badge badge-{{ $statusClass }}">{{ ucfirst($pr->status) }}</span>
+                                                    {{-- <span class="badge badge-{{ $statusClass }}"> --}}
+                                                    {{-- {{ ucfirst($pr->status) }} --}}
+                                                    @if ($pr->status == 'final' || $pr->status == 'reviewed')
+                                                        <i class="fal fa-cog {{ $gearColor }} ml-1"></i>
+                                                    @endif
+                                                    {{-- </span> --}}
                                                 </td>
                                                 <td class="text-center">
                                                     <a href="javascript:void(0);" class="btn btn-xs btn-primary print-btn"

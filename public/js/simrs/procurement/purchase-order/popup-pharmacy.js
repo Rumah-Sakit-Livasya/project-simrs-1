@@ -6,69 +6,25 @@
 const Swal = /** @type {import("sweetalert2").default} */ (window.Swal);
 
 class PopupPOPharmacyHandler {
-    /**
-     * @type {JQuery<HTMLElement>}
-     */
+    #$Form;
     #$AddModal;
-
-    /**
-     * @type {JQuery<HTMLElement>}
-     */
     #$LoadingIcon;
-
-    /**
-     * @type {JQuery<HTMLElement>}
-     */
     #$LoadingPage;
-
-    /**
-     * @type {JQuery<HTMLElement>}
-     */
     #$Table;
-
-    /**
-     * @type {JQuery<HTMLElement>}
-     */
     #$ModalTable;
-
-    /**
-     * @type {JQuery<HTMLElement>}
-     */
     #$Total;
-
-    /**
-     * @type {JQuery<HTMLElement>}
-     */
     #$DiscountTotal;
-
-    /**
-     * @type {JQuery<HTMLElement>}
-     */
     #$GrandTotal;
-
-    /**
-     * @type {JQuery<HTMLElement>}
-     */
     #$Nominal;
-
-    /**
-     * @type {JQuery<HTMLElement>}
-     */
     #$PPN;
+    #itemCounter = 0;
 
-    /**
-     * @type {SumberItem}
-     */
     #SumberItem = "pr";
-
-    /**
-     * @type {TipePR}
-     */
     #TipePR = "all";
-
     #API_URL = "/api/simrs/procurement/purchase-order/pharmacy";
 
     constructor() {
+        this.#$Form = $("#form-po");
         this.#$AddModal = $("#pilihItemModal");
         this.#$LoadingIcon = $("#loading-spinner");
         this.#$LoadingPage = $("#loading-page");
@@ -84,170 +40,123 @@ class PopupPOPharmacyHandler {
     }
 
     #init() {
-        this.#addEventListeners("#add-btn", this.#handleAddButtonClick);
-        this.#addEventListeners(
-            "#searchItemInput",
-            this.#handleItemSearchBar,
-            "keyup"
+        this.#itemCounter = this.#$Table.find("tr").length;
+
+        // --- EVENT DELEGATION UNTUK SEMUA KALKULASI ---
+        this.#$Table.on(
+            "keyup change",
+            "input[name^='qty'], input[name^='qty_bonus']",
+            () => this.refreshTotal()
         );
-        this.#addEventListeners(
-            "#order-submit-draft",
-            this.#handleDraftButtonClick
+        this.#$Table.on(
+            "keyup change",
+            "input[name^='discount_percent']",
+            (e) => this.discountPercentChange(e)
         );
-        this.#addEventListeners(
-            "#order-submit-final",
-            this.#handleFinalButtonClick
+        this.#$Table.on(
+            "keyup change",
+            "input[name^='discount_nominal']",
+            (e) => this.discountNominalChange(e)
         );
-        this.#addEventListeners(
-            "#tipe-pr-select",
-            this.#handleTipePrChange,
-            "change"
+        this.#$Table.on("click", ".delete-btn", (e) =>
+            this.deleteItem($(e.target).data("key"))
         );
-        this.#addEventListeners(
-            "#sumber-item-select",
-            this.#handleSumberItemChange,
-            "change"
+
+        // Event listener lainnya
+        $("#add-btn").on("click", () => this.#handleAddButtonClick());
+        $("#searchItemInput").on("keyup", (e) => this.#handleItemSearchBar(e));
+        $("#order-submit-draft").on("click", (e) =>
+            this.#handleDraftButtonClick(e)
         );
-        this.#addEventListeners("#ppn-input", this.refreshTotal, "change");
-        this.#addEventListeners("#ppn-input", this.refreshTotal, "keyup");
-        this.#addEventListeners(
-            "input[type='number']",
-            this.enforceNumberLimit,
-            "input"
+        $("#order-submit-final").on("click", (e) =>
+            this.#handleFinalButtonClick(e)
         );
+        $("#tipe-pr-select").on("change", (e) => this.#handleTipePrChange(e));
+        $("#sumber-item-select").on("change", (e) =>
+            this.#handleSumberItemChange(e)
+        );
+        $("#ppn-input").on("keyup change", () => this.refreshTotal());
+
+        // Memastikan semua input number mematuhi min/max
+        $("input[type='number']").on("input", (e) =>
+            this.enforceNumberLimit(e)
+        );
+
+        this.refreshTotal();
         this.#showLoading(false);
     }
 
-    /**
-     * Enforce number input min max limit on manual input
-     * @param {Event} event
-     */
     enforceNumberLimit(event) {
         const inputField = /** @type {HTMLInputElement} */ (event.target);
         let value = parseFloat(inputField.value);
-        let min = parseInt(String(inputField.min || 0)); // Default to 0 if not set
-        let max = parseInt(String(inputField.max || Number.MAX_SAFE_INTEGER)); // Set default to a large number
+        let min = parseInt(String(inputField.min || 0));
+        let max = parseInt(String(inputField.max || Number.MAX_SAFE_INTEGER));
 
         if (isNaN(value)) {
-            inputField.value = ""; // Reset to empty on invalid input
+            inputField.value = "";
             return;
         }
 
         if (value < min) {
-            inputField.value = String(min); // Clamp value at min
+            inputField.value = String(min);
         } else if (value > max) {
-            inputField.value = String(max); // Clamp value at max
+            inputField.value = String(max);
         }
     }
 
-    /**
-     * Handle modal tipe pr change
-     * @param {Event} event
-     */
     #handleTipePrChange(event) {
-        // get value of the selected option
-        const select = /** @type {HTMLSelectElement} */ (event.target);
-        const value = select.value;
-
+        const value = $(event.target).val();
         this.#TipePR = /** @type {TipePR} */ (value);
         this.#loadAddItemModal();
     }
 
-    /**
-     * Handle modal sumber item change
-     * @param {Event} event
-     */
     #handleSumberItemChange(event) {
-        // get value of the selected option
-        const select = /** @type {HTMLSelectElement} */ (event.target);
-        const value = select.value;
-
+        const value = $(event.target).val();
         this.#SumberItem = /** @type {SumberItem} */ (value);
         this.#loadAddItemModal();
     }
 
-    /**
-     * Handle save order final button click
-     * @param {Event} event
-     */
     #handleFinalButtonClick(event) {
-        const button = /** @type {HTMLButtonElement} */ (event.target);
-        // insert hidden input
-        // with name "status"
-        // and value "final"
-        const input = document.createElement("input");
-        input.type = "hidden";
-        input.name = "status";
-        input.value = "final";
-        button.insertAdjacentElement("afterend", input);
+        this.#$Form.find("input[name='status']").remove();
+        this.#$Form.append('<input type="hidden" name="status" value="final">');
     }
 
-    /**
-     * Handle save order draft button click
-     * @param {Event} event
-     */
     #handleDraftButtonClick(event) {
-        const button = /** @type {HTMLButtonElement} */ (event.target);
-        // insert hidden input
-        // with name "status"
-        // and value "draft"
-        const input = document.createElement("input");
-        input.type = "hidden";
-        input.name = "status";
-        input.value = "draft";
-        button.insertAdjacentElement("afterend", input);
+        this.#$Form.find("input[name='status']").remove();
+        this.#$Form.append('<input type="hidden" name="status" value="draft">');
     }
 
-    /**
-     * Handle item search bar on key up
-     * @param {Event} event
-     */
     #handleItemSearchBar(event) {
-        const searchInput = /** @type {HTMLInputElement} */ (event.target);
-        const value = searchInput.value.toLowerCase();
-        const items = document.querySelectorAll("tr.item");
-
-        items.forEach((item) => {
-            if (!item) return;
-            const itemNameElement = item.querySelector(".item-name");
-            if (!itemNameElement) return;
-            const itemName = itemNameElement.textContent;
-            if (!itemName) return;
-
-            // @ts-ignore
-            item.style.display = itemName.toLowerCase().includes(value)
-                ? ""
-                : "none";
+        const value = $(event.target).val().toLowerCase();
+        $("#itemTable tr.item").filter(function () {
+            $(this).toggle(
+                $(this).find(".item-name").text().toLowerCase().indexOf(value) >
+                    -1
+            );
         });
     }
 
     addItem(id) {
         const row = this.#$ModalTable.find("tr.item#" + id);
-
         const QtyString = row.find("input.qty").val();
-        if (!QtyString) {
-            showErrorAlertNoRefresh("Quantitas tidak dapat ditemukan!");
+        if (!QtyString || parseInt(String(QtyString)) <= 0) {
+            showErrorAlertNoRefresh("Jumlah harus lebih dari 0!");
             return;
         }
         const Qty = parseInt(String(QtyString));
-        if (Qty <= 0) {
-            showErrorAlertNoRefresh("Jumlah tidak boleh 0!");
-            return;
-        }
-        const trId = row.attr("id");
         const Item = /** @type {BarangFarmasi} */ (row.data("item"));
         const KodePR = row.data("kode_pr");
         const IdPR = row.data("id_pr");
-        const MaxQTy = parseInt(row.data("max_qty")) || 999999999;
-        const selectedOption = row
-            .find("select[name='satuan" + trId + "']")
-            .find("option:selected");
-        const Satuan = /** @type {Satuan} */ (selectedOption.data("satuan"));
+        const MaxQty = parseInt(row.data("max_qty")) || 999999999;
+        const Satuan = /** @type {Satuan} */ (
+            row.find("select[name^='satuan'] option:selected").data("satuan")
+        );
+
         const HTML = this.#getItemTableCol(
             Item,
             Satuan,
             Qty,
-            MaxQTy,
+            MaxQty,
             KodePR,
             IdPR
         );
@@ -255,17 +164,9 @@ class PopupPOPharmacyHandler {
         this.refreshTotal();
     }
 
-    /**
-     * Generate HTML string for Item table collumn
-     * @param {BarangFarmasi} item
-     * @param {Satuan} satuan
-     * @param {number} qty
-     * @param {number} max_qty
-     * @param {string} kode_pr
-     * @param {string} IdPR
-     */
     #getItemTableCol(item, satuan, qty, max_qty, kode_pr, IdPR) {
-        const key = Math.round(Math.random() * 100000);
+        this.#itemCounter++;
+        const key = `new_${this.#itemCounter}`;
 
         return /*html*/ `
             <tr id="item${key}">
@@ -289,228 +190,207 @@ class PopupPOPharmacyHandler {
                 <td>${kode_pr || ""}</td>
                 <td>${item.nama}</td>
                 <td>${satuan.nama}</td>
-                <td><input type="number" name="qty[${key}]" min="0" step="1" class="form-control" value="${qty}" max="${max_qty}"
-                    onkeyup="PopupPOPharmacyClass.refreshTotal()" onchange="PopupPOPharmacyClass.refreshTotal()"></td>
-                <td><input type="number" name="qty_bonus[${key}]" min="0" step="1" class="form-control" value="0"
-                    onkeyup="PopupPOPharmacyClass.refreshTotal()" onchange="PopupPOPharmacyClass.refreshTotal()"></td>
+                <td><input type="number" name="qty[${key}]" min="0" step="1" class="form-control" value="${qty}" max="${max_qty}"></td>
+                <td><input type="number" name="qty_bonus[${key}]" min="0" step="1" class="form-control" value="0"></td>
                 <td class="harga_total">${this.#rp(item.hna * qty)}</td>
-                <td class="discount_percent">
-                    <input type="number" name="discount_percent[${key}]" min="0" step="1" class= "form-control" value="0"
-                    onkeyup="PopupPOPharmacyClass.discountPercentChange(event)" onchange="PopupPOPharmacyClass.discountPercentChange(event)">
-                <td class="discount_rp">
-                    <input type="number" name="discount_nominal[${key}]" min="0" step="1" class= "form-control" value="0"
-                    onkeyup="PopupPOPharmacyClass.discountNominalChange(event)" onchange="PopupPOPharmacyClass.discountNominalChange(event)"></td>
+                <td class="discount_percent"><input type="number" name="discount_percent[${key}]" min="0" step="1" class="form-control" value="0"></td>
+                <td class="discount_rp"><input type="number" name="discount_nominal[${key}]" min="0" step="1" class="form-control" value="0"></td>
                 <td class="subtotal">${this.#rp(item.hna * qty)}</td>
-                <td><a class="mdi mdi-close pointer mdi-24px text-danger delete-btn"
-                        title="Hapus" onclick="PopupPOPharmacyClass.deleteItem(${key})"></a></td>
+                <td><a class="mdi mdi-close pointer mdi-24px text-danger delete-btn" title="Hapus" data-key="${key}"></a></td>
             </tr>
         `;
     }
 
     /**
-     * Handle discount percent input change
-     * @param {Event} event
+     * Mengubah nilai dari input persen diskon.
+     * @param {JQuery.Event} event - Event object dari jQuery.
      */
     discountPercentChange(event) {
         const input = /** @type {HTMLInputElement} */ (event.target);
-        const discountPercent = parseInt(input.value);
-        if (isNaN(discountPercent)) return;
+        const $tr = $(input).closest("tr");
 
-        const tr = input.closest("tr");
-        if (!tr) return alert("TR Not found!");
+        // Ambil nilai HNA dan Qty langsung dari input, bukan dari teks. Ini lebih aman.
+        const qty =
+            parseFloat(String($tr.find("input[name^='qty']").val())) || 0;
+        const hna =
+            parseFloat(String($tr.find("input[name^='hna']").val())) || 0;
+        const harga = qty * hna;
 
-        const dscnEl = $(tr).find("input[name^=discount_nominal]");
-        if (!dscnEl) return alert("Input Not found!");
+        const discountPercent = parseFloat(input.value) || 0;
 
-        const hargaEl = $(tr).find("td.harga_total");
-        if (!hargaEl) return alert("Harga Not found!");
-        const harga = parseInt(
-            hargaEl.text().replaceAll("Rp", "").replaceAll(".", "")
-        );
+        // Hitung diskon nominal dan bulatkan ke angka bulat terdekat.
+        const discountNominal = Math.round((discountPercent / 100) * harga);
 
-        dscnEl.val((discountPercent * harga) / 100);
+        // Set nilai input diskon nominal
+        $tr.find("input[name^='discount_nominal']").val(discountNominal);
 
-        this.refreshTotal({ updateDiscount: false });
-    }
-
-    /**
-     * Handle discount nominal input change
-     * @param {Event} event
-     */
-    discountNominalChange(event) {
-        const input = /** @type {HTMLInputElement} */ (event.target);
-        const discountNominal = parseInt(input.value);
-        if (isNaN(discountNominal)) return;
-
-        const tr = input.closest("tr");
-        if (!tr) return alert("TR Not found!");
-
-        const dscpEl = $(tr).find("input[name^=discount_percent]");
-        if (!dscpEl) return alert("Input Not found!");
-
-        const hargaEl = $(tr).find("td.harga_total");
-        if (!hargaEl) return alert("Harga Not found!");
-        const harga = parseInt(
-            hargaEl.text().replaceAll("Rp", "").replaceAll(".", "")
-        );
-
-        dscpEl.val((discountNominal / harga) * 100);
-
-        this.refreshTotal({ updateDiscount: false });
-    }
-
-    refreshTotal(option = { updateDiscount: true }) {
-        let total = 0;
-        let grandtotal = 0;
-        let discount_total = 0;
-        this.#$Table.find("tr").each((i, tr) => {
-            const qtyEl = $(tr).find("input[name^=qty]");
-            const qtybEl = $(tr).find("input[name^=qty_bonus]");
-            const hnaEl = $(tr).find("input[name^=hna]");
-            const dscnEl = $(tr).find("input[name^=discount_nominal]");
-            const dscnpEl = $(tr).find("input[name^=discount_percent]");
-            if (!qtyEl || !hnaEl || !dscnEl || !dscnpEl || !qtybEl) return;
-
-            const qty = parseInt(String(qtyEl.val()));
-            const hna = parseInt(String(hnaEl.val()));
-            const qtyb = parseInt(String(qtybEl.val()));
-            const dscn = parseInt(String(dscnEl.val()));
-            const dscnp = parseInt(String(dscnpEl.val()));
-            if (
-                isNaN(qty) ||
-                isNaN(hna) ||
-                isNaN(qtyb) ||
-                isNaN(dscn) ||
-                isNaN(dscnp)
-            )
-                return;
-
-            const harga = qty * hna;
-
-            if (option.updateDiscount) {
-                dscnpEl.val((dscn / harga) * 100);
-                dscnEl.val((dscnp * harga) / 100);
-            }
-
-            const subtotal = harga - dscn;
-            total += harga;
-            grandtotal += subtotal;
-            discount_total += dscn;
-            $(tr).find("td.harga_total").text(this.#rp(harga));
-            $(tr).find("td.subtotal").text(this.#rp(subtotal));
-        });
-        const PPN = parseInt(String(this.#$PPN.val()));
-        grandtotal += (grandtotal * PPN) / 100;
-
-        this.#$Total.text(this.#rp(total));
-        this.#$DiscountTotal.text(this.#rp(discount_total));
-        this.#$GrandTotal.text(this.#rp(grandtotal));
-        this.#$Nominal.val(grandtotal);
-    }
-
-    /**
-     * Delete item from table and variable
-     * @param {string} key
-     */
-    deleteItem(key) {
-        this.#$Table.find("#item" + key).remove();
+        // Panggil refreshTotal untuk menghitung ulang semua total.
         this.refreshTotal();
     }
 
     /**
-     * Handle add button click
-     * @param {Event} event
+     * Mengubah nilai dari input nominal diskon.
+     * @param {JQuery.Event} event - Event object dari jQuery.
      */
-    #handleAddButtonClick(event) {
-        event.preventDefault();
+    discountNominalChange(event) {
+        const input = /** @type {HTMLInputElement} */ (event.target);
+        const $tr = $(input).closest("tr");
+
+        const qty =
+            parseFloat(String($tr.find("input[name^='qty']").val())) || 0;
+        const hna =
+            parseFloat(String($tr.find("input[name^='hna']").val())) || 0;
+        const harga = qty * hna;
+
+        const discountNominal = parseFloat(input.value) || 0;
+
+        // Hanya hitung persen jika harga lebih dari 0 untuk menghindari pembagian dengan nol.
+        if (harga > 0) {
+            const discountPercent = (discountNominal / harga) * 100;
+            // Set nilai input diskon persen, batasi 2 angka desimal.
+            $tr.find("input[name^='discount_percent']").val(
+                discountPercent.toFixed(2)
+            );
+        } else {
+            // Jika harga 0, persen juga 0.
+            $tr.find("input[name^='discount_percent']").val(0);
+        }
+
+        this.refreshTotal();
+    }
+
+    /**
+     * Fungsi utama untuk menghitung ulang semua total pada form.
+     */
+    refreshTotal() {
+        let total = 0;
+        let discount_total = 0;
+        let grandtotal = 0;
+
+        // Iterasi hanya pada baris yang terlihat (visible)
+        this.#$Table.find("tr:visible").each((i, tr) => {
+            const $tr = $(tr);
+
+            // Gunakan parseFloat untuk semua nilai agar bisa menangani desimal
+            const qty =
+                parseFloat(String($tr.find("input[name^='qty']").val())) || 0;
+            const hna =
+                parseFloat(String($tr.find("input[name^='hna']").val())) || 0;
+            const dscn =
+                parseFloat(
+                    String($tr.find("input[name^='discount_nominal']").val())
+                ) || 0;
+
+            // Hitung harga dan subtotal per baris
+            const harga = qty * hna;
+            const subtotal = harga - dscn;
+
+            // Akumulasi total
+            total += harga;
+            discount_total += dscn;
+
+            // Update tampilan per baris
+            $tr.find(".harga_total").text(this.#rp(harga));
+            $tr.find(".subtotal").text(this.#rp(subtotal));
+        });
+
+        // Hitung Grand Total sebelum PPN
+        grandtotal = total - discount_total;
+
+        // Ambil nilai PPN
+        const PPN = parseFloat(String(this.#$PPN.val())) || 0;
+
+        // Hitung nilai PPN dan tambahkan ke Grand Total
+        const nilaiPPN = (grandtotal * PPN) / 100;
+        grandtotal += nilaiPPN;
+
+        // Update tampilan di tfoot dan input nominal
+        // Bulatkan semua hasil akhir untuk menghindari masalah angka desimal panjang
+        this.#$Total.text(this.#rp(Math.round(total)));
+        this.#$DiscountTotal.text(this.#rp(Math.round(discount_total)));
+        this.#$GrandTotal.text(this.#rp(Math.round(grandtotal)));
+        this.#$Nominal.val(Math.round(grandtotal));
+    }
+
+    /**
+     * Fungsi untuk menghapus item.
+     * @param {string|number} key - Kunci unik dari baris item.
+     */
+    deleteItem(key) {
+        const $row = this.#$Table.find("#item" + key);
+        if (!$row.length) return;
+
+        const $itemIdInput = $row.find("input[name^='item_id']");
+
+        if ($itemIdInput.length > 0) {
+            const itemId = $itemIdInput.val();
+            this.#$Form.append(
+                `<input type="hidden" name="deleted_items[]" value="${itemId}">`
+            );
+            $row.find("input, select").prop("disabled", true); // Nonaktifkan input
+            $row.hide();
+        } else {
+            $row.remove();
+        }
+
+        // Panggil refreshTotal setelah menghapus/menyembunyikan baris
+        this.refreshTotal();
+    }
+
+    #handleAddButtonClick() {
         this.#loadAddItemModal();
     }
 
     async #loadAddItemModal() {
         this.#$AddModal.modal("hide");
         this.#showLoading(true);
-        const url = "/get/items";
+        try {
+            const response = await fetch(
+                `/api/simrs/procurement/purchase-order/pharmacy/get/items`,
+                {
+                    method: "PATCH",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRF-TOKEN":
+                            $('meta[name="csrf-token"]').attr("content") || "",
+                    },
+                    body: JSON.stringify({
+                        sumber_item: this.#SumberItem,
+                        tipe_pr: this.#TipePR,
+                    }),
+                }
+            );
 
-        const body = JSON.stringify({
-            sumber_item: this.#SumberItem,
-            tipe_pr: this.#TipePR,
-        });
-
-        const response = await this.#APIfetch(url, body, "PATCH", true);
-        const HTML = await response.text();
-        this.#showLoading(false);
-
-        this.#$ModalTable.html(HTML);
-        this.#$AddModal.modal("show");
+            if (!response.ok) throw new Error("Network response was not ok.");
+            const HTML = await response.text();
+            this.#$ModalTable.html(HTML);
+            this.#$AddModal.modal("show");
+        } catch (error) {
+            showErrorAlertNoRefresh(`Gagal memuat item: ${error.message}`);
+        } finally {
+            this.#showLoading(false);
+        }
     }
 
-    /**
-     * Add event listeners
-     * @param {string} selector
-     * @param {Function} handler
-     * @param {string} event
-     */
-    #addEventListeners(selector, handler, event = "click") {
-        const buttons = document.querySelectorAll(selector);
-        buttons.forEach((button) => {
-            button.addEventListener(event, handler.bind(this));
-        });
-    }
-
-    /**
-     * Show or hide the loading icon
-     * @param {boolean} show
-     */
     #showLoading(show) {
         this.#$LoadingIcon.toggle(show);
         this.#$LoadingPage.toggle(show);
     }
 
-    /**
-     * Make a fetch call with API URL as base URL
-     * @param {string} url
-     * @param {any | null} body
-     * @param {"GET" | "POST" | "PATCH" | "PUT" | "DELETE"} method
-     */
-    #APIfetch(url, body = null, method = "GET", raw = false) {
-        return new Promise((resolve, reject) => {
-            fetch(this.#API_URL + url, {
-                method: method,
-                body: body,
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-CSRF-TOKEN":
-                        document
-                            .querySelector('meta[name="csrf-token"]')
-                            ?.getAttribute("content") || "",
-                },
-            })
-                .then(async (response) => {
-                    if (response.status != 200) {
-                        throw new Error("Error: " + response.statusText);
-                    }
-                    resolve(!raw ? await response.json() : response);
-                })
-                .catch((error) => {
-                    console.log("Error:", error);
-
-                    // @ts-ignore
-                    if (this.#showLoading) this.#showLoading(false); // assert
-
-                    showErrorAlertNoRefresh(`Error: ${error}`);
-                    return reject(error);
-                });
-        });
+    #rp(amount) {
+        // Memastikan input adalah angka dan membulatkannya
+        const num = Math.round(Number(amount));
+        return "Rp " + num.toLocaleString("id-ID");
     }
 
-    /**
-     * Format angka menjadi mata uang rupiah
-     * @param {number} amount
-     * @returns
-     */
-    #rp(amount) {
-        const formattedAmount = "Rp " + amount.toLocaleString("id-ID");
-        return formattedAmount;
+    #parseCurrency(str) {
+        return (
+            parseFloat(
+                String(str)
+                    .replace(/Rp\s?|\./g, "")
+                    .replace(",", ".")
+            ) || 0
+        );
     }
 }
 

@@ -57,6 +57,15 @@
                     <div class="panel-container show">
                         <div id="loading-page"></div>
                         <div class="panel-content">
+                            {{-- ====================================================== --}}
+                            {{-- TAMBAHKAN LOGIKA KUNCI (LOCK) DI SINI --}}
+                            {{-- ====================================================== --}}
+                            @php
+                                // Form akan dikunci jika PO sudah final DAN sudah di-review oleh CEO (approve/reject)
+                                $isLocked =
+                                    $po->status == 'final' && in_array($po->approval_ceo, ['approve', 'reject']);
+                            @endphp
+                            {{-- ====================================================== --}}
                             <form id="form-po" name="form-po"
                                 action="{{ route('procurement.purchase-order.pharmacy.update', ['id' => $po->id]) }}"
                                 method="post">
@@ -79,7 +88,7 @@
                                                 <div class="col-xl">
                                                     <input type="date" class="form-control" id="datepicker-1"
                                                         placeholder="Select date" name="tanggal_po"
-                                                        value="{{ $po->tanggal_po }}">
+                                                        value="{{ $po->tanggal_po }}" {{ $isLocked ? 'readonly' : '' }}>
                                                 </div>
                                             </div>
                                         </div>
@@ -95,7 +104,7 @@
                                                 </div>
                                                 <div class="col-xl">
                                                     <select name="supplier_id" id="supplier-select"
-                                                        class="form-control select2">
+                                                        class="form-control select2" {{ $isLocked ? 'disabled' : '' }}>
                                                         <option value="" hidden disabled selected>Pilih Supplier
                                                         </option>
                                                         @foreach ($suppliers as $supplier)
@@ -119,11 +128,13 @@
                                                     </label>
                                                 </div>
                                                 <div class="col-xl">
-                                                    <select name="top" id="top-select" class="form-control">
+                                                    <select name="top" id="top-select" class="form-control"
+                                                        {{ $isLocked ? 'disabled' : '' }}>
                                                         <option value="" hidden disabled selected>Pilih Term of
                                                             Payment
                                                         </option>
-                                                        <option {{ $po->top == 'COD' ? 'selected' : '' }} value="COD">COD
+                                                        <option {{ $po->top == 'COD' ? 'selected' : '' }} value="COD">
+                                                            COD
                                                         </option>
                                                         <option {{ $po->top == '7HARI' ? 'selected' : '' }} value="7HARI">
                                                             7 Hari</option>
@@ -149,6 +160,7 @@
                                 </div>
 
                                 <div class="row justify-content-center">
+                                    {{-- Tanggal Kirim --}}
                                     <div class="col-xl-4">
                                         <div class="form-group">
                                             <div class="row">
@@ -160,12 +172,14 @@
                                                 <div class="col-xl">
                                                     <input type="date" class="form-control" id="datepicker-1"
                                                         placeholder="Select date" name="tanggal_kirim"
-                                                        value="{{ $po->tanggal_kirim }}">
+                                                        value="{{ $po->tanggal_kirim }}"
+                                                        {{ $isLocked ? 'readonly' : '' }}>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
 
+                                    {{-- PIC Terima --}}
                                     <div class="col-xl-4">
                                         <div class="form-group">
                                             <div class="row">
@@ -176,12 +190,13 @@
                                                 </div>
                                                 <div class="col-xl">
                                                     <input type="text" class="form-control" name="pic_terima"
-                                                        value="{{ $po->pic_terima }}">
+                                                        value="{{ $po->pic_terima }}" {{ $isLocked ? 'readonly' : '' }}>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
 
+                                    {{-- Tipe TOP --}}
                                     <div class="col-xl-4">
                                         <div class="form-group">
                                             <div class="row">
@@ -191,7 +206,8 @@
                                                     </label>
                                                 </div>
                                                 <div class="col-xl">
-                                                    <select name="tipe_top" id="tipe_top-select" class="form-control">
+                                                    <select name="tipe_top" id="tipe_top-select" class="form-control"
+                                                        {{ $isLocked ? 'disabled' : '' }}>
                                                         <option value="SETELAH_TUKAR_FAKTUR"
                                                             {{ $po->tipe_top == 'SETELAH_TUKAR_FAKTUR' ? 'selected' : '' }}>
                                                             SETELAH TUKAR FAKTUR
@@ -208,6 +224,7 @@
                                 </div>
 
                                 <div class="row justify-content-center">
+                                    {{-- Tipe Order --}}
                                     <div class="col-xl-4">
                                         <div class="form-group">
                                             <div class="row">
@@ -217,7 +234,8 @@
                                                     </label>
                                                 </div>
                                                 <div class="col-xl">
-                                                    <select name="tipe" class="form-control" required>
+                                                    <select name="tipe" class="form-control" required
+                                                        {{ $isLocked ? 'disabled' : '' }}>
                                                         {{-- normal, urgent --}}
                                                         <option value="normal"
                                                             {{ $po->tipe == 'normal' ? 'selected' : '' }}>
@@ -232,6 +250,7 @@
                                         </div>
                                     </div>
 
+                                    {{-- Keterangan --}}
                                     <div class="col-xl-4">
                                         <div class="form-group">
                                             <div class="row">
@@ -242,12 +261,13 @@
                                                 </div>
                                                 <div class="col-xl">
                                                     <input type="text" class="form-control" name="keterangan"
-                                                        value="{{ $po->keterangan }}">
+                                                        value="{{ $po->keterangan }}" {{ $isLocked ? 'readonly' : '' }}>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
 
+                                    {{-- PPN --}}
                                     <div class="col-xl-4">
                                         <div class="form-group">
                                             <div class="row">
@@ -258,16 +278,17 @@
                                                 </div>
                                                 <div class="col-xl">
                                                     <input id="ppn-input" type="number" min="0" step="1"
-                                                        class="form-control" name="ppn" value="{{ $po->ppn }}">
+                                                        class="form-control" name="ppn" value="{{ $po->ppn }}"
+                                                        {{ $isLocked ? 'readonly' : '' }}>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-
                                 <hr>
 
                                 <div class="row justify-content-center">
+                                    {{-- Table barang --}}
                                     <table class="table table-bordered table-hover table-striped w-100">
                                         <thead class="bg-primary-600">
                                             <tr>
@@ -290,60 +311,71 @@
                                             @foreach ($po->items as $item)
                                                 @php
                                                     $total += $item->harga_barang * $item->qty;
+                                                    // Hitung discount percent untuk ditampilkan
+                                                    $harga_item = $item->harga_barang * $item->qty;
+                                                    $discount_percent_val =
+                                                        $harga_item > 0
+                                                            ? ($item->discount_nominal / $harga_item) * 100
+                                                            : 0;
                                                 @endphp
-                                                <tr id="item{{ $loop->iteration }}">
-                                                    <input type="hidden" name="kode_barang[{{ $loop->iteration }}]"
+                                                <tr id="item{{ $item->id }}">
+                                                    {{-- Hidden inputs tetap sama --}}
+                                                    <input type="hidden" name="kode_barang[{{ $item->id }}]"
                                                         value="{{ $item->kode_barang }}">
-                                                    <input type="hidden" name="nama_barang[{{ $loop->iteration }}]"
+                                                    <input type="hidden" name="nama_barang[{{ $item->id }}]"
                                                         value="{{ $item->nama_barang }}">
-                                                    <input type="hidden" name="barang_id[{{ $loop->iteration }}]"
+                                                    <input type="hidden" name="barang_id[{{ $item->id }}]"
                                                         value="{{ $item->barang_id }}">
-                                                    <input type="hidden" name="unit_barang[{{ $loop->iteration }}]"
+                                                    <input type="hidden" name="unit_barang[{{ $item->id }}]"
                                                         value="{{ $item->unit_barang }}">
-                                                    <input type="hidden" name="hna[{{ $loop->iteration }}]"
+                                                    <input type="hidden" name="hna[{{ $item->id }}]"
                                                         value="{{ $item->harga_barang }}">
-                                                    <input type="hidden" name="pri_id[{{ $loop->iteration }}]"
+                                                    <input type="hidden" name="pri_id[{{ $item->id }}]"
                                                         value="{{ $item->pri_id }}">
-                                                    <input type="hidden" name="item_id[{{ $loop->iteration }}]"
+                                                    <input type="hidden" name="item_id[{{ $item->id }}]"
                                                         value="{{ $item->id }}">
 
                                                     <td>{{ $item->pri_id ? $item->pr_item->pr->kode_pr : '' }}</td>
                                                     <td>{{ $item->nama_barang }}</td>
                                                     <td>{{ $item->unit_barang }}</td>
 
-                                                    <td><input type="number" name="qty[{{ $loop->iteration }}]"
+                                                    {{-- Qty --}}
+                                                    <td>
+                                                        <input type="number" name="qty[{{ $item->id }}]"
                                                             min="0" step="1"
                                                             max="{{ $item->pr_item ? $item->pr_item->approved_qty - $item->pr_item->ordered_qty + $item->qty : '999999999' }}"
                                                             class="form-control" value="{{ $item->qty }}"
-                                                            onkeyup="PopupPOPharmacyClass.refreshTotal()"
-                                                            onchange="PopupPOPharmacyClass.refreshTotal()">
+                                                            {{ $isLocked ? 'readonly' : '' }}>
                                                     </td>
-                                                    <td><input type="number" name="qty_bonus[{{ $loop->iteration }}]"
+                                                    {{-- Qty Bonus --}}
+                                                    <td>
+                                                        <input type="number" name="qty_bonus[{{ $item->id }}]"
                                                             min="0" step="1" class="form-control"
                                                             value="{{ $item->qty_bonus }}"
-                                                            onkeyup="PopupPOPharmacyClass.refreshTotal()"
-                                                            onchange="PopupPOPharmacyClass.refreshTotal()"></td>
-                                                    <td class="harga_total">{{ rp($item->harga_barang * $item->qty) }}
+                                                            {{ $isLocked ? 'readonly' : '' }}>
                                                     </td>
+                                                    <td class="harga_total">{{ rp($harga_item) }}</td>
                                                     <td class="discount_percent">
                                                         <input type="number"
-                                                            name="discount_percent[{{ $loop->iteration }}]"
-                                                            min="0" step="1" class= "form-control"
-                                                            value="{{ ($item->discount_nominal / ($item->harga_barang * $item->qty)) * 100 }}"
-                                                            onkeyup="PopupPOPharmacyClass.discountPercentChange(event)"
-                                                            onchange="PopupPOPharmacyClass.discountPercentChange(event)">
+                                                            name="discount_percent[{{ $item->id }}]" min="0"
+                                                            step="1" class="form-control"
+                                                            value="{{ number_format($discount_percent_val, 2) }}"
+                                                            {{ $isLocked ? 'readonly' : '' }}>
+                                                    </td>
                                                     <td class="discount_rp">
                                                         <input type="number"
-                                                            name="discount_nominal[{{ $loop->iteration }}]"
-                                                            min="0" step="1" class= "form-control"
+                                                            name="discount_nominal[{{ $item->id }}]" min="0"
+                                                            step="1" class="form-control"
                                                             value="{{ $item->discount_nominal }}"
-                                                            onkeyup="PopupPOPharmacyClass.discountNominalChange(event)"
-                                                            onchange="PopupPOPharmacyClass.discountNominalChange(event)">
+                                                            {{ $isLocked ? 'readonly' : '' }}>
                                                     </td>
                                                     <td class="subtotal">{{ rp($item->subtotal) }}</td>
-                                                    <td><a class="mdi mdi-close pointer mdi-24px text-danger delete-btn"
-                                                            title="Hapus"
-                                                            onclick="PopupPOPharmacyClass.deleteItem({{ $loop->iteration }})"></a>
+                                                    {{-- Ganti tombol hapus, hidden jika locked --}}
+                                                    <td>
+                                                        @if (!$isLocked)
+                                                            <a class="mdi mdi-close pointer mdi-24px text-danger delete-btn"
+                                                                title="Hapus" data-key="{{ $item->id }}"></a>
+                                                        @endif
                                                     </td>
                                                 </tr>
                                             @endforeach
@@ -351,25 +383,27 @@
                                         <tfoot>
                                             <tr>
                                                 <td class="text-right" colspan="4">
-                                                    <button type="button" id="add-btn"
-                                                        class="btn btn-primary waves-effect waves-themed">
-                                                        <span class="fal fa-plus mr-1"></span>
-                                                        Tambah Item
-                                                    </button>
-                                                    @include('pages.simrs.procurement.purchase-order.partials.modal-add-item')
+                                                    @if (!$isLocked)
+                                                        <button type="button" id="add-btn"
+                                                            class="btn btn-primary waves-effect waves-themed">
+                                                            <span class="fal fa-plus mr-1"></span>
+                                                            Tambah Item
+                                                        </button>
+                                                        @include('pages.simrs.procurement.purchase-order.partials.modal-add-item')
+                                                    @endif
                                                 </td>
                                                 <td class="text-right">Total
                                                     <input type="hidden" value="{{ $po->nominal }}" name="nominal">
                                                 </td>
                                                 <td id="harga-display">{{ rp($total) }}</td>
-                                                <td>{{--  --}}</td>
+                                                <td></td>
                                                 <td id="discount-display">{{ rp($po->items->sum('discount_nominal')) }}
                                                 </td>
                                                 <td>
                                                     (+PPN)
                                                     <span id="total-display">{{ rp($po->nominal) }}</span>
                                                 </td>
-                                                <td>{{--  --}}</td>
+                                                <td></td>
                                             </tr>
                                         </tfoot>
                                     </table>
@@ -425,35 +459,43 @@
                                             </a>
                                         </div>
                                         <div class="col-xl text-right">
-                                            @if ($po->status != 'final')
-                                                @if ($po->approval != 'revision' && $po->approval_ceo != 'revision')
-                                                    <button type="submit" id="order-submit-draft"
-                                                        class="btn btn-lg btn-primary waves-effect waves-themed">
-                                                        <span class="fal fa-save mr-1"></span>
-                                                        Simpan Draft
-                                                    </button>
+                                            {{-- ====================================================== --}}
+                                            {{-- UBAH LOGIKA TOMBOL SIMPAN DI SINI --}}
+                                            {{-- ====================================================== --}}
+                                            @if ($isLocked)
+                                                {{-- Jika terkunci, tampilkan notifikasi --}}
+                                                <div class="alert alert-danger text-center">
+                                                    <h4 class="alert-heading">Data Sudah Final dan Direview!</h4>
+                                                    <p>Data ini tidak dapat diubah lagi karena telah selesai proses approval
+                                                        oleh CEO.</p>
+                                                </div>
+                                            @else
+                                                @if ($po->status != 'final')
+                                                    @if ($po->approval != 'revision' && $po->approval_ceo != 'revision')
+                                                        <button type="submit" id="order-submit-draft"
+                                                            class="btn btn-lg btn-primary waves-effect waves-themed">
+                                                            <span class="fal fa-save mr-1"></span>
+                                                            Simpan Draft
+                                                        </button>
+                                                    @endif
                                                 @endif
                                                 <button type="submit" id="order-submit-final"
                                                     class="btn btn-lg btn-success waves-effect waves-themed">
                                                     <span class="fal fa-save mr-1"></span>
                                                     Simpan Final
                                                 </button>
-                                            @else
-                                                <h1 style="color: red">Data sudah final</h1>
-                                                <p>Tidak dapat diubah lagi</p>
                                             @endif
+                                            {{-- ====================================================== --}}
                                         </div>
                                     </div>
                                 </div>
                             </form>
-
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </main>
-
 @endsection
 @section('plugin')
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
@@ -467,5 +509,4 @@
         $(".select2").select2();
     </script>
     <script src="{{ asset('js/simrs/procurement/purchase-order/popup-pharmacy.js') }}?v={{ time() }}"></script>
-
 @endsection

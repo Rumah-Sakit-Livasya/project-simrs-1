@@ -985,6 +985,8 @@ Route::group(['middleware' => ['auth']], function () {
                     Route::get('/create', [ProcurementPurchaseOrderPharmacyController::class, 'create'])->name('purchase-order.pharmacy.create');
                     Route::get('/print/{id}', [ProcurementPurchaseOrderPharmacyController::class, 'print'])->name('purchase-order.pharmacy.print');
                     Route::get('/edit/{id}', [ProcurementPurchaseOrderPharmacyController::class, 'edit'])->name('purchase-order.pharmacy.edit');
+                    Route::get('/detail/{id}', [ProcurementPurchaseOrderPharmacyController::class, 'getDetail'])->name('purchase-order.pharmacy.detail');
+                    Route::delete('/destroy/{id}', [ProcurementPurchaseOrderPharmacyController::class, 'destroy'])->name('purchase-order.pharmacy.destroy');
                 });
 
                 Route::prefix('non-pharmacy')->group(function () {
