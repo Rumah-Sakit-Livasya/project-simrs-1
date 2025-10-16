@@ -2,9 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Http\Controllers\BotMessageController;
 use Illuminate\Console\Command;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -31,32 +29,30 @@ class NotifyContractExpiry extends Command
      */
     public function handle()
     {
-        $this->info('Starting contract expiry notification via direct call...');
+        $this->info('Starting contract expiry notification...');
 
         try {
-            // 1. Buat instance Controller
-            $controller = new BotMessageController();
+            // Lakukan POST request ke URL internal Anda
+            // Pastikan URL base sudah benar (misal: menggunakan env('APP_URL') atau tentukan secara langsung jika berjalan di server lokal)
+            $response = Http::withHeaders([
+                'Key' => 'KeyAbcKey', // Header validasi
+                'Nama' => 'arul',     // Header validasi
+                'Sandi' => '123###!!', // Header validasi
+            ])->post(route('notify-contract-route')); // Ganti dengan nama route yang benar
 
-            // 2. Buat instance Request kosong (jika Controller membutuhkan objek Request)
-            $request = new Request();
-
-            // 3. Panggil metode controller secara langsung
-            // Metode ini akan menjalankan seluruh logika Anda untuk mencari kontrak kadaluarsa dan mengirim CURL
-            $response = $controller->notifyExpiryContract($request);
-
-            // Periksa hasil respons dari controller
-            if ($response->getStatusCode() === 200) {
-                $this->info('Contract expiry notification process finished successfully.');
-                // Opsional: Log hasil
-                \Log::info('Contract Expiry Notification Success: ' . $response->getContent());
+            // Cek status respons
+            if ($response->successful()) {
+                $this->info('Contract expiry notification sent successfully.');
+                Log::info('Contract Expiry Notification Success: ' . $response->body());
                 return Command::SUCCESS;
             } else {
-                $this->error("Contract expiry notification failed within controller logic. Status: {$response->getStatusCode()}");
+                $this->error("Failed to send contract expiry notification. HTTP Status: {$response->status()}");
+                Log::error('Contract Expiry Notification Failed: ' . $response->body());
                 return Command::FAILURE;
             }
         } catch (\Exception $e) {
-            $this->error('An error occurred: ' . $e->getMessage());
-            \Log::error('Contract Expiry Notification Exception: ' . $e->getMessage());
+            $this->error('An error occurred during contract expiry notification: ' . $e->getMessage());
+            Log::error('Contract Expiry Notification Exception: ' . $e->getMessage());
             return Command::FAILURE;
         }
     }
