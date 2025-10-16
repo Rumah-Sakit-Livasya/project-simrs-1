@@ -80,14 +80,16 @@ class PatientController extends Controller
         ]);
     }
 
-    public function detail_patient(Patient $patient)
+    public function detail_patient(Patient $patient, Request $request)
     {
-        $lastRegis = $patient->registration->last();
-        if ($lastRegis) {
-            if ($lastRegis->status === 'aktif') {
+        // Jika akses dari tombol "Rujuk Rawat Inap / Poli Lain" (dengan nextRegis di request), jangan redirect, tampilkan detail
+        if (!$request->has('nextRegis')) {
+            $lastRegis = $patient->registration->last();
+            if ($lastRegis && $lastRegis->status === 'aktif') {
                 return redirect("/daftar-registrasi-pasien/" . $lastRegis->id);
             }
         }
+
         $birthdate = $patient->date_of_birth;
         $age = displayAge($birthdate);
 

@@ -20,10 +20,14 @@ class PermissionSeeder extends Seeder
             ['name' => 'create companies', 'guard_name' => 'web'],
             ['name' => 'edit companies', 'guard_name' => 'web'],
             ['name' => 'delete companies', 'guard_name' => 'web'],
+            ['name' => 'view mjkn', 'guard_name' => 'web'],
+            ['name' => 'view mjkn dashboard', 'guard_name' => 'web'],
+            ['name' => 'view mjkn pasien baru', 'guard_name' => 'web'],
+            ['name' => 'view mjkn list pasien baru', 'guard_name' => 'web'],
         ];
 
         foreach ($permissions as $data) {
-            Permission::create($data);
+            Permission::firstOrCreate($data);
         }
         $admin = Role::find(1);
         $admin->givePermissionTo($permissions);

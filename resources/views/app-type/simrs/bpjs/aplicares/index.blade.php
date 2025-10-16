@@ -1,440 +1,461 @@
 @extends('inc.layout')
+@section('title', 'Bridging Applicare - Ketersediaan Kamar')
 
-@section('title', 'BPJS Bridging - Aplicare')
+@section('extended-css')
+    {{-- CSS untuk grouping di tabel --}}
+    <style>
+        .group-start td {
+            border-top: 2px solid #c0c0c0 !important;
+        }
+
+        td.empty-cell {
+            border-bottom-width: 0 !important;
+            border-top-width: 0 !important;
+        }
+    </style>
+@endsection
 
 @section('content')
     <main id="js-page-content" role="main" class="page-content">
-        <ol class="breadcrumb page-breadcrumb">
-            <li class="breadcrumb-item"><a href="javascript:void(0);">SIMRS</a></li>
-            <li class="breadcrumb-item">BPJS</li>
-            <li class="breadcrumb-item active">Bridging Aplicare</li>
-            <li class="position-absolute pos-top pos-right d-none d-sm-block"><span class="js-get-date"></span></li>
-        </ol>
+        {{-- ... (subheader, panel-header, dll.) ... --}}
+
         <div class="row">
-            <div class="col-xl-12">
-                <div id="panel-1" class="panel">
+            <div class="col-lg-12">
+                <div class="panel">
                     <div class="panel-hdr">
-                        <h2>
-                            Ketersediaan <span class="fw-300"><i>Tempat Tidur & Sinkronisasi Aplicare</i></span>
-                        </h2>
+                        <h2><i class="fal fa-table"></i> Tabel Ketersediaan Kamar</h2>
+                        <div class="panel-toolbar">
+                            <button class="btn btn-info btn-sm" data-toggle="modal" data-target="#mappingModal">
+                                <i class="fas fa-cog mr-2"></i> Setting Mapping Kelas
+                            </button>
+                        </div>
                     </div>
                     <div class="panel-container show">
                         <div class="panel-content">
-                            <div class="alert alert-info">
-                                Tabel ini menampilkan data ruangan dari sistem internal Anda dan status sinkronisasinya
-                                dengan server BPJS.
+                            <ul class="nav nav-tabs" role="tablist">
+                                <li class="nav-item">
+                                    <a class="nav-link active" data-toggle="tab" href="#tab_internal_rs" role="tab">
+                                        <i class="fal fa-hospital mr-1"></i> Data Internal RS (SIMRS)
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" data-toggle="tab" href="#tab_bpjs" role="tab">
+                                        <i class="fal fa-server mr-1"></i> Data di BPJS (Applicare)
+                                    </a>
+                                </li>
+                            </ul>
+                            <div class="tab-content border border-top-0 p-3">
+
+                                {{-- TAB KONTEN INTERNAL RS --}}
+                                <div class="tab-pane fade show active" id="tab_internal_rs" role="tabpanel">
+                                    <div class="table-responsive">
+                                        {{-- Struktur Thead disesuaikan dengan gambar --}}
+                                        <table id="dt-internal-rs"
+                                            class="table table-bordered table-hover table-striped w-100">
+                                            <thead class="bg-primary-600">
+                                                <tr>
+                                                    <th>No</th>
+                                                    <th>Aplicare</th>
+                                                    <th>Nama Kelas</th>
+                                                    <th>Kode Ruangan</th>
+                                                    <th>Nama Ruangan</th>
+                                                    <th>Total Bed</th>
+                                                    <th>Bed Terpakai</th>
+                                                    <th>Sisa Bed</th>
+                                                    <th>Mapping Ruangan</th>
+                                                    <th>Fungsi</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                {{-- TAB KONTEN BPJS --}}
+                                <div class="tab-pane fade" id="tab_bpjs" role="tabpanel">
+                                    <table id="dt-bpjs" class="table table-bordered table-hover table-striped w-100">
+                                        <thead class="bg-success-600">
+                                            <tr>
+                                                <th>No</th>
+                                                <th>Nama Ruang</th>
+                                                <th>Kode Ruang</th>
+                                                <th>Nama Kelas</th>
+                                                <th>Kode Kelas</th>
+                                                <th>Kapasitas</th>
+                                                <th>Tersedia</th>
+                                                <th>Tersedia (Pria)</th>
+                                                <th>Tersedia (Wanita)</th>
+                                                <th>Update Terakhir</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+                                </div>
+
                             </div>
-                            <!-- datatable start -->
-                            <table id="aplicares-table" class="table table-bordered table-hover table-striped w-100">
-                                <thead class="bg-primary-600">
-                                    <tr>
-                                        <th>No</th>
-                                        {{-- <th>Kode Aplicare</th> --}}
-                                        <th>Nama Kelas</th>
-                                        <th>Kode Ruangan</th>
-                                        <th>Nama Ruangan</th>
-                                        <th>Total</th>
-                                        <th>Terpakai</th>
-                                        <th>Sisa</th>
-                                        <th>Status Sinkronisasi</th> {{-- HEADER DIPERBARUI --}}
-                                        <th style="width: 100px;">Fungsi</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {{-- Data diisi oleh DataTables --}}
-                                </tbody>
-                            </table>
-                            <!-- datatable end -->
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="row mt-4">
-            <div class="col-xl-12">
-                <div id="panel-2" class="panel">
-                    <div class="panel-hdr">
-                        <h2>
-                            Data Ketersediaan Kamar <span class="fw-300"><i>di Server BPJS (Live)</i></span>
-                        </h2>
+        {{-- MODAL (Tambahkan input untuk urutan) --}}
+        <div class="modal fade" id="mappingModal" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Setting Mapping Kelas BPJS</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true"><i class="fal fa-times"></i></span>
+                        </button>
                     </div>
-                    <div class="panel-container show">
-                        <div class="panel-content">
-                            <div class="alert alert-info">
-                                Tabel ini menampilkan data ketersediaan kamar yang saat ini tercatat di server BPJS Aplicare
-                                secara real-time. Gunakan tabel ini sebagai perbandingan dengan data di atas.
-                            </div>
-                            <!-- datatable start -->
-                            <table id="aplicares-bpjs-table" class="table table-bordered table-hover table-striped w-100">
-                                <thead class="bg-success-600">
-                                    <tr>
-                                        <th>Kode Kelas</th>
-                                        <th>Nama Kelas</th>
-                                        <th>Kode Ruang</th>
-                                        <th>Nama Ruang</th>
-                                        <th>Kapasitas</th>
-                                        <th>Tersedia</th>
-                                        <th>Tersedia Pria</th>
-                                        <th>Tersedia Wanita</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {{-- Data akan diisi oleh DataTables dari API BPJS --}}
-                                </tbody>
-                            </table>
-                            <!-- datatable end -->
+                    <div class="modal-body">
+                        <div class="alert alert-info">
+                            Pilih kelas BPJS yang sesuai untuk setiap kelas rawat internal Anda.
+                            Perubahan akan berlaku untuk semua ruangan dengan kelas rawat yang sama.
                         </div>
+                        <form id="mappingForm">
+                            <div class="form-group">
+                                <label for="kelas_rawat_id">Pilih Kelas Rawat Internal (SIMRS)</label>
+                                <select class="form-control" id="kelas_rawat_id" name="kelas_rawat_id" required>
+                                    <option value="" disabled selected>-- Pilih Kelas Internal --</option>
+                                    @foreach ($kelasRawatInternal as $kelas)
+                                        <option value="{{ $kelas->id }}"
+                                            data-aplicare-code="{{ $kelas->aplicare_code }}">
+                                            {{ $kelas->kelas }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="aplicare_code">Set ke Kelas BPJS (Applicare)</label>
+                                <select class="form-control" id="aplicare_code" name="aplicare_code" required>
+                                    <option value="" disabled selected>-- Pilih Kelas BPJS --</option>
+                                    @foreach ($kelasBpjs as $kelas)
+                                        <option value="{{ $kelas['kodekelas'] }}">{{ $kelas['namakelas'] }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="aplicare_urutan">Nomor Urut Tampilan</label>
+                                <input type="number" class="form-control" id="aplicare_urutan" name="aplicare_urutan"
+                                    placeholder="Contoh: 1">
+                                <small class="form-text text-muted">Gunakan untuk mengurutkan grup kelas di tabel.</small>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                        <button type="button" class="btn btn-primary" id="saveMappingBtn">Simpan Mapping</button>
                     </div>
                 </div>
             </div>
         </div>
     </main>
-
-    {{-- MODAL UNTUK MAPPING --}}
-    <div class="modal fade" id="mappingModal" tabindex="-1" role="dialog" aria-labelledby="mappingModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="mappingModalLabel">Mapping Ruangan ke Kelas Aplicare</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <form id="mappingForm">
-                        {{-- Hidden input untuk menyimpan ID ruangan yang sedang di-mapping --}}
-                        <input type="hidden" id="mappingRoomId" name="room_id">
-
-                        <div class="form-group">
-                            <label for="roomName">Nama Ruangan</label>
-                            <input type="text" id="roomName" class="form-control" readonly>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="bpjsClassSelect">Pilih Kelas BPJS</label>
-                            <select class="form-control" id="bpjsClassSelect" name="kode_bpjs" required>
-                                <option value="" disabled selected>-- Pilih Kelas --</option>
-                                {{-- Pilihan kelas akan diisi dari controller --}}
-                                @if (isset($kelasBpjs) && !empty($kelasBpjs))
-                                    @foreach ($kelasBpjs as $kelas)
-                                        <option value="{{ $kelas['kodekelas'] }}">{{ $kelas['namakelas'] }}</option>
-                                    @endforeach
-                                @endif
-                            </select>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
-                    <button type="button" class="btn btn-primary" onclick="saveMapping()">Simpan Mapping</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
 @endsection
 
 @section('plugin')
-    {{-- Pastikan Anda sudah memuat SweetAlert2, biasanya ada di layout utama --}}
     <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
-    <script src="/js/datatable/jszip.min.js"></script>
-    <script src="/js/datagrid/datatables/datatables.export.js"></script>
-    {{-- Plugin lain yang mungkin Anda butuhkan --}}
-
     <script>
         $(document).ready(function() {
-            // Inisialisasi DataTables
-            var table = $('#aplicares-table').DataTable({
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+
+            // DataTable Internal RS dengan Grouping Kelas dan sorting aplicare_urutan
+            const dtInternal = $('#dt-internal-rs').DataTable({
                 processing: true,
                 serverSide: true,
+                responsive: true,
                 ajax: "{{ route('aplicares.data') }}",
+                // Urutkan default berdasarkan kolom urutan (hidden)
+                order: [
+                    [10, 'asc']
+                ],
                 columns: [{
                         data: 'DT_RowIndex',
                         name: 'DT_RowIndex',
                         orderable: false,
-                        searchable: false
+                        searchable: false,
+                        className: 'text-center'
                     },
-                    // {
-                    //     data: 'aplicare_code',
-                    //     name: 'kelas_rawat.kode_bpjs'
-                    // },
+                    {
+                        data: 'aplicare_code',
+                        name: 'kelas_rawat.aplicare_code',
+                        orderable: false
+                    },
                     {
                         data: 'class_name',
-                        name: 'kelas_rawat.nama_bpjs'
+                        name: 'kelas_rawat.kelas',
+                        orderable: false
                     },
                     {
-                        data: 'no_ruang',
-                        name: 'no_ruang'
+                        data: 'kode_ruang',
+                        name: 'no_ruang',
+                        orderable: false
                     },
                     {
                         data: 'ruangan',
-                        name: 'ruangan'
+                        name: 'ruangan',
+                        orderable: false
                     },
                     {
                         data: 'beds_count',
                         name: 'beds_count',
-                        searchable: false
+                        searchable: false,
+                        orderable: false,
+                        className: 'text-center'
                     },
                     {
                         data: 'beds_terpakai_count',
                         name: 'beds_terpakai_count',
-                        searchable: false
+                        searchable: false,
+                        orderable: false,
+                        className: 'text-center'
                     },
                     {
                         data: 'sisa_bed',
                         name: 'sisa_bed',
+                        searchable: false,
                         orderable: false,
-                        searchable: false
+                        className: 'text-center'
                     },
                     {
                         data: 'mapping_status',
                         name: 'mapping_status',
                         orderable: false,
-                        searchable: false
+                        searchable: false,
+                        className: 'text-center'
                     },
                     {
                         data: 'action',
                         name: 'action',
                         orderable: false,
+                        searchable: false,
+                        className: 'text-center'
+                    },
+                    // Kolom tersembunyi untuk sorting urutan
+                    {
+                        data: 'aplicare_urutan',
+                        name: 'kelas_rawat.aplicare_urutan',
+                        visible: false
+                    },
+                ],
+                paging: false,
+                info: false,
+                drawCallback: function(settings) {
+                    var api = this.api();
+                    var rows = api.rows({
+                        page: 'current'
+                    }).nodes();
+                    var last = null;
+
+                    // Indeks kolom untuk grouping
+                    var aplicareCodeIndex = 1;
+                    var classNameIndex = 2;
+
+                    api.column(classNameIndex, {
+                        page: 'current'
+                    }).data().each(function(group, i) {
+                        if (last !== group) {
+                            // Baris grup baru, tambahkan class group-start
+                            $(rows).eq(i).addClass('group-start');
+                            last = group;
+                        } else {
+                            // Baris dalam grup, kosongkan kolom agrupasi
+                            $(rows).eq(i).find('td').eq(aplicareCodeIndex).html('').addClass(
+                                'empty-cell');
+                            $(rows).eq(i).find('td').eq(classNameIndex).html('').addClass(
+                                'empty-cell');
+                        }
+                    });
+                }
+            });
+
+            // DataTable BPJS
+            const dtBpjs = $('#dt-bpjs').DataTable({
+                processing: true,
+                serverSide: true,
+                responsive: true,
+                paging: false,
+                info: false,
+                ajax: "{{ route('aplicares.bpjs-data') }}",
+                columns: [{
+                        data: null,
+                        render: (data, type, row, meta) => meta.row + 1,
+                        orderable: false,
                         searchable: false
                     },
-                ],
-                responsive: true,
-                dom: "<'row mb-3'<'col-sm-12 col-md-6 d-flex align-items-center justify-content-start'f><'col-sm-12 col-md-6 d-flex align-items-center justify-content-end'lB>>" +
-                    "<'row'<'col-sm-12'tr>>" +
-                    "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
-                buttons: [
-                    'copy', 'csv', 'excel', 'pdf', 'print'
+                    {
+                        data: 'namaruang',
+                        name: 'namaruang'
+                    },
+                    {
+                        data: 'koderuang',
+                        name: 'koderuang'
+                    },
+                    {
+                        data: 'namakelas',
+                        name: 'namakelas'
+                    },
+                    {
+                        data: 'kodekelas',
+                        name: 'kodekelas'
+                    },
+                    {
+                        data: 'kapasitas',
+                        name: 'kapasitas'
+                    },
+                    {
+                        data: 'tersedia',
+                        name: 'tersedia'
+                    },
+                    {
+                        data: 'tersediapria',
+                        name: 'tersediapria'
+                    },
+                    {
+                        data: 'tersediawanita',
+                        name: 'tersediawanita'
+                    },
+                    {
+                        data: 'lastupdate',
+                        name: 'lastupdate'
+                    }
                 ]
             });
 
-            // =================================================================
-            // TAMBAHKAN KODE INI UNTUK MENGINISIALISASI TABEL KEDUA
-            // =================================================================
-            var bpjsTable = $('#aplicares-bpjs-table').DataTable({
-                processing: true,
-                serverSide: false, // Karena kita mengambil semua data sekaligus
-                ajax: {
-                    url: "{{ route('aplicares.bpjs-data') }}",
-                    type: "GET",
-                    // Jika ada error dari server, tampilkan di body tabel
+            // -- Modal Handling Mapping Kelas BPJS
+            $('#kelas_rawat_id').on('change', function() {
+                const selectedOption = $(this).find('option:selected');
+                const aplicareCode = selectedOption.data('aplicare-code');
+                $('#aplicare_code').val(aplicareCode || '');
+            });
+
+            $('#saveMappingBtn').on('click', function() {
+                const kelasRawatId = $('#kelas_rawat_id').val();
+                const aplicareCode = $('#aplicare_code').val();
+                const aplicareName = $('#aplicare_code option:selected').text();
+                const aplicareUrutan = $('#aplicare_urutan').val();
+
+                if (!kelasRawatId || !aplicareCode) {
+                    showErrorAlertNoRefresh('Harap lengkapi semua pilihan.');
+                    return;
+                }
+
+                $.ajax({
+                    url: "{{ route('aplicares.save-kelas-mapping') }}",
+                    type: 'POST',
+                    data: {
+                        kelas_rawat_id: kelasRawatId,
+                        aplicare_code: aplicareCode,
+                        aplicare_name: aplicareName,
+                        aplicare_urutan: aplicareUrutan
+                    },
+                    success: function(response) {
+                        showSuccessAlert(response.message);
+                        $('#mappingModal').modal('hide');
+                        location.reload();
+                    },
                     error: function(xhr) {
-                        let errorMsg = 'Gagal memuat data. Periksa koneksi atau kredensial Anda.';
-                        if (xhr.responseJSON && xhr.responseJSON.error) {
-                            errorMsg = xhr.responseJSON.error;
-                        }
-                        $("#aplicares-bpjs-table tbody").html(
-                            '<tr><td colspan="8" class="text-center text-danger">' + errorMsg +
-                            '</td></tr>'
-                        );
+                        showErrorAlert(xhr.responseJSON.message || 'Terjadi kesalahan.');
                     }
-                },
-                columns: [
-                    // Sesuaikan 'data' dengan nama kunci dari JSON response BPJS
-                    {
-                        data: 'kodekelas'
-                    },
-                    {
-                        data: 'namakelas'
-                    },
-                    {
-                        data: 'koderuang'
-                    },
-                    {
-                        data: 'namaruang'
-                    },
-                    {
-                        data: 'kapasitas'
-                    },
-                    {
-                        data: 'tersedia'
-                    },
-                    {
-                        data: 'tersediapria'
-                    },
-                    {
-                        data: 'tersediawanita'
-                    }
-                ],
-                responsive: true,
-                dom: "<'row mb-3'<'col-sm-12 col-md-6 d-flex align-items-center justify-content-start'f><'col-sm-12 col-md-6 d-flex align-items-center justify-content-end'lB>>" +
-                    "<'row'<'col-sm-12'tr>>" +
-                    "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
-                buttons: [
-                    'copy', 'csv', 'excel', 'pdf', 'print'
-                ]
+                });
             });
 
-        });
+            // Toggle mapping
+            window.toggleMapping = function(roomId, activate) {
+                const actionText = activate ? 'mengaktifkan' : 'menonaktifkan';
+                const url = `{{ url('bpjs/aplicares/toggle-mapping') }}/${roomId}`;
 
-        // =========================================================================
-        // HELPER FUNCTIONS UNTUK NOTIFIKASI (MENGGUNAKAN SWEETALERT2)
-        // =========================================================================
-        function showSuccessAlert(message) {
-            Swal.fire({
-                title: 'Berhasil!',
-                text: message,
-                icon: 'success',
-                confirmButtonText: 'OK'
-            });
-        }
-
-        function showErrorAlert(message) {
-            Swal.fire({
-                title: 'Gagal!',
-                text: message,
-                icon: 'error',
-                confirmButtonText: 'Tutup'
-            });
-        }
-
-        function showDeleteConfirmation(callback) {
-            Swal.fire({
-                title: 'Anda yakin ingin menghapus?',
-                text: "Ruangan ini akan dihapus dari server BPJS. Aksi ini tidak bisa dibatalkan.",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
-                confirmButtonText: 'Ya, Hapus!',
-                cancelButtonText: 'Batal'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    callback(); // Jalankan fungsi AJAX jika dikonfirmasi
-                }
-            });
-        }
-
-
-        // =========================================================================
-        // FUNGSI UTAMA UNTUK MEMANGGIL API APLICARES
-        // =========================================================================
-        function callAplicareApi(url, method, successMessage, errorMessage) {
-            Swal.fire({
-                title: 'Mohon Tunggu...',
-                text: 'Sedang memproses permintaan ke server BPJS.',
-                allowOutsideClick: false,
-                didOpen: () => {
-                    Swal.showLoading();
-                }
-            });
-
-            // Gunakan Fetch API modern
-            fetch(url, {
-                    method: method,
-                    headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}', // CSRF Token dari Blade
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
-                    }
-                })
-                .then(response => {
-                    // Cek jika response dari server tidak OK (e.g., error 500, 422)
-                    if (!response.ok) {
-                        // Coba ambil pesan error dari JSON response
-                        return response.json().then(errorData => {
-                            throw new Error(errorData.message || 'Terjadi kesalahan server.');
+                Swal.fire({
+                    title: `Anda yakin ingin ${actionText} ruangan ini?`,
+                    text: activate ? "Data ruangan akan dikirimkan ke server BPJS." :
+                        "Ruangan tidak akan terkirim lagi ke BPJS.",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: `Ya, ${actionText}!`,
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: url,
+                            type: 'POST',
+                            data: {
+                                activate: activate
+                            },
+                            success: function(response) {
+                                showSuccessAlert(response.message);
+                                dtInternal.ajax.reload();
+                                dtBpjs.ajax.reload();
+                            },
+                            error: function(xhr) {
+                                showErrorAlertNoRefresh(xhr.responseJSON.message ||
+                                    'Terjadi kesalahan.');
+                            }
                         });
                     }
-                    return response.json();
-                })
-                .then(data => {
-                    Swal.close();
-                    if (data.success) {
-                        showSuccessAlert(data.message || successMessage);
-                        $('#aplicares-table').DataTable().ajax.reload(null, false); // Reload tabel tanpa reset paging
-                    } else {
-                        showErrorAlert(data.message || errorMessage);
-                    }
-                })
-                .catch(error => {
-                    console.log('AJAX Error:', error);
-                    showErrorAlert(error.message || errorMessage);
                 });
-        }
-
-        function updateRoom(roomId) {
-            let url = `{{ route('aplicares.update', ['roomId' => ':id']) }}`.replace(':id', roomId);
-            callAplicareApi(url, 'POST', 'Ruangan berhasil diupdate.', 'Gagal mengupdate ruangan di Aplicares!');
-        }
-
-        function insertRoom(roomId) {
-            let url = `{{ route('aplicares.insert', ['roomId' => ':id']) }}`.replace(':id', roomId);
-            callAplicareApi(url, 'POST', 'Ruangan berhasil ditambahkan.', 'Gagal menambahkan ruangan di Aplicares!');
-        }
-
-        function deleteRoom(roomId) {
-            showDeleteConfirmation(function() {
-                let url = `{{ route('aplicares.delete', ['roomId' => ':id']) }}`.replace(':id', roomId);
-                callAplicareApi(url, 'DELETE', 'Ruangan berhasil dihapus.',
-                    'Gagal menghapus ruangan di Aplicares!');
-            });
-        }
-
-        // Ganti fungsi openMappingModal yang lama dengan ini
-        function openMappingModal(roomId) {
-            // Ambil data dari baris tabel untuk ditampilkan di modal
-            let rowData = $('#aplicares-table').DataTable().rows().data().toArray().find(row => row.id == roomId);
-            if (rowData) {
-                $('#mappingRoomId').val(roomId);
-                $('#roomName').val(rowData.ruangan); // Tampilkan nama ruangan
-
-                // Reset pilihan select
-                $('#bpjsClassSelect').val('');
-
-                $('#mappingModal').modal('show');
-            }
-        }
-
-        // Tambahkan fungsi baru ini untuk menyimpan
-        function saveMapping() {
-            const roomId = $('#mappingRoomId').val();
-            const kodeBpjs = $('#bpjsClassSelect').val();
-
-            if (!kodeBpjs) {
-                alert('Silakan pilih kelas BPJS terlebih dahulu.');
-                return;
             }
 
-            let url = `{{ route('aplicares.save-mapping', ['roomId' => ':id']) }}`.replace(':id', roomId);
-            let data = {
-                kode_bpjs: kodeBpjs
-            };
-
-            // Tampilkan notifikasi loading
-            Swal.fire({
-                title: 'Menyimpan...',
-                allowOutsideClick: false,
-                didOpen: () => {
-                    Swal.showLoading();
-                }
-            });
-
-            fetch(url, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(data)
-                })
-                .then(response => response.json())
-                .then(result => {
-                    if (result.success) {
-                        $('#mappingModal').modal('hide');
-                        Swal.fire('Berhasil!', result.message, 'success');
-                        $('#aplicares-table').DataTable().ajax.reload(null, false);
-                    } else {
-                        Swal.fire('Gagal!', result.message, 'error');
+            // Update room
+            window.updateRoom = function(id) {
+                const url = `{{ url('bpjs/aplicares/update') }}/${id}`;
+                Swal.fire({
+                    title: 'Perbarui Ketersediaan?',
+                    text: 'Data ketersediaan ruangan akan diperbarui di BPJS.',
+                    icon: 'info',
+                    showCancelButton: true,
+                    confirmButtonText: 'Ya, perbarui',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: url,
+                            type: 'POST',
+                            success: function(response) {
+                                showSuccessAlert(response.message);
+                                dtInternal.ajax.reload();
+                                dtBpjs.ajax.reload();
+                            },
+                            error: function(xhr) {
+                                showErrorAlertNoRefresh(xhr.responseJSON.message ||
+                                    'Terjadi kesalahan.');
+                            }
+                        });
                     }
-                })
-                .catch(error => {
-                    console.log('Error:', error);
-                    Swal.fire('Error!', 'Tidak dapat menyimpan mapping.', 'error');
                 });
-        }
+            }
+
+            // Delete room
+            window.deleteRoom = function(id) {
+                const url = `{{ url('bpjs/aplicares/delete') }}/${id}`;
+                Swal.fire({
+                    title: 'Hapus Ruangan dari Aplicare?',
+                    text: "Ruangan ini akan dihapus dari sistem BPJS.",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Ya, hapus!',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: url,
+                            type: 'POST',
+                            success: function(response) {
+                                showSuccessAlert(response.message);
+                                dtInternal.ajax.reload();
+                                dtBpjs.ajax.reload();
+                            },
+                            error: function(xhr) {
+                                showErrorAlertNoRefresh(xhr.responseJSON.message ||
+                                    'Terjadi kesalahan.');
+                            }
+                        });
+                    }
+                });
+            }
+        });
     </script>
 @endsection

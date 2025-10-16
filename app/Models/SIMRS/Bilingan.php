@@ -117,29 +117,45 @@ class Bilingan extends Model implements AuditableContract
 
     protected static function booted()
     {
-        static::updated(function (Bilingan $bilingan) {
-            // Jalankan hanya jika kolom 'status' diubah menjadi 'final'
-            if ($bilingan->isDirty('status') && strtolower($bilingan->status) === 'final') {
-                \Log::info('Processing final bilingan.', ['id' => $bilingan->id]);
+        // Fungsi ini akan dieksekusi saat model dibuat atau diperbarui.
+        $createJasaDokterOnFinal = function (Bilingan $bilingan) {
+            // Cek apakah statusnya benar-benar 'final'
+            if (strtolower($bilingan->status) !== 'final') {
+                return; // Jika bukan final, hentikan proses
+            }
 
-                $tagihanPasienItems = $bilingan->tagihanPasien()
-                    ->where('tagihan', 'NOT LIKE', 'Biaya Administrasi%')
-                    ->get();
+            Log::info('Processing final bilingan for Jasa Dokter creation.', ['bilingan_id' => $bilingan->id]);
 
-                \Log::info('Found tagihan items to process for Jasa Dokter.', ['count' => $tagihanPasienItems->count()]);
+            $tagihanPasienItems = $bilingan->tagihanPasien()
+                // Filter penting untuk mencegah "Biaya Administrasi"
+                ->where('tagihan', 'NOT LIKE', 'Biaya Administrasi%')
+                ->get();
 
-                foreach ($tagihanPasienItems as $tagihan) {
-                    // Cek untuk menghindari duplikasi
-                    if (!$tagihan->jasaDokter()->exists()) {
-                        $bilingan->createJasaDokter($tagihan);
-                    } else {
-                        \Log::warning('Jasa dokter already exists for this tagihan, skipping.', ['tagihan_id' => $tagihan->id]);
-                    }
+            Log::info('Found tagihan items to process for Jasa Dokter.', ['count' => $tagihanPasienItems->count()]);
+
+            foreach ($tagihanPasienItems as $tagihan) {
+                // Cek untuk menghindari duplikasi
+                if (!$tagihan->jasaDokter()->exists()) {
+                    // Panggil method yang ada di model Bilingan untuk membuat JasaDokter
+                    $bilingan->createJasaDokter($tagihan);
+                    Log::info('Jasa dokter created for tagihan.', ['tagihan_id' => $tagihan->id]);
+                } else {
+                    Log::warning('Jasa dokter already exists for this tagihan, skipping.', ['tagihan_id' => $tagihan->id]);
                 }
+            }
+        };
+
+        // Jalankan saat Bilingan BARU DIBUAT (jika langsung statusnya 'final')
+        static::created($createJasaDokterOnFinal);
+
+        // Jalankan saat Bilingan DIUPDATE (jika statusnya diubah menjadi 'final')
+        static::updated(function (Bilingan $bilingan) use ($createJasaDokterOnFinal) {
+            // Hanya jalankan jika kolom 'status' yang berubah
+            if ($bilingan->isDirty('status')) {
+                $createJasaDokterOnFinal($bilingan);
             }
         });
     }
-
     //======================================================================
     // PUBLIC & PROTECTED METHODS (Fungsi Bantuan)
     //======================================================================

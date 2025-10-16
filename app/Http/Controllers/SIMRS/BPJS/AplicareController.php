@@ -3,40 +3,92 @@
 namespace App\Http\Controllers\SIMRS\BPJS;
 
 use App\Http\Controllers\Controller;
-use App\Models\SIMRS\KelasRawat;
 use App\Models\SIMRS\Room;
+use App\Models\SIMRS\KelasRawat;
 use App\Services\BPJS\ApplicareService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 use Yajra\DataTables\Facades\DataTables;
 
 class AplicareController extends Controller
 {
     protected $applicareService;
 
-    // 2. Inject Service melalui constructor agar siap digunakan
     public function __construct(ApplicareService $applicareService)
     {
         $this->applicareService = $applicareService;
     }
 
-    /**
-     * Menampilkan halaman utama Bridging Aplicares.
-     */
     public function index()
     {
         $response = $this->applicareService->getReferensiKamar();
         $kelasBpjs = [];
-        // Perbaikan: Tambahkan pengecekan `is_null` agar tidak error jika koneksi gagal
         if (!is_null($response) && isset($response['metadata']['code']) && $response['metadata']['code'] == 1) {
             $kelasBpjs = $response['response']['list'];
         }
+        $kelasRawatInternal = KelasRawat::orderBy('aplicare_urutan')->get();
+        // dd($kelasRawatInternal);
+        return view('app-type.simrs.bpjs.aplicares.index', compact('kelasBpjs', 'kelasRawatInternal'));
+    }
 
-        return view('app-type.simrs.bpjs.aplicares.index', compact('kelasBpjs'));
+    public function getData(Request $request)
+    {
+        if ($request->ajax()) {
+            $data = Room::with(['kelas_rawat'])
+                ->withCount('beds')
+                ->withCount(['beds as beds_terpakai_count' => function ($query) {
+                    $query->whereNotNull('patient_id');
+                }]);
+            // Hapus join/order, sorting client-side
+
+            return DataTables::of($data)
+                ->addIndexColumn()
+                // Tambahkan aplicare_code ke data yang dikirim, kita akan membutuhkannya di JS
+                ->addColumn('aplicare_code', fn($row) => $row->kelas_rawat->aplicare_code ?? null)
+                ->addColumn('class_name', fn($row) => $row->kelas_rawat->kelas ?? '<span class="text-danger">Belum Set</span>')
+                // Kirim urutan untuk sorting di JS (jika tidak ada, kasih angka tinggi agar di akhir)
+                ->addColumn('aplicare_urutan', fn($row) => $row->kelas_rawat->aplicare_urutan ?? 999)
+                ->addColumn('kode_ruang', fn($row) => $row->no_ruang)
+                ->addColumn('sisa_bed', fn($row) => $row->beds_count - $row->beds_terpakai_count)
+                ->addColumn('mapping_status', function ($row) {
+                    if ($row->aplicare_mapping) {
+                        return '<span class="badge badge-success">Sudah di Mapping</span>';
+                    }
+                    return '<span class="badge badge-warning">Belum di Mapping</span>';
+                })
+                ->addColumn('action', function ($row) {
+                    $btn = '<div class="d-flex justify-content-center">';
+
+                    if ($row->kelas_rawat && $row->kelas_rawat->aplicare_code) {
+                        if ($row->aplicare_mapping) {
+                            // Biru: mapping (cog), Hijau: sync, Merah: hapus
+                            $btn .= '<button onclick="openMappingModal(' . $row->id . ', ' . $row->kelas_rawat_id . ')" class="btn btn-icon btn-info btn-xs" title="Setting Mapping Kelas"><i class="fas fa-cog"></i></button> ';
+                            $btn .= '<button onclick="updateRoom(' . $row->id . ')" class="btn btn-icon btn-success btn-xs" title="Update Ketersediaan"><i class="fas fa-sync-alt"></i></button> ';
+                            $btn .= '<button onclick="deleteRoom(' . $row->id . ')" class="btn btn-icon btn-danger btn-xs" title="Hapus dari Aplicare"><i class="fas fa-trash-alt"></i></button>';
+                        } else {
+                            // Jika tidak aktif: mapping dan aktifkan
+                            $btn .= '<button onclick="openMappingModal(' . $row->id . ', ' . $row->kelas_rawat_id . ')" class="btn btn-icon btn-info btn-xs" title="Setting Mapping Kelas"><i class="fas fa-cog"></i></button> ';
+                            $btn .= '<button onclick="toggleMapping(' . $row->id . ', true)" class="btn btn-icon btn-primary btn-xs" title="Aktifkan & Kirim ke Aplicare"><i class="fas fa-toggle-on"></i></button> ';
+                        }
+                    } else {
+                        // Jika belum ada aplicare_code, hanya tampilkan tombol mapping jika kelas_rawat sudah ada
+                        if ($row->kelas_rawat) {
+                            $btn .= '<button onclick="openMappingModal(' . $row->id . ', ' . $row->kelas_rawat_id . ')" class="btn btn-icon btn-info btn-xs" title="Setting Mapping Kelas"><i class="fas fa-cog"></i></button> ';
+                        } else {
+                            $btn .= '<span class="text-muted fs-xs">Set Kelas Rawat</span>';
+                        }
+                    }
+                    $btn .= '</div>';
+                    return $btn;
+                })
+                ->rawColumns(['action', 'mapping_status', 'class_name'])
+                ->make(true);
+        }
     }
 
     public function getDataFromBpjs(Request $request)
     {
-        // Ambil data dari BPJS, ambil semua data (misal, sampai 1000 kamar)
         $response = $this->applicareService->getKetersediaanKamar(1, 1000);
 
         $dataForDatatables = [
@@ -46,81 +98,27 @@ class AplicareController extends Controller
             'data' => [],
         ];
 
-        // Cek jika response sukses dan ada datanya
-        if (isset($response['metadata']['code']) && $response['metadata']['code'] == 1 && !empty($response['response']['list'])) {
+        if (!is_null($response) && isset($response['metadata']['code']) && $response['metadata']['code'] == 1 && !empty($response['response']['list'])) {
             $bpjsData = $response['response']['list'];
-
-            // Format data agar sesuai dengan yang diharapkan DataTables
             $dataForDatatables['data'] = $bpjsData;
             $dataForDatatables['recordsTotal'] = count($bpjsData);
             $dataForDatatables['recordsFiltered'] = count($bpjsData);
         } else {
-            // Jika gagal, kirim pesan error (opsional)
             $dataForDatatables['error'] = $response['metadata']['message'] ?? 'Gagal mengambil data dari server BPJS.';
         }
 
         return response()->json($dataForDatatables);
     }
 
-    /**
-     * Menyediakan data ruangan untuk DataTables.
-     */
-    public function getData(Request $request)
-    {
-        if ($request->ajax()) {
-            $data = Room::with(['kelas_rawat'])
-                ->withCount('beds')
-                ->withCount(['beds as beds_terpakai_count' => function ($query) {
-                    $query->whereNotNull('patient_id');
-                }]);
-
-            return DataTables::of($data)
-                ->addIndexColumn()
-                // Perbaikan 1: Tampilkan data mapping BPJS, bukan data internal
-                // ->addColumn('aplicare_code', fn($row) => $row->kelas_rawat->kode_bpjs ?? '')
-                ->addColumn('class_name', fn($row) => $row->kelas_rawat->kelas ?? '') // Menggunakan nama_bpjs
-                ->addColumn('kode_ruang', fn($row) => $row->no_ruang ?? $row->kode_ruang)
-                ->addColumn('sisa_bed', fn($row) => $row->beds_count - $row->beds_terpakai_count)
-                ->addColumn('mapping_status', function ($row) {
-                    return isset($row->kelas_rawat->kode_bpjs)
-                        ? '<span class="badge badge-success">Sudah di Mapping</span>'
-                        : '<span class="badge badge-warning">Belum di Mapping</span>';
-                })
-                ->addColumn('action', function ($row) {
-                    // ... (tidak ada perubahan di logika action) ...
-                    $btn = '<div class="d-flex justify-content-around">';
-                    if (!isset($row->kelas_rawat->kode_bpjs)) {
-                        $btn .= '<button onclick="openMappingModal(' . $row->id . ')" class="btn btn-icon btn-info btn-xs" title="Mapping Kode Kelas Aplicare"><i class="fas fa-cog"></i></button> ';
-                    } else { // Jika sudah di-mapping, tampilkan tombol aksi
-                        $btn .= '<button onclick="updateRoom(' . $row->id . ')" class="btn btn-icon btn-primary btn-xs" title="Update Ruangan"><i class="fas fa-sync-alt"></i></button> ';
-                        $btn .= '<button onclick="insertRoom(' . $row->id . ')" class="btn btn-icon btn-success btn-xs" title="Insert Ruangan"><i class="fas fa-upload"></i></button> ';
-                        $btn .= '<button onclick="deleteRoom(' . $row->id . ')" class="btn btn-icon btn-danger btn-xs" title="Hapus Ruangan"><i class="fas fa-trash-alt"></i></button>';
-                    }
-                    $btn .= '</div>';
-                    return $btn;
-                })
-                ->rawColumns(['action', 'mapping_status'])
-                ->make(true);
-        }
-    }
-
-    /* ================================================================== */
-    /*               IMPLEMENTASI FUNGSI API APLICARES                      */
-    /* ================================================================== */
-
-    /**
-     * Helper function untuk menyiapkan data payload.
-     */
     private function preparePayload(Room $room): array
     {
-        // Gunakan data dari `withCount` yang sudah di-load sebelumnya, JANGAN query ulang.
         $kapasitas = $room->beds_count;
         $terisi = $room->beds_terpakai_count;
         $tersedia = $kapasitas - $terisi;
 
         return [
-            "kodekelas"         => $room->kelas_rawat->kode_bpjs,
-            "koderuang"         => $room->kode_ruang ?? $room->no_ruang,
+            "kodekelas"         => $room->kelas_rawat->aplicare_code,
+            "koderuang"         => $room->no_ruang,
             "namaruang"         => $room->ruangan,
             "kapasitas"         => (string) $kapasitas,
             "tersedia"          => (string) $tersedia,
@@ -130,100 +128,149 @@ class AplicareController extends Controller
         ];
     }
 
-    public function updateRoom(Request $request, $roomId)
+    /**
+     * Ambil data ruangan BPJS (dari server BPJS) berdasarkan roomId lokal.
+     *
+     * @param int|string $roomId
+     * @param bool $checkActive
+     * @return array
+     * @throws \Illuminate\Validation\ValidationException
+     */
+    private function getMappedRoomOrFail($roomId, $checkActive = true): array
     {
+        // Ambil ruangan lokal, validasi mapping + kelas rawat
         $room = Room::with('kelas_rawat')->withCount('beds', 'beds as beds_terpakai_count')->findOrFail($roomId);
 
-        // Validasi: Pastikan ruangan sudah di-mapping
-        if (!$room->kelas_rawat || !$room->kelas_rawat->kode_bpjs) {
-            return response()->json(['success' => false, 'message' => 'Gagal: Ruangan ini belum di-mapping ke kelas BPJS.'], 422);
+        if ($checkActive && !$room->aplicare_mapping) {
+            throw ValidationException::withMessages(['message' => 'Gagal: Ruangan ini tidak aktif di Aplicare.']);
+        }
+        if (!$room->kelas_rawat) {
+            throw ValidationException::withMessages(['message' => 'Gagal: Ruangan ini belum memiliki kelas rawat.']);
+        }
+        if (!$room->kelas_rawat->aplicare_code) {
+            throw ValidationException::withMessages(['message' => 'Gagal: Kelas rawat untuk ruangan ini belum di-mapping ke kode BPJS. Buka menu "Setting Mapping Kelas".']);
         }
 
-        $payload = $this->preparePayload($room);
-        $response = $this->applicareService->updateKetersediaanBed($payload);
+        // Ambil data ruangan yang sudah mengacu pada BPJS (applicare) dari BPJS - bed/read
+        // Matching by kodekelas dan koderuang
+        $kodekelas = $room->kelas_rawat->aplicare_code;
+        $namakelas = $room->kelas_rawat->kelas;
 
-        if (isset($response['metadata']['code']) && $response['metadata']['code'] == 1) {
-            return response()->json(['success' => true, 'message' => 'Ruangan ' . $room->ruangan . ' berhasil diupdate di Aplicares.']);
+        $bpjs = $this->applicareService->getKetersediaanKamar(1, 1000);
+        $bpjsData = $bpjs['response']['list'] ?? [];
+
+
+        // Data di BPJS ditemukan? Ambil entri-nya (matching kodekelas & koderuang)
+        $found = collect($bpjsData)->first(function ($item) use ($kodekelas, $namakelas) {
+            return
+                isset($item['kodekelas'], $item['namakelas']) &&
+                (string)$item['kodekelas'] === (string)$kodekelas &&
+                (string)$item['namakelas'] === (string)$namakelas;
+        });
+        dd($found);
+
+        if (!$found) {
+            throw ValidationException::withMessages(['message' => 'Data ruangan ini belum terdaftar di BPJS (Aplicare).']);
         }
 
-        $errorMessage = $response['metadata']['message'] ?? 'Terjadi kesalahan dari server BPJS.';
-        return response()->json(['success' => false, 'message' => 'Update Gagal: ' . $errorMessage], 500);
+        return $found;
     }
 
-    public function insertRoom(Request $request, $roomId)
+    public function toggleMapping(Request $request, $roomId)
     {
-        $room = Room::with('kelas_rawat')->withCount('beds', 'beds as beds_terpakai_count')->findOrFail($roomId);
+        $activate = filter_var($request->input('activate'), FILTER_VALIDATE_BOOLEAN);
 
-        if (!$room->kelas_rawat || !$room->kelas_rawat->kode_bpjs) {
-            return response()->json(['success' => false, 'message' => 'Gagal: Ruangan ini belum di-mapping ke kelas BPJS.'], 422);
+        try {
+            $room = $this->getMappedRoomOrFail($roomId, false);
+
+            if ($activate) {
+                $payload = $this->preparePayload($room);
+                $response = $this->applicareService->createRuangan($payload);
+
+                $errorMessage = $response['metadata']['message'] ?? 'Terjadi kesalahan dari server BPJS.';
+                if (isset($response['metadata']['code']) && $response['metadata']['code'] == 1) {
+                    $room->update(['aplicare_mapping' => true]);
+                    return response()->json(['success' => true, 'message' => 'Ruangan berhasil diaktifkan dan ditambahkan ke Aplicares.']);
+                }
+                if (str_contains(strtolower($errorMessage), 'sudah tersedia')) {
+                    $room->update(['aplicare_mapping' => true]);
+                    return response()->json(['success' => true, 'message' => 'Ruangan sudah terdaftar di BPJS. Flag aktivasi di SIMRS diupdate.']);
+                }
+                return response()->json(['success' => false, 'message' => 'Aktivasi Gagal: ' . $errorMessage], 500);
+            } else {
+                $room->update(['aplicare_mapping' => false]);
+                return response()->json(['success' => true, 'message' => 'Ruangan berhasil dinonaktifkan dari Aplicare.']);
+            }
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], $e instanceof ValidationException ? 422 : 500);
         }
-
-        $payload = $this->preparePayload($room);
-        $response = $this->applicareService->createRuangan($payload);
-
-        if (isset($response['metadata']['code']) && $response['metadata']['code'] == 1) {
-            return response()->json(['success' => true, 'message' => 'Ruangan ' . $room->ruangan . ' berhasil ditambahkan ke Aplicares.']);
-        }
-
-        $errorMessage = $response['metadata']['message'] ?? 'Terjadi kesalahan dari server BPJS.';
-        return response()->json(['success' => false, 'message' => 'Insert Gagal: ' . $errorMessage], 500);
     }
 
-    public function deleteRoom(Request $request, $roomId)
+    public function updateRoom($roomId)
     {
-        $room = Room::with('kelas_rawat')->findOrFail($roomId);
+        try {
+            $room = $this->getMappedRoomOrFail($roomId);
+            $payload = $this->preparePayload($room);
+            dd($payload);
+            $response = $this->applicareService->updateKetersediaanBed($payload);
 
-        if (!$room->kelas_rawat || !$room->kelas_rawat->kode_bpjs) {
-            return response()->json(['success' => false, 'message' => 'Gagal: Ruangan ini belum di-mapping ke kelas BPJS.'], 422);
+            dd($response);
+
+            \Log::info('Aplicare updateRoom request', [
+                'room_id' => $roomId,
+                'payload' => $payload,
+                'response' => $response,
+            ]);
+
+            if (isset($response['metadata']['code']) && $response['metadata']['code'] == 1) {
+                return response()->json(['success' => true, 'message' => 'Ketersediaan berhasil diupdate.']);
+            }
+            return response()->json(['success' => false, 'message' => 'Update Gagal: ' . ($response['metadata']['message'] ?? 'Error BPJS')], 500);
+        } catch (\Exception $e) {
+            \Log::error('Aplicare updateRoom error', [
+                'room_id' => $roomId,
+                'exception' => $e,
+            ]);
+            return response()->json(['success' => false, 'message' => $e->getMessage()], $e instanceof ValidationException ? 422 : 500);
         }
-
-        $kodeKelas = $room->kelas_rawat->kode_bpjs;
-        $kodeRuang = $room->kode_ruang; // Asumsi ada kolom 'kode_ruang'
-
-        $response = $this->applicareService->deleteRuangan($kodeKelas, $kodeRuang);
-
-        if (isset($response['metadata']['code']) && $response['metadata']['code'] == 1) {
-            return response()->json(['success' => true, 'message' => 'Ruangan ' . $room->ruangan . ' berhasil dihapus dari Aplicares.']);
-        }
-
-        $errorMessage = $response['metadata']['message'] ?? 'Terjadi kesalahan dari server BPJS.';
-        return response()->json(['success' => false, 'message' => 'Delete Gagal: ' . $errorMessage], 500);
     }
 
-    public function saveMapping(Request $request, $roomId)
+    public function deleteRoom($roomId)
+    {
+        try {
+            $room = $this->getMappedRoomOrFail($roomId);
+            $response = $this->applicareService->deleteRuangan($room->kelas_rawat->aplicare_code, $room->no_ruang);
+
+            $room->update(['aplicare_mapping' => false]);
+
+            if (isset($response['metadata']['code']) && $response['metadata']['code'] == 1) {
+                return response()->json(['success' => true, 'message' => 'Ruangan berhasil dihapus dari BPJS dan dinonaktifkan.']);
+            }
+            $errorMessage = $response['metadata']['message'] ?? 'Error dari BPJS.';
+            if (str_contains(strtolower($errorMessage), 'tidak ditemukan')) {
+                return response()->json(['success' => true, 'message' => 'Ruangan tidak ditemukan di BPJS. Flag dinonaktifkan di SIMRS.']);
+            }
+            return response()->json(['success' => false, 'message' => 'Delete Gagal: ' . $errorMessage], 500);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], $e instanceof ValidationException ? 422 : 500);
+        }
+    }
+
+    public function saveKelasMapping(Request $request)
     {
         $request->validate([
-            'kode_bpjs' => 'required|string',
+            'kelas_rawat_id' => 'required|exists:kelas_rawat,id',
+            'aplicare_code' => 'required|string',
+            'aplicare_name' => 'required|string',
         ]);
 
         try {
-            $room = Room::findOrFail($roomId);
-            $kelasBpjs = KelasRawat::where('kode_bpjs', $request->kode_bpjs)->first();
-
-            if (!$kelasBpjs) {
-                // Jika kelas belum ada di database Anda, buat baru.
-                // Anda mungkin perlu menyesuaikan ini jika nama kolomnya berbeda.
-                $refKelas = $this->applicareService->getReferensiKamar();
-                $namaKelas = '';
-                foreach ($refKelas['response']['list'] as $ref) {
-                    if ($ref['kodekelas'] == $request->kode_bpjs) {
-                        $namaKelas = $ref['namakelas'];
-                        break;
-                    }
-                }
-
-                $kelasBpjs = KelasRawat::create([
-                    'kode_bpjs' => $request->kode_bpjs,
-                    'nama_bpjs' => $namaKelas,
-                    // isi kolom lain yang mungkin wajib diisi
-                ]);
-            }
-
-            // Hubungkan Room dengan KelasRawat
-            $room->kelas_rawat_id = $kelasBpjs->id;
-            $room->save();
-
-            return response()->json(['success' => true, 'message' => 'Mapping berhasil disimpan.']);
+            $kelasRawat = KelasRawat::findOrFail($request->kelas_rawat_id);
+            $kelasRawat->update([
+                'aplicare_code' => $request->aplicare_code,
+                'aplicare_name' => $request->aplicare_name,
+            ]);
+            return response()->json(['success' => true, 'message' => 'Mapping untuk kelas ' . $kelasRawat->kelas . ' berhasil disimpan.']);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => 'Terjadi kesalahan: ' . $e->getMessage()], 500);
         }

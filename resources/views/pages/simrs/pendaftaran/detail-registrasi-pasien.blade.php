@@ -242,10 +242,10 @@
                         <ul id="menu_layanan_pasien" class="dropdown-menu pull-right menu-card-styling w-25"
                             role="menu" style="text-align: left;">
                             <li class="p-2">
-                                <a href="javascript:void(0);" data-toggle="modal" data-target="#rujuk-ranap-poli"
-                                    class="nextRegis">
+                                <a href="{{ route('detail.pendaftaran.pasien', ['patient' => $patient->id, 'nextRegis' => 1]) }}"
+                                    target="_blank" class="nextRegis" style="display: flex; align-items: center;">
                                     <i class="fa fa-circle-o fa-fw pink-text text-accent-2"></i>
-                                    Rujuk Rawat Inap / Poli Lain
+                                    <span class="ml-2">Rujuk Rawat Inap / Poli Lain</span>
                                 </a>
                             </li>
                             @if ($registration->status == 'aktif')
@@ -493,6 +493,16 @@
                 $('#' + currentPanelId).fadeOut(500, function() {
                     $('#menu-layanan').fadeIn(500);
                 });
+            });
+
+            // Event: Navigasi ke halaman patient show
+            $('#rujuk-ranap-poli').on('click', function(e) {
+                e.preventDefault();
+                var patientId = $(this).data('id') || '{{ $patient->id }}';
+                // Ganti 'patient.show' dengan nama rute yang tepat jika berbeda
+                var url = '{{ route('detail.pendaftaran.pasien', ['patient' => ':id']) }}'.replace(':id',
+                    patientId);
+                window.open(url, '_blank');
             });
 
             $('#btn-back-to-menu').on('click', function() {

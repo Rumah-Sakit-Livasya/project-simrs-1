@@ -572,8 +572,6 @@ Route::get('/test-layout', function () {
     return view('test-layout');
 });
 
-
-
 require __DIR__ . '/auth.php';
 require __DIR__ . '/bpjs.php';
 require __DIR__ . '/simrs.php';

@@ -382,8 +382,16 @@ Route::post('process-message', [BotMessageController::class, 'processMessage'])-
 Route::post('/whatsapp/process-message', [WhatsappController::class, 'processMessage']);
 Route::post('/whatsapp/confirm-sent', [WhatsappController::class, 'confirmSent'])->name('whatsapp.confirmSent');
 
-Route::post('notify-contract', [BotMessageController::class, 'notifyExpiryContract'])->middleware(CheckAuthorizationBot::class);
-Route::post('notify-expiry-document', [BotMessageController::class, 'notifyExpiryDocumentToHRD'])->middleware(CheckAuthorizationBot::class);
+// Route::post('notify-contract', [BotMessageController::class, 'notifyExpiryContract'])->middleware(CheckAuthorizationBot::class);
+// Route::post('notify-expiry-document', [BotMessageController::class, 'notifyExpiryDocumentToHRD'])->middleware(CheckAuthorizationBot::class);
+Route::post('notify-contract', [BotMessageController::class, 'notifyExpiryContract'])
+    ->middleware(CheckAuthorizationBot::class)
+    ->name('notify-contract-route');
+
+Route::post('notify-expiry-document', [BotMessageController::class, 'notifyExpiryDocumentToHRD'])
+    ->middleware(CheckAuthorizationBot::class)
+    ->name('notify-expiry-document-route');
+
 // Route::get('notify-contract', [BotMessageController::class, 'notifyExpiryContract']);
 
 // Keuangan

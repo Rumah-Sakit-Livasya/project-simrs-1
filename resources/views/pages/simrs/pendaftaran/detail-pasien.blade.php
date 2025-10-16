@@ -255,6 +255,94 @@
             </div>
         </div>
 
+        @if (request()->has('nextRegis'))
+            @php
+                // Ambil semua registrasi aktif milik pasien
+                $activeRegistrations = $patient->registration->where('status', 'aktif');
+                // Skema warna mengikuti branding utama aplikasi
+                $colorThemes = [
+                    [
+                        'bg' => 'bg-primary', // Biru utama SIMRS
+                        'text' => 'text-white',
+                        'icon_bg' => 'text-primary-300 bg-white',
+                    ],
+                    [
+                        'bg' => 'bg-secondary',
+                        'text' => 'text-white',
+                        'icon_bg' => 'text-secondary-300 bg-white',
+                    ],
+                    [
+                        'bg' => 'bg-success',
+                        'text' => 'text-white',
+                        'icon_bg' => 'text-success-300 bg-white',
+                    ],
+                    [
+                        'bg' => 'bg-danger',
+                        'text' => 'text-white',
+                        'icon_bg' => 'text-danger-300 bg-white',
+                    ],
+                    [
+                        'bg' => 'bg-info',
+                        'text' => 'text-white',
+                        'icon_bg' => 'text-info-300 bg-white',
+                    ],
+                ];
+            @endphp
+
+            @if ($activeRegistrations->count())
+                <div id="panel-registrasi-aktif" class="panel">
+                    <div class="panel-hdr">
+                        <h2>
+                            <i class="fas fa-clipboard-list mr-2"></i>
+                            Registrasi Aktif
+                        </h2>
+                    </div>
+                    <div class="panel-container show">
+                        <div class="panel-content">
+                            <div class="row">
+                                @foreach ($activeRegistrations as $reg)
+                                    @php
+                                        $style = $colorThemes[$loop->index % count($colorThemes)];
+                                    @endphp
+
+                                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12 p-2">
+                                        <a href="{{ route('detail.registrasi.pasien', $reg->id) }}"
+                                            class="text-decoration-none">
+                                            <div class="p-3 rounded shadow d-flex align-items-center {{ $style['bg'] }}"
+                                                style="cursor: pointer; min-height: 110px;">
+                                                <div class="d-flex align-items-center justify-content-center mr-3"
+                                                    style="width: 55px; height: 55px;">
+                                                    <i
+                                                        class="fas fa-stethoscope fa-2x {{ $style['icon_bg'] }} rounded-circle p-2"></i>
+                                                </div>
+                                                <div class="d-flex flex-column">
+                                                    <h5 class="fw-bold mb-1 {{ $style['text'] }}">
+                                                        {{ $reg->departement->name ?? 'N/A' }}
+                                                    </h5>
+                                                    <div class="fs-sm mb-1 {{ $style['text'] }}">
+                                                        <span class="fw-500">Dokter:</span>
+                                                        {{ $reg->doctor->employee->fullname ?? 'N/A' }}
+                                                    </div>
+                                                    <div class="fs-sm mb-1 {{ $style['text'] }}">
+                                                        <span class="fw-500">Tgl Registrasi:</span>
+                                                        {{ \Carbon\Carbon::parse($reg->registration_date)->format('d-m-Y H:i') }}
+                                                    </div>
+                                                    <div class="fs-sm {{ $style['text'] }}">
+                                                        <span class="fw-500">No Registrasi:</span>
+                                                        {{ $reg->registration_number ?? 'N/A' }}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endif
+        @endif
+
         <div class="row">
             <div class="col-xl-12">
                 <div id="panel-2" class="panel">
@@ -271,6 +359,22 @@
                             {{-- ===== LOGIKA UTAMA ADA DI SINI ======================== --}}
                             {{-- ======================================================= --}}
 
+                            @php
+                                $nextRegis = request()->has('nextRegis');
+                            @endphp
+
+                            {{-- Tampilkan banner/flag jika nextRegis true --}}
+                            @if ($nextRegis)
+                                <div class="alert alert-info d-flex align-items-center mb-4" role="alert">
+                                    <i class="mdi mdi-alert-decagram fs-2 me-3 text-info"></i>
+                                    <div>
+                                        <span class="fw-semibold">Perhatian:</span>
+                                        <span>Pasien ini disarankan untuk melakukan <span class="fw-semibold">registrasi
+                                                baru</span>, silakan pilih jenis layanan di bawah.</span>
+                                    </div>
+                                </div>
+                            @endif
+
                             @if ($patient->status == 'digabung')
                                 <div class="d-flex flex-column align-items-center gap-2">
                                     <div class="mb-3">
@@ -285,11 +389,14 @@
                                         Data Pasien Digabungkan
                                     </h3>
                                     <p class="fs-5 text-secondary mb-3" style="max-width: 420px; margin: 0 auto;">
-                                        Pasien ini <span class="fw-semibold text-danger">tidak dapat didaftarkan</span>
-                                        karena datanya telah digabungkan dengan nomor rekam medis lain.
+                                        Pasien ini <span class="fw-semibold text-danger">tidak dapat
+                                            didaftarkan</span>
+                                        karena datanya telah digabungkan dengan nomor rekam
+                                        medis lain.
                                     </p>
                                     <div class="mb-2">
-                                        <span class="text-muted small">Gunakan Nomor Rekam Medis baru berikut:</span>
+                                        <span class="text-muted small">Gunakan Nomor Rekam
+                                            Medis baru berikut:</span>
                                     </div>
                                     @php
                                         $mergedPatient = \App\Models\SIMRS\Patient::where(
@@ -308,57 +415,62 @@
                                 {{-- Jika status pasien AKTIF, tampilkan menu registrasi --}}
                                 <ul class="box-menu list-unstyled row text-center gy-3 justify-content-center">
                                     <li class="col-lg-2 col-md-3 col-sm-4 col-6 p-3">
-                                        <a href="{{ route('form.registrasi', ['patient' => $patient->id, 'registrasi' => 'rawat-jalan']) }}"
+                                        <a href="{{ route('form.registrasi', ['patient' => $patient->id, 'registrasi' => 'rawat-jalan']) }}{{ $nextRegis ? '?nextRegis=1' : '' }}"
                                             class="d-block text-decoration-none service-link">
                                             <div class="rounded-circle mx-auto d-flex align-items-center justify-content-center bg-primary shadow border border-white"
                                                 style="width: 64px; height: 64px;">
                                                 <i class="mdi mdi-stethoscope text-white h1 mt-2"></i>
                                             </div>
-                                            <h5 class="mt-3 fw-semibold text-primary">Rawat Jalan</h5>
+                                            <h5 class="mt-3 fw-semibold text-primary">Rawat
+                                                Jalan</h5>
                                         </a>
                                     </li>
                                     <li class="col-lg-2 col-md-3 col-sm-4 col-6 p-3">
-                                        <a href="{{ route('form.registrasi', ['patient' => $patient->id, 'registrasi' => 'igd']) }}"
+                                        <a href="{{ route('form.registrasi', ['patient' => $patient->id, 'registrasi' => 'igd']) }}{{ $nextRegis ? '?nextRegis=1' : '' }}"
                                             class="d-block text-decoration-none service-link">
                                             <div class="rounded-circle mx-auto d-flex align-items-center justify-content-center bg-danger shadow border border-white"
                                                 style="width: 64px; height: 64px;">
                                                 <i class="mdi mdi-hospital text-white h1 mt-2"></i>
                                             </div>
-                                            <h5 class="mt-3 fw-semibold text-danger">IGD</h5>
+                                            <h5 class="mt-3 fw-semibold text-danger">IGD
+                                            </h5>
                                         </a>
                                     </li>
                                     <li class="col-lg-2 col-md-3 col-sm-4 col-6 p-3">
-                                        <a href="{{ route('form.registrasi', ['patient' => $patient->id, 'registrasi' => 'odc']) }}"
+                                        <a href="{{ route('form.registrasi', ['patient' => $patient->id, 'registrasi' => 'odc']) }}{{ $nextRegis ? '?nextRegis=1' : '' }}"
                                             class="d-block text-decoration-none service-link">
                                             <div class="rounded-circle mx-auto d-flex align-items-center justify-content-center bg-success shadow border border-white"
                                                 style="width: 64px; height: 64px;">
                                                 <i class="mdi mdi-bed text-white h1 mt-2"></i>
                                             </div>
-                                            <h5 class="mt-3 fw-semibold text-success">ODC</h5>
+                                            <h5 class="mt-3 fw-semibold text-success">ODC
+                                            </h5>
                                         </a>
                                     </li>
                                     <li class="col-lg-2 col-md-3 col-sm-4 col-6 p-3">
-                                        <a href="{{ route('form.registrasi', ['patient' => $patient->id, 'registrasi' => 'rawat-inap']) }}"
+                                        <a href="{{ route('form.registrasi', ['patient' => $patient->id, 'registrasi' => 'rawat-inap']) }}{{ $nextRegis ? '?nextRegis=1' : '' }}"
                                             class="d-block text-decoration-none service-link">
                                             <div class="rounded-circle mx-auto d-flex align-items-center justify-content-center bg-info shadow border border-white"
                                                 style="width: 64px; height: 64px;">
                                                 <i class="mdi mdi-bed text-white h1 mt-2"></i>
                                             </div>
-                                            <h5 class="mt-3 fw-semibold text-info">Rawat Inap</h5>
+                                            <h5 class="mt-3 fw-semibold text-info">Rawat
+                                                Inap</h5>
                                         </a>
                                     </li>
                                     <li class="col-lg-2 col-md-3 col-sm-4 col-6 p-3">
-                                        <a href="{{ route('form.registrasi', ['patient' => $patient->id, 'registrasi' => 'laboratorium']) }}"
+                                        <a href="{{ route('form.registrasi', ['patient' => $patient->id, 'registrasi' => 'laboratorium']) }}{{ $nextRegis ? '?nextRegis=1' : '' }}"
                                             class="d-block text-decoration-none service-link">
                                             <div class="rounded-circle mx-auto d-flex align-items-center justify-content-center bg-warning shadow border border-white"
                                                 style="width: 64px; height: 64px;">
                                                 <i class="mdi mdi-flask-outline text-white h1 mt-2"></i>
                                             </div>
-                                            <h5 class="mt-3 fw-semibold text-warning">Laboratorium</h5>
+                                            <h5 class="mt-3 fw-semibold text-warning">
+                                                Laboratorium</h5>
                                         </a>
                                     </li>
                                     <li class="col-lg-2 col-md-3 col-sm-4 col-6 p-3">
-                                        <a href="{{ route('form.registrasi', ['patient' => $patient->id, 'registrasi' => 'radiologi']) }}"
+                                        <a href="{{ route('form.registrasi', ['patient' => $patient->id, 'registrasi' => 'radiologi']) }}{{ $nextRegis ? '?nextRegis=1' : '' }}"
                                             class="d-block text-decoration-none service-link">
                                             <div class="rounded-circle mx-auto d-flex align-items-center justify-content-center bg-purple shadow border border-white"
                                                 style="width: 64px; height: 64px; background-color: #6f42c1;">
@@ -368,7 +480,7 @@
                                         </a>
                                     </li>
                                     <li class="col-lg-2 col-md-3 col-sm-4 col-6 p-3">
-                                        <a href="{{ route('form.registrasi', ['patient' => $patient->id, 'registrasi' => 'hemodialisa']) }}"
+                                        <a href="{{ route('form.registrasi', ['patient' => $patient->id, 'registrasi' => 'hemodialisa']) }}{{ $nextRegis ? '?nextRegis=1' : '' }}"
                                             class="d-block text-decoration-none service-link">
                                             <div class="rounded-circle mx-auto d-flex align-items-center justify-content-center bg-secondary shadow border border-white"
                                                 style="width: 64px; height: 64px; background-color: #ffc107;">

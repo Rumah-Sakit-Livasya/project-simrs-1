@@ -6,7 +6,7 @@ return [
     'user_key'     => env('BPJS_USER_KEY'),
     'kode_ppk'     => env('BPJS_KODE_PPK'),
 
-    'applicare' => [
-        'base_url' => env('BPJS_APPLICARE_BASE_URL'),
+    'aplicare' => [
+        'base_url' => env('BPJS_APLICARE_BASE_URL'),
     ],
 ];

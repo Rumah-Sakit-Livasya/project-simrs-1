@@ -21,7 +21,6 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::group(['middleware' => ['auth']], function () {
-
     Route::prefix('bpjs')->group(function () {
         Route::prefix('prb')->name('prb.')->group(function () {
             Route::get('data-prb', [PrbController::class, 'index'])->name('data-prb');
@@ -47,21 +46,15 @@ Route::group(['middleware' => ['auth']], function () {
         Route::prefix('aplicares')->name('aplicares.')->group(function () {
             Route::get('/', [AplicareController::class, 'index'])->name('index');
             Route::get('/data', [AplicareController::class, 'getData'])->name('data');
-
-            // Rute untuk aksi API
-            // Method POST sudah cocok untuk update dan insert via AJAX
-            Route::post('/update/{roomId}', [AplicareController::class, 'updateRoom'])->name('update');
-            Route::post('/insert/{roomId}', [AplicareController::class, 'insertRoom'])->name('insert');
-
-            // Method DELETE adalah yang paling tepat untuk aksi hapus.
-            // Jika AJAX Anda kesulitan, Anda bisa menggantinya menjadi POST.
-            Route::delete('/delete/{roomId}', [AplicareController::class, 'deleteRoom'])->name('delete');
-
-            Route::post('/mapping/{roomId}', [AplicareController::class, 'saveMapping'])->name('save-mapping');
-
-            // Route baru untuk mengambil data LANGSUNG dari server BPJS
             Route::get('/bpjs-data', [AplicareController::class, 'getDataFromBpjs'])->name('bpjs-data');
+
+            // --- Rute Aksi API ---
+            Route::post('/update/{roomId}', [AplicareController::class, 'updateRoom'])->name('update');
+            Route::post('/delete/{roomId}', [AplicareController::class, 'deleteRoom'])->name('delete');
+            Route::post('/toggle-mapping/{roomId}', [AplicareController::class, 'toggleMapping'])->name('toggle-mapping');
+            Route::post('/save-kelas-mapping', [AplicareController::class, 'saveKelasMapping'])->name('save-kelas-mapping');
         });
+
 
         Route::prefix('bridging-vclaim')->group(function () {
             Route::get('list-registrasi-sep', [BridgingVclaimController::class, 'listRegistrasiSEP'])
