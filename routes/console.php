@@ -13,10 +13,15 @@ Artisan::command('inspire', function () {
 ScheduleCommand::command('backup:clean')->daily()->at('00:00');
 ScheduleCommand::command('backup:run')->daily()->at('00:30');
 
-Schedule::command('notify:contract-expiry')
-    ->mondays() // Menjalankan setiap hari Senin
-    ->at('08:00'); // Pada pukul 08:00
+// --- Bagian untuk Command:notify-contract-expiry ---
+ScheduleCommand::call(function () {
+    // Jalankan command Artisan di dalam closure
+    \Artisan::call('notify:contract-expiry');
+})->mondays()->at('08:00');
 
-Schedule::command('notify:document-expiry')
-    ->mondays() // Menjalankan setiap hari Senin
-    ->at('08:00'); // Pada pukul 08:00
+
+// --- Bagian untuk Command:notify-document-expiry ---
+ScheduleCommand::call(function () {
+    // Jalankan command Artisan di dalam closure
+    \Artisan::call('notify:document-expiry');
+})->mondays()->at('08:00');
