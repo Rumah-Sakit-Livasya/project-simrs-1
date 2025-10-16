@@ -20,7 +20,8 @@ class DatabaseSeeder extends Seeder
         // $this->call(EthnicSeeder::class);
         // Target::factory()->count(100)->create();
         // $this->call(RolePermissionSeeder::class);
-        // $this->call(MenusTableSeeder::class);
+        // $this->call(PermissionSeeder::class);
+        $this->call(MenusTableSeeder::class);
         // $this->call(BankSeeder::class);
         // $this->call(OrganizationSeeder::class);
         // $this->call(CompanySeeder::class);

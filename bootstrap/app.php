@@ -3,6 +3,7 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Console\Scheduling\Schedule;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -34,4 +35,11 @@ return Application::configure(basePath: dirname(__DIR__))
     // >>>>> PENAMBAHAN SELESAI DI SINI <<<<<
     ->withExceptions(function (Exceptions $exceptions) {
         //
+    })
+    ->withSchedule(function (Schedule $schedule) { // <-- TAMBAHKAN BAGIAN INI
+        // Daftarkan semua jadwal Anda di sini
+        $schedule->command('app:charge-daily-room-rates')->dailyAt('01:00');
+
+        // Contoh lain jika ada
+        // $schedule->command('backup:run')->daily();
     })->create();

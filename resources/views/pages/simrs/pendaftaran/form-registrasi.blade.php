@@ -81,20 +81,20 @@
         }
 
         /* .box-menu li {
-                                                                        padding: 20px 30px;
-                                                                        margin: 20px;
-                                                                        width: 200px;
-                                                                        background: #f2f0f5;
-                                                                        text-align: center;
-                                                                        cursor: pointer;
-                                                                        border: 1px solid #e5e5e5;
-                                                                        border-radius: 8px;
-                                                                        display: flex;
-                                                                        align-items: center;
-                                                                        justify-content: center;
-                                                                        flex-direction: column;
-                                                                        box-shadow: 0 3px 3px 0 rgba(0, 0, 0, 0.33);
-                                                                    } */
+                                                                            padding: 20px 30px;
+                                                                            margin: 20px;
+                                                                            width: 200px;
+                                                                            background: #f2f0f5;
+                                                                            text-align: center;
+                                                                            cursor: pointer;
+                                                                            border: 1px solid #e5e5e5;
+                                                                            border-radius: 8px;
+                                                                            display: flex;
+                                                                            align-items: center;
+                                                                            justify-content: center;
+                                                                            flex-direction: column;
+                                                                            box-shadow: 0 3px 3px 0 rgba(0, 0, 0, 0.33);
+                                                                        } */
 
         .box-menu .circle-menu {
             height: 50px;
@@ -638,8 +638,16 @@
                 submitButton.prop('disabled', true).html(
                     '<span class="fal fa-spinner fa-spin mr-1"></span> Menyimpan...');
 
+                // Tambahkan pengkondisian nextregis pada URL AJAX submit
+                let actionUrl = form.data('action-url');
+                const urlParams = new URLSearchParams(window.location.search);
+                if (urlParams.has('nextRegis')) {
+                    // Cek apakah url sudah memiliki parameter atau belum
+                    actionUrl += (actionUrl.indexOf('?') === -1 ? '?' : '&') + 'nextRegis=1';
+                }
+
                 $.ajax({
-                    url: form.data('action-url'), // Mengambil URL dari data attribute
+                    url: actionUrl,
                     type: 'POST',
                     data: new FormData(this),
                     processData: false,

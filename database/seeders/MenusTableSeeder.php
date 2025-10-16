@@ -433,5 +433,42 @@ class MenusTableSeeder extends Seeder
             'sort_order' => 3,
             'permission' => 'view permissions',
         ]);
+
+        $mjkn = Menu::create([
+            'title' => 'MJKN',
+            'url' => '#',
+            'icon' => 'bx bxs-network-chart',
+            'permission' => 'view mjkn',
+            'sort_order' => 7,
+            'type' => 'simrs',
+        ]);
+
+        Menu::create([
+            'title' => 'Dashboard',
+            'url' => '/mjkn/dashboard',
+            'parent_id' => $mjkn->id,
+            'sort_order' => 1,
+            'permission' => 'view mjkn dashboard',
+            'type' => 'simrs',
+        ]);
+
+        Menu::create([
+            'title' => 'Pasien Baru',
+            'url' => '/mjkn/pasien-baru',
+            'parent_id' => $mjkn->id,
+            'sort_order' => 2,
+            'permission' => 'view mjkn pasien baru',
+            'type' => 'simrs',
+        ]);
+
+        Menu::create([
+            'title' => 'List Pasien Baru',
+            'url' => '/mjkn/list-pasien-baru',
+            'parent_id' => $mjkn->id,
+            'sort_order' => 3,
+            'permission' => 'view mjkn list pasien baru',
+            'type' => 'simrs',
+        ]);
+
     }
 }
