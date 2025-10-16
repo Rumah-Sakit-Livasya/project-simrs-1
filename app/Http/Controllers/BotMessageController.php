@@ -885,7 +885,10 @@ class BotMessageController extends Controller
 
             $responseHRD .= "\n _Reported automatic by: Smart HR_";
 
-            $hrdList = Employee::where('organization_id', 31)->latest()->get();
+            $hrdList = Employee::where('organization_id', 31)
+                ->where('is_active', 1)
+                ->latest()
+                ->get();
             $responses = [];
 
             foreach ($hrdList as $hrd) {
