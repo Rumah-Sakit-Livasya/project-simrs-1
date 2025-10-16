@@ -253,31 +253,19 @@
                                                 placeholder="Cari nama pemeriksaan...">
                                         </div>
 
-                                        @php
-                                            $totalCategories = $laboratorium_categories->count();
-                                            $columnClass = 'col-xl-3 col-lg-4 col-md-6'; // Default 4 kolom di layar besar
-                                            if ($totalCategories == 1) {
-                                                $columnClass = 'col-12';
-                                            } elseif ($totalCategories == 2) {
-                                                $columnClass = 'col-md-6';
-                                            } elseif ($totalCategories == 3) {
-                                                $columnClass = 'col-lg-4 col-md-6';
-                                            }
-                                        @endphp
-
                                         <div class="row" id="laboratorium-grid-container">
-                                            @foreach ($laboratorium_categories as $category)
-                                                <div class="{{ $columnClass }} category-column">
+                                            {{-- Iterasi berdasarkan GRUP PARAMETER --}}
+                                            @foreach ($groupedParameters as $groupName => $parameters)
+                                                {{-- PAKSA LAYOUT MENJADI 2 KOLOM --}}
+                                                <div class="col-md-6 category-column">
                                                     <div class="card border mb-4">
                                                         <div class="card-header bg-primary-50">
                                                             <h6 class="card-title text-white mb-0">
-                                                                {{ $category->nama_kategori }}</h6>
+                                                                {{ $groupName }}</h6>
                                                         </div>
-
-                                                        {{-- INI PERBAIKANNYA --}}
                                                         <div class="card-body p-0"
-                                                            style="max-height: 350px; overflow: scroll">
-                                                            @forelse ($category->parameter_laboratorium->where('is_order', true) as $parameter)
+                                                            style="max-height: 350px; overflow-y: auto;">
+                                                            @forelse ($parameters as $parameter)
                                                                 <div class="test-item parameter_laboratorium">
                                                                     <div
                                                                         class="custom-control custom-checkbox flex-grow-1">
@@ -290,6 +278,7 @@
                                                                     </div>
                                                                     <div class="test-price"
                                                                         id="harga_parameter_laboratorium_{{ $parameter->id }}">
+                                                                        {{-- Harga akan diisi oleh JS --}}
                                                                     </div>
                                                                     <div class="input-group quantity-stepper">
                                                                         <div class="input-group-prepend">
@@ -314,7 +303,7 @@
                                                                 </div>
                                                             @empty
                                                                 <div class="p-3 text-muted text-center">
-                                                                    Tidak ada parameter.
+                                                                    Tidak ada parameter dalam grup ini.
                                                                 </div>
                                                             @endforelse
                                                         </div>
@@ -380,7 +369,6 @@
             });
 
             // Menyimpan variabel global dari Controller
-            window._kategoriLaboratorium = @json($laboratorium_categories);
             window._tarifLaboratorium = @json($tarifs);
             window._penjamins = @json($penjamins);
             window._kelasRawats = @json($kelas_rawats);

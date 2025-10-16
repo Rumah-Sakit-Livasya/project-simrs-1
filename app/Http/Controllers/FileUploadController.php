@@ -66,36 +66,142 @@ class FileUploadController extends Controller
         }
     }
 
-    public function downloadDocument($id)
+    public function edit($id)
     {
         try {
-            // Temukan dokumen berdasarkan ID
             $document = UploadFile::find($id);
 
             if (!$document) {
                 return response()->json(['error' => 'Dokumen tidak ditemukan!'], 404);
             }
 
-            // Path ke file yang disimpan
-            $filePath = storage_path('app/public/uploads/' . $document->file);
-
-            if (!file_exists($filePath)) {
-                return response()->json(['error' => 'File tidak ditemukan!'], 404);
-            }
-
-            // Mengembalikan file PDF sebagai response download
-            return response()->file($filePath, [
-                'Content-Type' => 'application/pdf',
-                'Content-Disposition' => 'inline; filename="' . $document->file . '"'
+            return response()->json([
+                'id' => $document->id,
+                'nama' => $document->nama,
+                'file' => $document->file,
+                'masa_berlaku' => $document->masa_berlaku,
+                'hard_copy' => $document->hard_copy,
+                // tambahkan field lain jika diperlukan
             ]);
         } catch (\Exception $e) {
-            // Tangani pengecualian dan kembalikan pesan kesalahan
             return response()->json(['error' => 'Terjadi kesalahan: ' . $e->getMessage()], 500);
         }
     }
 
-    public function delete($id)
+    public function update(Request $request, $id)
     {
-        dd(true);
+        try {
+            $document = UploadFile::find($id);
+
+            if (!$document) {
+                return response()->json(['error' => 'Dokumen tidak ditemukan!'], 404);
+            }
+
+            $messages = [
+                'nama.required' => 'Nama dokumen tidak boleh kosong!',
+            ];
+
+            $validator = Validator::make($request->all(), [
+                'nama' => 'required',
+                'masa_berlaku' => 'nullable|date',
+                'file' => 'nullable|file',
+            ], $messages);
+
+            if ($validator->fails()) {
+                $errorMessage = $validator->errors()->first();
+                return response()->json([
+                    'error' => $errorMessage,
+                ], 422);
+            }
+
+            $document->nama = $request->nama;
+
+            if ($request->has('masa_berlaku')) {
+                $document->masa_berlaku = $request->masa_berlaku;
+            }
+
+            $document->hard_copy = $request->has('hard_copy') && $request->hard_copy == 'on' ? 1 : 0;
+
+            // Update file jika ada upload baru
+            if ($request->hasFile('file')) {
+                // Delete old file if exists
+                $oldFilePath = storage_path('app/public/uploads/' . $document->file);
+                if ($document->file && file_exists($oldFilePath)) {
+                    @unlink($oldFilePath);
+                }
+                $file = $request->file('file');
+                $fileName = time() . '_' . $file->getClientOriginalName();
+                $file->storeAs('uploads', $fileName, 'public');
+                $document->file = $fileName;
+            }
+
+            $document->save();
+
+            return response()->json(['message' => 'Dokumen berhasil diupdate!']);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Terjadi kesalahan: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function downloadDocument($id)
+    {
+        try {
+            $document = UploadFile::find($id);
+
+            if (!$document) {
+                return response()->json([
+                    'error' => 'File tidak ditemukan!'
+                ], 404);
+            }
+
+            $filePath = storage_path('app/public/uploads/' . $document->file);
+
+            if (!file_exists($filePath)) {
+                return response()->json([
+                    'error' => 'File tidak ditemukan!'
+                ], 404);
+            }
+
+            $originalName = pathinfo($document->file, PATHINFO_BASENAME);
+            $newName = preg_replace('/_(\.[a-z0-9]+)$/i', '$1', $originalName);
+
+            if (!empty($document->nama)) {
+                $extension = pathinfo($originalName, PATHINFO_EXTENSION);
+                $newName = preg_replace('/\s+/', '_', $document->nama) . '.' . $extension;
+            }
+
+            $mimeType = \Illuminate\Support\Facades\File::mimeType($filePath);
+
+            return response()->download($filePath, $newName, [
+                'Content-Type' => $mimeType,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Terjadi kesalahan: ' . $e->getMessage()], 500);
+        }
+    }
+
+    public function destroy($id)
+    {
+        try {
+            $document = UploadFile::find($id);
+
+            if (!$document) {
+                return response()->json(['error' => 'Dokumen tidak ditemukan!'], 404);
+            }
+
+            // Hapus file fisik bila ada
+            $filePath = storage_path('app/public/uploads/' . $document->file);
+            if (file_exists($filePath)) {
+                @unlink($filePath);
+            }
+
+            $document->delete();
+
+            return response()->json(['message' => 'Dokumen berhasil dihapus']);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Terjadi kesalahan: ' . $e->getMessage()], 500);
+        }
     }
 }

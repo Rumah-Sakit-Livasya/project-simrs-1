@@ -11,6 +11,7 @@ use App\Models\RelasiParameterLaboratorium;
 use App\Models\SIMRS\Doctor;
 use App\Models\SIMRS\GroupPenjamin;
 use App\Models\SIMRS\KelasRawat;
+use App\Models\SIMRS\Laboratorium\GrupParameterLaboratorium;
 use App\Models\SIMRS\Laboratorium\KategoriLaboratorium;
 use App\Models\SIMRS\Laboratorium\NilaiNormalLaboratorium;
 use App\Models\SIMRS\Laboratorium\OrderLaboratorium;
@@ -28,15 +29,43 @@ class LaboratoriumController extends Controller
 {
     public function order()
     {
+        // Ambil semua parameter dilengkapi grup dan hitung banyaknya parameter per grup
+        $allParameters = ParameterLaboratorium::with('grup_parameter_laboratorium')
+            ->where('is_order', true)
+            ->orderBy('parameter', 'asc')
+            ->get();
+
+        // Hitung jumlah parameter tiap grup
+        $groupedParameters = $allParameters->groupBy('grup_parameter_laboratorium.nama_grup');
+        $groupCounts = $groupedParameters->map->count();
+
+        // Urutkan grup berdasar jumlah parameter terbanyak (desc)
+        $sortedGroupNames = $groupCounts->sortDesc()->keys();
+
+        // List grup-parameter yang sudah diurutkan berdasar jumlah data
+        $finalGroupedData = collect();
+        foreach ($sortedGroupNames as $groupName) {
+            $parametersInGroup = $groupedParameters->get($groupName, collect());
+            $finalGroupedData->put($groupName, $parametersInGroup);
+        }
+
+        // ==========================================================
+        // Memastikan Semua Data Pendukung Dikirim ke View
+        // ==========================================================
         $laboratoriumDoctors = Doctor::whereHas('department_from_doctors', function ($query) {
             $query->where('name', 'like', '%lab%');
         })->get();
+
+        $tarifs = TarifParameterLaboratorium::all();
+        $penjamins = Penjamin::all();
+        $kelas_rawats = KelasRawat::all();
+
         return view('pages.simrs.laboratorium.order', [
+            'groupedParameters' => $finalGroupedData,
             'laboratoriumDoctors' => $laboratoriumDoctors,
-            'penjamins' => Penjamin::all(),
-            'kelas_rawats' => KelasRawat::all(),
-            'laboratorium_categories' => KategoriLaboratorium::all(),
-            'tarifs' => TarifParameterLaboratorium::all(),
+            'penjamins' => $penjamins,
+            'kelas_rawats' => $kelas_rawats,
+            'tarifs' => $tarifs,
         ]);
     }
 

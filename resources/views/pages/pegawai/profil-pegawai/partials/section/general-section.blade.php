@@ -628,8 +628,13 @@
                                         <tr>
                                             <td>{{ $item->nama }}</td>
                                             <td>
-                                                <a href="javascript:void(0)" class="download"
-                                                    data-id="{{ $item->id }}">Lihat dokumen</a>
+                                                @if (!empty($item->file))
+                                                    <a href="{{ asset('storage/uploads/' . $item->file) }}"
+                                                        target="_blank" class="text-primary text-underline">Lihat
+                                                        dokumen</a>
+                                                @else
+                                                    <span class="text-danger">Tidak ada file</span>
+                                                @endif
                                             </td>
                                             <td>
                                                 {{ $item->expire ? \Carbon\Carbon::parse($item->expire)->locale('id')->isoFormat('DD MMMM YYYY') : 'Tidak ada' }}
@@ -653,6 +658,18 @@
                                                     data-toggle="tooltip" data-id="{{ $item->id }}"
                                                     title="Delete">
                                                     <span class="fal fa-trash ikon-delete-dokumen"></span>
+                                                    <div class="span spinner-text d-none">
+                                                        <span class="spinner-border spinner-border-sm" role="status"
+                                                            aria-hidden="true"></span>
+                                                        Loading...
+                                                    </div>
+                                                </a>
+                                                <a href="javascript:void(0)"
+                                                    class="badge mx-1 badge-info p-2 border-0 text-white btn-download-dokumen"
+                                                    data-template="<div class=&quot;tooltip&quot; role=&quot;tooltip&quot;><div class=&quot;tooltip-inner bg-info-500&quot;></div></div>"
+                                                    data-toggle="tooltip" data-id="{{ $item->id }}"
+                                                    title="Download">
+                                                    <span class="fal fa-download ikon-download-dokumen"></span>
                                                     <div class="span spinner-text d-none">
                                                         <span class="spinner-border spinner-border-sm" role="status"
                                                             aria-hidden="true"></span>

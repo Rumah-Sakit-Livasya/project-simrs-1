@@ -1,122 +1,213 @@
 @extends('inc.layout')
-@section('title', 'List Approval Purchase Order (Pharmacy)')
+@section('title', 'Approval Purchase Order (Pharmacy)')
+
 @section('content')
     <main id="js-page-content" role="main" class="page-content">
+        {{-- Panel Form Filter --}}
+        <div class="panel" id="panel-filter">
+            <div class="panel-hdr">
+                <h2>Filter <span class="fw-300"><i>Approval PO</i></span></h2>
+            </div>
+            <div class="panel-container show">
+                <div class="panel-content">
+                    {{-- File partial untuk form filter --}}
+                    @include('pages.simrs.procurement.approval-po.partials.pharmacy-form')
+                </div>
+            </div>
+        </div>
 
-        @include('pages.simrs.procurement.approval-po.partials.pharmacy-form')
-
-        @include('pages.simrs.procurement.approval-po.partials.pharmacy-datatable')
+        {{-- Panel Daftar Data --}}
+        <div class="panel" id="panel-data">
+            <div class="panel-hdr">
+                <h2>Daftar <span class="fw-300"><i>Purchase Order (Pharmacy)</i></span></h2>
+            </div>
+            <div class="panel-container show">
+                <div class="panel-content">
+                    {{-- File partial untuk tabel --}}
+                    @include('pages.simrs.procurement.approval-po.partials.pharmacy-datatable')
+                </div>
+            </div>
+        </div>
     </main>
 @endsection
+
 @section('plugin')
     <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
     <script src="/js/datagrid/datatables/datatables.export.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous">
-    </script>
-    {{-- Datepicker Range --}}
     <script src="/js/dependency/moment/moment.js"></script>
     <script src="/js/formplugins/bootstrap-daterangepicker/bootstrap-daterangepicker.js"></script>
+    <script src="/js/formplugins/select2/select2.bundle.js"></script>
 
     <script>
-        var controls = {
-            leftArrow: '<i class="fal fa-angle-left" style="font-size: 1.25rem"></i>',
-            rightArrow: '<i class="fal fa-angle-right" style="font-size: 1.25rem"></i>'
-        }
-
         $(document).ready(function() {
-
-            /// Get the current date and time
-            var today = new Date();
-
-            // Format it as "YYYY-MM-DD"
-            var formattedToday = today.getFullYear() + '-' +
-                ('0' + (today.getMonth() + 1)).slice(-2) + '-' +
-                ('0' + today.getDate()).slice(-2) + ' ' +
-                ('0' + today.getHours()).slice(-2) + ':' +
-                ('0' + today.getMinutes()).slice(-2) + ':' +
-                ('0' + today.getSeconds()).slice(-2);
-
-            // Set the default date for the datepicker
-            $('#datepicker-1').daterangepicker({
+            // Inisialisasi Select2 & DateRangePicker
+            $('.select2').select2({
+                width: '100%'
+            });
+            $('#tanggal_po_filter').daterangepicker({
                 opens: 'left',
-                startDate: moment(today).startOf('month').format('YYYY-MM-DD'),
-                endDate: moment(today).format('YYYY-MM-DD'),
-                // timePicker: true, // Enable time selection
-                // timePicker24Hour: true, // 24-hour format
-                // timePickerSeconds: true, // Include seconds in time selection
+                autoUpdateInput: false,
                 locale: {
-                    format: 'YYYY-MM-DD' // Display format for the picker
+                    cancelLabel: 'Clear',
+                    format: 'YYYY-MM-DD'
                 }
-            }, function(start, end, label) {
-                console.log("A new date selection was made: " + start.format('YYYY-MM-DD') +
-                    ' to ' + end.format('YYYY-MM-DD'));
+            }).on('apply.daterangepicker', function(ev, picker) {
+                $(this).val(picker.startDate.format('YYYY-MM-DD') + ' - ' + picker.endDate.format(
+                    'YYYY-MM-DD'));
+            }).on('cancel.daterangepicker', function(ev, picker) {
+                $(this).val('');
             });
 
-            $('#loading-spinner').show();
-            // initialize datatable
-            $('#dt-basic-example').dataTable({
-                "drawCallback": function(settings) {
-                    // Menyembunyikan preloader setelah data berhasil dimuat
-                    $('#loading-spinner').hide();
-                },
+            // --- INISIALISASI DATATABLE ---
+            var table = $('#dt-approval-po-pharmacy').DataTable({
+                processing: true,
+                serverSide: true, // PENTING: Mengaktifkan mode server-side
                 responsive: true,
                 lengthChange: false,
+                ajax: {
+                    url: "{{ route('procurement.approval-po.pharmacy') }}",
+                    // Mengirim data filter ke controller
+                    data: function(d) {
+                        d.tanggal_po = $('#tanggal_po_filter').val();
+                        d.kode_po = $('#kode_po_filter').val();
+                        d.nama_barang = $('#nama_barang_filter').val();
+                        d.approval = $('#approval_filter').val();
+                        d.tipe = $('#tipe_po_filter').val();
+                    }
+                },
+                // Mendefinisikan kolom sesuai dengan data yang dikirim controller
+                columns: [{
+                        data: 'detail',
+                        name: 'detail',
+                        orderable: false,
+                        searchable: false,
+                        className: 'text-center'
+                    },
+                    {
+                        data: 'kode_po',
+                        name: 'kode_po'
+                    },
+                    {
+                        data: 'tanggal_po',
+                        name: 'tanggal_po'
+                    },
+                    {
+                        data: 'tanggal_app',
+                        name: 'tanggal_app'
+                    },
+                    {
+                        data: 'supplier_name',
+                        name: 'supplier.nama'
+                    },
+                    {
+                        data: 'keterangan',
+                        name: 'keterangan'
+                    },
+                    {
+                        data: 'keterangan_approval',
+                        name: 'keterangan_approval'
+                    },
+                    {
+                        data: 'user_app_name',
+                        name: 'app_user.employee.fullname'
+                    },
+                    {
+                        data: 'tipe',
+                        name: 'tipe'
+                    },
+                    {
+                        data: 'nominal',
+                        name: 'nominal',
+                        className: 'text-right'
+                    },
+                    {
+                        data: 'status_approval',
+                        name: 'approval',
+                        className: 'text-center'
+                    },
+                    {
+                        data: 'action',
+                        name: 'action',
+                        orderable: false,
+                        searchable: false,
+                        className: 'text-center'
+                    }
+                ],
                 dom: "<'row mb-3'<'col-sm-12 col-md-6 d-flex align-items-center justify-content-start'f><'col-sm-12 col-md-6 d-flex align-items-center justify-content-end'lB>>" +
                     "<'row'<'col-sm-12'tr>>" +
                     "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
-                buttons: [{
-                        extend: 'pdfHtml5',
-                        text: 'PDF',
-                        titleAttr: 'Generate PDF',
-                        className: 'btn-outline-danger btn-sm mr-1'
-                    },
-                    {
-                        extend: 'excelHtml5',
-                        text: 'Excel',
-                        titleAttr: 'Generate Excel',
-                        className: 'btn-outline-success btn-sm mr-1'
-                    },
-                    {
-                        extend: 'csvHtml5',
-                        text: 'CSV',
-                        titleAttr: 'Generate CSV',
-                        className: 'btn-outline-primary btn-sm mr-1'
-                    },
-                    {
-                        extend: 'copyHtml5',
-                        text: 'Copy',
-                        titleAttr: 'Copy to clipboard',
-                        className: 'btn-outline-primary btn-sm mr-1'
-                    },
-                    {
-                        extend: 'print',
-                        text: 'Print',
-                        titleAttr: 'Print Table',
-                        className: 'btn-outline-primary btn-sm'
-                    }
-                ]
+                buttons: [ /* Tombol Export Anda */ ]
             });
+
+            // --- EVENT LISTENERS ---
+            // Tombol filter
+            $('#filter-btn').on('click', function(e) {
+                e.preventDefault();
+                table.draw(); // Memuat ulang data tabel dengan filter baru
+            });
+
+            // Logika Child Row (Detail)
+            $('#dt-approval-po-pharmacy tbody').on('click', 'button.btn-detail', function() {
+                var tr = $(this).closest('tr');
+                var row = table.row(tr);
+                var id = $(this).data('id');
+                // Menggunakan endpoint detail yang sama dengan halaman PO
+                var url = `{{ url('/simrs/procurement/purchase-order/pharmacy/detail') }}/${id}`;
+
+                if (row.child.isShown()) {
+                    row.child.hide();
+                    tr.removeClass('shown');
+                } else {
+                    row.child(
+                        '<tr><td colspan="12" class="text-center"><i class="fas fa-spinner fa-spin"></i> Memuat...</td></tr>'
+                    ).show();
+                    tr.addClass('shown');
+                    $.get(url, function(data) {
+                        row.child(data).show();
+                    }).fail(function() {
+                        row.child(
+                            '<tr><td colspan="12" class="text-center text-danger">Gagal memuat detail.</td></tr>'
+                        ).show();
+                    });
+                }
+            });
+
+            // Logika Tombol Review (membuka modal)
+            // Logika Tombol Review (membuka popup window)
+            $('#dt-approval-po-pharmacy tbody').on('click', '.btn-review', function() {
+                var id = $(this).data('id');
+                var url = `{{ url('simrs/procurement/approval-po/pharmacy/edit') }}/${id}`;
+
+                // Definisikan ukuran dan posisi popup
+                const width = Math.round(screen.width * 0.7); // 70% dari lebar layar
+                const height = Math.round(screen.height * 0.8); // 80% dari tinggi layar
+                const left = Math.round((screen.width - width) / 2);
+                const top = Math.round((screen.height - height) / 2);
+
+                // Buka jendela baru
+                const popupWindow = window.open(
+                    url,
+                    "ReviewPOFarmasi_" + id,
+                    `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes`
+                );
+
+                // Fokuskan ke jendela popup jika sudah ada
+                if (popupWindow && window.focus) {
+                    popupWindow.focus();
+                }
+
+                // Tambahkan listener untuk merefresh DataTable saat popup ditutup
+                if (popupWindow) {
+                    var timer = setInterval(function() {
+                        if (popupWindow.closed) {
+                            clearInterval(timer);
+                            // Reload datatable tanpa reset paging
+                            table.ajax.reload(null, false);
+                        }
+                    }, 500);
+                }
+            });
+
         });
     </script>
-
-
-    <script>
-        const list = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'))
-        list.map((el) => {
-            let opts = {
-                animation: true,
-            }
-            if (el.hasAttribute('data-bs-content-id')) {
-                opts.content = document.getElementById(el.getAttribute('data-bs-content-id')).innerHTML;
-                opts.html = true;
-                opts.sanitize = false;
-            }
-            new bootstrap.Popover(el, opts);
-        })
-    </script>
-
-
-    <script src="{{ asset('js/simrs/procurement/approval-po/pharmacy.js') }}?v={{ time() }}"></script>
-
 @endsection

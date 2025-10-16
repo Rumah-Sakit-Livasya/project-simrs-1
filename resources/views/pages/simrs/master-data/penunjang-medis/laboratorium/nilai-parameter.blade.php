@@ -109,12 +109,10 @@
 
 @section('plugin')
     <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
-    <script src="/js/datagrid/datatables/datatables.export.js"></script>
     <script src="/js/formplugins/select2/select2.bundle.js"></script>
-    <script src="/js/formplugins/bootstrap-datepicker/bootstrap-datepicker.js"></script>
     <script>
         $(document).ready(function() {
-            // Inisialisasi DataTable
+            // --- Inisialisasi DataTable ---
             $('#dt-nilai-parameter').DataTable({
                 responsive: true,
                 lengthChange: false,
@@ -166,44 +164,82 @@
                 });
             });
 
-            // --- Event Delegation untuk Tombol Aksi di Tabel ---
+            // --- Event Delegation untuk Tombol Edit di Tabel ---
             $('#dt-nilai-parameter tbody').on('click', '.btn-edit', function() {
                 var dataId = $(this).data('id');
-                $('#modal-edit-nilai-parameter-laboratorium form').attr('data-id', dataId);
+                var url =
+                    `/api/simrs/master-data/penunjang-medis/laboratorium/nilai-normal-parameter/${dataId}`;
 
-                $.ajax({
-                    url: `/api/simrs/master-data/penunjang-medis/laboratorium/nilai-normal-parameter/${dataId}`,
-                    type: 'GET',
-                    success: function(response) {
-                        // Inisialisasi select2 sebelum mengisi data
-                        $('#modal-edit-nilai-parameter-laboratorium .select2').select2({
-                            dropdownParent: $(
-                                '#modal-edit-nilai-parameter-laboratorium')
-                        });
+                $.get(url, function(data) {
+                    var $modal = $('#modal-edit-nilai-parameter-laboratorium');
+                    var $form = $modal.find('#update-form');
+                    $form[0].reset();
 
-                        // Isi form
-                        $.each(response, function(key, value) {
-                            const selector =
-                                `#modal-edit-nilai-parameter-laboratorium [name="${key}"]`;
-                            if ($(selector).is('select')) {
-                                $(selector).val(value).trigger('change');
-                            } else {
-                                $(selector).val(value);
-                            }
-                        });
+                    // Pastikan id_edit ada dan terisi
+                    $form.find('#id_edit').val(data.id);
 
-                        $('#modal-edit-nilai-parameter-laboratorium').modal('show');
-                    },
-                    error: function(xhr, status, error) {
-                        showErrorAlert('Gagal mengambil data: ' + error);
-                    }
+                    $form.find('#min_edit').val(data.min);
+                    $form.find('#max_edit').val(data.max);
+                    $form.find('#hasil_edit').val(data.hasil);
+                    $form.find('#keterangan_edit').val(data.keterangan);
+                    $form.find('#min_kritis_edit').val(data.min_kritis);
+                    $form.find('#max_kritis_edit').val(data.max_kritis);
+
+                    // Konversi umur dari total hari ke tahun, bulan, hari (helper)
+                    var dariUmur = convertDaysToYMD(data.dari_umur);
+                    $form.find('#tahun_1_edit').val(dariUmur.years);
+                    $form.find('#bulan_1_edit').val(dariUmur.months);
+                    $form.find('#hari_1_edit').val(dariUmur.days);
+
+                    var sampaiUmur = convertDaysToYMD(data.sampai_umur);
+                    $form.find('#tahun_2_edit').val(sampaiUmur.years);
+                    $form.find('#bulan_2_edit').val(sampaiUmur.months);
+                    $form.find('#hari_2_edit').val(sampaiUmur.days);
+
+                    // Radio Jenis Kelamin
+                    $form.find(`input[name="jenis_kelamin"][value="${data.jenis_kelamin}"]`).prop(
+                        'checked', true);
+
+                    // Jika ada radio untuk nilai_normal (opsional, pakai jika memang ada)
+                    $form.find(`input[name="nilai_normal"][value="${data.nilai_normal}"]`).prop(
+                        'checked', true);
+
+                    // Select2 Parameter Laboratorium
+                    $modal.find('#parameter_laboratorium_id_edit').select2({
+                        dropdownParent: $modal,
+                        placeholder: 'Pilih Data'
+                    }).val(data.parameter_laboratorium_id).trigger('change');
+
+                    $modal.modal('show');
+                }).fail(function(xhr) {
+                    showErrorAlert('Gagal mengambil data: ' + xhr.responseText);
                 });
             });
 
+            // Helper konversi umur dari total hari ke Tahun/Bulan/Hari
+            function convertDaysToYMD(totalDays) {
+                if (totalDays === null || isNaN(totalDays)) {
+                    return {
+                        years: 0,
+                        months: 0,
+                        days: 0
+                    };
+                }
+                let years = Math.floor(totalDays / 365);
+                let remainingDays = totalDays % 365;
+                let months = Math.floor(remainingDays / 30);
+                let days = remainingDays % 30;
+                return {
+                    years,
+                    months,
+                    days
+                };
+            }
+
+            // --- Event Delegation untuk Tombol Hapus di Tabel ---
             $('#dt-nilai-parameter tbody').on('click', '.btn-delete', function() {
                 var dataId = $(this).data('id');
 
-                // Menggunakan SweetAlert untuk konfirmasi
                 showDeleteConfirmation(function() {
                     $.ajax({
                         url: `/api/simrs/master-data/penunjang-medis/laboratorium/nilai-normal-parameter/${dataId}`,
@@ -217,21 +253,23 @@
                         },
                         error: function(xhr) {
                             showErrorAlert('Gagal menghapus data: ' + xhr.responseJSON
-                                .message);
+                                ?.message ?? 'Unknown error');
                         }
                     });
                 });
             });
 
-
-            // --- Handler untuk Submit Form ---
+            // --- Handler untuk Submit Form Update ---
             $('#update-form').on('submit', function(e) {
                 e.preventDefault();
-                var formData = $(this).serialize();
-                var dataId = $(this).attr('data-id');
+                var $form = $(this);
+                var formData = $form.serialize();
+                var dataId = $form.find('#id_edit').val();
+                var url =
+                    `/api/simrs/master-data/penunjang-medis/laboratorium/nilai-normal-parameter/${dataId}`;
 
                 $.ajax({
-                    url: `/api/simrs/master-data/penunjang-medis/laboratorium/nilai-normal-parameter/${dataId}`,
+                    url: url,
                     type: 'PATCH',
                     data: formData,
                     success: function(response) {
@@ -244,12 +282,14 @@
                             var errors = Object.values(xhr.responseJSON.errors).join('\n');
                             showErrorAlert('Terjadi kesalahan validasi:\n' + errors);
                         } else {
-                            showErrorAlert('Terjadi kesalahan: ' + xhr.responseJSON.message);
+                            showErrorAlert('Terjadi kesalahan: ' + (xhr.responseJSON?.message ??
+                                'Unknown error'));
                         }
                     }
                 });
             });
 
+            // --- Handler untuk Submit Form Tambah ---
             $('#store-form').on('submit', function(e) {
                 e.preventDefault();
                 var formData = $(this).serialize();
@@ -260,8 +300,8 @@
                     data: formData,
                     success: function(response) {
                         $('#modal-tambah-nilai-parameter-laboratorium').modal('hide');
-                        $('#store-form')[0].reset(); // Reset form setelah berhasil
-                        $('.select2').val(null).trigger('change'); // Reset select2
+                        $('#store-form')[0].reset();
+                        $('.select2').val(null).trigger('change');
                         showSuccessAlert(response.message);
                         setTimeout(() => window.location.reload(), 1500);
                     },
@@ -270,7 +310,8 @@
                             var errors = Object.values(xhr.responseJSON.errors).join('\n');
                             showErrorAlert('Terjadi kesalahan validasi:\n' + errors);
                         } else {
-                            showErrorAlert('Terjadi kesalahan: ' + xhr.responseJSON.message);
+                            showErrorAlert('Terjadi kesalahan: ' + (xhr.responseJSON?.message ??
+                                'Unknown error'));
                         }
                     }
                 });
