@@ -11,7 +11,7 @@ use App\Models\SIMRS\Bilingan;
 use App\Models\SIMRS\TagihanPasien;
 use App\Models\SIMRS\TindakanMedis;
 use App\Models\TarifTindakanMedis;
-// use App\Models\SIMRS\PembayaranTagihan; // Import jika diperlukan
+// use App\Models\SIMRS\pembayaran_tagihan; // Import jika diperlukan
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -27,31 +27,53 @@ class JasaDokterController extends Controller
     {
         $dokters = Doctor::with('employee')->get();
 
+        // --- PERUBAHAN BAGIAN 1: Default Filter Tanggal ke Hari Ini ---
+        // Tentukan tanggal awal dan akhir. Jika tidak ada di request, gunakan tanggal hari ini.
+        $tanggalAwal = $request->tanggal_awal;
+        $tanggalAkhir = $request->tanggal_akhir;
+
+        // Jika tidak ada filter tanggal sama sekali yang diterapkan oleh user,
+        // maka defaultnya adalah menampilkan data hari ini saja.
+        if (empty($tanggalAwal) && empty($tanggalAkhir)) {
+            $tanggalAwal = now()->toDateString();
+            $tanggalAkhir = now()->toDateString();
+        }
+        // --- AKHIR PERUBAHAN BAGIAN 1 ---
+
         $query = JasaDokter::query()
             // Filter: hanya yang punya tagihan pasien yang terkait dengan bilingan status final
             ->whereHas('tagihanPasien.bilinganSatu', function ($q) {
                 $q->where('status', 'final');
             })
-            // UBAH BAGIAN INI: Filter untuk mengecualikan 'Biaya Administrasi'
+            // Filter untuk mengecualikan 'Biaya Administrasi'
+            // Kode ini sudah benar, masalahnya ada pada saat pembuatan data (di model)
             ->whereHas('tagihanPasien', function ($q) {
                 $q->where('tagihan', 'NOT LIKE', 'Biaya Administrasi%');
             })
-            // --- AKHIR PERUBAHAN ---
             // Relasi yang dibutuhkan untuk view
-            ->with(['tagihanPasien.registration.patient', 'tagihanPasien.registration.penjamin', 'tagihanPasien.registration.kelas_rawat', 'tagihanPasien.registration.doctor.employee', 'tagihanPasien.tindakan_medis.tarifTindakanMedis', 'tagihanPasien.bilinganSatu.pembayaranTagihan', 'dokter.employee']);
+            ->with([
+                'tagihanPasien.registration.patient',
+                'tagihanPasien.registration.penjamin',
+                'tagihanPasien.registration.kelas_rawat',
+                'tagihanPasien.registration.doctor.employee',
+                'tagihanPasien.tindakan_medis.tarifTindakanMedis',
+                'tagihanPasien.bilinganSatu.pembayaran_tagihan',
+                'dokter.employee'
+            ]);
 
-        // ... (sisa method index tidak perlu diubah) ...
+        // --- PERUBAHAN BAGIAN 2: Menggunakan variabel tanggal yang sudah didefinisikan ---
         // Filter tanggal dari bilingan (created_at)
-        if ($request->filled('tanggal_awal')) {
-            $query->whereHas('tagihanPasien.bilinganSatu', function ($q) use ($request) {
-                $q->whereDate('created_at', '>=', $request->tanggal_awal);
+        if ($tanggalAwal) {
+            $query->whereHas('tagihanPasien.bilinganSatu', function ($q) use ($tanggalAwal) {
+                $q->whereDate('created_at', '>=', $tanggalAwal);
             });
         }
-        if ($request->filled('tanggal_akhir')) {
-            $query->whereHas('tagihanPasien.bilinganSatu', function ($q) use ($request) {
-                $q->whereDate('created_at', '<=', $request->tanggal_akhir);
+        if ($tanggalAkhir) {
+            $query->whereHas('tagihanPasien.bilinganSatu', function ($q) use ($tanggalAkhir) {
+                $q->whereDate('created_at', '<=', $tanggalAkhir);
             });
         }
+        // --- AKHIR PERUBAHAN BAGIAN 2 ---
 
         // Filter tipe registrasi
         if ($request->filled('tipe_registrasi')) {
@@ -64,11 +86,11 @@ class JasaDokterController extends Controller
         if ($request->filled('tagihan_pasien')) {
             $query->whereHas('tagihanPasien.bilinganSatu', function ($q) use ($request) {
                 if ($request->tagihan_pasien === 'lunas') {
-                    $q->whereHas('pembayaranTagihan', function ($pq) {
+                    $q->whereHas('pembayaran_tagihan', function ($pq) {
                         $pq->where(DB::raw('lower(bill_notes)'), 'like', '%lunas%');
                     });
                 } elseif ($request->tagihan_pasien === 'belum-lunas') {
-                    $q->whereDoesntHave('pembayaranTagihan', function ($pq) {
+                    $q->whereDoesntHave('pembayaran_tagihan', function ($pq) {
                         $pq->where(DB::raw('lower(bill_notes)'), 'like', '%lunas%');
                     });
                 }
@@ -77,11 +99,7 @@ class JasaDokterController extends Controller
 
         // Filter status AP
         if ($request->filled('status_ap')) {
-            if ($request->status_ap === 'draft') {
-                $query->where('status', 'draft');
-            } elseif ($request->status_ap === 'final') {
-                $query->where('status', 'final');
-            }
+            $query->where('status', $request->status_ap); // Disederhanakan
         }
 
         // Filter dokter berdasarkan registrasi
@@ -92,14 +110,19 @@ class JasaDokterController extends Controller
         }
 
         // Urutkan berdasarkan tanggal billing (created_at dari bilingan)
-        $jasaDokterItems = $query->get();
-        $jasaDokterItems = $jasaDokterItems->sortByDesc(function ($item) {
+        $jasaDokterItems = $query->get()->sortByDesc(function ($item) {
             return optional($item->tagihanPasien?->bilinganSatu)->created_at;
         });
 
-        // Ambil data
-
-        return view('app-type.keuangan.jasa-dokter.index', compact('jasaDokterItems', 'dokters'));
+        // --- PERUBAHAN BAGIAN 3: Kirim variabel tanggal ke view ---
+        // Ini agar input filter tanggal di view bisa menampilkan tanggal yang sedang aktif.
+        return view('app-type.keuangan.jasa-dokter.index', compact(
+            'jasaDokterItems',
+            'dokters',
+            'tanggalAwal',
+            'tanggalAkhir'
+        ));
+        // --- AKHIR PERUBAHAN BAGIAN 3 ---
     }
 
     // ... (sisa method dari storeSelected hingga sebelum exportExcel tidak perlu diubah) ...
@@ -422,7 +445,7 @@ class JasaDokterController extends Controller
                 'tagihanPasien.registration.penjamin',
                 'tagihanPasien.registration.kelas_rawat',
                 'tagihanPasien.registration.doctor.employee', // Dokter Registrasi
-                'tagihanPasien.bilinganSatu.pembayaranTagihan', // Untuk info pembayaran
+                'tagihanPasien.bilinganSatu.pembayaran_tagihan', // Untuk info pembayaran
                 'tagihanPasien.tindakan_medis', // Untuk nama tindakan asli jika perlu
                 'dokter.employee', // Dokter AP (yang ada di tabel jasa_dokter)
             ]);
@@ -468,11 +491,11 @@ class JasaDokterController extends Controller
         if ($request->filled('tagihan_pasien')) {
             $query->whereHas('tagihanPasien.bilinganSatu', function ($q) use ($request) {
                 if ($request->tagihan_pasien === 'lunas') {
-                    $q->whereHas('pembayaranTagihan', function ($pq) {
+                    $q->whereHas('pembayaran_tagihan', function ($pq) {
                         $pq->where(DB::raw('lower(bill_notes)'), 'like', '%lunas%');
                     });
                 } elseif ($request->tagihan_pasien === 'belum-lunas') {
-                    $q->whereDoesntHave('pembayaranTagihan', function ($pq) {
+                    $q->whereDoesntHave('pembayaran_tagihan', function ($pq) {
                         $pq->where(DB::raw('lower(bill_notes)'), 'like', '%lunas%');
                     });
                 }

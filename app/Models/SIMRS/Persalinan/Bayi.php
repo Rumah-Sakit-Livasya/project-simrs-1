@@ -9,6 +9,7 @@ use App\Models\SIMRS\Operasi\OrderOperasi;
 use App\Models\SIMRS\Patient;
 use App\Models\SIMRS\Registration;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Request;
 
 class Bayi extends Model

@@ -139,7 +139,7 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
     // Route::get('/api/registration/{id}', [RegistrationController::class, 'getRegistrationData']);
     Route::get('get-registrasi-data/{registrasiId}', [RegistrationController::class, 'getRegistrationData'])->name('registration.get');
     Route::get('get-medical-actions/{registrationId}', [OrderTindakanMedisController::class, 'getMedicalActions'])->name('medical.action.get');
-    Route::delete('delete-medical-action/{id}', [OrderTindakanMedis::class, 'destroy'])->name('medical.action.destroy');
+    Route::delete('delete-medical-action/{id}', [OrderTindakanMedisController::class, 'destroy'])->name('medical.action.destroy');
     Route::post('order-tindakan-medis/', [OrderTindakanMedisController::class, 'store'])->name('tindakan.medis.store');
 
     Route::post('order-radiologi/', [OrderRadiologiController::class, 'store'])->name('order.radiologi.store');
