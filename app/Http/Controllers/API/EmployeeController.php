@@ -277,7 +277,6 @@ class EmployeeController extends Controller
     public function store()
     {
         try {
-            // dd(request());
             $validator = Validator::make(
                 request()->all(),
                 [
@@ -304,6 +303,10 @@ class EmployeeController extends Controller
                     'account_number' => 'nullable',
                     'account_holder_name' => 'nullable',
                     'is_management' => 'nullable',
+                    'no_mou' => 'nullable|string|max:255',
+                    'mou_period' => 'nullable|string|max:255',
+                    'mou_start_date' => 'nullable|date',
+                    'mou_end_date' => 'nullable|date',
                 ],
                 [
                     'fullname.required' => 'Nama Harus di isi!',
@@ -329,6 +332,10 @@ class EmployeeController extends Controller
                     'bank_id.required' => 'Nama bank harus dipilih',
                     'account_number.required' => 'Nomor rekening harus diisi',
                     'account_holder_name.required' => 'Nama rekening harus diisi',
+                    'no_mou.required' => 'Nomor MOU harus diisi',
+                    'mou_period.required' => 'Periode MOU harus diisi',
+                    'mou_start_date.required' => 'Tanggal mulai MOU harus diisi',
+                    'mou_end_date.required' => 'Tanggal selesai MOU harus diisi',
                 ]
             );
 
@@ -336,24 +343,58 @@ class EmployeeController extends Controller
                 return response()->json($validator->errors(), 422);
             }
 
-            request()['company_id'] = 1;
-            $pegawai = Employee::create(request()->all());
-            $bank = BankEmployee::create([
+            $data = $validator->validated();
+            $data['company_id'] = 1;
+
+            // Kunci permasalahan: jika request is_management tidak diisi/set null, berikan default false
+            $isManagement = request()->has('is_management') ? (bool) request()->input('is_management') : false;
+
+            // Store Employee with MOU fields
+            $pegawai = Employee::create([
+                'fullname' => $data['fullname'],
+                'email' => $data['email'],
+                'mobile_phone' => $data['mobile_phone'],
+                'place_of_birth' => $data['place_of_birth'],
+                'birthdate' => $data['birthdate'],
+                'gender' => $data['gender'],
+                'marital_status' => $data['marital_status'],
+                'religion' => $data['religion'],
+                'identity_type' => $data['identity_type'],
+                'identity_number' => $data['identity_number'],
+                'citizen_id_address' => $data['citizen_id_address'],
+                'employee_code' => $data['employee_code'],
+                'employment_status' => $data['employment_status'],
+                'join_date' => $data['join_date'],
+                'organization_id' => $data['organization_id'],
+                'job_position_id' => $data['job_position_id'],
+                'job_level_id' => $data['job_level_id'],
+                'approval_line' => $data['approval_line'],
+                'basic_salary' => $data['basic_salary'],
+                'is_management' => $isManagement,
+                'company_id' => $data['company_id'],
+                'no_mou' => $data['no_mou'] ?? null,
+                'mou_period' => $data['mou_period'] ?? null,
+                'mou_start_date' => $data['mou_start_date'] ?? null,
+                'mou_end_date' => $data['mou_end_date'] ?? null,
+            ]);
+
+            // Store bank data if present
+            BankEmployee::create([
                 'employee_id' => $pegawai->id,
-                'bank_id' => request()->bank_id,
-                'account_holder_name' => request()->account_holder_name,
-                'account_number' => request()->account_number,
+                'bank_id' => $data['bank_id'] ?? null,
+                'account_holder_name' => $data['account_holder_name'] ?? null,
+                'account_number' => $data['account_number'] ?? null,
                 'status' => 1,
             ]);
 
             $user = User::create([
                 'employee_id' => $pegawai->id,
-                'name' => request()->fullname,
-                'email' => request()->email,
+                'name' => $data['fullname'],
+                'email' => $data['email'],
                 'status' => 1,
             ]);
             $user->assignRole('employee');
-            //return response
+
             return response()->json(['message' => 'Pegawai Berhasil di Tambahkan!']);
         } catch (\Exception $e) {
             return response()->json([
