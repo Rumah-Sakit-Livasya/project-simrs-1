@@ -15,6 +15,7 @@
     ];
 
     $pelayananOptions = [
+        'kebidanan' => 'Kebidanan',
         'bedah' => 'Bedah',
         'non-bedah' => 'Non Bedah',
         'psikiatrik' => 'Psikiatrik',
