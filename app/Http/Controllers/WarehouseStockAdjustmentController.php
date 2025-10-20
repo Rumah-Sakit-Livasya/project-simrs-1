@@ -40,7 +40,7 @@ class WarehouseStockAdjustmentController extends Controller
 
         foreach ($filters as $filter) {
             if ($request->filled($filter)) {
-                $query->where($filter, 'like', '%'.$request->$filter.'%');
+                $query->where($filter, 'like', '%' . $request->$filter . '%');
                 $filterApplied = true;
             }
         }
@@ -57,7 +57,7 @@ class WarehouseStockAdjustmentController extends Controller
 
         if ($request->filled('nama_barang')) {
             $query->whereHas('items.stored.pbi', function ($q) use ($request) {
-                $q->where('nama_barang', 'like', '%'.$request->nama_barang.'%');
+                $q->where('nama_barang', 'like', '%' . $request->nama_barang . '%');
             });
             $filterApplied = true;
         }
@@ -70,10 +70,17 @@ class WarehouseStockAdjustmentController extends Controller
             $sa = WarehouseStockAdjustment::all();
         }
 
+        $auth_users = \App\Models\OtorisasiUser::with('user.employee')
+            ->whereHas('user', function ($query) {
+                $query->where('is_active', 1);
+            })
+            ->where('otorisasi_type', 'Stock Adjustment')
+            ->get();
+
         return view('pages.simrs.warehouse.revaluasi-stock.stock-adjustment.index', [
             'sas' => $sa,
             'gudangs' => WarehouseMasterGudang::all(),
-            'auth_users' => WarehouseStockAdjustmentUsers::all(),
+            'auth_users' => $auth_users,
         ]);
     }
 
@@ -295,7 +302,7 @@ class WarehouseStockAdjustmentController extends Controller
             ->count() + 1;
         $count = str_pad($count, 6, '0', STR_PAD_LEFT);
 
-        return $count.'/ADJ/'.$year.$month;
+        return $count . '/ADJ/' . $year . $month;
     }
 
     /**
@@ -303,6 +310,7 @@ class WarehouseStockAdjustmentController extends Controller
      */
     public function update(Request $request)
     {
+        // dd($request->all());
         $validatedData1 = $request->validate([
             'user_id' => 'required|exists:users,id',
             'barang_f_id' => 'nullable|exists:warehouse_barang_farmasi,id',
@@ -351,7 +359,7 @@ class WarehouseStockAdjustmentController extends Controller
 
                 WarehouseStockAdjustmentItems::create([
                     'sa_id' => $sa->id,
-                    'si_'.$validatedData2['type'].'_id' => $stored_barang->id,
+                    'si_' . $validatedData2['type'] . '_id' => $stored_barang->id,
                     'qty' => $delta,
                 ]);
 
@@ -363,9 +371,9 @@ class WarehouseStockAdjustmentController extends Controller
                 // use the GoodsStockService
                 $args = new IncreaseDecreaseStockArguments($user, $sa, $stored_barang, $delta);
                 if ($delta < 0) {
-                    $this->goodsStockService->increaseStock($args);
-                } else {
                     $this->goodsStockService->decreaseStock($args);
+                } else {
+                    $this->goodsStockService->increaseStock($args);
                 }
             }
 

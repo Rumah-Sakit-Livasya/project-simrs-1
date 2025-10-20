@@ -216,18 +216,21 @@
             // Show Edit Modal
             $('body').on('click', '.edit-btn', function() {
                 var id = $(this).data('id');
-                $.get("{{ url('simrs/warehouse/master-data/pabrik') }}/" + id + "/edit", function(
-                    data) {
-                    $('#pabrik-modal-title').text('Edit Pabrik');
-                    $('#pabrik_id').val(data.id);
-                    $('#nama').val(data.nama);
-                    $('#alamat').val(data.alamat);
-                    $('#telp').val(data.telp);
-                    $('#contact_person').val(data.contact_person);
-                    $('#contact_person_phone').val(data.contact_person_phone);
-                    $('input[name="aktif"][value="' + (data.aktif ? 1 : 0) + '"]').prop(
-                        'checked', true);
-                    $('#pabrik-modal').modal('show');
+                $.get("{{ url('simrs/warehouse/master-data/pabrik') }}/" + id, function(response) {
+                    if (response.success && response.data) {
+                        $('#pabrik-modal-title').text('Edit Pabrik');
+                        $('#pabrik_id').val(response.data.id ?? '');
+                        $('#nama').val(response.data.nama ?? '');
+                        $('#alamat').val(response.data.alamat ?? '');
+                        $('#telp').val(response.data.telp ?? '');
+                        $('#contact_person').val(response.data.contact_person ?? '');
+                        $('#contact_person_phone').val(response.data.contact_person_phone ?? '');
+                        $('input[name="aktif"][value="' + (response.data.aktif ? 1 : 0) + '"]')
+                            .prop('checked', true);
+                        $('#pabrik-modal').modal('show');
+                    } else {
+                        showErrorAlert('Data tidak ditemukan atau gagal mengambil data.');
+                    }
                 });
             });
 
