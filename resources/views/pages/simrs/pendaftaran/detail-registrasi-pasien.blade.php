@@ -388,10 +388,18 @@
                                         <div class="form-group">
                                             <div class="row">
                                                 <label for="s_tgl_1" class="col-md-4 control-label">Ruangan - Bed</label>
-                                                <div class="col-md-8">
-                                                    <input class="form-control" type="text" value="  - "
-                                                        readonly="readonly">
-                                                </div>
+                                                @if ($registration->registration_type == 'rawat-inap')
+                                                    <div class="col-md-8">
+                                                        <input class="form-control" type="text"
+                                                            value="{{ $registration->patient->bed->room->ruangan . ' - ' . $registration->patient->bed->nama_tt }}"
+                                                            readonly="readonly">
+                                                    </div>
+                                                @else
+                                                    <div class="col-md-8">
+                                                        <input class="form-control" type="text" value="  - "
+                                                            readonly="readonly">
+                                                    </div>
+                                                @endif
                                             </div>
                                         </div>
                                     </div>
