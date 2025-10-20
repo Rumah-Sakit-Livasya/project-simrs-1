@@ -1,16 +1,14 @@
-<div class="modal fade" id="pilihSRModal" tabindex="-1" aria-labelledby="pilihSRModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+<div class="modal fade" id="modal-pilih-sr" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h1 class="modal-title fs-5" id="addModalLabel">Pilih Stock Request</h1>
+                <h5 class="modal-title">Pilih Stock Request (SR)</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true"><i class="fal fa-times"></i></span>
+                </button>
             </div>
             <div class="modal-body">
-                <input type="text" id="searchSRInput" placeholder="Cari Kode Stock Request..." class="form-control">
-                <br>
-                <input type="text" id="searchSRAsalInput" placeholder="Cari Gudang Asal..." class="form-control">
-                <br>
-                <input type="text" id="searchSRTujuanInput" placeholder="Cari Gudang Tujuan..." class="form-control">
-                <br>
+                {{-- Tambahkan filter jika perlu --}}
                 <table class="table table-bordered table-hover table-striped w-100">
                     <thead class="bg-primary-600">
                         <tr>
@@ -19,26 +17,26 @@
                             <th>Gudang Asal</th>
                             <th>Gudang Tujuan</th>
                             <th>User</th>
-                            <th>Keterangan</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ($srs as $sr)
-                            <tr class="pointer sr-row" onclick="PopupDBPharmacyClass.SelectSR({{ json_encode($sr) }})"
-                                data-bs-dismiss="modal" title="Pilih {{ $sr->kode_sr }}">
+                        @forelse ($srs as $sr)
+                            {{-- Simpan data SR di atribut data-* untuk diakses oleh JS --}}
+                            <tr class="pointer sr-row" data-sr='{{ json_encode($sr) }}'
+                                title="Pilih {{ $sr->kode_sr }}">
                                 <td>{{ tgl($sr->tanggal_sr) }}</td>
-                                <td class="kode-sr">{{ $sr->kode_sr }}</td>
-                                <td class="gudang-asal-sr">{{ $sr->asal->nama }}</td>
-                                <td class="gudang-tujuan-sr">{{ $sr->tujuan->nama }}</td>
-                                <td class="user-sr">{{ $sr->user->employee->fullname }}</td>
-                                <td>{{ $sr->keterangan }}</td>
+                                <td>{{ $sr->kode_sr }}</td>
+                                <td>{{ $sr->asal->nama }}</td>
+                                <td>{{ $sr->tujuan->nama }}</td>
+                                <td>{{ $sr->user->employee->fullname }}</td>
                             </tr>
-                        @endforeach
+                        @empty
+                            <tr>
+                                <td colspan="5" class="text-center">Tidak ada Stock Request yang tersedia.</td>
+                            </tr>
+                        @endforelse
                     </tbody>
                 </table>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
             </div>
         </div>
     </div>

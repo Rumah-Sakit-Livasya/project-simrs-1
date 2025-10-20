@@ -3,114 +3,84 @@
 namespace App\Exports;
 
 use App\Models\Employee;
-use Carbon\Carbon;
-use Illuminate\Contracts\View\View;
-use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
-use Maatwebsite\Excel\Concerns\WithEvents;
-use Maatwebsite\Excel\Events\AfterSheet;
-use PhpOffice\PhpSpreadsheet\Style\Border;
-use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
-use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
+use Maatwebsite\Excel\Concerns\WithStyles;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class EmployeeExport implements FromCollection, WithHeadings, ShouldAutoSize, WithEvents
+class EmployeeExport implements FromQuery, WithHeadings, WithMapping, ShouldAutoSize, WithStyles
 {
-    protected $employees;
-    protected $month;
-    protected $year;
-    protected $shifts; // Tambahkan properti shifts
-
-    public function __construct($employees, $shifts, $month, $year)
+    /**
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function query()
     {
-        $this->employees = $employees;
-        $this->shifts = $shifts; // Inisialisasi shifts
-        $this->month = $month;
-        $this->year = $year;
+        // Tambahkan orderBy fullname
+        return Employee::query()
+            ->with(['organization', 'jobPosition', 'jobLevel', 'company'])
+            ->where('is_active', 1)
+            ->orderBy('fullname', 'asc');
     }
 
-    public function collection()
+    /**
+     * @param \App\Models\Employee $employee
+     * @return array
+     */
+    public function map($employee): array
     {
-        return $this->employees;
-    }
-
-    public function headings(): array
-    {
-        // Atur judul kolom untuk data karyawan
-        $headings = [
-            'Employee ID',
-            'Email',
-            'Employee Name',
+        return [
+            $employee->employee_code,
+            $employee->fullname,
+            $employee->email,
+            $employee->mobile_phone,
+            $employee->jobPosition->name ?? '-',
+            $employee->jobLevel->name ?? '-',
+            $employee->organization->name ?? '-',
+            $employee->company->name ?? '-',
+            $employee->employment_status,
+            $employee->join_date,
         ];
-
-        // Tentukan tanggal awal dan akhir berdasarkan bulan dan tahun yang dipilih
-        $startDate = Carbon::createFromDate($this->year, $this->month - 1, 26);
-        $endDate = Carbon::createFromDate($this->year, $this->month - 1, 25)->addMonth();
-
-        // Buat judul kolom berdasarkan rentang tanggal
-        while ($startDate <= $endDate) {
-            $headings[] = $startDate->format('d-m-Y');
-            $startDate->addDay();
-        }
-
-        return $headings;
     }
 
     /**
      * @return array
      */
-    public function registerEvents(): array
+    public function headings(): array
     {
         return [
-            AfterSheet::class => function (AfterSheet $event) {
-                $startDate = Carbon::createFromDate($this->year, $this->month - 1, 25);
-                $endDate = Carbon::createFromDate($this->year, $this->month - 1, 25)->addMonth();
-
-                // Menambahkan data nama shift di samping nama employee
-                $startDateColumnIndex = 4; // Kolom pertama setelah Employee Name
-                $startDateRowIndex = 2; // Baris kedua (setelah header)
-
-                foreach ($this->employees as $employee) {
-                    $currentColumnIndex = $startDateColumnIndex;
-                    foreach ($this->headings() as $index => $heading) {
-                        if ($index < 3) { // Skip Employee ID, Email, and Employee Name columns
-                            continue;
-                        }
-
-                        $dateColumnIndex = $index + 1; // Kolom tanggal dimulai dari indeks ke-4
-                        $attendanceDate = Carbon::createFromFormat('d-m-Y', $heading)->startOfDay();
-
-                        if ($attendanceDate->gte($startDate) && $attendanceDate->lte($endDate)) {
-                            // Tanggal pada attendance berada di antara startDate dan endDate
-                            $shift = null;
-                            $attendance = $employee->attendance->where('date', $attendanceDate->format('Y-m-d'))->first();
-                            if ($attendance) {
-                                $shift = $attendance->shift->name;
-                                if ($attendance->attendance_code || $attendance->day_off) {
-                                    $shift = $attendance->attendance_code->code ?? $attendance->day_off->attendance_code->code;
-                                }
-                            }
-                            $event->sheet->setCellValueByColumnAndRow($currentColumnIndex, $startDateRowIndex, $shift);
-                        }
-
-                        $currentColumnIndex++;
-                    }
-                    $startDateRowIndex++;
-                }
-
-                // Menambahkan border ke setiap sel dalam lembar Excel
-                $highestRow = $event->sheet->getHighestRow();
-                $highestColumn = $event->sheet->getHighestColumn();
-                $range = 'A1:' . $highestColumn . $highestRow; // Mulai dari kolom Employee Name
-                $event->sheet->getStyle($range)->applyFromArray([
-                    'borders' => [
-                        'allBorders' => [
-                            'borderStyle' => Border::BORDER_THIN,
-                            'color' => ['argb' => '000000'],
-                        ],
-                    ],
-                ]);
-            },
+            'NIP',
+            'Nama Lengkap',
+            'Email',
+            'No. HP',
+            'Jabatan',
+            'Level',
+            'Unit/Organisasi',
+            'Perusahaan',
+            'Status Pegawai',
+            'Tanggal Bergabung',
         ];
+    }
+
+    /**
+     * @param Worksheet $sheet
+     * @return array
+     */
+    public function styles(Worksheet $sheet): array
+    {
+        // Mengatur border pada seluruh data termasuk heading
+        $highestRow = $sheet->getHighestDataRow();
+        $highestColumn = $sheet->getHighestDataColumn();
+
+        $dataRange = "A1:{$highestColumn}{$highestRow}";
+
+        // Mengatur border tipis di seluruh area data
+        $sheet->getStyle($dataRange)->getBorders()->getAllBorders()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+
+        // Optional: bold heading
+        $sheet->getStyle('A1:' . $highestColumn . '1')->getFont()->setBold(true);
+
+        return [];
     }
 }

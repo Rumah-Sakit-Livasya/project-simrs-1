@@ -6,6 +6,7 @@ use App\Http\Controllers\API\DayOffRequestController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Pages\CompanyController;
 use App\Http\Controllers\API\CompanyController as ApiCompanyController;
+use App\Http\Controllers\API\EmployeeController;
 use App\Http\Controllers\API\RoleController;
 use App\Http\Controllers\API\TimeScheduleController;
 use App\Http\Controllers\API\WasteTransportController;
@@ -145,6 +146,7 @@ Route::middleware([LastSeenUser::class])->group(function () {
             // web.php
             Route::get('/team', [TeamController::class, 'index'])->name('team.index');
             Route::get('/team/search', [TeamController::class, 'search'])->name('team.search');
+            Route::get('/export', [EmployeeController::class, 'export'])->name('employees.export');
         });
         /* END PEGAWAI ----------------------------------------------------------------------------*/
 

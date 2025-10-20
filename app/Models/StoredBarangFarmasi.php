@@ -20,6 +20,23 @@ class StoredBarangFarmasi extends Model implements AuditableContract
         return $this->belongsTo(WarehousePenerimaanBarangFarmasiItems::class, 'pbi_id');
     }
 
+    /**
+     * Mendapatkan data master barang farmasi melalui tabel penerimaan barang item.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasOneThrough
+     */
+    public function barang()
+    {
+        return $this->hasOneThrough(
+            WarehouseBarangFarmasi::class,
+            WarehousePenerimaanBarangFarmasiItems::class,
+            'id', // Foreign key di tabel WarehousePenerimaanBarangFarmasiItems (pbi)
+            'id', // Foreign key di tabel WarehouseBarangFarmasi (barang)
+            'pbi_id', // Local key di tabel StoredBarangFarmasi
+            'barang_id' // Local key di tabel WarehousePenerimaanBarangFarmasiItems
+        );
+    }
+
     public function gudang()
     {
         return $this->belongsTo(WarehouseMasterGudang::class, 'gudang_id');

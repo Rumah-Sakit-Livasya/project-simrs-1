@@ -14,23 +14,36 @@ class WarehousePenerimaanBarangFarmasiItems extends Model implements AuditableCo
     protected $table = "warehouse_penerimaan_barang_farmasi_item";
     protected $guarded = ["id"];
 
-    public function pb(){
+    public function pb()
+    {
         return $this->belongsTo(WarehousePenerimaanBarangFarmasi::class, 'pb_id');
     }
 
-    public function item(){
+    public function item()
+    {
         return $this->belongsTo(WarehouseBarangFarmasi::class, 'barang_id');
     }
 
-    public function satuan(){
+    /**
+     * Relasi ke master barang farmasi
+     */
+    public function barang()
+    {
+        return $this->belongsTo(WarehouseBarangFarmasi::class, 'barang_id');
+    }
+
+    public function satuan()
+    {
         return $this->belongsTo(WarehouseSatuanBarang::class, 'satuan_id');
     }
 
-    public function stored_items(){
+    public function stored_items()
+    {
         return $this->hasMany(StoredBarangFarmasi::class, 'pbi_id');
     }
 
-    public function poi(){
+    public function poi()
+    {
         return $this->belongsTo(ProcurementPurchaseOrderPharmacyItems::class, 'poi_id');
     }
 }

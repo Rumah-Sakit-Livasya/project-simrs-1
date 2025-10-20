@@ -1,15 +1,3 @@
-<style>
-    .display-none {
-        display: none;
-    }
-
-    .popover {
-        max-width: 100%;
-        max-height:
-    }
-</style>
-
-
 <div class="row">
     <div class="col-xl-12">
         <div id="panel-1" class="panel">
@@ -31,61 +19,99 @@
                                 <th>Gudang</th>
                                 <th>Keterangan</th>
                                 <th>Stock Awal</th>
-                                <th>Adjustment</th>
+                                <th>Masuk</th>
+                                <th>Keluar</th>
                                 <th>Stock Akhir</th>
                                 <th>User</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @if (isset($logs))
+                            @if (isset($logs) && isset($saldo_awal))
                                 @php
-                                    $total_qty = $logs->sum('stock.qty');
+                                    $saldo_berjalan = $saldo_awal;
                                     $count = 0;
                                 @endphp
+                                <!-- Baris untuk Saldo Awal -->
+                                <tr class="table-info">
+                                    <td colspan="5" class="text-center fw-bold">SALDO AWAL</td>
+                                    <td class="fw-bold">{{ number_format($saldo_awal) }}</td>
+                                    <td colspan="2"></td>
+                                    <td class="fw-bold">{{ number_format($saldo_awal) }}</td>
+                                    <td></td>
+                                </tr>
+
                                 @foreach ($logs as $log)
                                     @php
-                                        $move_out = false;
-                                        $adjustment = $log->after_qty - $log->before_qty;
-                                        $final = $total_qty;
-                                        $before = $total_qty = $total_qty - $adjustment;
-                                        $sign = $adjustment > 0 ? '+' : '';
-                                        if (
-                                            request('gudang_id') !== null &&
-                                            $log->after_gudang_id != request('gudang_id')
-                                        ) {
-                                            $move_out = true;
+                                        $stock_awal_baris = $saldo_berjalan;
+                                        $adjustment = 0;
+                                        $gudang_id_filter = request('gudang_id');
+
+                                        if ($gudang_id_filter) {
+                                            if ($log->after_gudang_id == $gudang_id_filter) {
+                                                $adjustment = $log->after_qty - $log->before_qty;
+                                            }
+                                            if (
+                                                $log->before_gudang_id == $gudang_id_filter &&
+                                                $log->after_gudang_id != $gudang_id_filter
+                                            ) {
+                                                $adjustment = -$log->before_qty;
+                                            }
+                                        } else {
+                                            $adjustment = $log->after_qty - $log->before_qty;
                                         }
 
-                                        // from $log->source, find column where it starts with "kode"
-                                        // and store its value to $code
-                                        $code = '';
+                                        if ($adjustment == 0) {
+                                            continue;
+                                        }
 
-                                        foreach ($log->source->getAttributes() as $key => $value) {
-                                            if (Str::startsWith($key, 'kode')) {
-                                                $code = $value;
-                                                break;
+                                        $stock_akhir_baris = $stock_awal_baris + $adjustment;
+                                        $saldo_berjalan = $stock_akhir_baris;
+
+                                        $qty_masuk = $adjustment > 0 ? $adjustment : 0;
+                                        $qty_keluar = $adjustment < 0 ? abs($adjustment) : 0;
+
+                                        // *** PERBAIKAN DENGAN HELPER OPTIONAL() ***
+                                        $code = 'N/A';
+                                        $source_attributes = optional($log->source)->getAttributes(); // Tidak akan error jika $log->source null
+
+                                        if (is_array($source_attributes)) {
+                                            foreach ($source_attributes as $key => $value) {
+                                                if (str_starts_with($key, 'kode') && !is_null($value)) {
+                                                    $code = $value;
+                                                    break;
+                                                }
                                             }
                                         }
 
-                                        if ($code == '') {
-                                            $code = 'Unknown Code';
+                                        $keterangan =
+                                            optional($log->source)->keterangan ??
+                                            ($log->keterangan ?? 'Tanpa Keterangan');
+                                        $nama_user = optional($log->user)->name ?? 'User Tidak Dikenal';
+
+                                        $gudang_tampil = 'N/A';
+                                        if ($adjustment < 0) {
+                                            $gudang_tampil =
+                                                optional($log->before_gudang)->nama ?? 'Gudang Asal Dihapus';
+                                        } else {
+                                            $gudang_tampil =
+                                                optional($log->after_gudang)->nama ?? 'Gudang Tujuan Dihapus';
                                         }
+
                                     @endphp
-                                    @if ($adjustment != 0)
-                                        <tr>
-                                            <td>{{ ++$count }}</td>
-                                            <td>{{ tgl($log->created_at) }}</td>
-                                            <td>{{ $code }}</td>
-                                            <td>{{ $move_out ? $log->before_gudang->nama : $log->after_gudang->nama }}
-                                            </td>
-                                            <td>{{ $log->source->keterangan ?? $log->keterangan }}</td>
-                                            <td>{{ $before }}</td>
-                                            <td>{{ !$move_out ? $sign : '' }}{{ $move_out ? -$log->before_qty : $adjustment }}
-                                            </td>
-                                            <td>{{ $move_out ? 0 : $final }}</td>
-                                            <td>{{ $log->user->name }}</td>
-                                        </tr>
-                                    @endif
+                                    <tr>
+                                        <td>{{ ++$count }}</td>
+                                        <td>{{ $log->created_at->format('d M Y H:i:s') }}</td>
+                                        <td>{{ $code }}</td>
+                                        <td>{{ $gudang_tampil }}</td>
+                                        <td>{{ $keterangan }}</td>
+                                        <td>{{ number_format($stock_awal_baris) }}</td>
+                                        <td class="text-success">
+                                            {{ $qty_masuk > 0 ? '+' . number_format($qty_masuk) : 0 }}</td>
+                                        <td class="text-danger">
+                                            {{ $qty_keluar > 0 ? '-' . number_format($qty_keluar) : 0 }}</td>
+                                        <td class="fw-bold">{{ number_format($stock_akhir_baris) }}</td>
+                                        <td>{{ $nama_user }}</td>
+                                    </tr>
                                 @endforeach
                             @endif
                         </tbody>
@@ -97,7 +123,8 @@
                                 <th>Gudang</th>
                                 <th>Keterangan</th>
                                 <th>Stock Awal</th>
-                                <th>Adjustment</th>
+                                <th>Masuk</th>
+                                <th>Keluar</th>
                                 <th>Stock Akhir</th>
                                 <th>User</th>
                             </tr>

@@ -1,278 +1,54 @@
 // @ts-check
 /// <reference types="jquery" />
-/// <reference path="../../../types.d.ts" />
 
-// @ts-ignore
-const Swal = /** @type {import("sweetalert2").default} */ (window.Swal);
+$(document).ready(function () {
+    // === Cache DOM Elements ===
+    const $form = $("#form-sr");
+    const $loadingPage = $("#loading-page");
+    const $AddModal = $("#pilihItemModal");
+    const $ModalItemTableBody = $("#itemTable");
+    const $ItemTableBody = $("#tableItems");
+    const $AsalGudangId = $("select[name='asal_gudang_id']");
+    const $TujuanGudangId = $("select[name='tujuan_gudang_id']");
+    const $ItemSourceSelect = $("#itemSourceSelect");
+    const $ItemSearchInput = $("#searchItemInput");
 
-class PopupSRPharmacyHandler {
-    /**
-     * @type {JQuery<HTMLElement>}
-     */
-    #$AsalGudangId;
+    let keyCache = [];
+    let itemCounter = $ItemTableBody.find("tr").length;
 
-    /**
-     * @type {JQuery<HTMLElement>}
-     */
-    #$TujuanGudangId;
+    initializeKeyCache();
 
-    /**
-     * @type {JQuery<HTMLElement>}
-     */
-    #$AddModal;
+    // === Event Bindings ===
+    $("#add-btn").on("click", handleAddButtonClick);
+    $ItemSourceSelect.on("change", applyModalFilter);
+    $ItemSearchInput.on("keyup", applyModalFilter);
+    $ItemTableBody.on("click", ".delete-btn", handleDeleteItemClick);
+    $ModalItemTableBody.on("click", ".btn-pilih-item", handleSelectItemClick);
 
-    /**
-     * @type {JQuery<HTMLElement>}
-     */
-    #$LoadingIcon;
+    $AsalGudangId.on("change", resetItems);
+    $TujuanGudangId.on("change", resetItems);
 
-    /**
-     * @type {JQuery<HTMLElement>}
-     */
-    #$LoadingPage;
-
-    /**
-     * @type {JQuery<HTMLElement>}
-     */
-    #$Table;
-
-    /**
-     * @type {JQuery<HTMLElement>}
-     */
-    #$ModalTable;
-
-    /**
-     * @type {JQuery<HTMLElement>}
-     */
-    #$ItemSource;
-
-    /**
-     * @type {JQuery<HTMLElement>}
-     */
-    #$ItemSearch;
-
-    /**
-     * @type {string[]}
-     */
-    // @ts-ignore
-    #KeyCache = window._key_caches ?? [];
-
-    #API_URL = "/api/simrs/warehouse/stock-request/pharmacy";
-
-    constructor() {
-        this.#$AsalGudangId = $("select[name='asal_gudang_id']");
-        this.#$TujuanGudangId = $("select[name='tujuan_gudang_id']");
-        this.#$AddModal = $("#pilihItemModal");
-        this.#$LoadingIcon = $("#loading-spinner");
-        this.#$LoadingPage = $("#loading-page");
-        this.#$Table = $("#tableItems");
-        this.#$ModalTable = $("#itemTable");
-        this.#$ItemSource = $("#itemSourceSelect");
-        this.#$ItemSearch = $("#searchItemInput");
-
-        this.#init();
-    }
-
-    #init() {
-        this.#addEventListeners("#add-btn", this.#handleAddButtonClick);
-        this.#addEventListeners(
-            "#searchItemInput",
-            this.#handleItemSearchBar,
-            "keyup"
-        );
-        this.#addEventListeners(
-            "#order-submit-draft",
-            this.#handleDraftButtonClick
-        );
-        this.#addEventListeners(
-            "#order-submit-final",
-            this.#handleFinalButtonClick
-        );
-        this.#addEventListeners(
-            "#itemSourceSelect",
-            this.#handleItemSearchBar.bind(this, null),
-            "change"
-        );
-        $("#asal-gudang").on(
-            "select2:select",
-            this.#handleGudangChange.bind(this)
-        );
-        $("#tujuan-gudang").on(
-            "select2:select",
-            this.#handleGudangChange.bind(this)
-        );
-        this.#showLoading(false);
-    }
-
-    #handleGudangChange() {
-        this.#KeyCache = [];
-        this.#$Table.empty();
-    }
-
-    /**
-     * Handle save order final button click
-     * @param {Event} event
-     */
-    #handleFinalButtonClick(event) {
-        const button = /** @type {HTMLButtonElement} */ (event.target);
-        // insert hidden input
-        // with name "status"
-        // and value "final"
-        const input = document.createElement("input");
-        input.type = "hidden";
-        input.name = "status";
-        input.value = "final";
-        button.insertAdjacentElement("afterend", input);
-    }
-
-    /**
-     * Handle save order draft button click
-     * @param {Event} event
-     */
-    #handleDraftButtonClick(event) {
-        const button = /** @type {HTMLButtonElement} */ (event.target);
-        // insert hidden input
-        // with name "status"
-        // and value "draft"
-        const input = document.createElement("input");
-        input.type = "hidden";
-        input.name = "status";
-        input.value = "draft";
-        button.insertAdjacentElement("afterend", input);
-    }
-
-    /**
-     * Handle item search bar on key up
-     * @param {Event?} event
-     */
-    #handleItemSearchBar(event) {
-        let value = "";
-        if (event) {
-            const searchInput = /** @type {HTMLInputElement} */ (event.target);
-            value = searchInput.value.toLowerCase();
-        } else {
-            value = /** @type {string} */ (
-                (this.#$ItemSearch.val()) || ""
-            ).toLowerCase();
+    // [PERBAIKAN KUNCI] Ubah event handler tombol submit
+    $("#order-submit-draft, #order-submit-final").on("click", function (e) {
+        e.preventDefault();
+        const status = $(this).is("#order-submit-final") ? "final" : "draft";
+        if (submitForm(status)) {
+            $form.submit();
         }
-        const items = document.querySelectorAll("tr.item");
-        const source = /** @type {"stock" | "barang"} */ (
-            this.#$ItemSource.val()
-        );
+    });
 
-        items.forEach((item) => {
-            if (!item) return;
-            const itemNameElement = item.querySelector(".item-name");
-            if (!itemNameElement) return;
-            const itemName = itemNameElement.textContent;
-            if (!itemName) return;
-
-            // get attribute data-type
-            const itemType = item.getAttribute("data-type");
-            if (!itemType) return;
-            if (itemType !== source) {
-                // @ts-ignore
-                item.style.display = "none";
-                return;
-            }
-
-            // @ts-ignore
-            item.style.display = itemName.toLowerCase().includes(value)
-                ? ""
-                : "none";
+    function initializeKeyCache() {
+        keyCache = [];
+        $ItemTableBody.find(".delete-btn").each((_, el) => {
+            keyCache.push($(el).data("key-cache"));
         });
     }
 
-    addItem(tipe, id) {
-        const row = this.#$ModalTable.find(`tr.${tipe}-based#${tipe}${id}`);
-
-        const QtyString = row.find("input.qty").val();
-        if (!QtyString) {
-            this.#$AddModal.modal("hide");
-            showErrorAlertNoRefresh("Quantitas tidak dapat ditemukan!");
-            return;
-        }
-        const Qty = parseInt(String(QtyString));
-        if (Qty <= 0) {
-            this.#$AddModal.modal("hide");
-            showErrorAlertNoRefresh("Jumlah tidak boleh 0!");
-            return;
-        }
-
-        let stock = null;
-        if (tipe == "stock") {
-            // get td with class "stock"
-            const stockCell = row.find("td.stock");
-            const stockString = stockCell.text();
-            stock = parseInt(String(stockString));
-        }
-
-        const Item = /** @type {BarangFarmasi} */ (row.data("item"));
-        const selectedOption = row
-            .find("select[name='satuan" + Item.id + "']")
-            .find("option:selected");
-        const Satuan = /** @type {Satuan} */ (selectedOption.data("satuan"));
-
-        const Key = `${Item.id}/${Satuan.id}`;
-        if (this.#KeyCache.includes(Key)) return; // ignore duplicate key
-
-        this.#KeyCache.push(Key); // add key to cache
-        const HTML = this.#getItemTableCol(Item, Satuan, Key, Qty, stock);
-        this.#$Table.append(HTML);
-    }
-
-    /**
-     * Generate HTML string for Item table collumn
-     * @param {BarangFarmasi} item
-     * @param {Satuan} satuan
-     * @param {string} key_cache
-     * @param {number} qty
-     * @param {number?} stock
-     */
-    #getItemTableCol(item, satuan, key_cache, qty, stock = null) {
-        const key = Math.round(Math.random() * 100000);
-
-        return /*html*/ `
-            <tr id="item${key}">
-                <input type="hidden" name="barang_id[${key}]" value="${
-            item.id
-        }">
-                <input type="hidden" name="satuan_id[${key}]" value="${
-            satuan.id
-        }">
-
-                <td>${item.kode}</td>
-                <td>${item.nama}</td>
-                <td>${satuan.nama}</td>
-                <td>${stock ? stock : "-"}</td>
-                <td><input type="number" name="qty[${key}]" min="1" step="1" class="form-control" value="${qty}"></td>
-                <td><input type="text" name="keterangan_item[${key}]" class="form-control"></td>
-                <td><a class="mdi mdi-close pointer mdi-24px text-danger delete-btn"
-                        title="Hapus" onclick="PopupSRPharmacyClass.deleteItem(${key}, '${key_cache}')"></a></td>
-            </tr>
-        `;
-    }
-
-    /**
-     * Delete item from table and variable
-     * @param {string} key
-     * @param {string} key_cache
-     */
-    deleteItem(key, key_cache) {
-        this.#$Table.find("#item" + key).remove();
-        // remove from this.#KeyCache with value key_cache
-        this.#KeyCache = this.#KeyCache.filter((item) => item !== key_cache);
-    }
-
-    /**
-     * Handle add button click
-     * @param {Event} event
-     */
-    async #handleAddButtonClick(event) {
+    async function handleAddButtonClick(event) {
         event.preventDefault();
-        this.#$AddModal.modal("hide");
-        const gudangAsalId = this.#$AsalGudangId.val();
-        const gudangTujuanId = this.#$TujuanGudangId.val();
+
+        const gudangAsalId = $AsalGudangId.val();
+        const gudangTujuanId = $TujuanGudangId.val();
         if (!gudangAsalId || !gudangTujuanId) {
             showErrorAlertNoRefresh(
                 "Pilih gudang asal dan gudang tujuan terlebih dahulu!"
@@ -280,85 +56,245 @@ class PopupSRPharmacyHandler {
             return;
         }
 
-        this.#showLoading(true);
-        const url = `/get/item-gudang/${gudangAsalId}/${gudangTujuanId}`;
-        const HTML = await (
-            await this.#APIfetch(url, null, "GET", true)
-        ).text();
-        this.#showLoading(false);
+        $ModalItemTableBody.html(
+            '<tr><td colspan="9" class="text-center p-3"><i class="fas fa-spinner fa-spin"></i> Memuat data...</td></tr>'
+        );
+        $AddModal.modal("show");
 
-        this.#$ModalTable.html(HTML);
-        this.#handleItemSearchBar(null);
-        this.#$AddModal.modal("show");
+        try {
+            const url = `/simrs/warehouse/stock-request/pharmacy/get/item-gudang/${gudangAsalId}/${gudangTujuanId}`;
+            const response = await fetch(url);
+            const data = await response.json();
+
+            if (!response.ok)
+                throw new Error(data.error || "Gagal mengambil data");
+            renderModalItems(data, gudangAsalId, gudangTujuanId);
+        } catch (error) {
+            $ModalItemTableBody.html(
+                `<tr><td colspan="9" class="text-center text-danger p-3">Gagal memuat data: ${error.message}</td></tr>`
+            );
+        }
     }
 
     /**
-     * Add event listeners
-     * @param {string} selector
-     * @param {Function} handler
-     * @param {string} event
+     * [REFACTOR] Merender data item (dari AJAX JSON) ke dalam tabel modal.
+     * Disesuaikan dengan struktur JSON yang baru.
+     * @param {Array<Object>} items
+     * @param {string|number} asalGudangId
+     * @param {string|number} tujuanGudangId
      */
-    #addEventListeners(selector, handler, event = "click") {
-        const buttons = document.querySelectorAll(selector);
-        buttons.forEach((button) => {
-            button.addEventListener(event, handler.bind(this));
+    function renderModalItems(items, asalGudangId, tujuanGudangId) {
+        if (!items || items.length === 0) {
+            $ModalItemTableBody.html(
+                '<tr><td colspan="9" class="text-center p-3">Tidak ada item ditemukan.</td></tr>'
+            );
+            return;
+        }
+
+        let html = "";
+        items.forEach((itemData) => {
+            // [FIX] Semua data sekarang ada di dalam properti `barang`
+            const barang = itemData.barang;
+
+            // [FIX] Satuan diambil dari dalam objek barang
+            const satuan = barang.satuan;
+
+            if (!barang || !satuan) return; // Lewati jika data tidak lengkap
+
+            const key = `${barang.id}/${satuan.id}`;
+            const isAdded = keyCache.includes(key);
+
+            // [FIX] Stok diambil dari dalam objek barang, lalu dicari yang cocok
+            // Gunakan asalGudangId dan tujuanGudangId dari parameter
+            const stokAsalData = barang.stok_gudang.find(
+                (s) => s.gudang_id == asalGudangId
+            );
+            const stokTujuanData = barang.stok_gudang.find(
+                (s) => s.gudang_id == tujuanGudangId
+            );
+
+            const stokAsal = stokAsalData ? stokAsalData.total_qty : 0;
+            const stokTujuan = stokTujuanData ? stokTujuanData.total_qty : 0;
+
+            const source = stokAsal > 0 ? "stock" : "barang";
+
+            html += `
+                <tr class="item-row"
+                    data-source="${source}"
+                    data-item-name="${barang.nama.toLowerCase()}"
+                    data-key="${key}"
+                    data-item='${JSON.stringify(
+                        barang
+                    )}'>  {{-- Simpan objek barang lengkap --}}
+
+                    <td>${barang.kode}</td>
+                    <td class="item-name">${barang.nama}</td>
+                    <td>${satuan.nama}</td>
+                    <td>${stokAsal}</td>
+                    <td>${stokTujuan}</td>
+                    <td>${barang.min_stok || 0}</td>
+                    <td>${barang.max_stok || 0}</td>
+                    <td><input type="number" class="form-control form-control-sm item-qty" min="1" value="1"></td>
+                    <td>
+                        <button class="btn btn-primary btn-xs btn-pilih-item" ${
+                            isAdded ? "disabled" : ""
+                        }>
+                            ${
+                                isAdded
+                                    ? '<i class="fal fa-check"></i>'
+                                    : "Pilih"
+                            }
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+        $ModalItemTableBody.html(html);
+        applyModalFilter();
+    }
+
+    /**
+     * [REFACTOR] Menangani klik tombol "Pilih" di dalam modal.
+     * Disesuaikan dengan struktur data yang baru.
+     */
+    function handleSelectItemClick(event) {
+        const $button = $(event.currentTarget);
+        const $row = $button.closest("tr");
+        const key = $row.data("key");
+
+        if (keyCache.includes(key)) return;
+
+        // [FIX] Ambil objek 'barang' lengkap dari atribut data
+        const barang = $row.data("item");
+        const satuan = barang.satuan; // Ambil satuan dari dalam objek barang
+        const stokAsal = $row.find("td").eq(3).text(); // Ambil dari teks di kolom tabel
+
+        const qty = parseInt($row.find("input.item-qty").val().toString(), 10);
+        if (isNaN(qty) || qty <= 0) {
+            showErrorAlertNoRefresh("Qty harus diisi dan lebih dari 0.");
+            return;
+        }
+
+        // Panggil fungsi untuk menambah baris ke tabel utama
+        addItemToTable({
+            barang_id: barang.id,
+            satuan_id: satuan.id,
+            nama_barang: barang.nama,
+            nama_satuan: satuan.nama,
+            stok: stokAsal,
+            qty: qty,
+            keterangan: "",
+        });
+
+        $button.prop("disabled", true).html('<i class="fal fa-check"></i>');
+        keyCache.push(key);
+    }
+
+    /**
+     * Menerapkan filter pada tabel modal berdasarkan input pencarian dan dropdown source.
+     * Pastikan penamaan selector konsisten ($ItemSearchInput, $ItemSourceSelect, $ModalItemTableBody).
+     */
+    function applyModalFilter() {
+        const searchTerm = ($ItemSearchInput.val() || "")
+            .toString()
+            .toLowerCase();
+        const sourceFilter = $ItemSourceSelect.val();
+
+        $ModalItemTableBody.find("tr.item-row").each(function () {
+            const $row = $(this);
+
+            // [PERBAIKAN] Gunakan data-item-name, bukan data-name
+            const itemName = ($row.data("item-name") || "")
+                .toString()
+                .toLowerCase();
+            const itemSource = $row.data("source");
+
+            const nameMatch = itemName.includes(searchTerm);
+            // Hanya filter source jika dropdown tidak kosong, jika tidak, tampilkan semua
+            const sourceMatch = !sourceFilter || itemSource === sourceFilter;
+
+            $row.toggle(nameMatch && sourceMatch);
         });
     }
 
-    /**
-     * Show or hide the loading icon
-     * @param {boolean} show
-     */
-    #showLoading(show) {
-        this.#$LoadingIcon.toggle(show);
-        this.#$LoadingPage.toggle(show);
+    function addItemToTable(item) {
+        itemCounter++;
+        const key_cache = `${item.barang_id}/${item.satuan_id}`;
+        const html = `
+            <tr id="item${itemCounter}">
+                <input type="hidden" name="barang_id[${itemCounter}]" value="${
+            item.barang_id
+        }">
+                <input type="hidden" name="satuan_id[${itemCounter}]" value="${
+            item.satuan_id
+        }">
+                <td class="text-center">
+                    <a class="btn btn-danger btn-xs delete-btn" data-key-cache="${key_cache}"><i class="fal fa-times"></i></a>
+                </td>
+                <td>${item.nama_barang}</td>
+                <td>${item.nama_satuan}</td>
+                <td>${item.stok ?? "-"}</td>
+                <td><input type="number" name="qty[${itemCounter}]" class="form-control" value="${
+            item.qty
+        }" min="1"></td>
+                <td><input type="text" name="keterangan_item[${itemCounter}]" class="form-control" value="${
+            item.keterangan
+        }"></td>
+            </tr>
+        `;
+        $ItemTableBody.append(html);
+    }
+
+    function handleDeleteItemClick(event) {
+        const $button = $(event.currentTarget);
+        const key_cache = $button.data("key-cache");
+
+        keyCache = keyCache.filter((k) => k !== key_cache);
+
+        const $modalButton = $ModalItemTableBody.find(
+            `tr[data-key="${key_cache}"] .btn-pilih-item`
+        );
+        $modalButton.prop("disabled", false).text("Pilih");
+
+        $button.closest("tr").remove();
+    }
+
+    function resetItems() {
+        if ($ItemTableBody.find("tr").length > 0) {
+            Swal.fire({
+                title: "Ganti Gudang?",
+                text: "Item yang sudah ditambahkan akan dihapus. Lanjutkan?",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonText: "Ya, lanjutkan!",
+                cancelButtonText: "Batal",
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $ItemTableBody.empty();
+                    initializeKeyCache();
+                }
+            });
+        }
     }
 
     /**
-     * Make a fetch call with API URL as base URL
-     * @param {string} url
-     * @param {FormData | null} body
-     * @param {"GET" | "POST" | "PATCH" | "PUT" | "DELETE"} method
+     * Men-submit form dengan status yang ditentukan.
+     * @param {'draft' | 'final'} status
      */
-    #APIfetch(url, body = null, method = "GET", raw = false) {
-        return new Promise((resolve, reject) => {
-            fetch(this.#API_URL + url, {
-                method: method,
-                body: body,
-                headers: {
-                    "X-CSRF-TOKEN":
-                        document
-                            .querySelector('meta[name="csrf-token"]')
-                            ?.getAttribute("content") || "",
-                },
-            })
-                .then(async (response) => {
-                    if (response.status != 200) {
-                        throw new Error("Error: " + response.statusText);
-                    }
-                    resolve(!raw ? await response.json() : response);
-                })
-                .catch((error) => {
-                    console.log("Error:", error);
+    function submitForm(status) {
+        if ($ItemTableBody.find("tr").length === 0) {
+            showErrorAlertNoRefresh(
+                "Harap tambahkan minimal satu item barang."
+            );
+            return false;
+        }
 
-                    // @ts-ignore
-                    if (this.#showLoading) this.#showLoading(false); // assert
+        $("#status-input").val(status);
 
-                    showErrorAlertNoRefresh(`Error: ${error}`);
-                    return reject(error);
-                });
-        });
+        // [PERBAIKAN KUNCI] Tampilkan overlay HANYA saat tombol simpan diklik.
+        $loadingPage.show();
+
+        // Return true agar form bisa lanjut di-submit secara native
+        return true;
     }
-
-    /**
-     * Format angka menjadi mata uang rupiah
-     * @param {number} amount
-     * @returns
-     */
-    #rp(amount) {
-        const formattedAmount = "Rp " + amount.toLocaleString("id-ID");
-        return formattedAmount;
-    }
-}
-
-const PopupSRPharmacyClass = new PopupSRPharmacyHandler();
+});
