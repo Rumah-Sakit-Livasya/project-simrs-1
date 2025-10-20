@@ -227,6 +227,7 @@ Route::middleware(['web', 'auth'])->prefix('dashboard')->group(function () {
         Route::get('/delete/{id}', [JobPositionController::class, 'destroy']);
     });
     Route::prefix('employee')->group(function () {
+        Route::put('/{id}', [EmployeeController::class, 'update'])->name('employee.update');
         Route::get('/pegawai/{id}', [EmployeeController::class, 'pegawai']);
         Route::post('/store', [EmployeeController::class, 'store']);
         Route::post('/non-aktif/{id}', [EmployeeController::class, 'nonAktifPegawai']);
@@ -236,7 +237,6 @@ Route::middleware(['web', 'auth'])->prefix('dashboard')->group(function () {
         Route::get('/lokasi/{id}', [EmployeeController::class, 'editLokasi']);
         Route::get('/delete/{id}', [EmployeeController::class, 'destroy']);
         Route::post('/import', [EmployeeController::class, 'import']);
-        Route::get('/get/{id}', [EmployeeController::class, 'edit']);
         Route::put('/approval_line/{id}', [EmployeeController::class, 'updateApprovalLine']);
         Route::post('/location/store', [EmployeeController::class, 'storeLocation']);
         Route::get('/organization/{id}', [EmployeeController::class, 'editOrganisasi']);

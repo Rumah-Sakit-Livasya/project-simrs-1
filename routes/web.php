@@ -14,6 +14,7 @@ use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\ChecklistHarianCategoryController;
 use App\Http\Controllers\ChecklistHarianController;
 use App\Http\Controllers\DailyWasteInputController;
+use App\Http\Controllers\EmployeePageController;
 use App\Http\Controllers\InternalVehiclePageController;
 use App\Http\Controllers\KunjunganPageController;
 use App\Http\Controllers\LaporanInternalController;
@@ -147,6 +148,7 @@ Route::middleware([LastSeenUser::class])->group(function () {
             Route::get('/team', [TeamController::class, 'index'])->name('team.index');
             Route::get('/team/search', [TeamController::class, 'search'])->name('team.search');
             Route::get('/export', [EmployeeController::class, 'export'])->name('employees.export');
+            Route::get('/{employee}/edit', [EmployeePageController::class, 'edit'])->name('employees.edit');
         });
         /* END PEGAWAI ----------------------------------------------------------------------------*/
 
