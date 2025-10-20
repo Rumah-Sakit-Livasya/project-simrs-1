@@ -26,6 +26,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Facades\Excel;
 
 class EmployeeController extends Controller
@@ -107,6 +108,130 @@ class EmployeeController extends Controller
             return response()->json([
                 'error' => 'No result'
             ], 404);
+        }
+    }
+
+    /**
+     * Update data pegawai secara keseluruhan.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function update(Request $request, $id)
+    {
+        try {
+            // Cari data employee berdasarkan ID, fail jika tidak ditemukan
+            $employee = Employee::findOrFail($id);
+
+            // Ambil data asli employee dari database
+            $original = $employee->fresh();
+
+            $validator = Validator::make(
+                $request->all(),
+                [
+                    'fullname' => 'required|string|max:255',
+                    'email' => [
+                        'required',
+                        'email',
+                        // Hanya periksa unique jika email berubah
+                        function ($attribute, $value, $fail) use ($original) {
+                            if (
+                                $original !== null &&
+                                (strtolower($value) !== strtolower($original->email))
+                            ) {
+                                $exists = Employee::where('email', $value)
+                                    ->where('id', '!=', $original->id)
+                                    ->exists();
+                                if ($exists) {
+                                    $fail('Email ini sudah digunakan oleh pegawai lain.');
+                                }
+                            }
+                        },
+                    ],
+                    'mobile_phone' => 'required',
+                    'place_of_birth' => 'required',
+                    'birthdate' => 'required|date_format:Y-m-d',
+                    'gender' => 'required',
+                    'marital_status' => 'required',
+                    'religion' => 'required',
+                    'identity_type' => 'required',
+                    'identity_number' => 'required',
+                    'citizen_id_address' => 'required',
+                    'employee_code' => [
+                        'required',
+                        // Hanya periksa unique jika employee_code berubah
+                        function ($attribute, $value, $fail) use ($original) {
+                            if (
+                                $original !== null &&
+                                ($value != $original->employee_code)
+                            ) {
+                                $exists = Employee::where('employee_code', $value)
+                                    ->where('id', '!=', $original->id)
+                                    ->exists();
+                                if ($exists) {
+                                    $fail('NIP ini sudah digunakan oleh pegawai lain.');
+                                }
+                            }
+                        },
+                    ],
+                    'employment_status' => 'required',
+                    'join_date' => 'required|date_format:Y-m-d',
+                    'organization_id' => 'required|exists:organizations,id',
+                    'job_position_id' => 'required|exists:job_positions,id',
+                    'job_level_id' => 'required|exists:job_levels,id',
+                    'approval_line' => 'nullable|exists:employees,id',
+                    'basic_salary' => 'required|numeric',
+                    'bank_id' => 'nullable|exists:banks,id',
+                ]
+            );
+
+            if ($validator->fails()) {
+                return response()->json(['errors' => $validator->errors()], 422);
+            }
+
+            DB::beginTransaction();
+
+            $employee->update($request->all());
+
+            if ($employee->user) {
+                $employee->user->update([
+                    'name' => $request->fullname,
+                    'email' => $request->email,
+                ]);
+            }
+
+            BankEmployee::updateOrCreate(
+                ['employee_id' => $employee->id],
+                [
+                    'bank_id' => $request->bank_id,
+                    'account_holder_name' => $request->account_holder_name,
+                    'account_number' => $request->account_number,
+                ]
+            );
+
+            if ($request->is_doctor == "on") {
+                $employee->update(['is_doctor' => true]);
+                Doctor::updateOrCreate(
+                    ['employee_id' => $employee->id],
+                    [
+                        'departement_id' => $request->departement_id,
+                        'kode_dpjp' => $request->kode_dpjp
+                    ]
+                );
+            } else {
+                $employee->update(['is_doctor' => false]);
+                Doctor::where('employee_id', $employee->id)->delete();
+            }
+
+            DB::commit();
+
+            return response()->json(['message' => 'Data pegawai berhasil diperbarui!']);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json(['error' => 'Pegawai tidak ditemukan.'], 404);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['error' => 'Gagal memperbarui data: ' . $e->getMessage()], 500);
         }
     }
 

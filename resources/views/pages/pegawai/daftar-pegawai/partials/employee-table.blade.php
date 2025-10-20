@@ -168,8 +168,14 @@
                     <td style="white-space: nowrap">
                         {{ $employee->identity_number ?? '-' }}</td>
                     <td style="white-space: nowrap">
+                        <!-- Edit Button - Warna Kuning -->
+                        <button onclick="openEditPopup({{ $employee->id }})" class="badge mx-1 p-2 border-0 text-white"
+                            style="background-color: #FFC107;" title="Ubah Data Pegawai">
+                            <i class="fal fa-pencil"></i>
+                        </button>
+                        <!-- Non Aktifkan Button - Warna Merah -->
                         <button type="button" data-backdrop="static" data-keyboard="false"
-                            class="badge mx-1 badge-danger p-2 border-0 text-white"
+                            class="badge mx-1 p-2 border-0 text-white" style="background-color: #DC3545;"
                             data-template="<div class=&quot;tooltip&quot; role=&quot;tooltip&quot;><div class=&quot;tooltip-inner bg-danger-500&quot;></div></div>"
                             data-toggle="tooltip" data-id="{{ $employee->id }}" title="Non-aktifkan"
                             onclick="btnNonAktifPegawai(event)">
@@ -178,20 +184,21 @@
                                 <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                             </div>
                         </button>
+                        <!-- Edit Approval Line - Warna Biru -->
                         <button type="button" data-backdrop="static" data-keyboard="false"
-                            class="badge mx-1 badge-info p-2 border-0 text-white btn-link"
+                            class="badge mx-1 p-2 border-0 text-white" style="background-color: #17A2B8;"
                             data-template="<div class=&quot;tooltip&quot; role=&quot;tooltip&quot;><div class=&quot;tooltip-inner bg-info-500&quot;></div></div>"
                             data-toggle="tooltip" data-id="{{ $employee->id }}" title="Edit Approval Line"
                             onclick="btnLink(event)">
                             <span class="fal fa-link ikon-link"></span>
                             <div class="span spinner-text d-none">
                                 <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-
                             </div>
                         </button>
+                        <!-- Set Lokasi Absen - Warna Orange -->
                         <button type="button" data-backdrop="static" data-keyboard="false"
-                            onclick="btnEditLocation(event)"
-                            class="badge mx-1 btn-edit-map badge-warning p-2 border-0 text-white"
+                            onclick="btnEditLocation(event)" class="badge mx-1 p-2 border-0 text-white"
+                            style="background-color: #FF9800;"
                             data-template="<div class=&quot;tooltip&quot; role=&quot;tooltip&quot;><div class=&quot;tooltip-inner text-white bg-warning-500&quot;></div></div>"
                             data-toggle="tooltip" data-id="{{ $employee->id }}" title="Set Lokasi Absen">
                             <span class="fal fa-map-marker-alt ikon-edit"></span>
@@ -199,8 +206,9 @@
                                 <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                             </div>
                         </button>
+                        <!-- Ubah Organisasi - Warna Ungu -->
                         <button type="button" data-backdrop="static" data-keyboard="false"
-                            class="badge mx-1 badge-primary p-2 border-0 text-white btn-organisasi"
+                            class="badge mx-1 p-2 border-0 text-white" style="background-color: #6F42C1;"
                             data-template="<div class=&quot;tooltip&quot; role=&quot;tooltip&quot;><div class=&quot;tooltip-inner bg-primary&quot;></div></div>"
                             data-toggle="tooltip" data-employee-id="{{ $employee->id }}"
                             data-id="{{ $employee->organization_id }}" title="Ubah Organisasi"
@@ -210,15 +218,17 @@
                                 <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                             </div>
                         </button>
-                        <button type="button"
-                            class="badge mx-1 badge-warning p-2 border-0 text-white btn-toggle-management"
-                            data-id="{{ $employee->id }}" data-status="{{ $employee->is_management }}"
-                            title="Toggle Manajemen">
+                        <!-- Toggle Manajemen - Warna Hijau -->
+                        <button type="button" class="badge mx-1 p-2 border-0 text-white"
+                            style="background-color: #28A745;" data-id="{{ $employee->id }}"
+                            data-status="{{ $employee->is_management }}" title="Toggle Manajemen">
                             <span class="fas fa-user-secret"></span>
                         </button>
-                        <button type="button" class="btn btn-sm btn-outline-info btn-icon btn-inline-block mr-1"
-                            title="Input Tanda Tangan" onclick="openSignaturePopup({{ $employee->id }})">
-                            <i class="fas fa-signature"></i>
+                        <!-- Tanda Tangan - Warna Abu (ganti icon jadi fa-link, samakan dengan lain) -->
+                        <button type="button" class="badge mx-1 p-2 border-0 text-white"
+                            style="background-color: #6c757d;" title="Input Tanda Tangan"
+                            onclick="openSignaturePopup({{ $employee->id }})">
+                            <span class="fal fa-link"></span>
                         </button>
                     </td>
                 </tr>

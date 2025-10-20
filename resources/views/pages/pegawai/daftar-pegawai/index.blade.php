@@ -339,6 +339,36 @@
     <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
 
     <script>
+        /**
+         * Fungsi untuk membuka popup window untuk mengedit data pegawai.
+         * @param {number} employeeId - ID dari pegawai yang akan di-edit.
+         */
+        function openEditPopup(employeeId) {
+            const url = `/employees/${employeeId}/edit`; // Rute baru yang akan kita buat
+            const windowName = `EditEmployee_${employeeId}`;
+
+            // Buka popup dalam mode fullscreen
+            const width = screen.availWidth;
+            const height = screen.availHeight;
+            const windowFeatures = `width=${width},height=${height},left=0,top=0,resizable=yes,scrollbars=yes`;
+
+            const popup = window.open(url, windowName, windowFeatures);
+
+            // Fokuskan ke window baru jika browser mendukung
+            if (window.focus) {
+                popup.focus();
+            }
+
+            // Listener untuk me-reload halaman utama setelah popup ditutup
+            // Ini berguna agar data di tabel utama ikut ter-update.
+            const checkPopup = setInterval(() => {
+                if (popup.closed) {
+                    clearInterval(checkPopup);
+                    location.reload(); // Reload halaman utama
+                }
+            }, 1000);
+        }
+
         // document.getElementById('downloadTemplateBtn').addEventListener('click', function() {
         //     $('#downloadTemplateModal').modal('show');
         // });
@@ -1244,6 +1274,7 @@
                     }
                 });
             });
+
         });
 
         /**
