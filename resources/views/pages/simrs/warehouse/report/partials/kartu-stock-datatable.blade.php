@@ -20,7 +20,7 @@
                         <th>Keterangan</th>
                         <th>Masuk</th>
                         <th>Keluar</th>
-                        <th>Saldo</th>
+                        <th>Stok Akhir</th>
                         <th>User</th>
                     </tr>
                 </thead>

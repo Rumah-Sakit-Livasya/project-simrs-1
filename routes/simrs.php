@@ -762,10 +762,13 @@ Route::group(['middleware' => ['auth']], function () {
                     Route::delete('/{id}', [WarehouseGolonganBarangController::class, 'destroy'])->name('destroy');
                 });
 
-                Route::prefix('pabrik')->group(function () {
-                    Route::get('/', [WarehousePabrikController::class, 'index'])->name('pabrik');
-                    Route::resource('pabrik', WarehousePabrikController::class);
-                    Route::get('pabrik-data', [WarehousePabrikController::class, 'data'])->name('pabrik.data');
+                Route::prefix('pabrik')->name('pabrik.')->group(function () {
+                    Route::get('/', [WarehousePabrikController::class, 'index'])->name('index');
+                    Route::get('/data', [WarehousePabrikController::class, 'data'])->name('data');
+                    Route::post('/', [WarehousePabrikController::class, 'store'])->name('store');
+                    Route::get('/{id}', [WarehousePabrikController::class, 'show'])->name('show');
+                    Route::put('/{id}', [WarehousePabrikController::class, 'update'])->name('update');
+                    Route::delete('/{id}', [WarehousePabrikController::class, 'destroy'])->name('destroy');
                 });
 
                 Route::prefix('supplier')->name('supplier.')->group(function () {

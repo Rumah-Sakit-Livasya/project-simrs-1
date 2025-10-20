@@ -61,12 +61,12 @@
                                     <td>{{ $sa->barang->nama }}</td>
                                     <td>{{ $sa->satuan->nama }}</td>
                                     <td>{{ $sa->keterangan }}</td>
-                                    <td>{{ $sa->authorized_user->user->employee->fullname }}
+                                    <td>{{ $sa->authorized_user->employee->fullname }}
                                         @if ($sa->authorized_user_id != $sa->user_id)
                                             (logged in as {{ $sa->user->employee->fullname }})
                                         @endif
                                     </td>
-                                    <td>{{$sa->items->sum("qty")}}</td>
+                                    <td>{{ $sa->items->sum('qty') }}</td>
                                 </tr>
                             @endforeach
                         </tbody>

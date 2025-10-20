@@ -60,6 +60,31 @@ class WarehousePabrikController extends Controller
     }
 
     /**
+     * Display the specified resource.
+     */
+    public function show($id)
+    {
+        $pabrik = WarehousePabrik::find($id);
+
+        if (! $pabrik) {
+            return response()->json(['success' => false, 'message' => 'Data tidak ditemukan.'], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'id' => $pabrik->id,
+                'nama' => $pabrik->nama,
+                'alamat' => $pabrik->alamat,
+                'telp' => $pabrik->telp,
+                'contact_person' => $pabrik->contact_person,
+                'contact_person_phone' => $pabrik->contact_person_phone,
+                'aktif' => $pabrik->aktif,
+            ],
+        ]);
+    }
+
+    /**
      * Show the form for editing the specified resource.
      */
     public function edit($id)

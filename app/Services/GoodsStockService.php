@@ -131,7 +131,7 @@ class GoodsStockService
             throw new \Exception("Stock tidak cukup");
         }
 
-        $this->updateQuantity($args->item, -$args->qty, 'out', $args);
+        $this->updateQuantity($args->item, -abs($args->qty), 'out', $args);
     }
 
     /**
