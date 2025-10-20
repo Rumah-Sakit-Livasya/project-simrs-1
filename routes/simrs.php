@@ -960,6 +960,7 @@ Route::group(['middleware' => ['auth']], function () {
                 Route::get('/stock-status', [WarehouseReportStockStatus::class, 'index'])->name('report.stock-status');
                 Route::get('/stock-detail', [WarehouseReportStockDetail::class, 'index'])->name('report.stock-detail');
                 Route::get('/kartu-stok', [WarehouseReportKartuStock::class, 'index'])->name('report.kartu-stock');
+                Route::post('/kartu-stok', [WarehouseReportKartuStock::class, 'index']);
                 Route::get('/histori-perubahan-master-data', [WarehouseReportHistoriPerubahanMasterBarang::class, 'index'])->name('report.histori-perubahan-master-data');
             });
         });

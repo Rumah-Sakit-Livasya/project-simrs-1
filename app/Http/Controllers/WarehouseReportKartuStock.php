@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\StockTransaction;
+use App\Models\StoredBarangFarmasi;
+use App\Models\StoredBarangNonFarmasi;
 use App\Models\WarehouseBarangFarmasi;
 use App\Models\WarehouseBarangNonFarmasi;
 use App\Models\WarehouseMasterGudang;
@@ -101,10 +103,32 @@ class WarehouseReportKartuStock extends Controller
      */
     private function getAllBarang()
     {
-        $farmasi = WarehouseBarangFarmasi::with("satuan", "satuan_tambahan")->where('aktif', 1)->get()->map(fn($i) => $i->type = 'f');
-        $nonFarmasi = WarehouseBarangNonFarmasi::with("satuan", "satuan_tambahan")->where('aktif', 1)->get()->map(fn($i) => $i->type = 'nf');
-        return $farmasi->concat($nonFarmasi)->sortBy('nama_barang');
+        // Ambil data farmasi
+        $farmasi = WarehouseBarangFarmasi::with("satuan", "satuan_tambahan")
+            ->where('aktif', 1)
+            ->get()
+            ->map(function ($item) {
+                // 1. Tambahkan properti 'type' ke objek
+                $item->type = 'f';
+                // 2. Kembalikan seluruh objek yang sudah dimodifikasi
+                return $item;
+            });
+
+        // Ambil data non-farmasi
+        $nonFarmasi = WarehouseBarangNonFarmasi::with("satuan", "satuan_tambahan")
+            ->where('aktif', 1)
+            ->get()
+            ->map(function ($item) {
+                // 1. Tambahkan properti 'type' ke objek
+                $item->type = 'nf';
+                // 2. Kembalikan seluruh objek yang sudah dimodifikasi
+                return $item;
+            });
+
+        // Gabungkan kedua collection dan urutkan berdasarkan nama
+        return $farmasi->concat($nonFarmasi)->sortBy('nama');
     }
+
 
     /**
      * Menghitung total stok pada titik waktu tertentu.
