@@ -1620,6 +1620,7 @@ class ERMController extends Controller
                     $terapi_tindakan = $assesment->terapi_tindakan ?? null;
                 } else {
                     $assesment = PengkajianDokterIGD::firstWhere('registration_id', $registration->id);
+                    $terapi_tindakan = $assesment->terapi_tindakan ?? null;
                 }
 
 
