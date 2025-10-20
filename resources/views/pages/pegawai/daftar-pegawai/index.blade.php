@@ -334,6 +334,8 @@
     <script src="/js/datagrid/datatables/datatables.export.js"></script>
     <script src="/js/formplugins/select2/select2.bundle.js"></script>
     <script src="/js/formplugins/bootstrap-datepicker/bootstrap-datepicker.js"></script>
+    <script src="/js/dependency/moment/moment.js"></script>
+    <script src="/js/formplugins/bootstrap-daterangepicker/bootstrap-daterangepicker.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
 
     <script>
@@ -1260,5 +1262,38 @@
 
             window.open(url, windowName, windowFeatures);
         }
+    </script>
+
+    <script>
+        $(function() {
+            // Inisialisasi Daterangepicker untuk Masa Berlaku MOU
+            $('#mou_period').daterangepicker({
+                autoUpdateInput: false,
+                locale: {
+                    cancelLabel: 'Batal',
+                    applyLabel: 'Terapkan',
+                    format: 'YYYY-MM-DD'
+                }
+            });
+
+            $('#mou_period').on('apply.daterangepicker', function(ev, picker) {
+                $(this).val(picker.startDate.format('YYYY-MM-DD') + ' s/d ' + picker.endDate.format(
+                    'YYYY-MM-DD'));
+                $('#mou_start_date').val(picker.startDate.format('YYYY-MM-DD'));
+                $('#mou_end_date').val(picker.endDate.format('YYYY-MM-DD'));
+            });
+
+            $('#mou_period').on('cancel.daterangepicker', function(ev, picker) {
+                $(this).val('');
+                $('#mou_start_date').val('');
+                $('#mou_end_date').val('');
+            });
+
+            // Set value dari old jika ada (saat validasi gagal)
+            @if (old('mou_start_date') && old('mou_end_date'))
+                $('#mou_period').data('daterangepicker').setStartDate('{{ old('mou_start_date') }}');
+                $('#mou_period').data('daterangepicker').setEndDate('{{ old('mou_end_date') }}');
+            @endif
+        });
     </script>
 @endsection

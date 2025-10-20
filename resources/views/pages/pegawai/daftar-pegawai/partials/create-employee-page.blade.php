@@ -60,7 +60,7 @@
                 </div>
                 <div class="form-group row" style="font-size: 0.8rem !important;">
                     <div class="col-md-12 mb-3">
-                        <label>Nama*</label>
+                        <label>Nama<span class="text-danger">*</span></label>
                         <input type="text" class="form-control @error('fullname') is-invalid @enderror"
                             autocomplete="off" name="fullname" placeholder="Fizar Rama Waluyo, S. Kom."
                             value="{{ old('fullname') }}">
@@ -69,7 +69,7 @@
                         @enderror
                     </div>
                     <div class="col-md-6 mb-3">
-                        <label>Email*</label>
+                        <label>Email<span class="text-danger">*</span></label>
                         <input type="text" class="form-control @error('email') is-invalid @enderror" name="email"
                             autocomplete="off" placeholder="xxxxxx@gmail.com" value="{{ old('email') }}">
                         @error('email')
@@ -77,7 +77,7 @@
                         @enderror
                     </div>
                     <div class="col-md-6 mb-3">
-                        <label>No. Telepon*</label>
+                        <label>No. Telepon<span class="text-danger">*</span></label>
                         <input type="text" class="form-control @error('mobile_phone') is-invalid @enderror"
                             name="mobile_phone" autocomplete="off" placeholder="085xxxxxxxxx"
                             value="{{ old('mobile_phone') }}">
@@ -86,7 +86,7 @@
                         @enderror
                     </div>
                     <div class="col-md-6 mb-3">
-                        <label>Tempat Lahir*</label>
+                        <label>Tempat Lahir<span class="text-danger">*</span></label>
                         <input type="text" class="form-control @error('place_of_birth') is-invalid @enderror"
                             name="place_of_birth" autocomplete="off" placeholder="Majalengka"
                             value="{{ old('place_of_birth') }}">
@@ -95,7 +95,7 @@
                         @enderror
                     </div>
                     <div class="col-md-6 mb-3">
-                        <label>Tanggal Lahir*</label>
+                        <label>Tanggal Lahir<span class="text-danger">*</span></label>
                         <div class="input-group">
                             <input type="text" name="birthdate"
                                 class="form-control @error('birthdate') is-invalid @enderror"
@@ -111,7 +111,7 @@
                         </div>
                     </div>
                     <div class="col-md-6 mb-3">
-                        <label>Jenis Kelamin*</label>
+                        <label>Jenis Kelamin<span class="text-danger">*</span></label>
                         <select class="select2 form-control w-100 @error('gender') is-invalid @enderror" id="gender"
                             name="gender">
                             <option value=""></option>
@@ -125,19 +125,20 @@
                         @enderror
                     </div>
                     <div class="col-md-6 mb-3">
-                        <label>Status Menikah*</label>
-                        <select class="select2 form-control w-100" id="marital_status" name="marital_status">
+                        <label>Status Menikah<span class="text-danger">*</span></label>
+                        <select class="select2 form-control w-100 @error('marital_status') is-invalid @enderror"
+                            id="marital_status" name="marital_status">
                             <option value=""></option>
-                            <option value="Lajang" {{ old('marita_status') == 'Lajang' ? 'selected' : '' }}>Lajang
+                            <option value="Lajang" {{ old('marital_status') == 'Lajang' ? 'selected' : '' }}>Lajang
                             </option>
-                            <option value="Menikah" {{ old('marita_status') == 'Menikah' ? 'selected' : '' }}>Menikah
+                            <option value="Menikah" {{ old('marital_status') == 'Menikah' ? 'selected' : '' }}>Menikah
                             </option>
-                            <option value="Janda" {{ old('marita_status') == 'Janda' ? 'selected' : '' }}>Janda
+                            <option value="Janda" {{ old('marital_status') == 'Janda' ? 'selected' : '' }}>Janda
                             </option>
-                            <option value="Duda" {{ old('marita_status') == 'Duda' ? 'selected' : '' }}>Duda
+                            <option value="Duda" {{ old('marital_status') == 'Duda' ? 'selected' : '' }}>Duda
                             </option>
                         </select>
-                        @error('marita_status')
+                        @error('marital_status')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
@@ -147,8 +148,9 @@
                             placeholder="O">
                     </div>
                     <div class="col-md-6 mb-3">
-                        <label>Agama*</label>
-                        <select class="select2 form-control w-100" id="religion" name="religion">
+                        <label>Agama<span class="text-danger">*</span></label>
+                        <select class="select2 form-control w-100 @error('religion') is-invalid @enderror"
+                            id="religion" name="religion">
                             <option value=""></option>
                             <option value="Islam" {{ old('religion') == 'Islam' ? 'selected' : '' }}>Islam</option>
                             <option value="Katholik" {{ old('religion') == 'Katholik' ? 'selected' : '' }}>Katholik
@@ -177,8 +179,9 @@
                 </div>
                 <div class="form-group row" style="font-size: 0.8rem !important;">
                     <div class="col-md-6 mb-3">
-                        <label>Tipe Identitas*</label>
-                        <select class="select2 form-control w-100" id="identity_type" name="identity_type">
+                        <label>Tipe Identitas<span class="text-danger">*</span></label>
+                        <select class="select2 form-control w-100 @error('identity_type') is-invalid @enderror"
+                            id="identity_type" name="identity_type">
                             <option value=""></option>
                             <option value="KTP" {{ old('identity_type') == 'KTP' ? 'selected' : '' }}>KTP</option>
                             <option value="Passport" {{ old('identity_type') == 'Passport' ? 'selected' : '' }}>
@@ -189,7 +192,7 @@
                         @enderror
                     </div>
                     <div class="col-md-6 mb-3">
-                        <label>Nomor Identitas*</label>
+                        <label>Nomor Identitas<span class="text-danger">*</span></label>
                         <input type="text" class="form-control @error('identity_number') is-invalid @enderror"
                             id="identity_number" name="identity_number" autocomplete="off"
                             placeholder="321xxxxxxxxx" value="{{ old('identity_number') }}">
@@ -216,7 +219,7 @@
                     </div>
                     <div class="col-md-12 mb-3">
                         <label class="form-label" for="example-textarea">Alamat di
-                            KTP*</label>
+                            KTP<span class="text-danger">*</span></label>
                         <textarea class="form-control @error('citizen_id_address') is-invalid @enderror" id="citizen_id_address"
                             rows="3" name="citizen_id_address"></textarea>
                         <div class="custom-control custom-checkbox mt-3">
@@ -242,6 +245,7 @@
                 <a href="#" class="btn-next-step btn btn-primary btn-sm ml-2">Selanjutnya</a>
             </div>
         </div>
+
         <div id="step-2" style="display: none">
             <div id="data-pegawai">
                 <div class="row" style="margin-top: 70px">
@@ -255,7 +259,7 @@
                 </div>
                 <div class="form-group row" style="font-size: 0.8rem !important;">
                     <div class="col-md-12 mb-3">
-                        <label>Nomor Induk Pegawai*</label>
+                        <label>Nomor Induk Pegawai<span class="text-danger">*</span></label>
                         <input type="text" class="form-control @error('employee_code') is-invalid @enderror"
                             autocomplete="off" name="employee_code" placeholder="2024xxxxx"
                             value="{{ old('employee_code') }}">
@@ -264,17 +268,19 @@
                         @enderror
                     </div>
                     <div class="col-md-6 mb-3">
-                        <label>Status Pegawai*</label>
+                        <label>Status Pegawai<span class="text-danger">*</span></label>
                         <select class="select2 form-control w-100 @error('employment_status') is-invalid @enderror"
                             id="employment_status_create" name="employment_status">
                             <option value=""></option>
-                            <option value="Permanen" {{ old('employee_id') == 'Permanen' ? 'selected' : '' }}>Permanen
+                            <option value="Permanen" {{ old('employment_status') == 'Permanen' ? 'selected' : '' }}>
+                                Permanen
                             </option>
-                            <option value="Kontrak" {{ old('employee_id') == 'Kontrak' ? 'selected' : '' }}>Kontrak
+                            <option value="Kontrak" {{ old('employment_status') == 'Kontrak' ? 'selected' : '' }}>
+                                Kontrak
                             </option>
-                            <option value="Percobaan" {{ old('employee_id') == 'Percobaan' ? 'selected' : '' }}>
+                            <option value="Percobaan" {{ old('employment_status') == 'Percobaan' ? 'selected' : '' }}>
                                 Percobaan</option>
-                            <option value="Outsource" {{ old('employee_id') == 'Outsource' ? 'selected' : '' }}>
+                            <option value="Outsource" {{ old('employment_status') == 'Outsource' ? 'selected' : '' }}>
                                 Outsource</option>
                         </select>
                         @error('employment_status')
@@ -282,7 +288,7 @@
                         @enderror
                     </div>
                     <div class="col-md-6 mb-3">
-                        <label>Tanggal Masuk Kerja*</label>
+                        <label>Tanggal Masuk Kerja<span class="text-danger">*</span></label>
                         <div class="input-group">
                             <input type="text" name="join_date"
                                 class="form-control @error('join_date') is-invalid @enderror"
@@ -297,8 +303,43 @@
                             @enderror
                         </div>
                     </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label>No MOU</label>
+                        <input type="text" class="form-control @error('no_mou') is-invalid @enderror"
+                            autocomplete="off" name="no_mou" placeholder="Masukkan No MOU"
+                            value="{{ old('no_mou') }}">
+                        @error('no_mou')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label>Masa Berlaku MOU</label>
+                        <div class="input-group">
+                            <input type="text" name="mou_period"
+                                class="form-control @error('mou_start_date') is-invalid @enderror @error('mou_end_date') is-invalid @enderror"
+                                placeholder="Pilih rentang tanggal" id="mou_period"
+                                value="@if (old('mou_start_date') && old('mou_end_date')) {{ old('mou_start_date') . ' s/d ' . old('mou_end_date') }} @endif">
+                            <div class="input-group-append">
+                                <span class="input-group-text fs-xl">
+                                    <i class="fal fa-calendar-alt"></i>
+                                </span>
+                            </div>
+                            @error('mou_start_date')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                            @error('mou_end_date')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <input type="hidden" name="mou_start_date" id="mou_start_date"
+                            value="{{ old('mou_start_date') }}">
+                        <input type="hidden" name="mou_end_date" id="mou_end_date"
+                            value="{{ old('mou_end_date') }}">
+                    </div>
+
                     <div class="col-md-12 mb-3">
-                        <label>Organisasi*</label>
+                        <label>Organisasi<span class="text-danger">*</span></label>
                         <select class="select2 form-control w-100 @error('organization_id') is-invalid @enderror"
                             id="organization_id_create" name="organization_id">
                             <option value=""></option>
@@ -314,7 +355,7 @@
                         @enderror
                     </div>
                     <div class="col-md-6 mb-3">
-                        <label>Jabatan*</label>
+                        <label>Jabatan<span class="text-danger">*</span></label>
                         <select class="select2 form-control w-100 @error('job_position_id') is-invalid @enderror"
                             id="job_position_id_create" name="job_position_id">
                             <option value=""></option>
@@ -330,7 +371,7 @@
                         @enderror
                     </div>
                     <div class="col-md-6 mb-3">
-                        <label>Level Jabatan*</label>
+                        <label>Level Jabatan<span class="text-danger">*</span></label>
                         <select class="select2 form-control w-100 @error('job_level_id') is-invalid @enderror"
                             id="job_level_id" name="job_level_id">
                             <option value=""></option>
@@ -346,7 +387,7 @@
                         @enderror
                     </div>
                     <div class="col-md-6 mb-3">
-                        <label>Approval Line*</label>
+                        <label>Approval Line<span class="text-danger">*</span></label>
                         <select class="select2 form-control w-100 @error('approval_line') is-invalid @enderror"
                             id="approval_line" name="approval_line">
                             <option value=""></option>
@@ -406,7 +447,7 @@
                 </div>
                 <div class="form-group row" style="font-size: 0.8rem !important;">
                     <div class="col-md-6 mb-3">
-                        <label>Gaji Pokok*</label>
+                        <label>Gaji Pokok<span class="text-danger">*</span></label>
                         <input type="number" class="form-control @error('basic_salary') is-invalid @enderror"
                             autocomplete="off" name="basic_salary" id="basic_salary" placeholder="2024xxxxx"
                             value="{{ old('basic_salary') }}">
@@ -462,7 +503,7 @@
                 </div>
                 <div class="form-group row" style="font-size: 0.8rem !important;">
                     <div class="col-md-12 mb-3">
-                        <label>Nama Bank*</label>
+                        <label>Nama Bank</label>
                         <select class="select2 form-control w-100 @error('bank_id') is-invalid @enderror"
                             id="bank_id" name="bank_id">
                             <option value=""></option>
@@ -476,7 +517,7 @@
                         @enderror
                     </div>
                     <div class="col-md-6 mb-3">
-                        <label>Nomor Rekening*</label>
+                        <label>Nomor Rekening</label>
                         <input type="text" class="form-control @error('account_number') is-invalid @enderror"
                             name="account_number" autocomplete="off" placeholder="4310xxxxxxxx"
                             value="{{ old('account_number') }}">
@@ -485,7 +526,7 @@
                         @enderror
                     </div>
                     <div class="col-md-6 mb-3">
-                        <label>Nama Rekening*</label>
+                        <label>Nama Rekening</label>
                         <input type="text" class="form-control @error('account_holder_name') is-invalid @enderror"
                             name="account_holder_name" autocomplete="off" placeholder="Fizar Rama Waluyo"
                             value="{{ old('account_holder_name') }}">
