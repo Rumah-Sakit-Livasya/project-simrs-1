@@ -866,12 +866,22 @@ Route::group(['middleware' => ['auth']], function () {
                 });
             });
 
-            Route::prefix('stock-request')->group(function () {
-                Route::prefix('pharmacy')->group(function () {
-                    Route::get('/', [WarehouseStockRequestPharmacyController::class, 'index'])->name('stock-request.pharmacy');
-                    Route::get('/create', [WarehouseStockRequestPharmacyController::class, 'create'])->name('stock-request.pharmacy.create');
-                    Route::get('/print/{id}', [WarehouseStockRequestPharmacyController::class, 'print'])->name('stock-request.pharmacy.print');
-                    Route::get('/edit/{id}', [WarehouseStockRequestPharmacyController::class, 'edit'])->name('stock-request.pharmacy.edit');
+            Route::prefix('stock-request')->name('stock-request.')->group(function () {
+                Route::prefix('pharmacy')->name('pharmacy.')->group(function () {
+                    // Rute yang sudah ada (disesuaikan penamaannya)
+                    Route::get('/', [WarehouseStockRequestPharmacyController::class, 'index'])->name('index');
+                    Route::get('/create', [WarehouseStockRequestPharmacyController::class, 'create'])->name('create');
+                    Route::get('/print/{id}', [WarehouseStockRequestPharmacyController::class, 'print'])->name('print');
+                    Route::get('/edit/{id}', [WarehouseStockRequestPharmacyController::class, 'edit'])->name('edit');
+
+                    // Rute yang ditambahkan untuk fungsionalitas penuh
+                    Route::post('/', [WarehouseStockRequestPharmacyController::class, 'store'])->name('store');
+                    Route::put('/{id}', [WarehouseStockRequestPharmacyController::class, 'update'])->name('update');
+                    Route::delete('/{id}', [WarehouseStockRequestPharmacyController::class, 'destroy'])->name('destroy');
+                    Route::get('/{id}/details', [WarehouseStockRequestPharmacyController::class, 'getDetailItems'])->name('details'); // Untuk Child Row
+                    // [FIX] Tambahkan rute ini untuk mengambil data item di modal
+                    Route::get('/get/item-gudang/{asal_gudang_id}/{tujuan_gudang_id}', [WarehouseStockRequestPharmacyController::class, 'get_item_gudang'])
+                        ->name('get.item-gudang');
                 });
 
                 Route::prefix('non-pharmacy')->group(function () {
@@ -883,11 +893,22 @@ Route::group(['middleware' => ['auth']], function () {
             });
 
             Route::prefix('distribusi-barang')->group(function () {
-                Route::prefix('pharmacy')->group(function () {
-                    Route::get('/', [WarehouseDistribusiBarangFarmasiController::class, 'index'])->name('distribusi-barang.pharmacy');
-                    Route::get('/create', [WarehouseDistribusiBarangFarmasiController::class, 'create'])->name('distribusi-barang.pharmacy.create');
-                    Route::get('/print/{id}', [WarehouseDistribusiBarangFarmasiController::class, 'print'])->name('distribusi-barang.pharmacy.print');
-                    Route::get('/edit/{id}', [WarehouseDistribusiBarangFarmasiController::class, 'edit'])->name('distribusi-barang.pharmacy.edit');
+                Route::prefix('pharmacy')->name('distribusi-barang.pharmacy.')->group(function () {
+                    // Rute yang sudah ada
+                    Route::get('/', [WarehouseDistribusiBarangFarmasiController::class, 'index'])->name('index');
+                    Route::get('/create', [WarehouseDistribusiBarangFarmasiController::class, 'create'])->name('create');
+                    Route::get('/print/{id}', [WarehouseDistribusiBarangFarmasiController::class, 'print'])->name('print');
+                    Route::get('/edit/{id}', [WarehouseDistribusiBarangFarmasiController::class, 'edit'])->name('edit');
+
+                    // Rute yang ditambahkan untuk fungsionalitas penuh
+                    Route::post('/', [WarehouseDistribusiBarangFarmasiController::class, 'store'])->name('store');
+                    Route::put('/{id}', [WarehouseDistribusiBarangFarmasiController::class, 'update'])->name('update');
+                    Route::delete('/{id}', [WarehouseDistribusiBarangFarmasiController::class, 'destroy'])->name('destroy');
+                    Route::get('/{id}/details', [WarehouseDistribusiBarangFarmasiController::class, 'getDetailItems'])->name('details');
+                    Route::get('/get-items-modal/{asal_gudang_id}/{tujuan_gudang_id}', [WarehouseDistribusiBarangFarmasiController::class, 'getItemGudangForModal'])->name('get-items-modal');
+                    Route::get('/get/stock/{gudang_id}/{barang_id}/{satuan_id}', [WarehouseDistribusiBarangFarmasiController::class, 'get_stock'])
+                        ->name('get-stock');
+                    // Route::get('/get/stock/{asal_gudang_id}/{tujuan_gudang_id}/{barang_id}', [WarehouseDistribusiBarangFarmasiController::class, 'getStock'])->name('get-stock');
                 });
 
                 Route::prefix('non-pharmacy')->group(function () {

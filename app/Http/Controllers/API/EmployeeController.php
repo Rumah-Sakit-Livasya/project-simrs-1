@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API;
 
 use App\Exports\DeductionExport;
+use App\Exports\EmployeeExport;
 use App\Exports\SalaryExport;
 use App\Http\Controllers\Controller;
 use App\Imports\DeductionImport;
@@ -395,6 +396,16 @@ class EmployeeController extends Controller
                 'error' => $e->getMessage(),
             ], 404);
         }
+    }
+
+    /**
+     * Handle the export of employee data.
+     *
+     * @return \Symfony\Component\HttpFoundation\BinaryFileResponse
+     */
+    public function export()
+    {
+        return Excel::download(new EmployeeExport, 'daftar-pegawai.xlsx');
     }
 
     public function import(Request $request)

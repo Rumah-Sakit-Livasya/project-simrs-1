@@ -106,4 +106,16 @@ class WarehouseBarangFarmasi extends Model implements AuditableContract
             ->unique('id') // Optional: avoid duplicates
             ->values();
     }
+
+    public function stokGudang()
+    {
+        return $this->hasManyThrough(
+            StoredBarangFarmasi::class,                 // 1. Model tujuan akhir (tabel stok)
+            WarehousePenerimaanBarangFarmasiItems::class, // 2. Model perantara (tabel item penerimaan)
+            'barang_id',                                // 3. Foreign key di tabel perantara (pbi) yang merujuk ke model ini (barang)
+            'pbi_id',                                   // 4. Foreign key di tabel tujuan (stok) yang merujuk ke tabel perantara (pbi)
+            'id',                                       // 5. Primary key di model ini (barang)
+            'id'                                        // 6. Primary key di model perantara (pbi)
+        );
+    }
 }

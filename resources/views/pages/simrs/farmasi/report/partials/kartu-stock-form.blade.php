@@ -19,7 +19,7 @@
             <div class="panel-container show">
                 <div class="panel-content">
 
-                    <form action="{{ route('farmasi.report.kartu-stock') }}" method="get">
+                    <form action="{{ route('farmasi.report.kartu-stock') }}" method="post">
                         @csrf
 
                         <div class="row justify-content-center">
@@ -57,14 +57,24 @@
                                                 <option value="" selected hidden disabled>Pilih Barang</option>
                                                 @foreach ($barangs as $barang)
                                                     @php
-                                                        $id = $barang->satuan->id . '_' . $barang->id . '_' . $barang->type;
+                                                        $id =
+                                                            $barang->satuan->id .
+                                                            '_' .
+                                                            $barang->id .
+                                                            '_' .
+                                                            $barang->type;
                                                     @endphp
                                                     <option value="{{ $id }}"
                                                         {{ request('satuan_barang_type') == $id ? 'selected' : '' }}>
                                                         [{{ $barang->satuan->kode }}] {{ $barang->nama }}</option>
                                                     @foreach ($barang->satuan_tambahan as $st)
                                                         @php
-                                                            $id = $st->satuan->id . '_' . $barang->id . '_' . $barang->type;
+                                                            $id =
+                                                                $st->satuan->id .
+                                                                '_' .
+                                                                $barang->id .
+                                                                '_' .
+                                                                $barang->type;
                                                         @endphp
 
                                                         <option value="{{ $id }}"

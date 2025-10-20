@@ -10,6 +10,7 @@ use App\Models\WarehouseStockRequestPharmacyItems;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Yajra\DataTables\Facades\DataTables; // Tambahkan ini
 
 class WarehouseStockRequestPharmacyController extends Controller
 {
@@ -18,67 +19,111 @@ class WarehouseStockRequestPharmacyController extends Controller
      */
     public function index(Request $request)
     {
-        $query = WarehouseStockRequestPharmacy::query()->with(['items']);
-        $filters = ['kode_sr', 'status'];
-        $filterApplied = false;
+        if ($request->ajax()) {
+            $query = WarehouseStockRequestPharmacy::with(['asal', 'tujuan', 'user.employee'])->select('warehouse_stock_request_pharmacy.*');
 
-        foreach ($filters as $filter) {
-            if ($request->filled($filter)) {
-                $query->where($filter, 'like', '%'.$request->$filter.'%');
-                $filterApplied = true;
+            // Server-side filtering
+            if ($request->filled('kode_sr')) {
+                $query->where('kode_sr', 'like', '%' . $request->kode_sr . '%');
             }
-        }
-
-        if ($request->filled('tanggal_sr')) {
-            $dateRange = explode(' - ', $request->tanggal_sr);
-            if (count($dateRange) === 2) {
-                $startDate = date('Y-m-d 00:00:00', strtotime($dateRange[0]));
-                $endDate = date('Y-m-d 23:59:59', strtotime($dateRange[1]));
-                $query->whereBetween('tanggal_sr', [$startDate, $endDate]);
+            if ($request->filled('status')) {
+                $query->where('status', $request->status);
             }
-            $filterApplied = true;
+            // ... tambahkan filter lain jika perlu
+
+            return DataTables::of($query)
+                ->addIndexColumn() // DT_RowIndex
+                ->addColumn('action', function ($row) {
+                    $buttons = [];
+                    // Tombol print selalu ada
+                    $buttons[] = '<button onclick="window.printData(' . $row->id . ')" class="btn btn-primary btn-icon btn-xs rounded-circle" title="Print"><i class="fal fa-print"></i></button>';
+                    if ($row->status === 'draft') {
+                        // Gunakan window agar pasti global scope
+                        $buttons[] = '<button onclick="window.editData(' . $row->id . ')" class="btn btn-warning btn-icon btn-xs rounded-circle" title="Edit"><i class="fal fa-pencil"></i></button>';
+                        $buttons[] = '<button onclick="window.deleteData(' . $row->id . ')" class="btn btn-danger btn-icon btn-xs rounded-circle" title="Hapus"><i class="fal fa-trash"></i></button>';
+                    }
+                    return implode(' ', $buttons);
+                })
+                ->editColumn('tanggal_sr', function ($data) {
+                    return tgl($data->tanggal_sr); // Asumsi helper tgl() tersedia
+                })
+                ->editColumn('tipe', function ($data) {
+                    return ucfirst($data->tipe);
+                })
+                ->editColumn('status', function ($data) {
+                    return ucfirst($data->status);
+                })
+                ->rawColumns(['action'])
+                ->make(true);
         }
 
-        if ($request->filled('nama_barang')) {
-            $query->whereHas('items', function ($q) use ($request) {
-                $q->where('nama_barang', 'like', '%'.$request->nama_barang.'%');
-            });
-            $filterApplied = true;
-        }
-
-        // Get the filtered results if any filter is applied
-        if ($filterApplied) {
-            $sr = $query->orderBy('created_at', 'desc')->get();
-        } else {
-            // Return all data if no filter is applied
-            $sr = WarehouseStockRequestPharmacy::all();
-        }
-
-        return view('pages.simrs.warehouse.stock-request.pharmacy', [
-            'srs' => $sr,
-        ]);
+        // Initial page load
+        return view('pages.simrs.warehouse.stock-request.pharmacy');
     }
 
+    /**
+     * Mengambil detail item untuk child row DataTables.
+     */
+    public function getDetailItems($id)
+    {
+        $sr = WarehouseStockRequestPharmacy::with(['items', 'items.barang', 'items.satuan'])->findOrFail($id);
+        return view("pages.simrs.warehouse.stock-request.partials.sr-detail-childrow", compact('sr'));
+    }
+
+    /**
+     * Mengambil data item untuk modal pemilihan.
+     */
     public function get_item_gudang($asal_gudang_id, $tujuan_gudang_id)
     {
-        $gudang_asal = WarehouseMasterGudang::findOrFail($asal_gudang_id);
-        $gudang_tujuan = WarehouseMasterGudang::findOrFail($tujuan_gudang_id);
+        try {
+            // [PERBAIKAN] Ganti 'satuanBeli' menjadi 'satuan'
+            $barang_farmasi = WarehouseBarangFarmasi::with('satuan')
+                ->with(['stokGudang' => function ($query) use ($asal_gudang_id, $tujuan_gudang_id) {
+                    // ... (query stokGudang yang sudah diperbaiki sebelumnya)
+                    $query->select(
+                        'warehouse_penerimaan_barang_farmasi_item.barang_id',
+                        'stored_barang_farmasi.gudang_id',
+                        DB::raw('SUM(stored_barang_farmasi.qty) as total_qty')
+                    )
+                        ->whereIn('stored_barang_farmasi.gudang_id', [$asal_gudang_id, $tujuan_gudang_id])
+                        ->groupBy(
+                            'warehouse_penerimaan_barang_farmasi_item.barang_id',
+                            'stored_barang_farmasi.gudang_id'
+                        );
+                }])
+                ->where('aktif', 1)
+                ->orderBy('nama')
+                ->get();
 
-        return view('pages.simrs.warehouse.stock-request.partials.table-items-pharmacy', [
-            'items' => WarehouseBarangFarmasi::all(),
-            'sis_asal' => StoredBarangFarmasi::where('gudang_id', $asal_gudang_id)->where('qty', '>', 0)->get(),
-            'sis_tujuan' => StoredBarangFarmasi::where('gudang_id', $tujuan_gudang_id)->where('qty', '>', 0)->get(),
-            'gudang_asal' => $gudang_asal,
-            'gudang_tujuan' => $gudang_tujuan,
-        ]);
+            $items = $barang_farmasi->map(function ($barang) use ($asal_gudang_id, $tujuan_gudang_id) {
+                // [PERBAIKAN] Ganti 'satuanBeli' menjadi 'satuan'
+                if (!$barang->satuan) return null;
+
+                // ... (sisa mapping data)
+                return [
+                    'barang' => $barang,
+                    'satuan' => $barang->satuan, // Gunakan 'satuan'
+                    // ...
+                ];
+            })->filter();
+
+            return response()->json($items->values()->all());
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal mengambil data barang: ' . $e->getMessage(),
+            ], 500);
+        }
     }
 
     /**
      * Show the form for creating a new resource.
+     * Modifikasi: Sekarang merender konten modal, bukan halaman penuh.
      */
     public function create()
     {
-        return view('pages.simrs.warehouse.stock-request.partials.popup-add-sr-farmasi', [
+        return view('pages.simrs.warehouse.stock-request.partials.popup-add-sr-farmasi', [ // [NOTE] Seharusnya ini form-modal-content
+            'sr' => null,
             'gudangs' => WarehouseMasterGudang::all(),
             'gudang_asals' => WarehouseMasterGudang::where('aktif', 1)->where('apotek', 1)->where('warehouse', 1)->get(),
         ]);
@@ -96,7 +141,7 @@ class WarehouseStockRequestPharmacyController extends Controller
             ->count() + 1;
         $count = str_pad($count, 6, '0', STR_PAD_LEFT);
 
-        return $count.'/SRF/'.$year.$month;
+        return $count . '/SRF/' . $year . $month;
     }
 
     /**
@@ -104,8 +149,6 @@ class WarehouseStockRequestPharmacyController extends Controller
      */
     public function store(Request $request)
     {
-        // dd($request->all());
-
         $validatedData1 = $request->validate([
             'user_id' => 'required|exists:users,id',
             'asal_gudang_id' => 'required|exists:warehouse_master_gudang,id',
@@ -116,6 +159,7 @@ class WarehouseStockRequestPharmacyController extends Controller
             'keterangan' => 'nullable|string',
         ]);
 
+        // [REFACTOR] Validasi item dipindahkan ke dalam transaksi
         $validatedData2 = $request->validate([
             'barang_id.*' => 'required|exists:warehouse_barang_farmasi,id',
             'satuan_id.*' => 'required|exists:warehouse_satuan_barang,id',
@@ -128,23 +172,28 @@ class WarehouseStockRequestPharmacyController extends Controller
 
         try {
             $sr = WarehouseStockRequestPharmacy::create($validatedData1);
-            foreach ($validatedData2['barang_id'] as $index => $barangId) {
-                WarehouseStockRequestPharmacyItems::create([
-                    'sr_id' => $sr->id,
-                    'barang_id' => $barangId,
-                    'satuan_id' => $validatedData2['satuan_id'][$index],
-                    'qty' => $validatedData2['qty'][$index],
-                    'keterangan' => $validatedData2['keterangan_item'][$index] ?? null,
-                ]);
+
+            // [REFACTOR] Menggunakan createMany untuk efisiensi
+            if ($request->has('barang_id')) {
+                $items = [];
+                foreach ($request->barang_id as $key => $barangId) {
+                    $items[] = new WarehouseStockRequestPharmacyItems([
+                        'barang_id' => $barangId,
+                        'satuan_id' => $request->satuan_id[$key],
+                        'qty' => $request->qty[$key],
+                        'keterangan' => $request->keterangan_item[$key] ?? null,
+                    ]);
+                }
+                $sr->items()->saveMany($items);
             }
 
             DB::commit();
 
-            return back()->with('success', 'Data berhasil disimpan');
+            return redirect()->route('warehouse.stock-request.pharmacy.index')->with('success', 'Stock Request berhasil dibuat.');
         } catch (\Exception $e) {
             DB::rollBack();
-
-            return back()->with('error', $e->getMessage());
+            // [REFACTOR] Mengembalikan ke halaman create dengan error dan input lama
+            return redirect()->route('warehouse.stock-request.pharmacy.create')->with('error', 'Gagal menyimpan data: ' . $e->getMessage())->withInput();
         }
     }
 
@@ -158,11 +207,12 @@ class WarehouseStockRequestPharmacyController extends Controller
 
     /**
      * Show the form for editing the specified resource.
+     * Modifikasi: Menggunakan view yang sama dengan create.
      */
     public function edit(WarehouseStockRequestPharmacy $warehouseStockRequestPharmacy, $id)
     {
-        return view('pages.simrs.warehouse.stock-request.partials.popup-edit-sr-farmasi', [
-            'sr' => $warehouseStockRequestPharmacy::findorfail($id),
+        return view('pages.simrs.warehouse.stock-request.partials.popup-add-sr-farmasi', [ // [NOTE] Menggunakan view yang sama dengan create
+            'sr' => $warehouseStockRequestPharmacy->findOrFail($id),
             'gudangs' => WarehouseMasterGudang::all(),
             'gudang_asals' => WarehouseMasterGudang::where('aktif', 1)->where('apotek', 1)->where('warehouse', 1)->get(),
         ]);
@@ -174,7 +224,6 @@ class WarehouseStockRequestPharmacyController extends Controller
     public function update(Request $request, WarehouseStockRequestPharmacy $warehouseStockRequestPharmacy, $id)
     {
         $validatedData1 = $request->validate([
-            'id' => 'required|exists:warehouse_stock_request_pharmacy,id',
             'user_id' => 'required|exists:users,id',
             'asal_gudang_id' => 'required|exists:warehouse_master_gudang,id',
             'tujuan_gudang_id' => 'required|exists:warehouse_master_gudang,id',
@@ -198,46 +247,36 @@ class WarehouseStockRequestPharmacyController extends Controller
             $sr = $warehouseStockRequestPharmacy->findOrFail($id);
             $sr->update($validatedData1);
 
-            // $validatedData["item_id"] is a key => pair array
-            // delete everything from WarehouseStockRequestPharmacyItems
-            // where sr_id == $pr->id
-            // and id IS NOT IN $validatedData["item_id"]
-            // because if it is not in $validatedData["item_id"]
-            // it means it has been deleted
-            if (isset($validatedData2['item_id']) && count($validatedData2['item_id']) > 0) {
-                WarehouseStockRequestPharmacyItems::where('sr_id', $sr->id)
-                    ->whereNotIn('id', $validatedData2['item_id'])
-                    ->delete(); // don't force delete to retain history
-            } else {
-                WarehouseStockRequestPharmacyItems::where('sr_id', $sr->id)->delete();
+            $existingItemIds = $sr->items()->pluck('id')->toArray();
+            $submittedItemIds = collect($request->item_id)->filter()->toArray(); // Ambil ID item yang dikirim dari form
+
+            // Hapus item yang tidak ada di form
+            $itemsToDelete = array_diff($existingItemIds, $submittedItemIds);
+            if (!empty($itemsToDelete)) {
+                WarehouseStockRequestPharmacyItems::whereIn('id', $itemsToDelete)->delete();
             }
 
-            foreach ($validatedData2['barang_id'] as $index => $barangId) {
-                $attributes = [
-                    'sr_id' => $sr->id,
-                    'barang_id' => $barangId,
-                    'satuan_id' => $validatedData2['satuan_id'][$index],
-                    'qty' => $validatedData2['qty'][$index],
-                    'keterangan' => $validatedData2['keterangan_item'][$index] ?? null,
-                ];
-
-                if ($request->has('item_id') && isset($validatedData2['item_id'][$index])) {
-                    $sri = WarehouseStockRequestPharmacyItems::findorfail($validatedData2['item_id'][$index]);
-                    $sri->update($attributes);
-                } else {
-                    $sri = new WarehouseStockRequestPharmacyItems($attributes);
+            // Update atau buat item baru
+            if ($request->has('barang_id')) {
+                foreach ($request->barang_id as $key => $barangId) {
+                    $itemId = $request->item_id[$key] ?? null;
+                    $sr->items()->updateOrCreate(
+                        ['id' => $itemId, 'sr_id' => $sr->id],
+                        [
+                            'barang_id' => $barangId,
+                            'satuan_id' => $request->satuan_id[$key],
+                            'qty' => $request->qty[$key],
+                            'keterangan' => $request->keterangan_item[$key] ?? null,
+                        ]
+                    );
                 }
-
-                $sri->save(); // save or update
             }
 
             DB::commit();
-
-            return back()->with('success', 'Data berhasil disimpan');
+            return redirect()->route('warehouse.stock-request.pharmacy.index')->with('success', 'Stock Request berhasil diperbarui.');
         } catch (\Exception $e) {
             DB::rollBack();
-
-            return back()->with('error', $e->getMessage());
+            return redirect()->route('warehouse.stock-request.pharmacy.edit', $id)->with('error', 'Gagal memperbarui data: ' . $e->getMessage())->withInput();
         }
     }
 

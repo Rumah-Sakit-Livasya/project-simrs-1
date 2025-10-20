@@ -283,6 +283,12 @@
                                                 <i class="fal fa-plus-circle mr-1"></i>Import Pegawai
                                             </a>
                                         </li>
+                                        <li class="nav-item">
+                                            <a class="nav-link" data-toggle="tab" href="#js_pill_border_icon-4"
+                                                role="tab">
+                                                <i class="fal fa-plus-circle mr-1"></i>Export Pegawai
+                                            </a>
+                                        </li>
                                         {{-- <li class="nav-item">
                                             <a class="nav-link" data-toggle="tab" href="#js_pill_border_icon-4"
                                                 role="tab">
@@ -300,6 +306,9 @@
                                         </div>
                                         <div class="tab-pane fade show" id="js_pill_border_icon-3" role="tabpanel">
                                             @include('pages.pegawai.daftar-pegawai.partials.create-employee')
+                                        </div>
+                                        <div class="tab-pane fade show" id="js_pill_border_icon-4" role="tabpanel">
+                                            @include('pages.pegawai.daftar-pegawai.partials.export-employee')
                                         </div>
                                         {{-- <div class="tab-pane fade show" id="js_pill_border_icon-4" role="tabpanel">
                                             @include('pages.pegawai.daftar-pegawai.partials.employee-salary')
