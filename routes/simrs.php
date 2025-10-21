@@ -78,6 +78,7 @@ use App\Http\Controllers\SIMRS\Operasi\TindakanOperasiController;
 use App\Http\Controllers\SIMRS\Operasi\TipeOperasiController;
 use App\Http\Controllers\SIMRS\OtorisasiUserController;
 use App\Http\Controllers\SIMRS\ParameterRadiologiController;
+use App\Http\Controllers\SIMRS\Pasien\PatientDashboardController;
 use App\Http\Controllers\SIMRS\PatientController;
 use App\Http\Controllers\SIMRS\Pengkajian\FormBuilderController;
 use App\Http\Controllers\SIMRS\Pengkajian\PengkajianController;
@@ -1668,6 +1669,10 @@ Route::group(['middleware' => ['auth']], function () {
         Route::prefix('rekam-medis')->name('rekam-medis.')->group(function () {
             Route::get('merge', [MergeRMController::class, 'index'])->name('merge.form');
             Route::post('merge', [MergeRMController::class, 'mergeAction'])->name('merge.action');
+        });
+
+        Route::prefix('pasien')->name('pasien.')->group(function () {
+            Route::get('/{pasien}/dashboard', [PatientDashboardController::class, 'index'])->name('dashboard');
         });
     });
 });

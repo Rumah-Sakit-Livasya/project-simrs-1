@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Auditable;
 use OwenIt\Auditing\Contracts\Auditable as AuditableContract;
 use Illuminate\Database\Eloquent\Casts\Attribute; // Penting untuk accessor baru
+use Illuminate\Support\Facades\Log;
 
 class Bilingan extends Model implements AuditableContract
 {

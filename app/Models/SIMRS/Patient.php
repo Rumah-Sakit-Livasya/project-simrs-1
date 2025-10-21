@@ -2,6 +2,8 @@
 
 namespace App\Models\SIMRS;
 
+use App\Models\OrderRadiologi;
+use App\Models\SIMRS\Laboratorium\OrderLaboratorium;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -69,5 +71,37 @@ class Patient extends Model
         return $this->belongsToMany(Bed::class, 'bed_patient')
             ->withPivot('status')
             ->withTimestamps();
+    }
+
+    /**
+     * Relasi untuk mengambil semua order lab pasien
+     * melalui tabel registrations.
+     */
+    public function orderLaboratorium()
+    {
+        return $this->hasManyThrough(
+            OrderLaboratorium::class,
+            Registration::class,
+            'patient_id',             // Foreign key di model perantara (registrations)
+            'registration_id',        // Foreign key di model tujuan (order_laboratoriums)
+            'id',                     // Local key di model ini (patients)
+            'id'                      // Local key di model perantara (registrations)
+        );
+    }
+
+    /**
+     * Relasi untuk mengambil semua order radiologi pasien
+     * melalui tabel registrations.
+     */
+    public function orderRadiologi()
+    {
+        return $this->hasManyThrough(
+            OrderRadiologi::class,    // Model tujuan
+            Registration::class,      // Model perantara
+            'patient_id',             // Foreign key di model perantara (registrations)
+            'registration_id',        // Foreign key di model tujuan (order_radiologis)
+            'id',                     // Local key di model ini (patients)
+            'id'                      // Local key di model perantara (registrations)
+        );
     }
 }
