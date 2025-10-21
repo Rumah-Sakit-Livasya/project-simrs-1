@@ -128,6 +128,7 @@
 @if (empty($pengkajian))
 @if ($registration->registration_type === 'rawat-jalan' && $assesment)
 @php
+    // [PERBAIKAN] Pastikan $assesment->tanda_vital ada sebelum diakses
     $tanda_vital_raw = $assesment->tanda_vital ?? '';
     if (is_array($tanda_vital_raw)) {
         $tanda_vital = $tanda_vital_raw;
@@ -322,6 +323,23 @@ Pemeriksaan Penunjang: {{ $assesment->pemeriksaan_penunjang ?? '' }}
     @include('pages.simrs.erm.partials.action-js.resume-medis-rajal')
     <script>
         $(document).ready(function() {
+            @if ($assessmentNotFilled)
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Pengkajian Belum Diisi',
+                    text: 'Anda harus mengisi pengkajian awal terlebih dahulu sebelum membuat resume medis.',
+                    confirmButtonText: 'OK',
+                    allowOutsideClick: false, // Mencegah user menutup alert dengan klik di luar
+                    allowEscapeKey: false // Mencegah user menutup alert dengan tombol Esc
+                }).then((result) => {
+                    // Setelah user klik "OK", redirect ke halaman sebelumnya
+                    if (result.isConfirmed) {
+                        window.location.href =
+                            '{{ url()->current() }}?registration={{ $registration->registration_number }}&menu=pengkajian_dokter_igd';
+                    }
+                });
+            @endif
+
             $('body').addClass('layout-composed');
 
             // Fungsi helper untuk inisialisasi Select2 dengan AJAX

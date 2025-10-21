@@ -1615,27 +1615,44 @@ class ERMController extends Controller
 
                 $dokter = Employee::where('is_doctor', 1)->get();
                 $pengkajian = ResumeMedisRajal::firstWhere('registration_id', $registration->id);
-                if ($registration->registration_type == 'rawat-jalan') {
-                    $assesment = DoctorInitialAssessment::firstWhere('registration_id', $registration->id);
-                    $terapi_tindakan = $assesment->terapi_tindakan ?? null;
-                } else {
-                    $assesment = PengkajianDokterIGD::firstWhere('registration_id', $registration->id);
-                    $terapi_tindakan = $assesment->terapi_tindakan ?? null;
+                $assesment = null;
+                $terapi_tindakan = null;
+                $keluhan_utama = null;
+                $assesmentError = null;
+
+                try {
+                    if ($registration->registration_type == 'rawat-jalan') {
+                        $assesment = DoctorInitialAssessment::firstWhere('registration_id', $registration->id);
+                    } else {
+                        $assesment = PengkajianDokterIGD::firstWhere('registration_id', $registration->id);
+                    }
+
+                    // Proses terapi_tindakan & keluhan_utama jika assesment tersedia
+                    if ($assesment) {
+                        $terapi_tindakan = $assesment->terapi_tindakan ?? null;
+
+                        $anamnesisData = $assesment->anamnesis ?? null;
+                        if (is_array($anamnesisData) && array_key_exists('keluhan_utama', $anamnesisData)) {
+                            $keluhan_utama = $anamnesisData['keluhan_utama'];
+                        }
+                    }
+                } catch (\Throwable $e) {
+                    $assesmentError = $e->getMessage();
                 }
 
-
-                // Flag untuk menampilkan SweetAlert2 jika assesment belum ada
+                // Flag untuk memicu SweetAlert2 jika assesment belum ada
                 $showSwal = false;
-                if (!$assesment || !$assesment->exists) {
+                if (is_null($assesment) || (method_exists($assesment, 'exists') && !$assesment->exists)) {
                     $showSwal = true;
                 }
 
-                $keluhan_utama = null;
-                if (is_array($assesment->anamnesis) && array_key_exists('keluhan_utama', $assesment->anamnesis)) {
-                    $keluhan_utama = $assesment->anamnesis['keluhan_utama'];
-                }
+                // [FLAG] Flag untuk memicu SweetAlert di view
+                // Kirim true jika $assesment null atau tidak ditemukan
+                $assessmentNotFilled = is_null($assesment);
 
-                return view('pages.simrs.erm.form.dokter.resume_medis', compact('registration', 'registrations', 'pengkajian', 'assesment', 'diagnosa_utama', 'diagnosa_tambahan', 'keluhan_utama', 'terapi_tindakan', 'menu', 'departements', 'jadwal_dokter', 'dokter', 'path'));
+                // Kirim $assesmentError ke view (pastikan juga compact atau with-nya sesuai di bawah)
+
+                return view('pages.simrs.erm.form.dokter.resume_medis', compact('registration', 'registrations', 'pengkajian', 'assesment', 'diagnosa_utama', 'diagnosa_tambahan', 'keluhan_utama', 'terapi_tindakan', 'menu', 'departements', 'jadwal_dokter', 'dokter', 'path',        'assessmentNotFilled'));
 
             case 'rekonsiliasi_obat':
                 $dokter = Employee::where('is_doctor', 1)->get();
