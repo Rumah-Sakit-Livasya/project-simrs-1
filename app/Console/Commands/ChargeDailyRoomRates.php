@@ -42,6 +42,7 @@ class ChargeDailyRoomRates extends Command
             ->with(['patient', 'penjamin.group_penjamin', 'kelas_rawat', 'bilingan'])
             ->get();
 
+
         if ($activeInpatients->isEmpty()) {
             $this->info('Tidak ada pasien rawat inap aktif yang ditemukan.');
             Log::info('Scheduler: Tidak ada pasien rawat inap aktif yang ditemukan.');
@@ -62,7 +63,7 @@ class ChargeDailyRoomRates extends Command
 
             // 3. Cek apakah tagihan kamar untuk hari ini sudah ada
             $alreadyChargedToday = TagihanPasien::where('registration_id', $registration->id)
-                ->where('tagihan', 'like', '[Biaya Kamar Harian]%')
+                ->where('tagihan', 'like', '[Biaya Kamar]%')
                 ->whereDate('created_at', $today)
                 ->exists();
 

@@ -647,8 +647,6 @@ class RegistrationController extends Controller
                 $biayaAdminRawatInap = BiayaAdministrasiRawatInap::where('group_penjamin_id', $gruop_penjamin_id)
                     ->first();
 
-                dd($biayaAdminRawatInap);
-
                 if (!$biayaAdminRawatInap) {
                     Log::error('Biaya administrasi rawat inap tidak ditemukan untuk group_penjamin_id: ' . $gruop_penjamin_id);
                     return response()->json(['message' => 'Biaya administrasi rawat inap tidak ditemukan untuk penjamin ini!'], 404);

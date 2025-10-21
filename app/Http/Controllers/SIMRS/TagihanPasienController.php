@@ -203,39 +203,38 @@ class TagihanPasienController extends Controller
     public function getData($id)
     {
         try {
-            // 1. Dapatkan model Bilingan terlebih dahulu
             $bilingan = Bilingan::find($id);
 
-            // 2. Lakukan pengecekan awal yang krusial
             if (!$bilingan) {
-                // Jika bilingan tidak ditemukan, kembalikan data kosong
                 return response()->json(['data' => []]);
             }
 
-            // =======================================================================
-            // PERBAIKAN LOGIKA: Tampilkan data HANYA jika status BUKAN 'final'
-            // Jika sudah 'final', tabel di frontend harus kosong (tidak bisa diedit)
-            // =======================================================================
             if (strtolower($bilingan->status) === 'final') {
                 return response()->json(['data' => []]);
             }
 
-            // 3. Buat Query Builder. Eager load tidak diperlukan di sini
-            // karena kita tidak mengakses relasi 'bilingan' di dalam DataTables.
             $query = TagihanPasien::where('bilingan_id', $id);
 
-            // 4. Serahkan Query Builder ke DataTables untuk diproses secara server-side
             return DataTables::of($query)
-                // Mengganti nama kolom dari database ke nama yang diharapkan frontend
                 ->addColumn('tanggal', fn($row) => $row->date)
                 ->addColumn('detail_tagihan', fn($row) => $row->tagihan)
-                ->addColumn('diskon_rp', fn($row) => $row->diskon)
-                ->addColumn('jaminan_rp', fn($row) => $row->jaminan)
-                // Tambahkan kolom 'del' secara dinamis untuk tombol hapus
+                ->addColumn('diskon_rp', function ($row) {
+                    // Tampilkan nilai diskon langsung, tanpa dikalikan/dibagi,
+                    // format sebagai angka Indonesia (contoh: 375000.0 → 375.000)
+                    if ($row->diskon === null) {
+                        return null;
+                    }
+                    return number_format($row->diskon, 0, ',', '.');
+                })
+                ->addColumn('jaminan_rp', function ($row) {
+                    if ($row->jaminan === null) {
+                        return null;
+                    }
+                    return number_format($row->jaminan, 0, ',', '.');
+                })
                 ->addColumn('del', function ($row) {
                     return '<button type="button" class="btn btn-danger btn-sm delete-btn" data-id="' . $row->id . '"><i class="fa fa-trash"></i></button>';
                 })
-                // Beritahu DataTables bahwa kolom 'del' berisi HTML dan tidak boleh di-escape
                 ->rawColumns(['del'])
                 ->make(true);
         } catch (\Exception $e) {

@@ -70,6 +70,7 @@ use App\Http\Controllers\SIMRS\Operasi\TipeOperasiController;
 use App\Http\Controllers\SIMRS\OrderRadiologiController;
 use App\Http\Controllers\SIMRS\OrderTindakanMedisController;
 use App\Http\Controllers\SIMRS\ParameterRadiologiController;
+use App\Http\Controllers\SIMRS\Pasien\PatientDashboardController;
 use App\Http\Controllers\SIMRS\Pengkajian\FormBuilderController;
 use App\Http\Controllers\SIMRS\Pengkajian\PengkajianController;
 use App\Http\Controllers\SIMRS\Pengkajian\PengkajianDokterRajalController;
@@ -1022,3 +1023,8 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
 Route::get('/tts', [TtsController::class, 'generateSpeech']);
 Route::post('/antrian/panggil', [AntrianController::class, 'panggilPasien'])->name('api.antrian.panggil');
 Route::get('/plasma-status/rawat-jalan/{plasmaDisplayRawatJalan}', [PlasmaDisplayRawatJalanController::class, 'getStatus']);
+
+Route::middleware(['auth:sanctum'])->group(function () {
+    Route::get('/pasien/{pasien}/data/lab', [PatientDashboardController::class, 'getLabData'])->name('api.pasien.lab');
+    Route::get('/pasien/{pasien}/data/radiologi', [PatientDashboardController::class, 'getRadiologiData'])->name('api.pasien.radiologi');
+});
