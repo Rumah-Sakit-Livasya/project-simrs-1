@@ -157,7 +157,8 @@
                     data: function(d) {
                         d.kode_sr = $('#kode_sr').val();
                         d.status = $('#status').val();
-                        // ... tambahkan filter lain
+                        d.tanggal_sr = $('#tanggal_sr').val();
+                        d.nama_barang = $('#nama_barang').val();
                     }
                 },
                 columns: [{
