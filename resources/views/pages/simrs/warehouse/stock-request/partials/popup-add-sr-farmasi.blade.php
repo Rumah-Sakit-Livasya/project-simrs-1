@@ -139,6 +139,7 @@
                                                     <input type="hidden" name="satuan_id[{{ $loop->index }}]"
                                                         value="{{ $item->satuan_id }}">
                                                     <td class="text-center">
+                                                        <input type="text" name="poi_id[{{ $key }}]" value="{{ $item->poi_id }}">
                                                         <a class="btn btn-danger btn-xs delete-btn"
                                                             data-key-cache="{{ $item->barang_id }}/{{ $item->satuan_id }}">
                                                             <i class="fal fa-times"></i>

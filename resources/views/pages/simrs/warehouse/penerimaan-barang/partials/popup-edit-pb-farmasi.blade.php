@@ -377,7 +377,7 @@
                                         </a>
                                     </div>
                                     <div class="col-md-6 text-right">
-                                        @if ($pb->status != 'final')
+                                        @if ($pb->canBeEdited())
                                             <button type="submit" id="order-submit-draft"
                                                 class="btn btn-lg btn-primary waves-effect waves-themed btn-action">
                                                 <span class="fal fa-save mr-1"></span>

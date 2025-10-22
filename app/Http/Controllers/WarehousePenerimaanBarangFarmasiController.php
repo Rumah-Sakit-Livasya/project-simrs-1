@@ -382,6 +382,7 @@ class WarehousePenerimaanBarangFarmasiController extends Controller
      */
     public function update(Request $request, WarehousePenerimaanBarangFarmasi $warehousePenerimaanBarangFarmasi, $id)
     {
+        // dd($request->all()); //
         $validatedData1 = $request->validate([
             'user_id' => 'required|exists:users,id',
             'po_id' => 'nullable|exists:procurement_purchase_order_pharmacy,id',
@@ -404,8 +405,6 @@ class WarehousePenerimaanBarangFarmasiController extends Controller
             'kas' => 'nullable|string',
         ]);
 
-        // dd($validatedData1);
-
         // Validate the incoming request data against our rules.
         $validatedData2 = $request->validate([
             'kode_barang.*' => 'required|string|max:255',
@@ -424,25 +423,36 @@ class WarehousePenerimaanBarangFarmasiController extends Controller
             'item_id' => 'nullable|array',
             'item_id.*' => 'integer',
         ]);
-        $auto = isset($validatedData1['po_id']) ? false : true;
+
+        // Determine if this is auto-generated PO (non-PO) or based on existing PO
+        $pb = WarehousePenerimaanBarangFarmasi::findOrFail($id);
+        $auto = !isset($validatedData1['po_id']) || $validatedData1['po_id'] === null;
 
         DB::beginTransaction();
         try {
-            $pb = WarehousePenerimaanBarangFarmasi::findOrFail($id);
             $pb->update($validatedData1);
 
-            if (count($validatedData2['item_id']) > 0) {
+            if (isset($validatedData2['item_id']) && count($validatedData2['item_id']) > 0) {
                 WarehousePenerimaanBarangFarmasiItems::where('pb_id', $pb->id)
                     ->whereNotIn('id', $validatedData2['item_id'])
                     ->delete(); // don't force delete to retain history
             }
 
             foreach ($validatedData2['barang_id'] as $key => $item_id) {
+                $poi = null; // Inisialisasi variabel $poi
+
                 if (! $auto) { // based on PO
-                    $poi = ProcurementPurchaseOrderPharmacyItems::findOrFail($validatedData2['poi_id'][$key]);
-                    // check if $poi->qty_received + $validatedData2["qty"][$key] doesn't exceed $poi->qty
-                    if ($poi->qty_received + $validatedData2['qty'][$key] > $poi->qty) {
-                        throw new \Exception('Qty received exceeds PO qty for item ' . $poi->barang->nama . '(' . $poi->id . ')');
+                    // Tambahkan pengecekan ini untuk memastikan 'poi_id' ada sebelum digunakan
+                    if (!isset($validatedData2['poi_id'][$key]) || $validatedData2['poi_id'][$key] === null) {
+                        // Jika tidak ada, skip validasi PO untuk item ini (kemungkinan penerimaan non-PO)
+                        // Atau bisa juga set $auto = true untuk item ini
+                        $auto = true;
+                    } else {
+                        $poi = ProcurementPurchaseOrderPharmacyItems::findOrFail($validatedData2['poi_id'][$key]);
+                        // check if $poi->qty_received + $validatedData2["qty"][$key] doesn't exceed $poi->qty
+                        if ($poi->qty_received + $validatedData2['qty'][$key] > $poi->qty) {
+                            throw new \Exception('Qty received exceeds PO qty for item ' . $poi->barang->nama . '(' . $poi->id . ')');
+                        }
                     }
                 }
 
@@ -450,7 +460,7 @@ class WarehousePenerimaanBarangFarmasiController extends Controller
                     ? $validatedData2['is_bonus'][$key]
                     : false;
 
-                $poi_id = $auto ? null : $validatedData2['poi_id'][$key];
+                $poi_id = ($auto || !isset($validatedData2['poi_id'][$key])) ? null : $validatedData2['poi_id'][$key];
 
                 $attributes = [
                     'pb_id' => $pb->id,
@@ -477,12 +487,8 @@ class WarehousePenerimaanBarangFarmasiController extends Controller
                     $pbi->save(); // Make sure $pbi has an ID before passing to stock creation
                 }
 
-                // !!! Penting !!!
-                // Simpan terlebih dahulu supaya $pbi->id tidak null.
-                // Lalu createStock dengan $pbi yang sudah ada id-nya.
-
                 if ($validatedData1['status'] === 'final') {
-                    if (! $auto) {
+                    if (! $auto && $poi) { // Pastikan $poi tidak null
                         $poi->update([
                             'qty_received' => $poi->qty_received + $validatedData2['qty'][$key], // update POI received quantity
                         ]);
@@ -501,8 +507,8 @@ class WarehousePenerimaanBarangFarmasiController extends Controller
             }
 
             if ($validatedData1['status'] == 'final') {
-                if ($auto) {
-                    // generate auto po
+                if ($auto && !$pb->po_id) {
+                    // generate auto po only if it doesn't exist yet
                     $po = $this->createAutoPO($request, $pb->kode_penerimaan);
                     $pb->update([
                         'po_id' => $po->id,
