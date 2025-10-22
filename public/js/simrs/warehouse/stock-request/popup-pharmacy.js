@@ -147,28 +147,23 @@ $(document).ready(function () {
 
         let html = "";
         items.forEach((itemData) => {
-            // [FIX] Semua data sekarang ada di dalam properti `barang`
+            // Data barang ada di level root itemData.barang
             const barang = itemData.barang;
 
-            // [FIX] Satuan diambil dari dalam objek barang
-            const satuan = barang.satuan;
+            // Satuan ada di level root itemData.satuan
+            const satuan = itemData.satuan;
 
             if (!barang || !satuan) return; // Lewati jika data tidak lengkap
 
-            const key = `${barang.id}/${satuan.id}`;
+            const key = `${itemData.barang_id}/${itemData.satuan_id}`;
             const isAdded = keyCache.includes(key);
 
-            // [FIX] Stok diambil dari dalam objek barang, lalu dicari yang cocok
-            // Gunakan asalGudangId dan tujuanGudangId dari parameter
-            const stokAsalData = barang.stok_gudang.find(
-                (s) => s.gudang_id == asalGudangId
-            );
-            const stokTujuanData = barang.stok_gudang.find(
-                (s) => s.gudang_id == tujuanGudangId
-            );
+            // Stok sudah ada langsung di itemData sebagai total_qty untuk gudang asal
+            const stokAsal = itemData.total_qty || 0;
 
-            const stokAsal = stokAsalData ? stokAsalData.total_qty : 0;
-            const stokTujuan = stokTujuanData ? stokTujuanData.total_qty : 0;
+            // Untuk stok tujuan, kita perlu data tambahan jika tersedia
+            // Untuk sementara set ke 0 karena struktur data hanya menyediakan stok asal
+            const stokTujuan = 0;
 
             const source = stokAsal > 0 ? "stock" : "barang";
 
@@ -177,9 +172,13 @@ $(document).ready(function () {
                     data-source="${source}"
                     data-item-name="${barang.nama.toLowerCase()}"
                     data-key="${key}"
-                    data-item='${JSON.stringify(
-                        barang
-                    )}'>  {{-- Simpan objek barang lengkap --}}
+                    data-barang-id="${itemData.barang_id}"
+                    data-satuan-id="${itemData.satuan_id}"
+                    data-nama-barang="${barang.nama}"
+                    data-nama-satuan="${satuan.nama}"
+                    data-kode="${barang.kode}"
+                    data-min-stok="${barang.min_stok || 0}"
+                    data-max-stok="${barang.max_stok || 0}">
 
                     <td>${barang.kode}</td>
                     <td class="item-name">${barang.nama}</td>
@@ -218,9 +217,11 @@ $(document).ready(function () {
 
         if (keyCache.includes(key)) return;
 
-        // [FIX] Ambil objek 'barang' lengkap dari atribut data
-        const barang = $row.data("item");
-        const satuan = barang.satuan; // Ambil satuan dari dalam objek barang
+        // Ambil data dari atribut data-* yang sudah kita set
+        const barangId = $row.data("barang-id");
+        const satuanId = $row.data("satuan-id");
+        const namaBarang = $row.data("nama-barang");
+        const namaSatuan = $row.data("nama-satuan");
         const stokAsal = $row.find("td").eq(3).text(); // Ambil dari teks di kolom tabel
 
         const qty = parseInt($row.find("input.item-qty").val().toString(), 10);
@@ -231,10 +232,10 @@ $(document).ready(function () {
 
         // Panggil fungsi untuk menambah baris ke tabel utama
         addItemToTable({
-            barang_id: barang.id,
-            satuan_id: satuan.id,
-            nama_barang: barang.nama,
-            nama_satuan: satuan.nama,
+            barang_id: barangId,
+            satuan_id: satuanId,
+            nama_barang: namaBarang,
+            nama_satuan: namaSatuan,
             stok: stokAsal,
             qty: qty,
             keterangan: "",
