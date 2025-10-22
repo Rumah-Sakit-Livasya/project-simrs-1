@@ -179,9 +179,7 @@
             // =================================================================
             $('.select2').select2({
                 placeholder: "Pilih...",
-                allowClear: true,
-                dropdownParent: (el) => $(el).closest('.modal').length ? $(el).closest('.modal') : $(
-                    document.body)
+                allowClear: true
             });
 
 
@@ -248,29 +246,25 @@
              * Fetch stok untuk item dari SR dan siapkan data untuk dirender.
              * @returns Promise
              */
-            function fetchStockAndPrepareItem(asalGudangId, item) {
-                return new Promise(resolve => {
-                    const url =
-                        `/simrs/warehouse/distribusi-barang/pharmacy/get/stock/${asalGudangId}/${item.barang.id}/${item.satuan.id}`;
-                    $.get(url, function(stockData) {
-                        const sisaQty = Math.max(0, (item.qty || 0) - (item.qty_fulfilled || 0));
-                        const stokTersedia = stockData.qty || 0;
-                        const qtyToDistribute = Math.min(sisaQty, stokTersedia);
+             function fetchStockAndPrepareItem(asalGudangId, item) {
+                 return new Promise(resolve => {
+                     const url =
+                         `/simrs/warehouse/distribusi-barang/pharmacy/get/stock/${asalGudangId}/${item.barang.id}/${item.satuan.id}`;
+                     $.get(url, function(stockData) {
+                         const sisaQty = Math.max(0, (item.qty || 0) - (item.qty_fulfilled || 0));
+                         const stokTersedia = stockData.qty || 0;
+                         const qtyToDistribute = Math.min(sisaQty, stokTersedia);
 
-                        if (qtyToDistribute > 0) {
-                            resolve({
-                                barang: item.barang,
-                                satuan: item.satuan,
-                                qty: qtyToDistribute,
-                                stok: stokTersedia,
-                                keterangan: item.keterangan || ''
-                            });
-                        } else {
-                            resolve(null); // Resolusi null jika tidak ada yang perlu didistribusi
-                        }
-                    }).fail(() => resolve(null)); // Resolusi null jika AJAX gagal
-                });
-            }
+                         resolve({
+                             barang: item.barang,
+                             satuan: item.satuan,
+                             qty: qtyToDistribute,
+                             stok: stokTersedia,
+                             keterangan: item.keterangan || ''
+                         });
+                     }).fail(() => resolve(null)); // Resolusi null jika AJAX gagal
+                 });
+             }
 
 
             /**
@@ -376,7 +370,9 @@
             /**
              * Menangani submit form (Draft/Final).
              */
-            function handleFormSubmit() {
+            function handleFormSubmit(e) {
+                e.preventDefault();
+
                 if ($itemTableBody.find('tr').length === 0) {
                     showErrorAlertNoRefresh('Harap tambahkan minimal satu item barang.');
                     return;
@@ -388,7 +384,36 @@
                 // Tampilkan loader fullscreen sebelum submit
                 $pageLoader.show();
 
-                $form.submit();
+                // Kirim form menggunakan AJAX
+                const formData = new FormData($form[0]);
+                const actionUrl = $form.attr('action');
+
+                $.ajax({
+                    url: actionUrl,
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function(response) {
+                        $pageLoader.hide();
+                        if (response.success) {
+                            showSuccessAlert(response.message || 'Distribusi Barang berhasil disimpan.');
+                            // Tutup window saat ini dan reload window pembuka
+                            if (window.opener) {
+                                window.opener.location.reload();
+                            }
+                            window.close();
+                        }
+                    },
+                    error: function(xhr) {
+                        $pageLoader.hide();
+                        let errorMessage = 'Terjadi kesalahan saat menyimpan data.';
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            errorMessage = xhr.responseJSON.message;
+                        }
+                        showErrorAlertNoRefresh(errorMessage);
+                    }
+                });
             }
 
         });

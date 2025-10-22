@@ -12,11 +12,22 @@ $(document).ready(function () {
     const $TujuanGudangId = $("select[name='tujuan_gudang_id']");
     const $ItemSourceSelect = $("#itemSourceSelect");
     const $ItemSearchInput = $("#searchItemInput");
+    const $submitDraftBtn = $("#order-submit-draft");
+    const $submitFinalBtn = $("#order-submit-final");
 
     let keyCache = [];
     let itemCounter = $ItemTableBody.find("tr").length;
+    let isSubmitting = false; // Flag untuk mencegah double click
+    let canEdit = true; // Default true untuk form baru
+
+    // Ambil canEdit dari data attribute jika ada (untuk edit mode)
+    const canEditAttr = $form.data('can-edit');
+    if (canEditAttr !== undefined) {
+        canEdit = canEditAttr;
+    }
 
     initializeKeyCache();
+    applyEditRestrictions();
 
     // === Event Bindings ===
     $("#add-btn").on("click", handleAddButtonClick);
@@ -28,14 +39,50 @@ $(document).ready(function () {
     $AsalGudangId.on("change", resetItems);
     $TujuanGudangId.on("change", resetItems);
 
-    // [PERBAIKAN KUNCI] Ubah event handler tombol submit
+    // [PERBAIKAN KUNCI] Ubah event handler tombol submit dengan proteksi double click
     $("#order-submit-draft, #order-submit-final").on("click", function (e) {
         e.preventDefault();
-        const status = $(this).is("#order-submit-final") ? "final" : "draft";
-        if (submitForm(status)) {
+
+        // Cegah submit jika tidak bisa edit
+        if (!canEdit) {
+            showErrorAlertNoRefresh(
+                "Stock Request ini tidak dapat diubah lagi."
+            );
+            return;
+        }
+
+        // Cegah submit jika sedang dalam proses submit
+        if (isSubmitting) {
+            return;
+        }
+
+        const $clickedBtn = $(this);
+        const status = $clickedBtn.is("#order-submit-final") ? "final" : "draft";
+
+        if (submitForm(status, $clickedBtn)) {
+            // Set flag dan disable kedua tombol
+            isSubmitting = true;
+            $submitDraftBtn.prop("disabled", true).addClass("btn-disabled");
+            $submitFinalBtn.prop("disabled", true).addClass("btn-disabled");
+
+            // Toggle spinner UI
+            $clickedBtn.find(".btn-text").addClass("d-none");
+            $clickedBtn.find(".btn-spinner").removeClass("d-none");
+
             $form.submit();
         }
     });
+
+    function applyEditRestrictions() {
+        if (!canEdit) {
+            // Disable semua input dan button
+            $form.find("input, select, textarea").prop("disabled", true);
+            $("#add-btn").prop("disabled", true).addClass("btn-disabled");
+            $ItemTableBody.find(".delete-btn").prop("disabled", true).addClass("btn-disabled");
+            $submitDraftBtn.prop("disabled", true).addClass("btn-disabled");
+            $submitFinalBtn.prop("disabled", true).addClass("btn-disabled");
+        }
+    }
 
     function initializeKeyCache() {
         keyCache = [];
@@ -46,6 +93,13 @@ $(document).ready(function () {
 
     async function handleAddButtonClick(event) {
         event.preventDefault();
+
+        if (!canEdit) {
+            showErrorAlertNoRefresh(
+                "Stock Request ini tidak dapat diubah lagi."
+            );
+            return;
+        }
 
         const gudangAsalId = $AsalGudangId.val();
         const gudangTujuanId = $TujuanGudangId.val();
@@ -220,6 +274,10 @@ $(document).ready(function () {
     function addItemToTable(item) {
         itemCounter++;
         const key_cache = `${item.barang_id}/${item.satuan_id}`;
+        const deleteBtn = canEdit
+            ? `<a class="btn btn-danger btn-xs delete-btn" data-key-cache="${key_cache}"><i class="fal fa-times"></i></a>`
+            : `<a class="btn btn-danger btn-xs delete-btn btn-disabled" disabled><i class="fal fa-times"></i></a>`;
+
         const html = `
             <tr id="item${itemCounter}">
                 <input type="hidden" name="barang_id[${itemCounter}]" value="${
@@ -229,23 +287,30 @@ $(document).ready(function () {
             item.satuan_id
         }">
                 <td class="text-center">
-                    <a class="btn btn-danger btn-xs delete-btn" data-key-cache="${key_cache}"><i class="fal fa-times"></i></a>
+                    ${deleteBtn}
                 </td>
                 <td>${item.nama_barang}</td>
                 <td>${item.nama_satuan}</td>
                 <td>${item.stok ?? "-"}</td>
                 <td><input type="number" name="qty[${itemCounter}]" class="form-control" value="${
             item.qty
-        }" min="1"></td>
+        }" min="1" ${!canEdit ? 'disabled' : ''}></td>
                 <td><input type="text" name="keterangan_item[${itemCounter}]" class="form-control" value="${
             item.keterangan
-        }"></td>
+        }" ${!canEdit ? 'disabled' : ''}></td>
             </tr>
         `;
         $ItemTableBody.append(html);
     }
 
     function handleDeleteItemClick(event) {
+        if (!canEdit) {
+            showErrorAlertNoRefresh(
+                "Stock Request ini tidak dapat diubah lagi."
+            );
+            return;
+        }
+
         const $button = $(event.currentTarget);
         const key_cache = $button.data("key-cache");
 
@@ -260,6 +325,13 @@ $(document).ready(function () {
     }
 
     function resetItems() {
+        if (!canEdit) {
+            showErrorAlertNoRefresh(
+                "Stock Request ini tidak dapat diubah lagi."
+            );
+            return;
+        }
+
         if ($ItemTableBody.find("tr").length > 0) {
             Swal.fire({
                 title: "Ganti Gudang?",
@@ -280,12 +352,15 @@ $(document).ready(function () {
     /**
      * Men-submit form dengan status yang ditentukan.
      * @param {'draft' | 'final'} status
+     * @param {jQuery} $button - Tombol yang diklik
      */
-    function submitForm(status) {
+    function submitForm(status, $button) {
         if ($ItemTableBody.find("tr").length === 0) {
             showErrorAlertNoRefresh(
                 "Harap tambahkan minimal satu item barang."
             );
+            // Reset tombol jika validasi gagal
+            enableSubmitButtons();
             return false;
         }
 
@@ -296,5 +371,23 @@ $(document).ready(function () {
 
         // Return true agar form bisa lanjut di-submit secara native
         return true;
+    }
+
+    /**
+     * Fungsi helper untuk mengaktifkan kembali tombol submit
+     * (digunakan jika terjadi error sebelum submit)
+     */
+    function enableSubmitButtons() {
+        isSubmitting = false;
+        $submitDraftBtn.prop("disabled", false).removeClass("btn-disabled");
+        $submitFinalBtn.prop("disabled", false).removeClass("btn-disabled");
+
+        // Reset spinner UI
+        $submitDraftBtn.find(".btn-text").removeClass("d-none");
+        $submitDraftBtn.find(".btn-spinner").addClass("d-none");
+        $submitFinalBtn.find(".btn-text").removeClass("d-none");
+        $submitFinalBtn.find(".btn-spinner").addClass("d-none");
+
+        $loadingPage.hide();
     }
 });

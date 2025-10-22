@@ -30,6 +30,11 @@
         #loading-spinner {
             display: none;
         }
+
+        .btn-disabled {
+            pointer-events: none;
+            opacity: 0.6;
+        }
     </style>
 @endsection
 
@@ -111,7 +116,6 @@
                                     </div>
                                 </div>
                                 <hr>
-
                                 <h5 class="frame-heading">Item yang Diminta</h5>
                                 <table class="table table-bordered table-hover">
                                     <thead class="bg-primary-600">
@@ -171,10 +175,18 @@
                                     class="panel-content border-faded border-left-0 border-right-0 border-bottom-0 d-flex flex-row align-items-center mt-3">
                                     <button type="button" class="btn btn-secondary" onclick="window.close()">Batal</button>
                                     <div class="ml-auto">
-                                        <button type="button" id="order-submit-draft" class="btn btn-primary">Simpan
-                                            Draft</button>
-                                        <button type="button" id="order-submit-final" class="btn btn-success">Simpan
-                                            Final</button>
+                                        <button type="button" id="order-submit-draft" class="btn btn-primary">
+                                            <span class="btn-text">Simpan Draft</span>
+                                            <span class="btn-spinner d-none">
+                                                <i class="fas fa-spinner fa-spin"></i> Menyimpan...
+                                            </span>
+                                        </button>
+                                        <button type="button" id="order-submit-final" class="btn btn-success">
+                                            <span class="btn-text">Simpan Final</span>
+                                            <span class="btn-spinner d-none">
+                                                <i class="fas fa-spinner fa-spin"></i> Menyimpan...
+                                            </span>
+                                        </button>
                                     </div>
                                 </div>
                             </form>
@@ -195,6 +207,7 @@
         $(document).ready(function() {
             // Inisialisasi semua select2 di halaman ini
             $('.select2').select2();
+
         });
     </script>
     <script src="{{ asset('js/simrs/warehouse/stock-request/popup-pharmacy.js') }}?v={{ time() }}"></script>

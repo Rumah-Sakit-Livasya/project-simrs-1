@@ -17,49 +17,65 @@ class WarehouseStockRequestPharmacyController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
-    {
-        if ($request->ajax()) {
-            $query = WarehouseStockRequestPharmacy::with(['asal', 'tujuan', 'user.employee'])->select('warehouse_stock_request_pharmacy.*');
+     public function index(Request $request)
+     {
+         if ($request->ajax()) {
+             $query = WarehouseStockRequestPharmacy::with(['asal', 'tujuan', 'user.employee'])->select('warehouse_stock_request_pharmacy.*');
 
-            // Server-side filtering
-            if ($request->filled('kode_sr')) {
-                $query->where('kode_sr', 'like', '%' . $request->kode_sr . '%');
-            }
-            if ($request->filled('status')) {
-                $query->where('status', $request->status);
-            }
-            // ... tambahkan filter lain jika perlu
+             // Server-side filtering
+             if ($request->filled('kode_sr')) {
+                 $query->where('kode_sr', 'like', '%' . $request->kode_sr . '%');
+             }
+             if ($request->filled('status')) {
+                 $query->where('status', $request->status);
+             }
+             if ($request->filled('tanggal_sr')) {
+                 $dateRange = explode(' - ', $request->tanggal_sr);
+                 if (count($dateRange) === 2) {
+                     $startDate = date('Y-m-d 00:00:00', strtotime($dateRange[0]));
+                     $endDate = date('Y-m-d 23:59:59', strtotime($dateRange[1]));
+                     $query->whereBetween('tanggal_sr', [$startDate, $endDate]);
+                 }
+             }
+             if ($request->filled('nama_barang')) {
+                 $query->whereHas('items', function ($q) use ($request) {
+                     $q->whereHas('barang', function ($subQ) use ($request) {
+                         $subQ->where('nama', 'like', '%' . $request->nama_barang . '%');
+                     });
+                 });
+             }
 
-            return DataTables::of($query)
-                ->addIndexColumn() // DT_RowIndex
-                ->addColumn('action', function ($row) {
-                    $buttons = [];
-                    // Tombol print selalu ada
-                    $buttons[] = '<button onclick="window.printData(' . $row->id . ')" class="btn btn-primary btn-icon btn-xs rounded-circle" title="Print"><i class="fal fa-print"></i></button>';
-                    if ($row->status === 'draft') {
-                        // Gunakan window agar pasti global scope
-                        $buttons[] = '<button onclick="window.editData(' . $row->id . ')" class="btn btn-warning btn-icon btn-xs rounded-circle" title="Edit"><i class="fal fa-pencil"></i></button>';
-                        $buttons[] = '<button onclick="window.deleteData(' . $row->id . ')" class="btn btn-danger btn-icon btn-xs rounded-circle" title="Hapus"><i class="fal fa-trash"></i></button>';
-                    }
-                    return implode(' ', $buttons);
-                })
-                ->editColumn('tanggal_sr', function ($data) {
-                    return tgl($data->tanggal_sr); // Asumsi helper tgl() tersedia
-                })
-                ->editColumn('tipe', function ($data) {
-                    return ucfirst($data->tipe);
-                })
-                ->editColumn('status', function ($data) {
-                    return ucfirst($data->status);
-                })
-                ->rawColumns(['action'])
-                ->make(true);
-        }
+             return DataTables::of($query)
+                 ->addIndexColumn() // DT_RowIndex
+                 ->addColumn('action', function ($row) {
+                     $buttons = [];
+                     // Tombol print selalu ada
+                     $buttons[] = '<button onclick="window.printData(' . $row->id . ')" class="btn btn-primary btn-icon btn-xs rounded-circle" title="Print"><i class="fal fa-print"></i></button>';
 
-        // Initial page load
-        return view('pages.simrs.warehouse.stock-request.pharmacy');
-    }
+                     // Gunakan canEdit() dari model untuk menentukan apakah bisa edit/delete
+                     if ($row->canEdit()) {
+                         // Gunakan window agar pasti global scope
+                         $buttons[] = '<button onclick="window.editData(' . $row->id . ')" class="btn btn-warning btn-icon btn-xs rounded-circle" title="Edit"><i class="fal fa-pencil"></i></button>';
+                         $buttons[] = '<button onclick="window.deleteData(' . $row->id . ')" class="btn btn-danger btn-icon btn-xs rounded-circle" title="Hapus"><i class="fal fa-trash"></i></button>';
+                     }
+                     return implode(' ', $buttons);
+                 })
+                 ->editColumn('tanggal_sr', function ($data) {
+                     return tgl($data->tanggal_sr); // Asumsi helper tgl() tersedia
+                 })
+                 ->editColumn('tipe', function ($data) {
+                     return ucfirst($data->tipe);
+                 })
+                 ->editColumn('status', function ($data) {
+                     return ucfirst($data->status);
+                 })
+                 ->rawColumns(['action'])
+                 ->make(true);
+         }
+
+         // Initial page load
+         return view('pages.simrs.warehouse.stock-request.pharmacy');
+     }
 
     /**
      * Mengambil detail item untuk child row DataTables.
@@ -79,12 +95,14 @@ class WarehouseStockRequestPharmacyController extends Controller
             // [PERBAIKAN] Ganti 'satuanBeli' menjadi 'satuan'
             $barang_farmasi = WarehouseBarangFarmasi::with('satuan')
                 ->with(['stokGudang' => function ($query) use ($asal_gudang_id, $tujuan_gudang_id) {
-                    // ... (query stokGudang yang sudah diperbaiki sebelumnya)
                     $query->select(
                         'warehouse_penerimaan_barang_farmasi_item.barang_id',
                         'stored_barang_farmasi.gudang_id',
                         DB::raw('SUM(stored_barang_farmasi.qty) as total_qty')
                     )
+                        ->join('warehouse_penerimaan_barang_farmasi_item',
+                            'stored_barang_farmasi.penerimaan_item_id', '=',
+                            'warehouse_penerimaan_barang_farmasi_item.id')
                         ->whereIn('stored_barang_farmasi.gudang_id', [$asal_gudang_id, $tujuan_gudang_id])
                         ->groupBy(
                             'warehouse_penerimaan_barang_farmasi_item.barang_id',
@@ -95,17 +113,24 @@ class WarehouseStockRequestPharmacyController extends Controller
                 ->orderBy('nama')
                 ->get();
 
-            $items = $barang_farmasi->map(function ($barang) use ($asal_gudang_id, $tujuan_gudang_id) {
-                // [PERBAIKAN] Ganti 'satuanBeli' menjadi 'satuan'
-                if (!$barang->satuan) return null;
+                $items = $barang_farmasi->map(function ($barang) use ($asal_gudang_id, $tujuan_gudang_id) {
+                    // [PERBAIKAN] Ganti 'satuanBeli' menjadi 'satuan'
+                    if (!$barang->satuan) return null;
 
-                // ... (sisa mapping data)
-                return [
-                    'barang' => $barang,
-                    'satuan' => $barang->satuan, // Gunakan 'satuan'
-                    // ...
-                ];
-            })->filter();
+                    // Ambil stok dari gudang asal dan tujuan
+                    $stok_asal = $barang->stokGudang->where('gudang_id', $asal_gudang_id)->first();
+                    $stok_tujuan = $barang->stokGudang->where('gudang_id', $tujuan_gudang_id)->first();
+
+                    return [
+                        'barang_id' => $barang->id,
+                        'nama' => $barang->nama,
+                        'satuan' => $barang->satuan, // Gunakan 'satuan'
+                        'satuan_id' => $barang->satuan->id,
+                        'satuan_nama' => $barang->satuan->nama,
+                        'stok_asal' => $stok_asal ? $stok_asal->total_qty : 0,
+                        'stok_tujuan' => $stok_tujuan ? $stok_tujuan->total_qty : 0,
+                    ];
+                })->filter();
 
             return response()->json($items->values()->all());
         } catch (\Exception $e) {

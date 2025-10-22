@@ -89,11 +89,5 @@
                 Cari
             </button>
         </div>
-        <div class="col-xl-3">
-            <button type="button" class="btn btn-primary waves-effect waves-themed" id="tambah-btn">
-                <span class="fal fa-plus mr-1"></span>
-                Stock Request
-            </button>
-        </div>
     </div>
 </form>
