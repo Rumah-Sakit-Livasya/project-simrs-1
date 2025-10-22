@@ -313,28 +313,34 @@ class WarehouseStockRequestPharmacyController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(WarehouseStockRequestPharmacy $warehouseStockRequestPharmacy, $id)
-    {
-        $pr = $warehouseStockRequestPharmacy->findorfail($id);
-        if ($pr->status == 'final') {
-            return response()->json([
-                'success' => false,
-                'message' => 'SR sudah final, tidak bisa dihapus!',
-            ]);
-        }
+     public function destroy(WarehouseStockRequestPharmacy $warehouseStockRequestPharmacy, $id)
+     {
+         $sr = $warehouseStockRequestPharmacy->findorfail($id);
 
-        try {
-            $pr->delete();
+         // Cek apakah SR sudah memiliki distribusi/pergerakan barang
+         $hasDistribution = DB::table('warehouse_distribusi_barang_farmasi')
+             ->where('sr_id', $id)
+             ->exists();
 
-            return response()->json([
-                'success' => true,
-                'message' => 'SR berhasil dihapus!',
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage(),
-            ]);
-        }
-    }
+         if ($hasDistribution) {
+             return response()->json([
+                 'success' => false,
+                 'message' => 'SR sudah memiliki distribusi barang, tidak bisa dihapus!',
+             ]);
+         }
+
+         try {
+             $sr->delete();
+
+             return response()->json([
+                 'success' => true,
+                 'message' => 'SR berhasil dihapus!',
+             ]);
+         } catch (\Exception $e) {
+             return response()->json([
+                 'success' => false,
+                 'message' => $e->getMessage(),
+             ]);
+         }
+     }
 }
