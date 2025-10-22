@@ -46,8 +46,8 @@
             font-weight: 600;
         }
     </style>
-    {{-- daterangepicker --}}
-    <link rel="stylesheet" href="/css/formplugins/bootstrap-daterangepicker/bootstrap-daterangepicker.css">
+    {{-- datepicker --}}
+    <link rel="stylesheet" href="/css/formplugins/bootstrap-datepicker/bootstrap-datepicker.css">
 @endsection
 
 @section('content')
@@ -84,12 +84,18 @@
                                 method="get">
                                 @csrf
                                 <div class="row mb-3">
-                                    <div class="col-md-4">
+                                    <div class="col-md-2">
                                         <div class="form-group">
-                                            <label class="form-label" for="tanggal_terima">Rentang Tanggal Terima</label>
-                                            <input type="text" class="form-control" id="tanggal_terima"
-                                                name="tanggal_terima" value="{{ request('tanggal_terima') }}"
-                                                autocomplete="off" placeholder="Pilih rentang tanggal">
+                                            <label class="form-label" for="tanggal_dari">Tanggal Dari</label>
+                                            <input type="date" class="form-control" id="tanggal_dari"
+                                                name="tanggal_dari" value="{{ request('tanggal_dari') }}">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="form-group">
+                                            <label class="form-label" for="tanggal_sampai">Tanggal Sampai</label>
+                                            <input type="date" class="form-control" id="tanggal_sampai"
+                                                name="tanggal_sampai" value="{{ request('tanggal_sampai') }}">
                                         </div>
                                     </div>
                                     <div class="col-md-4">
@@ -220,12 +226,6 @@
     <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
     <script src="/js/datagrid/datatables/datatables.export.js"></script>
 
-    {{-- Plugin DateRangePicker --}}
-    <script src="/js/dependency/moment/moment.js"></script>
-    <script src="/js/formplugins/bootstrap-daterangepicker/bootstrap-daterangepicker.js"></script>
-    {{-- Add moment.js if not already included --}}
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
-
     <script>
         // Fungsi untuk format Child Row
         function formatChildRow(items) {
@@ -280,63 +280,6 @@
         }
 
         $(document).ready(function() {
-            // Pastikan moment tersedia
-            if (typeof moment === 'undefined') {
-                console.error('moment.js is not loaded!');
-            }
-
-            // Inisialisasi daterangepicker pada input tanggal_terima
-            var today = new Date();
-
-            $('#tanggal_terima').daterangepicker({
-                opens: 'left',
-                startDate: moment(today).format('YYYY-MM-DD'),
-                endDate: moment(today).format('YYYY-MM-DD'),
-                autoUpdateInput: false,
-                locale: {
-                    format: 'YYYY-MM-DD',
-                    cancelLabel: 'Batal',
-                    applyLabel: 'Terapkan',
-                    fromLabel: 'Dari',
-                    toLabel: 'Sampai',
-                    customRangeLabel: "Custom",
-                    daysOfWeek: [
-                        "Min",
-                        "Sen",
-                        "Sel",
-                        "Rab",
-                        "Kam",
-                        "Jum",
-                        "Sab"
-                    ],
-                    monthNames: [
-                        "Januari",
-                        "Februari",
-                        "Maret",
-                        "April",
-                        "Mei",
-                        "Juni",
-                        "Juli",
-                        "Agustus",
-                        "September",
-                        "Oktober",
-                        "November",
-                        "Desember"
-                    ],
-                    firstDay: 1
-                }
-            });
-
-            $('#tanggal_terima').on('apply.daterangepicker', function(ev, picker) {
-                var start = picker.startDate.format('YYYY-MM-DD');
-                var end = picker.endDate.format('YYYY-MM-DD');
-                $(this).val(start + ' s/d ' + end);
-            });
-
-            $('#tanggal_terima').on('cancel.daterangepicker', function(ev, picker) {
-                $(this).val('');
-            });
-
             // Inisialisasi DataTables
             var table = $('#dt-penerimaan-farmasi').DataTable({
                 responsive: true,

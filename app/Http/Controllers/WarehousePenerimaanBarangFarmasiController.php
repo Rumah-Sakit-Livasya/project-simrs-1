@@ -31,62 +31,70 @@ class WarehousePenerimaanBarangFarmasiController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
-    {
-        $query = WarehousePenerimaanBarangFarmasi::query()->with(['items', 'po']);
-        $filters = ['kode_penerimaan', 'no_faktur'];
-        $filterApplied = false;
+     public function index(Request $request)
+     {
+         $query = WarehousePenerimaanBarangFarmasi::query()->with(['items', 'po']);
+         $filters = ['kode_penerimaan', 'no_faktur', 'kode_po'];
+         $filterApplied = false;
 
-        foreach ($filters as $filter) {
-            if ($request->filled($filter)) {
-                $query->where($filter, 'like', '%' . $request->$filter . '%');
-                $filterApplied = true;
-            }
-        }
+         // Simple text filters
+         foreach ($filters as $filter) {
+             if ($request->filled($filter)) {
+                 if ($filter === 'kode_po') {
+                     $query->whereHas('po', function ($q) use ($request) {
+                         $q->where('kode_po', 'like', '%' . $request->kode_po . '%');
+                     });
+                 } else {
+                     $query->where($filter, 'like', '%' . $request->$filter . '%');
+                 }
+                 $filterApplied = true;
+             }
+         }
 
-        if ($request->filled('tanggal_terima')) {
-            $dateRange = explode(' - ', $request->tanggal_terima);
-            if (count($dateRange) === 2) {
-                $startDate = date('Y-m-d 00:00:00', strtotime($dateRange[0]));
-                $endDate = date('Y-m-d 23:59:59', strtotime($dateRange[1]));
-                $query->whereBetween('tanggal_terima', [$startDate, $endDate]);
-            }
-            $filterApplied = true;
-        }
+         // Date range filter (tanggal_dari and tanggal_sampai)
+         if ($request->filled('tanggal_dari') && $request->filled('tanggal_sampai')) {
+             $startDate = date('Y-m-d 00:00:00', strtotime($request->tanggal_dari));
+             $endDate = date('Y-m-d 23:59:59', strtotime($request->tanggal_sampai));
+             $query->whereBetween('tanggal_terima', [$startDate, $endDate]);
+             $filterApplied = true;
+         } elseif ($request->filled('tanggal_dari')) {
+             $startDate = date('Y-m-d 00:00:00', strtotime($request->tanggal_dari));
+             $query->where('tanggal_terima', '>=', $startDate);
+             $filterApplied = true;
+         } elseif ($request->filled('tanggal_sampai')) {
+             $endDate = date('Y-m-d 23:59:59', strtotime($request->tanggal_sampai));
+             $query->where('tanggal_terima', '<=', $endDate);
+             $filterApplied = true;
+         }
 
-        if ($request->filled('nama_barang')) {
-            $query->whereHas('items', function ($q) use ($request) {
-                $q->where('nama_barang', 'like', '%' . $request->nama_barang . '%');
-            });
-            $filterApplied = true;
-        }
+         // Filter by nama_barang
+         if ($request->filled('nama_barang')) {
+             $query->whereHas('items', function ($q) use ($request) {
+                 $q->where('nama_barang', 'like', '%' . $request->nama_barang . '%');
+             });
+             $filterApplied = true;
+         }
 
-        if ($request->filled('batch_no')) {
-            $query->whereHas('items', function ($q) use ($request) {
-                $q->where('batch_no', 'like', '%' . $request->batch_no . '%');
-            });
-            $filterApplied = true;
-        }
+         // Filter by batch_no
+         if ($request->filled('batch_no')) {
+             $query->whereHas('items', function ($q) use ($request) {
+                 $q->where('batch_no', 'like', '%' . $request->batch_no . '%');
+             });
+             $filterApplied = true;
+         }
 
-        if ($request->filled('kode_po')) {
-            $query->whereHas('po', function ($q) use ($request) {
-                $q->where('kode_po', 'like', '%' . $request->kode_po . '%');
-            });
-            $filterApplied = true;
-        }
+         // Get the filtered results if any filter is applied
+         if ($filterApplied) {
+             $pb = $query->orderBy('created_at', 'desc')->get();
+         } else {
+             // Return all data if no filter is applied
+             $pb = WarehousePenerimaanBarangFarmasi::all();
+         }
 
-        // Get the filtered results if any filter is applied
-        if ($filterApplied) {
-            $pb = $query->orderBy('created_at', 'desc')->get();
-        } else {
-            // Return all data if no filter is applied
-            $pb = WarehousePenerimaanBarangFarmasi::all();
-        }
-
-        return view('pages.simrs.warehouse.penerimaan-barang.pharmacy', [
-            'pbs' => $pb,
-        ]);
-    }
+         return view('pages.simrs.warehouse.penerimaan-barang.pharmacy', [
+             'pbs' => $pb,
+         ]);
+     }
 
     /**
      * Show the form for creating a new resource.
