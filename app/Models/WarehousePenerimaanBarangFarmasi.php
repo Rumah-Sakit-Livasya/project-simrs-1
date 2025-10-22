@@ -39,4 +39,37 @@ class WarehousePenerimaanBarangFarmasi extends Model implements AuditableContrac
     {
         return $this->morphMany(ApSupplierDetail::class, 'penerimaanBarang');
     }
+
+    /**
+     * Check if penerimaan can be edited
+     * Allows editing of tanggal, no_faktur, penerima, ED, batch even if there's movement
+     * Only blocks editing if there are other restrictions
+     */
+    public function canBeEdited()
+    {
+        // Always allow editing for these fields: tanggal, no_faktur, penerima, ED, batch
+        // even if there's movement
+        return true;
+    }
+
+    /**
+     * Check if penerimaan can be deleted
+     * Only block deletion if there's actual movement/distribution
+     */
+    public function canBeDeleted()
+    {
+        // Check if items have been distributed/moved
+        foreach ($this->items as $item) {
+            // Check if item has been used in distributions
+            $hasDistribution = \DB::table('warehouse_distribusi_barang_farmasi_items')
+                ->where('pb_item_id', $item->id)
+                ->exists();
+
+            if ($hasDistribution) {
+                return false;
+            }
+        }
+
+        return true;
+    }
 }
