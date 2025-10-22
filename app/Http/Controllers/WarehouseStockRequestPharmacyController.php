@@ -89,57 +89,55 @@ class WarehouseStockRequestPharmacyController extends Controller
     /**
      * Mengambil data item untuk modal pemilihan.
      */
-    public function get_item_gudang($asal_gudang_id, $tujuan_gudang_id)
-    {
-        try {
-            // [PERBAIKAN] Ganti 'satuanBeli' menjadi 'satuan'
-            $barang_farmasi = WarehouseBarangFarmasi::with('satuan')
-                ->with(['stokGudang' => function ($query) use ($asal_gudang_id, $tujuan_gudang_id) {
-                    $query->select(
-                        'warehouse_penerimaan_barang_farmasi_item.barang_id',
-                        'stored_barang_farmasi.gudang_id',
-                        DB::raw('SUM(stored_barang_farmasi.qty) as total_qty')
-                    )
-                        ->join('warehouse_penerimaan_barang_farmasi_item',
-                            'stored_barang_farmasi.penerimaan_item_id', '=',
-                            'warehouse_penerimaan_barang_farmasi_item.id')
-                        ->whereIn('stored_barang_farmasi.gudang_id', [$asal_gudang_id, $tujuan_gudang_id])
-                        ->groupBy(
-                            'warehouse_penerimaan_barang_farmasi_item.barang_id',
-                            'stored_barang_farmasi.gudang_id'
-                        );
-                }])
-                ->where('aktif', 1)
-                ->orderBy('nama')
-                ->get();
+     public function get_item_gudang($asal_gudang_id, $tujuan_gudang_id)
+     {
+         $gudang_asal = WarehouseMasterGudang::findOrFail($asal_gudang_id);
+         $gudang_tujuan = WarehouseMasterGudang::findOrFail($tujuan_gudang_id);
 
-                $items = $barang_farmasi->map(function ($barang) use ($asal_gudang_id, $tujuan_gudang_id) {
-                    // [PERBAIKAN] Ganti 'satuanBeli' menjadi 'satuan'
-                    if (!$barang->satuan) return null;
+         // Query yang lebih kokoh dengan eager loading dan pengecekan relasi
+         $sis_asal = StoredBarangFarmasi::with([
+             // Muat relasi pbi, lalu dari pbi muat relasi barang dan satuan
+             'pbi' => function ($query) {
+                 $query->with(['barang', 'satuan']);
+             }
+         ])
+             // Hanya ambil data yang punya relasi pbi yang valid
+             ->whereHas('pbi.barang')
+             // Filter berdasarkan gudang asal
+             ->where('gudang_id', $asal_gudang_id)
+             // Filter hanya yang stoknya lebih dari 0
+             ->where('qty', '>', 0)
+             ->get();
 
-                    // Ambil stok dari gudang asal dan tujuan
-                    $stok_asal = $barang->stokGudang->where('gudang_id', $asal_gudang_id)->first();
-                    $stok_tujuan = $barang->stokGudang->where('gudang_id', $tujuan_gudang_id)->first();
+         // Opsional: Jika ingin mengelompokkan berdasarkan barang dan satuan,
+         // karena satu barang bisa ada di beberapa batch (PBI) yang berbeda.
+         $items_grouped = $sis_asal->groupBy(function ($item) {
+             // Buat kunci unik berdasarkan ID barang dan ID satuan
+             return $item->pbi->barang_id . '-' . $item->pbi->satuan_id;
+         })->map(function ($group) {
+             // Ambil item pertama sebagai representasi (karena barang & satuannya sama)
+             $first_item = $group->first();
+             // Jumlahkan total qty dari semua batch untuk barang & satuan ini
+             $total_qty = $group->sum('qty');
 
-                    return [
-                        'barang_id' => $barang->id,
-                        'nama' => $barang->nama,
-                        'satuan' => $barang->satuan, // Gunakan 'satuan'
-                        'satuan_id' => $barang->satuan->id,
-                        'satuan_nama' => $barang->satuan->nama,
-                        'stok_asal' => $stok_asal ? $stok_asal->total_qty : 0,
-                        'stok_tujuan' => $stok_tujuan ? $stok_tujuan->total_qty : 0,
-                    ];
-                })->filter();
+             return [
+                 'barang_id' => $first_item->pbi->barang_id,
+                 'satuan_id' => $first_item->pbi->satuan_id,
+                 'barang' => [
+                     'id' => $first_item->pbi->barang->id,
+                     'nama' => $first_item->pbi->barang->nama,
+                     'kode' => $first_item->pbi->barang->kode ?? null,
+                 ],
+                 'satuan' => [
+                     'id' => $first_item->pbi->satuan->id,
+                     'nama' => $first_item->pbi->satuan->nama,
+                 ],
+                 'total_qty' => $total_qty,
+             ];
+         });
 
-            return response()->json($items->values()->all());
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Gagal mengambil data barang: ' . $e->getMessage(),
-            ], 500);
-        }
-    }
+         return response()->json($items_grouped->values()->all());
+     }
 
     /**
      * Show the form for creating a new resource.
