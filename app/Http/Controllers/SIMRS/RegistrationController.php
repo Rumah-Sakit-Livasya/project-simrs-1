@@ -54,20 +54,32 @@ class RegistrationController extends Controller
     public function getRegistrationData($id)
     {
         try {
-            // Cari data registrasi berdasarkan ID
-            $registration = Registration::findOrFail($id);
-            $tindakan_medis = TindakanMedis::all();
+            // [UBAH] Gunakan with() untuk eager loading relasi yang dibutuhkan (doctor.employee)
+            // Ini lebih efisien daripada memuatnya nanti (menghindari N+1 query problem).
+            $registration = Registration::with('doctor.employee')->findOrFail($id);
+
+            // Opsi ini bisa Anda aktifkan jika perlu, tapi sepertinya tidak digunakan di frontend.
+            // $tindakan_medis = TindakanMedis::all();
+
+            // [UBAH] Siapkan doctor_employee_id
+            // Gunakan null-safe operator (?) untuk menghindari error jika relasi tidak ada
+            $doctorEmployeeId = $registration->doctor?->employee_id;
 
             // Buat response dengan data yang sesuai
             return response()->json([
                 'success' => true,
                 'message' => 'Data registrasi ditemukan.',
                 'data' => [
-                    // 'tanggal_tindakan' => $registration->tanggal_tindakan,
-                    'dokter_id' => $registration->doctor_id,
+                    // [BARU] Kirim employee_id dari dokter yang terhubung dengan registrasi ini
+                    'doctor_employee_id' => $doctorEmployeeId,
+
+                    // [HAPUS] Kita tidak lagi mengirim doctor_id, ganti dengan doctor_employee_id
+                    // 'dokter_id' => $registration->doctor_id,
+
                     'departement_id' => $registration->departement_id,
                     'kelas_id' => intval($registration->kelas_rawat_id),
-                    'tindakan_medis' => $tindakan_medis
+
+                    // 'tindakan_medis' => $tindakan_medis // Uncomment jika memang dibutuhkan di frontend
                 ],
             ], 200);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
@@ -75,14 +87,13 @@ class RegistrationController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Data registrasi tidak ditemukan.',
-                'error' => $e->getMessage(),
             ], 404);
         } catch (\Exception $e) {
-            // Error umum lainnya
+            // Error umum lainnya (sebaiknya log error ini untuk debugging)
+            \Log::error('Error in getRegistrationData: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => 'Terjadi kesalahan saat mengambil data registrasi.',
-                'error' => $e->getMessage(),
+                'message' => 'Terjadi kesalahan pada server saat mengambil data.',
             ], 500);
         }
     }

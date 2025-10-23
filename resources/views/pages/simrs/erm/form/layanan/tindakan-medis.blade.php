@@ -110,7 +110,7 @@
                             rows.push({
                                 no: idx++,
                                 tanggal_tindakan: action.tanggal_tindakan || 'Tidak Diketahui',
-                                doctor: action.doctor?.employee?.fullname || 'Tidak Diketahui',
+                                doctor: action.employee?.fullname || 'Tidak Diketahui',
                                 tindakan: action.tindakan_medis?.nama_tindakan ||
                                     'Tidak Diketahui',
                                 kelas: action.departement?.name || 'Tidak Diketahui',
@@ -153,7 +153,7 @@
             dtTindakanBidan.row.add({
                 no: rowCount,
                 tanggal_tindakan: data.tanggal_tindakan || 'Tidak Diketahui',
-                doctor: data.doctor?.employee?.fullname || 'Tidak Diketahui',
+                doctor: data.employee?.fullname || 'Tidak Diketahui',
                 tindakan: data.tindakan_medis?.nama_tindakan || 'Tidak Diketahui',
                 kelas: data.departement?.name || 'Tidak Diketahui',
                 qty: data.qty || 0,
@@ -317,7 +317,7 @@
                 const formData = {
                     tanggal_tindakan: $('#tglTindakan').val(),
                     registration_id: registrationId,
-                    doctor_id: $('#dokterPerawat').val(),
+                    employee_id: $('#dokterPerawat').val(),
                     tindakan_medis_id: $('#tindakanMedis').val(),
                     kelas: $('#kelas-tindakan-medis').val(),
                     departement_id: $('#departement-tindakan-medis').val(),
@@ -382,7 +382,15 @@
                     success: function(response) {
                         if (response.success) {
                             const data = response.data;
-                            $('#dokterPerawat').val(data.dokter_id).trigger('change');
+                            // Cek apakah doctor_employee_id ada di data registrasi
+                            if (data.doctor_employee_id) {
+                                console.log('Attempting to select employee_id:', data.doctor_employee_id);
+
+                                // Set nilai select2 dengan employee_id
+                                $('#dokterPerawat').val(data.doctor_employee_id).trigger('change');
+                                console.log('Personnel set to employee_id:', data.doctor_employee_id);
+                            }
+
                             $('#kelas-tindakan-medis').val(data.kelas_id).trigger('change');
                             $('#departement-tindakan-medis').val(data.departement_id).trigger(
                                 'change');

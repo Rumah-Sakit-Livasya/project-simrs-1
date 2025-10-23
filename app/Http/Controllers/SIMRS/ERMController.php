@@ -1668,15 +1668,57 @@ class ERMController extends Controller
 
             case 'tindakan_medis':
                 $tindakan_medis = TindakanMedis::all();
-                $groupedDoctors = Doctor::with('employee', 'departements')->get()->groupBy(function ($doctor) {
-                    return $doctor->department_from_doctors->name;
-                });
+                // Gabungkan semua data dalam satu collection
+                $allData = collect();
+
+                // [UBAH] Kita akan standarkan agar value yang dikirim adalah employee_id
+                // 1. Ambil data dokter (dari tabel Doctor)
+                $doctors = Doctor::with('employee', 'departements')->get();
+                foreach ($doctors as $doctor) {
+                    // Hanya proses jika dokter memiliki relasi employee yang valid
+                    if ($doctor->employee) {
+                        $allData->push([
+                            'employee_id' => $doctor->employee_id, // Ini akan jadi value di <option>
+                            'name' => $doctor->employee->fullname ?? 'N/A',
+                            'department' => $doctor->department_from_doctors->name ?? 'Dokter', // Beri label grup yang jelas
+                        ]);
+                    }
+                }
+
+                // 2. Ambil data perawat (jobPosition id = 7)
+                $nurses = Employee::whereHas('jobPosition', function ($query) {
+                    $query->where('id', 7);
+                })->where('is_active', 1)->get();
+                foreach ($nurses as $nurse) {
+                    $allData->push([
+                        'employee_id' => $nurse->id, // Ini akan jadi value di <option>
+                        'name' => $nurse->fullname ?? 'N/A',
+                        'department' => 'Perawat', // Beri label grup yang jelas
+                    ]);
+                }
+
+                // 3. Ambil data bidan (jobPosition id = 26)
+                $midwives = Employee::whereHas('jobPosition', function ($query) {
+                    $query->where('id', 26);
+                })->where('is_active', 1)->get();
+                foreach ($midwives as $midwife) {
+                    $allData->push([
+                        'employee_id' => $midwife->id, // Ini akan jadi value di <option>
+                        'name' => $midwife->fullname ?? 'N/A',
+                        'department' => 'Bidan', // Beri label grup yang jelas
+                    ]);
+                }
+
+                // 4. Group by department
+                // [UBAH] Ubah nama variabel agar lebih deskriptif
+                $groupedPersonnel = $allData->groupBy('department');
+
                 $tindakan_medis_yang_dipakai = OrderTindakanMedis::where('registration_id', $registration->id)->get();
                 $kelas_rawats = \App\Models\SIMRS\KelasRawat::all();
                 $dTindakan = \App\Models\SIMRS\Departement::with('grup_tindakan_medis.tindakan_medis')->get();
 
-                return view('pages.simrs.erm.form.layanan.tindakan-medis', compact('groupedDoctors', 'registration', 'registrations', 'dTindakan', 'menu', 'departements', 'jadwal_dokter', 'tindakan_medis', 'tindakan_medis_yang_dipakai', 'kelas_rawats', 'path'));
-
+                // [UBAH] Kirim variabel yang sudah diubah namanya ke view
+                return view('pages.simrs.erm.form.layanan.tindakan-medis', compact('groupedPersonnel', 'registration', 'registrations', 'dTindakan', 'menu', 'departements', 'jadwal_dokter', 'tindakan_medis', 'tindakan_medis_yang_dipakai', 'kelas_rawats', 'path'));
             case 'pemakaian_alat':
                 $list_peralatan = Peralatan::all();
                 $alat_medis_yang_dipakai = OrderAlatMedis::where('registration_id', $registration->id)->get();

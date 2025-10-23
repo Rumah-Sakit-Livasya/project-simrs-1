@@ -131,15 +131,34 @@
                 placeholder: "Pilih status"
             });
 
-            // Inisialisasi summernote
+            // FUNGSI UNTUK MEMBUAT TOMBOL KUSTOM DI SUMMERNOTE
+
+            // [UBAH TOTAL] Inisialisasi Summernote dengan Konfigurasi Khusus Form
             $('#summernote').summernote({
-                height: 200,
+                height: 450,
+                tabsize: 2,
+                // [PENTING] Nonaktifkan filter XSS bawaan yang bisa merusak tag form
+                disableDragAndDrop: false, // Biarkan drag-drop gambar tetap aktif
+                codeviewFilter: false,
+                codeviewIframeFilter: false,
+
+                // [PENTING] Definisikan tag apa saja yang kita izinkan
+                // Ini mencegah Summernote menghapus atribut penting seperti 'name', 'id', 'value', dll.
+                allowedTags: [
+                    'p', 'br', 'ul', 'ol', 'li', 'hr', 'table', 'thead', 'tbody', 'tr', 'th', 'td',
+                    'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'b', 'i', 'u', 'strong', 'em', 'span',
+                    'div', 'a', 'img', 'input', 'textarea', 'select', 'option', 'label', 'button'
+                ],
+
+                // [BARU] Tambahkan tombol kustom ke toolbar untuk snippet form
                 toolbar: [
-                    ['style', ['style']],
-                    ['font', ['bold', 'italic', 'underline', 'clear']],
+                    ['style', ['style', 'bold', 'italic', 'underline', 'clear']],
+                    ['font', ['fontname', 'fontsize']],
                     ['para', ['ul', 'ol', 'paragraph']],
-                    ['insert', ['link', 'table']],
-                    ['view', ['fullscreen', 'codeview']]
+                    ['table', ['table']],
+                    ['view', ['fullscreen', 'codeview']],
+                    // Grup baru untuk Form Snippets
+                    ['form', ['insertInput', 'insertTextarea', 'insertSelect', 'insertDataPlaceholder', 'insertSignaturePad']]
                 ]
             });
 

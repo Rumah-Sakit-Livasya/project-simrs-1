@@ -292,12 +292,12 @@ class PengkajianController extends Controller
     public function destroyPengkajianLanjutan(PengkajianLanjutan $pengkajianLanjutan): JsonResponse
     {
         // Aturan Bisnis: Jangan izinkan penghapusan jika form sudah difinalisasi.
-        if ($pengkajianLanjutan->is_final) {
-            return response()->json([
-                'error' => 'Aksi Ditolak',
-                'message' => 'Form yang sudah difinalisasi tidak dapat dihapus.'
-            ], 403); // 403 Forbidden
-        }
+        // if ($pengkajianLanjutan->is_final) {
+        //     return response()->json([
+        //         'error' => 'Aksi Ditolak',
+        //         'message' => 'Form yang sudah difinalisasi tidak dapat dihapus.'
+        //     ], 403); // 403 Forbidden
+        // }
 
         // Aturan Bisnis Opsional: Hanya user yang membuat yang bisa menghapus, atau admin.
         // if (Auth::id() !== $pengkajianLanjutan->created_by && !Auth::user()->isAdmin()) {

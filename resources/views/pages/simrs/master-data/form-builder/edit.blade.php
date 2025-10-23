@@ -122,8 +122,34 @@
     <script>
         $(document).ready(function() {
             $('.select2').select2();
+
+            // Inisialisasi Summernote dengan Konfigurasi Khusus Form
             $('#summernote').summernote({
-                height: 500 // Atur tinggi editor
+                height: 450,
+                tabsize: 2,
+                // Nonaktifkan filter XSS bawaan yang bisa merusak tag form
+                disableDragAndDrop: false, // Biarkan drag-drop gambar tetap aktif
+                codeviewFilter: false,
+                codeviewIframeFilter: false,
+
+                // Definisikan tag apa saja yang kita izinkan
+                // Ini mencegah Summernote menghapus atribut penting seperti 'name', 'id', 'value', dll.
+                allowedTags: [
+                    'p', 'br', 'ul', 'ol', 'li', 'hr', 'table', 'thead', 'tbody', 'tr', 'th', 'td',
+                    'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'b', 'i', 'u', 'strong', 'em', 'span',
+                    'div', 'a', 'img', 'input', 'textarea', 'select', 'option', 'label', 'button'
+                ],
+
+                // Tambahkan tombol kustom ke toolbar untuk snippet form
+                toolbar: [
+                    ['style', ['style', 'bold', 'italic', 'underline', 'clear']],
+                    ['font', ['fontname', 'fontsize']],
+                    ['para', ['ul', 'ol', 'paragraph']],
+                    ['table', ['table']],
+                    ['view', ['fullscreen', 'codeview']],
+                    // Grup baru untuk Form Snippets
+                    ['form', ['insertInput', 'insertTextarea', 'insertSelect', 'insertDataPlaceholder', 'insertSignaturePad']]
+                ]
             });
 
             $('#update-form').on('submit', function(e) {
