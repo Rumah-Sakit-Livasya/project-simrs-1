@@ -12,13 +12,18 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('order_tindakan_medis', function (Blueprint $table) {
+            // Menghapus kolom doctor_id dan foreign key-nya
+            if (Schema::hasColumn('order_tindakan_medis', 'doctor_id')) {
+                $table->dropForeign(['doctor_id']);
+                $table->dropColumn('doctor_id');
+            }
+
             // Menambahkan kolom employee_id sebagai foreign key yang merujuk ke tabel 'employees'
             // Mengizinkan nilai NULL jika ada data lama yang tidak memiliki employee_id
-            // Menempatkan kolom ini setelah 'doctor_id' untuk kerapian
             $table->foreignId('employee_id')
                     ->nullable() // Tambahkan nullable() jika ada kemungkinan data lama tidak memiliki employee_id
-                    ->constrained('employees') // Sesuaikan 'employees' jika nama tabel Anda berbeda
-                    ->after('doctor_id'); // Posisikan kolom setelah doctor_id
+                    ->after('user_id')
+                    ->constrained('employees'); // Sesuaikan 'employees' jika nama tabel Anda berbeda
         });
     }
 
@@ -28,10 +33,15 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('order_tindakan_medis', function (Blueprint $table) {
-            // Logika untuk membatalkan migrasi (menghapus kolom dan foreign key)
-            // Laravel 8+ akan otomatis menangani penghapusan foreign key jika menggunakan constrained()
+            // Menghapus kolom employee_id dan foreign key-nya
             $table->dropForeign(['employee_id']);
             $table->dropColumn('employee_id');
+
+            // Menambahkan kembali kolom doctor_id sebagai foreign key
+            $table->foreignId('doctor_id')
+                    ->nullable()
+                    ->after('user_id')
+                    ->constrained('doctors');
         });
     }
 };
