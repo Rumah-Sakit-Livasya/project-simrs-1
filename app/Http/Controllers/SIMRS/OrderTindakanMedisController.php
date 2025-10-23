@@ -19,28 +19,42 @@ class OrderTindakanMedisController extends Controller
     {
         // Validasi input
         if (empty($registrationId)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'ID pendaftaran tidak boleh kosong. Silakan masukkan ID pendaftaran yang valid.',
-            ], 400); // 400 Bad Request
+            return response()->json(
+                [
+                    "success" => false,
+                    "message" =>
+                    "ID pendaftaran tidak boleh kosong. Silakan masukkan ID pendaftaran yang valid.",
+                ],
+                400,
+            ); // 400 Bad Request
         }
 
         // Fetch medical actions from the database
-        $actions = OrderTindakanMedis::where('registration_id', $registrationId)
-            ->with(['user.employee', 'tindakan_medis', 'departement', 'registration', 'doctor.employee'])
+        $actions = OrderTindakanMedis::where("registration_id", $registrationId)
+            ->with([
+                "user.employee",
+                "tindakan_medis",
+                "departement",
+                "registration",
+                "employee",
+            ])
             ->get();
 
         // Jika tidak ada tindakan medis ditemukan
         if ($actions->isEmpty()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Tidak ada tindakan medis yang ditemukan untuk ID pendaftaran ini. Pastikan ID pendaftaran yang dimasukkan benar.',
-            ], 404); // 404 Not Found
+            return response()->json(
+                [
+                    "success" => false,
+                    "message" =>
+                    "Tidak ada tindakan medis yang ditemukan untuk ID pendaftaran ini. Pastikan ID pendaftaran yang dimasukkan benar.",
+                ],
+                404,
+            ); // 404 Not Found
         }
 
         return response()->json([
-            'success' => true,
-            'data' => $actions,
+            "success" => true,
+            "data" => $actions,
         ]);
     }
 
@@ -52,7 +66,7 @@ class OrderTindakanMedisController extends Controller
                 'tanggal_tindakan' => 'required|date',
                 'user_id' => 'required|exists:users,id',
                 'registration_id' => 'required|exists:registrations,id',
-                'doctor_id' => 'required|exists:doctors,id',
+                'employee_id' => 'nullable|exists:employees,id',
                 'departement_id' => 'required|exists:departements,id',
                 'kelas' => 'required|string',
                 'tindakan_medis_id' => 'required|exists:tindakan_medis,id',
@@ -60,7 +74,6 @@ class OrderTindakanMedisController extends Controller
             ], [
                 'tanggal_tindakan.required' => 'Tanggal tindakan harus diisi.',
                 'user_id.required' => 'Pengguna harus diisi.',
-                'doctor_id.required' => 'Dokter harus diisi.',
                 'departement_id.required' => 'Departemen harus diisi.',
                 'kelas.required' => 'Kelas harus diisi.',
                 'tindakan_medis_id.required' => 'Tindakan medis harus diisi.',
@@ -165,23 +178,33 @@ class OrderTindakanMedisController extends Controller
         $action = OrderTindakanMedis::find($id);
 
         if (!$action) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Tindakan medis tidak ditemukan. Pastikan ID yang dimasukkan benar.',
-            ], 404);
+            return response()->json(
+                [
+                    "success" => false,
+                    "message" =>
+                    "Tindakan medis tidak ditemukan. Pastikan ID yang dimasukkan benar.",
+                ],
+                404,
+            );
             try {
                 $action->delete();
                 return response()->json([
-                    'success' => true,
-                    'message' => 'Tindakan medis berhasil dihapus.'
+                    "success" => true,
+                    "message" => "Tindakan medis berhasil dihapus.",
                 ]);
             } catch (\Exception $e) {
-                \Log::error('Error menghapus tindakan medis: ' . $e->getMessage());
+                \Log::error(
+                    "Error menghapus tindakan medis: " . $e->getMessage(),
+                );
 
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Terjadi kesalahan saat menghapus tindakan medis. Silakan coba lagi nanti.'
-                ], 500);
+                return response()->json(
+                    [
+                        "success" => false,
+                        "message" =>
+                        "Terjadi kesalahan saat menghapus tindakan medis. Silakan coba lagi nanti.",
+                    ],
+                    500,
+                );
             }
         }
     }
@@ -201,6 +224,7 @@ class OrderTindakanMedisController extends Controller
     private function calculateWajibBayar($medicalAction)
     {
         // Implement your logic to calculate wajib bayar here
-        return $this->calculateNominal($medicalAction) - $this->calculateDiskon($medicalAction); // Example calculation
+        return $this->calculateNominal($medicalAction) -
+            $this->calculateDiskon($medicalAction); // Example calculation
     }
 }

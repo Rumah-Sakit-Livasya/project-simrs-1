@@ -16,13 +16,36 @@
             border-radius: .5rem;
             cursor: wait;
         }
+
+        /* Style for table loading overlay */
+        .table-loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.65);
+            z-index: 99999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            pointer-events: all;
+        }
+
+        .table-loading-overlay .spinner-border {
+            color: #1976d2;
+            width: 3rem;
+            height: 3rem;
+        }
+
+        .table-container-relative {
+            position: relative;
+        }
     </style>
 
     <div class="tab-content p-3">
         <div class="tab-pane fade show active" id="tab_default-1" role="tabpanel">
             @include('pages.simrs.erm.partials.detail-pasien')
-
-
             {{-- <div id="tindakan-medis"> --}}
             <div class="panel-hdr border-top">
                 <h2 class="text-light">
@@ -35,13 +58,20 @@
                     <div class="panel-container show">
                         <div class="panel-content">
                             <!-- datatable start -->
-                            <div class="table-responsive">
+                            <div class="table-responsive table-container-relative" id="table-order-tindakan-wrapper"
+                                style="overflow:visible;">
+                                <!-- Table loading overlay -->
+                                <div class="table-loading-overlay" id="table-tindakan-loading" style="display:none;">
+                                    <div>
+                                        <div class="spinner-border" role="status"></div>
+                                    </div>
+                                </div>
                                 <table id="dt-tindakan-bidan" class="table table-bordered table-hover table-striped w-100">
                                     <thead class="bg-primary-600">
                                         <tr>
                                             <th>No</th>
                                             <th>Tanggal</th>
-                                            <th>Dokter</th>
+                                            <th>Dokter/Perawat</th>
                                             <th>Tindakan</th>
                                             <th>Kelas</th>
                                             <th>Qty</th>
@@ -93,9 +123,16 @@
     <script>
         let dtTindakanBidan;
 
+        // Helper to show/hide loading overlay for table
+        function showTableLoading(show = true) {
+            $('#table-tindakan-loading').css('display', show ? 'flex' : 'none');
+        }
+
         // Fungsi untuk memuat dan menampilkan data tindakan medis
         function loadMedicalActions(registrationId) {
             if (!registrationId) return; // Keluar jika tidak ada ID registrasi
+
+            showTableLoading(true);
 
             $.ajax({
                 url: `/api/simrs/get-medical-actions/${registrationId}`,
@@ -110,7 +147,7 @@
                             rows.push({
                                 no: idx++,
                                 tanggal_tindakan: action.tanggal_tindakan || 'Tidak Diketahui',
-                                doctor: action.employee?.fullname || 'Tidak Diketahui',
+                                employee: action.employee.fullname || 'Tidak Diketahui',
                                 tindakan: action.tindakan_medis?.nama_tindakan ||
                                     'Tidak Diketahui',
                                 kelas: action.departement?.name || 'Tidak Diketahui',
@@ -143,6 +180,9 @@
                             `Gagal memuat tindakan medis. Status: ${xhr.status}, Pesan: ${xhr.statusText}`;
                     }
                     // showErrorAlertNoRefresh(errorMessage); // Uncomment jika ingin menampilkan error
+                },
+                complete: function() {
+                    showTableLoading(false);
                 }
             });
         }
@@ -153,7 +193,7 @@
             dtTindakanBidan.row.add({
                 no: rowCount,
                 tanggal_tindakan: data.tanggal_tindakan || 'Tidak Diketahui',
-                doctor: data.employee?.fullname || 'Tidak Diketahui',
+                employee: data.employee.fullname || 'Tidak Diketahui',
                 tindakan: data.tindakan_medis?.nama_tindakan || 'Tidak Diketahui',
                 kelas: data.departement?.name || 'Tidak Diketahui',
                 qty: data.qty || 0,
@@ -184,8 +224,8 @@
                         name: 'tanggal_tindakan'
                     },
                     {
-                        data: 'doctor',
-                        name: 'doctor'
+                        data: 'employee',
+                        name: 'employee'
                     },
                     {
                         data: 'tindakan',
@@ -254,7 +294,7 @@
                                 if (response == 1) {
                                     dtTindakanBidan.row($row).remove().draw();
                                     showSuccessAlert(
-                                    'Tindakan medis berhasil dihapus.');
+                                        'Tindakan medis berhasil dihapus.');
                                 } else {
                                     showErrorAlertNoRefresh(
                                         'Gagal menghapus tindakan medis: ' + (
@@ -384,11 +424,14 @@
                             const data = response.data;
                             // Cek apakah doctor_employee_id ada di data registrasi
                             if (data.doctor_employee_id) {
-                                console.log('Attempting to select employee_id:', data.doctor_employee_id);
+                                console.log('Attempting to select employee_id:', data
+                                    .doctor_employee_id);
 
                                 // Set nilai select2 dengan employee_id
-                                $('#dokterPerawat').val(data.doctor_employee_id).trigger('change');
-                                console.log('Personnel set to employee_id:', data.doctor_employee_id);
+                                $('#dokterPerawat').val(data.doctor_employee_id).trigger(
+                                    'change');
+                                console.log('Personnel set to employee_id:', data
+                                    .doctor_employee_id);
                             }
 
                             $('#kelas-tindakan-medis').val(data.kelas_id).trigger('change');
