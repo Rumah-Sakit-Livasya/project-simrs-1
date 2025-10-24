@@ -115,57 +115,124 @@
     </div>
     <div class="card-body">
         <div class="table-responsive">
+            @php
+                $humptyDumpty = [
+                    'usia' => [
+                        'label' => 'Usia',
+                        'options' => [
+                            '< 3 tahun' => 4,
+                            '3 - 7 tahun' => 3,
+                            '7 - 13 tahun' => 2,
+                            '>= 13 tahun' => 1,
+                        ],
+                    ],
+                    'jenis_kelamin' => [
+                        'label' => 'Jenis Kelamin',
+                        'options' => [
+                            'Laki-laki' => 2,
+                            'Perempuan' => 1,
+                        ],
+                    ],
+                    'diagnosis' => [
+                        'label' => 'Diagnosis',
+                        'options' => [
+                            'Diagnosis neurologi' => 4,
+                            'Perubahan oksigenasi (respiratorik, dehidrasi, anemia, anoreksia, sinkop, pusing, dsb.)' => 3,
+                            'Gangguan perilaku/psikiatri' => 2,
+                            'Diagnosis lainnya' => 1,
+                        ],
+                    ],
+                    'gangguan_kognitif' => [
+                        'label' => 'Gangguan Kognitif',
+                        'options' => [
+                            'Tidak menyadari keterbatasan dirinya' => 3,
+                            'Lupa akan adanya keterbatasan' => 2,
+                            'Orientasi baik terhadap diri sendiri' => 1,
+                        ],
+                    ],
+                    'faktor_lingkungan' => [
+                        'label' => 'Faktor Lingkungan',
+                        'options' => [
+                            'Riwayat jatuh / Bayi diletakkan di tempat tidur dewasa' => 4,
+                            'Pasien menggunakan alat bantu / Bayi diletakkan dalam tempat tidur bayi/perabot rumah' => 3,
+                            'Pasien diletakkan di tempat tidur' => 2,
+                            'Area di luar rumah sakit' => 1,
+                        ],
+                    ],
+                    'respon_terhadap_operasi' => [
+                        'label' => 'Respons terhadap Pembedahan/Sedasi/Anastesi',
+                        'options' => [
+                            'Dalam 24 jam' => 3,
+                            'Dalam 48 jam' => 2,
+                            '> 48 jam / Tidak menjalani pembedahan' => 1,
+                        ],
+                    ],
+                    'penggunaan_medikamentosa' => [
+                        'label' => 'Penggunaan Medikamentosa',
+                        'options' => [
+                            'Penggunaan multipel: sedatif, hipnosis, barbiturat, fenotiazin, antidepresan, pencahar, diuretik, narkose' => 3,
+                            'Penggunaan salah satu obat di atas' => 2,
+                            'Penggunaan medikasi lain / Tidak ada medikasi' => 1,
+                        ],
+                    ],
+                ];
+            @endphp
+
             <table class="table table-bordered table-hover">
                 <thead class="bg-light">
                     <tr>
                         <th>Parameter</th>
-                        <th>Pilihan</th>
-                        <th class="text-center">Skor</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach ([
-        'usia' => ['label' => 'Usia', 'options' => ['< 3 tahun' => 4, '3 - 7 tahun' => 3, '7 - 13 tahun' => 2, '>= 13 tahun' => 1]],
-        'jenis_kelamin' => ['label' => 'Jenis Kelamin', 'options' => ['Laki-laki' => 2, 'Perempuan' => 1]],
-        'diagnosis' => ['label' => 'Diagnosis', 'options' => ['Diagnosis neurologi' => 4, 'Perubahan oksigenasi (respiratorik, dehidrasi, anemia, anoreksia, sinkop, pusing, dsb.)' => 3, 'Gangguan perilaku/psikiatri' => 2, 'Diagnosis lainnya' => 1]],
-        'gangguan_kognitif' => ['label' => 'Gangguan Kognitif', 'options' => ['Tidak menyadari keterbatasan dirinya' => 3, 'Lupa akan adanya keterbatasan' => 2, 'Orientasi baik terhadap diri sendiri' => 1]],
-        'faktor_lingkungan' => ['label' => 'Faktor Lingkungan', 'options' => ['Riwayat jatuh / Bayi diletakkan di tempat tidur dewasa' => 4, 'Pasien menggunakan alat bantu / Bayi diletakkan dalam tempat tidur bayi/perabot rumah' => 3, 'Pasien diletakkan di tempat tidur' => 2, 'Area di luar rumah sakit' => 1]],
-        'respon_terhadap_operasi' => ['label' => 'Respons terhadap Pembedahan/Sedasi/Anastesi', 'options' => ['Dalam 24 jam' => 3, 'Dalam 48 jam' => 2, '> 48 jam / Tidak menjalani pembedahan' => 1]],
-        'penggunaan_medikamentosa' => ['label' => 'Penggunaan Medikamentosa', 'options' => ['Penggunaan multipel: sedatif, hipnosis, barbiturat, fenotiazin, antidepresan, pencahar, diuretik, narkose' => 3, 'Penggunaan salah satu obat di atas' => 2, 'Penggunaan medikasi lain / Tidak ada medikasi' => 1]],
-    ] as $key => $item)
-                        <tr>
-                            <td class="align-middle"><b>{{ $item['label'] }}</b></td>
-                            <td colspan="2">
-                                @foreach ($item['options'] as $pilihan => $skor)
-                                    <div class="custom-control custom-radio">
-                                        <input type="radio" id="jatuh_anak_{{ $key }}_{{ $skor }}"
-                                            name="resiko_jatuh_anak[humpty_dumpty][{{ $key }}]"
-                                            value="{{ $skor }}" class="custom-control-input humpty"
-                                            data-skor="{{ $skor }}" @checked(isset($jatuh['humpty_dumpty'][$key]) && $jatuh['humpty_dumpty'][$key] == $skor)>
-                                        <label class="custom-control-label"
-                                            for="jatuh_anak_{{ $key }}_{{ $skor }}">{{ $pilihan }}
-                                            <span class="badge badge-secondary">{{ $skor }}</span></label>
-                                    </div>
-                                @endforeach
-                            </td>
-                        </tr>
+                        @foreach ($humptyDumpty as $key => $item)
+                            @foreach ($item['options'] as $pilihan => $skor)
+                                <th class="text-center">{{ $pilihan }}<br><span
+                                        class="badge badge-secondary">{{ $skor }}</span></th>
+                            @endforeach
+                        @break
                     @endforeach
-                </tbody>
-                <tfoot class="bg-light">
+                </tr>
+            </thead>
+            <tbody>
+                @foreach ($humptyDumpty as $key => $item)
                     <tr>
-                        <th class="text-right" colspan="2">Total Skor Humpty Dumpty</th>
-                        <td><input type="text" name="resiko_jatuh_anak[humpty_dumpty][total_skor]" id="skor_humpty"
-                                class="form-control font-weight-bold bg-white" readonly
-                                value="{{ $jatuh['humpty_dumpty']['total_skor'] ?? '' }}"></td>
+                        <td class="align-middle"><b>{{ $item['label'] }}</b></td>
+                        @foreach ($item['options'] as $pilihan => $skor)
+                            <td class="text-center align-middle">
+                                <div class="custom-control custom-radio d-inline-block">
+                                    <input type="radio" id="jatuh_anak_{{ $key }}_{{ $skor }}"
+                                        name="resiko_jatuh_anak[humpty_dumpty][{{ $key }}]"
+                                        value="{{ $skor }}" class="custom-control-input humpty"
+                                        data-skor="{{ $skor }}" @checked(isset($jatuh['humpty_dumpty'][$key]) && $jatuh['humpty_dumpty'][$key] == $skor)>
+                                    <label class="custom-control-label"
+                                        for="jatuh_anak_{{ $key }}_{{ $skor }}"></label>
+                                </div>
+                            </td>
+                        @endforeach
                     </tr>
-                    <tr>
-                        <th class="text-right" colspan="2">Analisis Resiko</th>
-                        <td><input type="text" name="resiko_jatuh_anak[humpty_dumpty][analisis]"
-                                id="analisis_humpty" class="form-control font-weight-bold bg-white" readonly
-                                value="{{ $jatuh['humpty_dumpty']['analisis'] ?? '' }}"></td>
-                    </tr>
-                </tfoot>
-            </table>
-        </div>
+                @endforeach
+            </tbody>
+            <tfoot class="bg-light">
+                <tr>
+                    <th class="text-right"
+                        colspan="{{ count($humptyDumpty[array_key_first($humptyDumpty)]['options']) + 1 }}">Total
+                        Skor Humpty Dumpty</th>
+                    <td>
+                        <input type="text" name="resiko_jatuh_anak[humpty_dumpty][total_skor]" id="skor_humpty"
+                            class="form-control font-weight-bold bg-white" readonly
+                            value="{{ $jatuh['humpty_dumpty']['total_skor'] ?? '' }}">
+                    </td>
+                </tr>
+                <tr>
+                    <th class="text-right"
+                        colspan="{{ count($humptyDumpty[array_key_first($humptyDumpty)]['options']) + 1 }}">
+                        Analisis Resiko</th>
+                    <td>
+                        <input type="text" name="resiko_jatuh_anak[humpty_dumpty][analisis]"
+                            id="analisis_humpty" class="form-control font-weight-bold bg-white" readonly
+                            value="{{ $jatuh['humpty_dumpty']['analisis'] ?? '' }}">
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
     </div>
+</div>
 </div>
