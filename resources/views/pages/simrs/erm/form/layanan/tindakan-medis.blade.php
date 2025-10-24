@@ -73,7 +73,8 @@
                                             <th>Tanggal</th>
                                             <th>Dokter/Perawat</th>
                                             <th>Tindakan</th>
-                                            <th>Kelas</th>
+                                            {{-- FIX: Changed header from "Kelas" to "Poliklinik" for clarity --}}
+                                            <th>Poliklinik</th>
                                             <th>Qty</th>
                                             <th>Entry By</th>
                                             <th>F.O.C</th>
@@ -113,7 +114,124 @@
         </div>
     </div>
     {{-- </div> --}}
-    @include('pages.simrs.pendaftaran.partials.modal-tindakan-medis')
+    <div class="modal fade" id="modal-tambah-tindakan" tabindex="-1" role="dialog" aria-hidden="true"
+        data-id="{{ $registration->id }}">
+        <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-loading-overlay" style="display: none;">
+                    <div class="d-flex justify-content-center align-items-center h-100">
+                        <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
+                            <span class="sr-only">Loading...</span>
+                        </div>
+                        <h4 class="ml-3">Memproses data...</h4>
+                    </div>
+                </div>
+
+                <div class="modal-header bg-primary">
+                    <h5 class="modal-title text-white">Tambah Tindakan Medis</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true"><i class="fal fa-times"></i></span>
+                    </button>
+                </div>
+
+                <form id="store-form" method="post" action="javascript:void(0)" autocomplete="off" novalidate>
+                    @csrf
+                    @method('post')
+                    <input type="hidden" id="registration" value="{{ $registration->id }}">
+
+                    <div class="modal-body">
+                        <div class="form-group row">
+                            <label for="tglTindakan" class="col-sm-3 col-form-label">Tgl Tindakan</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" id="tglTindakan" name="tgl_tindakan"
+                                    placeholder="Pilih tanggal">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="dokterPerawat" class="col-sm-3 col-form-label">Dokter/Perawat/Bidan</label>
+                            <div class="col-sm-9">
+                                <select class="form-select" id="dokterPerawat" name="employee_id" style="width: 100%;">
+                                    <option value=""></option>
+                                    @foreach ($groupedPersonnel as $department => $items)
+                                        <optgroup label="{{ $department }}">
+                                            @foreach ($items as $item)
+                                                <option value="{{ $item['employee_id'] }}">
+                                                    {{ $item['name'] }}
+                                                </option>
+                                            @endforeach
+                                        </optgroup>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label for="departement-tindakan-medis" class="col-sm-3 col-form-label">Poliklinik</label>
+                            <div class="col-sm-9">
+                                <select class="form-select" id="departement-tindakan-medis" name="departement_id"
+                                    style="width: 100%;">
+                                    @foreach ($dTindakan as $departement)
+                                        <option value="{{ $departement->id }}"
+                                            data-groups="{{ $departement->grup_tindakan_medis ? json_encode($departement->grup_tindakan_medis->toArray()) : '[]' }}">
+                                            {{ $departement->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label for="kelas-tindakan-medis" class="col-sm-3 col-form-label">Kelas</label>
+                            <div class="col-sm-9">
+                                <select class="form-select" id="kelas-tindakan-medis" name="kelas"
+                                    style="width: 100%;">
+                                    @foreach ($kelas_rawats as $kelas)
+                                        <option value="{{ $kelas->id }}">
+                                            {{ $kelas->kelas }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label for="tindakanMedis" class="col-sm-3 col-form-label">Tindakan Medis</label>
+                            <div class="col-sm-9">
+                                <select class="form-select" id="tindakanMedis" name="tindakan_medis_id"
+                                    style="width: 100%;">
+                                    {{-- Dibuat kosong, hanya ada placeholder awal --}}
+                                    <option value="" selected>Pilih Poliklinik terlebih dahulu</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label for="qty" class="col-sm-3 col-form-label">Qty</label>
+                            <div class="col-sm-9">
+                                <input type="number" class="form-control" id="qty" name="qty" value="1"
+                                    min="1">
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label for="diskonDokter" class="col-sm-3 col-form-label">Diskon Dokter</label>
+                            <div class="col-sm-9">
+                                <div class="form-check mt-2">
+                                    <input class="form-check-input" type="checkbox" id="diskonDokter" name="foc">
+                                    <label class="form-check-label" for="diskonDokter">Ya</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div> <!-- /.modal-body -->
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary">Simpan Tindakan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 @endsection
 @section('plugin-erm')
     <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
@@ -150,6 +268,7 @@
                                 employee: action.employee.fullname || 'Tidak Diketahui',
                                 tindakan: action.tindakan_medis?.nama_tindakan ||
                                     'Tidak Diketahui',
+                                // This now correctly corresponds to the "Poliklinik" header
                                 kelas: action.departement?.name || 'Tidak Diketahui',
                                 qty: action.qty || 0,
                                 entry_by: action.user?.employee?.fullname || 'Tidak Diketahui',
@@ -162,24 +281,25 @@
                             dtTindakanBidan.clear().rows.add(rows).draw();
                         }
                     } else {
-                        showErrorAlertNoRefresh('Gagal memuat tindakan medis: ' + response.message);
+                        // This case handles a 404 response gracefully
+                        if (dtTindakanBidan) {
+                            dtTindakanBidan.clear().draw();
+                        }
                     }
                 },
                 error: function(xhr) {
                     let errorMessage = 'Terjadi kesalahan yang tidak diketahui. Silakan coba lagi nanti.';
                     if (xhr.responseJSON && xhr.responseJSON.message) {
                         errorMessage = xhr.responseJSON.message;
-                    } else if (xhr.status === 404) {
-                        // Jika tidak ada data, tabel akan menampilkan "Belum ada tindakan medis."
-                        // jadi tidak perlu menampilkan error.
-                        dtTindakanBidan.clear().draw();
                     } else if (xhr.status === 500) {
                         errorMessage = 'Terjadi kesalahan pada server. Silakan coba lagi nanti.';
-                    } else if (xhr.status !== 0) { // Jangan tampilkan error jika request dibatalkan
+                    } else if (xhr.status !== 0 && xhr.status !== 404) {
                         errorMessage =
                             `Gagal memuat tindakan medis. Status: ${xhr.status}, Pesan: ${xhr.statusText}`;
                     }
-                    // showErrorAlertNoRefresh(errorMessage); // Uncomment jika ingin menampilkan error
+                    if (xhr.status !== 404) { // Don't show an error if no records were found
+                        showErrorAlertNoRefresh(errorMessage);
+                    }
                 },
                 complete: function() {
                     showTableLoading(false);
@@ -193,7 +313,7 @@
             dtTindakanBidan.row.add({
                 no: rowCount,
                 tanggal_tindakan: data.tanggal_tindakan || 'Tidak Diketahui',
-                employee: data.employee.fullname || 'Tidak Diketahui',
+                employee: data.employee?.fullname || 'Tidak Diketahui',
                 tindakan: data.tindakan_medis?.nama_tindakan || 'Tidak Diketahui',
                 kelas: data.departement?.name || 'Tidak Diketahui',
                 qty: data.qty || 0,
@@ -255,32 +375,30 @@
                 data: []
             });
 
-            // --- PERUBAHAN UTAMA: Panggil fungsi untuk memuat data saat halaman siap ---
             const registrationId = "{{ $registration->id }}";
             loadMedicalActions(registrationId);
-            // --- AKHIR PERUBAHAN UTAMA ---
 
-            // Event listener untuk menu item "Tindakan Medis" (opsional, untuk refresh)
             $('.menu-layanan[data-layanan="tindakan-medis"]').on('click', function() {
                 loadMedicalActions(registrationId);
             });
 
-            // Event listener untuk tombol hapus tindakan medis
-            $(document).on('click', '.delete-action', function() {
+            $('#dt-tindakan-bidan tbody').on('click', '.delete-action', function() {
                 const actionId = $(this).data('id');
                 const $row = $(this).closest('tr');
 
                 Swal.fire({
-                    title: 'Apakah kamu yakin?',
-                    text: "Tindakan medis ini akan dihapus!",
+                    title: 'Apakah Anda yakin?',
+                    text: "Tindakan medis dan tagihan terkait akan dihapus permanen!",
                     icon: 'warning',
                     showCancelButton: true,
-                    confirmButtonColor: '#3085d6',
-                    cancelButtonColor: '#d33',
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
                     confirmButtonText: 'Ya, hapus!',
                     cancelButtonText: 'Batal'
                 }).then((result) => {
                     if (result.isConfirmed) {
+                        $row.css('opacity', 0.5);
+
                         $.ajax({
                             url: `/api/simrs/delete-medical-action/${actionId}`,
                             method: 'DELETE',
@@ -291,30 +409,28 @@
                                 'Accept': 'application/json'
                             },
                             success: function(response) {
-                                if (response == 1) {
-                                    dtTindakanBidan.row($row).remove().draw();
-                                    showSuccessAlert(
+                                if (response && response.success) {
+                                    dtTindakanBidan.row($row).remove().draw(false);
+                                    showSuccessAlert(response.message ||
                                         'Tindakan medis berhasil dihapus.');
                                 } else {
-                                    showErrorAlertNoRefresh(
-                                        'Gagal menghapus tindakan medis: ' + (
-                                            response.message || ''));
+                                    showErrorAlertNoRefresh(response.message ||
+                                        'Gagal menghapus tindakan medis dari server.'
+                                    );
+                                    $row.css('opacity', 1);
                                 }
                             },
                             error: function(xhr) {
-                                let errorMessage =
-                                    'Terjadi kesalahan yang tidak diketahui.';
-                                if (xhr.responseJSON && xhr.responseJSON.message) {
-                                    errorMessage = xhr.responseJSON.message;
-                                }
+                                const errorMessage = xhr.responseJSON?.message ||
+                                    'Terjadi kesalahan pada server. Silakan coba lagi.';
                                 showErrorAlertNoRefresh(errorMessage);
+                                $row.css('opacity', 1);
                             }
                         });
                     }
                 });
             });
 
-            // Inisialisasi datepicker dan tanggal default
             let today = new Date();
             let day = String(today.getDate()).padStart(2, '0');
             let month = String(today.getMonth() + 1).padStart(2, '0');
@@ -326,7 +442,6 @@
                 todayHighlight: true,
             });
 
-            // Event listener untuk select departemen
             $('#departement-tindakan-medis').on('change', function() {
                 const tindakanMedisSelect = $('#tindakanMedis');
                 const selectedOption = $(this).find('option:selected');
@@ -347,7 +462,6 @@
                 tindakanMedisSelect.trigger('change');
             });
 
-            // Event listener untuk pengiriman form tambah tindakan
             $('#modal-tambah-tindakan #store-form').on('submit', function(event) {
                 event.preventDefault();
                 const modal = $('#modal-tambah-tindakan');
@@ -400,7 +514,6 @@
                 });
             });
 
-            // Event listener saat modal tambah tindakan ditampilkan
             $('#modal-tambah-tindakan').on('shown.bs.modal', function(event) {
                 const modal = $(this);
                 const loadingOverlay = modal.find('.modal-loading-overlay');
@@ -422,18 +535,10 @@
                     success: function(response) {
                         if (response.success) {
                             const data = response.data;
-                            // Cek apakah doctor_employee_id ada di data registrasi
                             if (data.doctor_employee_id) {
-                                console.log('Attempting to select employee_id:', data
-                                    .doctor_employee_id);
-
-                                // Set nilai select2 dengan employee_id
                                 $('#dokterPerawat').val(data.doctor_employee_id).trigger(
                                     'change');
-                                console.log('Personnel set to employee_id:', data
-                                    .doctor_employee_id);
                             }
-
                             $('#kelas-tindakan-medis').val(data.kelas_id).trigger('change');
                             $('#departement-tindakan-medis').val(data.departement_id).trigger(
                                 'change');
