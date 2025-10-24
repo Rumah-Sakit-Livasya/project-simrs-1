@@ -109,130 +109,337 @@
 </div>
 
 {{-- ================= RESIKO JATUH ANAK (HUMPTY DUMPTY) ================= --}}
-<div class="card mt-4">
-    <div class="card-header bg-light">
-        <h5 class="mb-0"><b>Pengkajian Resiko Jatuh Anak (Skala Humpty Dumpty)</b></h5>
-    </div>
-    <div class="card-body">
-        <div class="table-responsive">
-            @php
-                $humptyDumpty = [
-                    'usia' => [
-                        'label' => 'Usia',
-                        'options' => [
-                            '< 3 tahun' => 4,
-                            '3 - 7 tahun' => 3,
-                            '7 - 13 tahun' => 2,
-                            '>= 13 tahun' => 1,
-                        ],
-                    ],
-                    'jenis_kelamin' => [
-                        'label' => 'Jenis Kelamin',
-                        'options' => [
-                            'Laki-laki' => 2,
-                            'Perempuan' => 1,
-                        ],
-                    ],
-                    'diagnosis' => [
-                        'label' => 'Diagnosis',
-                        'options' => [
-                            'Diagnosis neurologi' => 4,
-                            'Perubahan oksigenasi (respiratorik, dehidrasi, anemia, anoreksia, sinkop, pusing, dsb.)' => 3,
-                            'Gangguan perilaku/psikiatri' => 2,
-                            'Diagnosis lainnya' => 1,
-                        ],
-                    ],
-                    'gangguan_kognitif' => [
-                        'label' => 'Gangguan Kognitif',
-                        'options' => [
-                            'Tidak menyadari keterbatasan dirinya' => 3,
-                            'Lupa akan adanya keterbatasan' => 2,
-                            'Orientasi baik terhadap diri sendiri' => 1,
-                        ],
-                    ],
-                    'faktor_lingkungan' => [
-                        'label' => 'Faktor Lingkungan',
-                        'options' => [
-                            'Riwayat jatuh / Bayi diletakkan di tempat tidur dewasa' => 4,
-                            'Pasien menggunakan alat bantu / Bayi diletakkan dalam tempat tidur bayi/perabot rumah' => 3,
-                            'Pasien diletakkan di tempat tidur' => 2,
-                            'Area di luar rumah sakit' => 1,
-                        ],
-                    ],
-                    'respon_terhadap_operasi' => [
-                        'label' => 'Respons terhadap Pembedahan/Sedasi/Anastesi',
-                        'options' => [
-                            'Dalam 24 jam' => 3,
-                            'Dalam 48 jam' => 2,
-                            '> 48 jam / Tidak menjalani pembedahan' => 1,
-                        ],
-                    ],
-                    'penggunaan_medikamentosa' => [
-                        'label' => 'Penggunaan Medikamentosa',
-                        'options' => [
-                            'Penggunaan multipel: sedatif, hipnosis, barbiturat, fenotiazin, antidepresan, pencahar, diuretik, narkose' => 3,
-                            'Penggunaan salah satu obat di atas' => 2,
-                            'Penggunaan medikasi lain / Tidak ada medikasi' => 1,
-                        ],
-                    ],
-                ];
-            @endphp
-
-            <table class="table table-bordered table-hover">
-                <thead class="bg-light">
-                    <tr>
-                        <th>Parameter</th>
-                        @foreach ($humptyDumpty as $key => $item)
-                            @foreach ($item['options'] as $pilihan => $skor)
-                                <th class="text-center">{{ $pilihan }}<br><span
-                                        class="badge badge-secondary">{{ $skor }}</span></th>
-                            @endforeach
-                        @break
-                    @endforeach
-                </tr>
-            </thead>
-            <tbody>
-                @foreach ($humptyDumpty as $key => $item)
-                    <tr>
-                        <td class="align-middle"><b>{{ $item['label'] }}</b></td>
-                        @foreach ($item['options'] as $pilihan => $skor)
-                            <td class="text-center align-middle">
-                                <div class="custom-control custom-radio d-inline-block">
-                                    <input type="radio" id="jatuh_anak_{{ $key }}_{{ $skor }}"
-                                        name="resiko_jatuh_anak[humpty_dumpty][{{ $key }}]"
-                                        value="{{ $skor }}" class="custom-control-input humpty"
-                                        data-skor="{{ $skor }}" @checked(isset($jatuh['humpty_dumpty'][$key]) && $jatuh['humpty_dumpty'][$key] == $skor)>
-                                    <label class="custom-control-label"
-                                        for="jatuh_anak_{{ $key }}_{{ $skor }}"></label>
+<div class="col-md-12">
+    <div class="card mb-4">
+        <div class="card-header bg-success text-white">
+            <h5 class="mb-0 text-center font-weight-bold">PENGKAJIAN RISIKO JATUH ANAK</h5>
+        </div>
+        <div class="card-body">
+            <div class="mb-2">
+                <h6 class="mb-3 font-weight-bold text-success text-center">ANAK (1 BLN - 17 TH)</h6>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-bordered mb-0">
+                    <tbody>
+                        <tr class="bg-light">
+                            <th class="col-xs-2 text-center">Parameter</th>
+                            <th class="col-xs-2 text-center">Skor : 4</th>
+                            <th class="col-xs-3 text-center">Skor : 3</th>
+                            <th class="col-xs-3 text-center">Skor : 2</th>
+                            <th class="col-xs-2 text-center">Skor : 1</th>
+                        </tr>
+                        {{-- Usia --}}
+                        <tr>
+                            <td>Usia</td>
+                            <td>
+                                <div class="custom-control custom-radio">
+                                    <input type="radio" id="humpty_usia_4"
+                                        name="resiko_jatuh_anak[humpty_dumpty][usia]" value="< 3 tahun" data-skor="4"
+                                        class="custom-control-input humpty" @checked(isset($jatuh['humpty_dumpty']['usia']) && $jatuh['humpty_dumpty']['usia'] == 4)>
+                                    <label class="custom-control-label" for="humpty_usia_4">&lt; 3 tahun</label>
                                 </div>
                             </td>
-                        @endforeach
-                    </tr>
-                @endforeach
-            </tbody>
-            <tfoot class="bg-light">
-                <tr>
-                    <th class="text-right"
-                        colspan="{{ count($humptyDumpty[array_key_first($humptyDumpty)]['options']) + 1 }}">Total
-                        Skor Humpty Dumpty</th>
-                    <td>
-                        <input type="text" name="resiko_jatuh_anak[humpty_dumpty][total_skor]" id="skor_humpty"
-                            class="form-control font-weight-bold bg-white" readonly
-                            value="{{ $jatuh['humpty_dumpty']['total_skor'] ?? '' }}">
-                    </td>
-                </tr>
-                <tr>
-                    <th class="text-right"
-                        colspan="{{ count($humptyDumpty[array_key_first($humptyDumpty)]['options']) + 1 }}">
-                        Analisis Resiko</th>
-                    <td>
-                        <input type="text" name="resiko_jatuh_anak[humpty_dumpty][analisis]"
-                            id="analisis_humpty" class="form-control font-weight-bold bg-white" readonly
-                            value="{{ $jatuh['humpty_dumpty']['analisis'] ?? '' }}">
-                    </td>
-                </tr>
-            </tfoot>
-        </table>
+                            <td>
+                                <div class="custom-control custom-radio">
+                                    <input type="radio" id="humpty_usia_3"
+                                        name="resiko_jatuh_anak[humpty_dumpty][usia]" value="3 - 7 tahun"
+                                        data-skor="3" class="custom-control-input humpty"
+                                        @checked(isset($jatuh['humpty_dumpty']['usia']) && $jatuh['humpty_dumpty']['usia'] == 3)>
+                                    <label class="custom-control-label" for="humpty_usia_3">3 - 7 tahun</label>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="custom-control custom-radio">
+                                    <input type="radio" id="humpty_usia_2"
+                                        name="resiko_jatuh_anak[humpty_dumpty][usia]" value="7 - 13 tahun"
+                                        data-skor="2" class="custom-control-input humpty"
+                                        @checked(isset($jatuh['humpty_dumpty']['usia']) && $jatuh['humpty_dumpty']['usia'] == 2)>
+                                    <label class="custom-control-label" for="humpty_usia_2">7 - 13 tahun</label>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="custom-control custom-radio">
+                                    <input type="radio" id="humpty_usia_1"
+                                        name="resiko_jatuh_anak[humpty_dumpty][usia]" value=">= 13 tahun"
+                                        data-skor="1" class="custom-control-input humpty"
+                                        @checked(isset($jatuh['humpty_dumpty']['usia']) && $jatuh['humpty_dumpty']['usia'] == 1)>
+                                    <label class="custom-control-label" for="humpty_usia_1">&ge; 13 tahun</label>
+                                </div>
+                            </td>
+                        </tr>
+                        {{-- Jenis Kelamin --}}
+                        <tr>
+                            <td>Jenis kelamin</td>
+                            <td>
+                                <div class="custom-control custom-radio">
+                                    <label class="custom-control-label">&nbsp;</label>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="custom-control custom-radio">
+                                    <label class="custom-control-label">&nbsp;</label>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="custom-control custom-radio">
+                                    <input type="radio" id="humpty_jk_2"
+                                        name="resiko_jatuh_anak[humpty_dumpty][jenis_kelamin]" value="Laki-laki"
+                                        data-skor="2" class="custom-control-input humpty"
+                                        @checked(isset($jatuh['humpty_dumpty']['jenis_kelamin']) && $jatuh['humpty_dumpty']['jenis_kelamin'] == 2)>
+                                    <label class="custom-control-label" for="humpty_jk_2">Laki-laki</label>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="custom-control custom-radio">
+                                    <input type="radio" id="humpty_jk_1"
+                                        name="resiko_jatuh_anak[humpty_dumpty][jenis_kelamin]" value="Perempuan"
+                                        data-skor="1" class="custom-control-input humpty"
+                                        @checked(isset($jatuh['humpty_dumpty']['jenis_kelamin']) && $jatuh['humpty_dumpty']['jenis_kelamin'] == 1)>
+                                    <label class="custom-control-label" for="humpty_jk_1">Perempuan</label>
+                                </div>
+                            </td>
+                        </tr>
+                        {{-- Diagnosis --}}
+                        <tr>
+                            <td>Diagnosis</td>
+                            <td>
+                                <div class="custom-control custom-radio">
+                                    <input type="radio" id="humpty_diag_4"
+                                        name="resiko_jatuh_anak[humpty_dumpty][diagnosis]" value="Diagnosis neurologi"
+                                        data-skor="4" class="custom-control-input humpty"
+                                        @checked(isset($jatuh['humpty_dumpty']['diagnosis']) && $jatuh['humpty_dumpty']['diagnosis'] == 4)>
+                                    <label class="custom-control-label" for="humpty_diag_4">Diagnosis
+                                        neurologi</label>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="custom-control custom-radio">
+                                    <input type="radio" id="humpty_diag_3"
+                                        name="resiko_jatuh_anak[humpty_dumpty][diagnosis]"
+                                        value="Perubahan oksigenasi (diagnosis respiratorik, dehidrasi, anemia, anoreksia, sinkop, pusing, dsb.)"
+                                        data-skor="3" class="custom-control-input humpty"
+                                        @checked(isset($jatuh['humpty_dumpty']['diagnosis']) && $jatuh['humpty_dumpty']['diagnosis'] == 3)>
+                                    <label class="custom-control-label" for="humpty_diag_3">Perubahan oksigenasi
+                                        (diagnosis respiratorik, dehidrasi, anemia, anoreksia, sinkop, pusing,
+                                        dsb.)</label>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="custom-control custom-radio">
+                                    <input type="radio" id="humpty_diag_2"
+                                        name="resiko_jatuh_anak[humpty_dumpty][diagnosis]"
+                                        value="Gangguan perilaku/psikiatri" data-skor="2"
+                                        class="custom-control-input humpty" @checked(isset($jatuh['humpty_dumpty']['diagnosis']) && $jatuh['humpty_dumpty']['diagnosis'] == 2)>
+                                    <label class="custom-control-label" for="humpty_diag_2">Gangguan
+                                        perilaku/psikiatri</label>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="custom-control custom-radio">
+                                    <input type="radio" id="humpty_diag_1"
+                                        name="resiko_jatuh_anak[humpty_dumpty][diagnosis]" value="Diagnosis lainnya"
+                                        data-skor="1" class="custom-control-input humpty"
+                                        @checked(isset($jatuh['humpty_dumpty']['diagnosis']) && $jatuh['humpty_dumpty']['diagnosis'] == 1)>
+                                    <label class="custom-control-label" for="humpty_diag_1">Diagnosis lainnya</label>
+                                </div>
+                            </td>
+                        </tr>
+                        {{-- Gangguan Kognitif --}}
+                        <tr>
+                            <td>Gangguan kognitif</td>
+                            <td>
+                                <div class="custom-control custom-radio">
+                                    <label class="custom-control-label">&nbsp;</label>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="custom-control custom-radio">
+                                    <input type="radio" id="humpty_kog_3"
+                                        name="resiko_jatuh_anak[humpty_dumpty][gangguan_kognitif]"
+                                        value="Tidak menyadari keterbatasan dirinya" data-skor="3"
+                                        class="custom-control-input humpty" @checked(isset($jatuh['humpty_dumpty']['gangguan_kognitif']) && $jatuh['humpty_dumpty']['gangguan_kognitif'] == 3)>
+                                    <label class="custom-control-label" for="humpty_kog_3">Tidak menyadari
+                                        keterbatasan dirinya</label>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="custom-control custom-radio">
+                                    <input type="radio" id="humpty_kog_2"
+                                        name="resiko_jatuh_anak[humpty_dumpty][gangguan_kognitif]"
+                                        value="Lupa akan adanya keterbatasan" data-skor="2"
+                                        class="custom-control-input humpty" @checked(isset($jatuh['humpty_dumpty']['gangguan_kognitif']) && $jatuh['humpty_dumpty']['gangguan_kognitif'] == 2)>
+                                    <label class="custom-control-label" for="humpty_kog_2">Lupa akan adanya
+                                        keterbatasan</label>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="custom-control custom-radio">
+                                    <input type="radio" id="humpty_kog_1"
+                                        name="resiko_jatuh_anak[humpty_dumpty][gangguan_kognitif]"
+                                        value="Orientasi baik terhadap diri sendiri" data-skor="1"
+                                        class="custom-control-input humpty" @checked(isset($jatuh['humpty_dumpty']['gangguan_kognitif']) && $jatuh['humpty_dumpty']['gangguan_kognitif'] == 1)>
+                                    <label class="custom-control-label" for="humpty_kog_1">Orientasi baik terhadap
+                                        diri sendiri</label>
+                                </div>
+                            </td>
+                        </tr>
+                        {{-- Faktor Lingkungan --}}
+                        <tr>
+                            <td>Faktor lingkungan</td>
+                            <td>
+                                <div class="custom-control custom-radio">
+                                    <input type="radio" id="humpty_ling_4"
+                                        name="resiko_jatuh_anak[humpty_dumpty][faktor_lingkungan]"
+                                        value="Riwayat jatuh / Bayi diletakkan di tempat tidur dewasa" data-skor="4"
+                                        class="custom-control-input humpty" @checked(isset($jatuh['humpty_dumpty']['faktor_lingkungan']) && $jatuh['humpty_dumpty']['faktor_lingkungan'] == 4)>
+                                    <label class="custom-control-label" for="humpty_ling_4">Riwayat jatuh / Bayi
+                                        diletakkan di tempat tidur dewasa</label>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="custom-control custom-radio">
+                                    <input type="radio" id="humpty_ling_3"
+                                        name="resiko_jatuh_anak[humpty_dumpty][faktor_lingkungan]"
+                                        value="Pasien menggunakan alat bantu / Bayi diletakkan dalam tempat tidur bayi/perabot rumah"
+                                        data-skor="3" class="custom-control-input humpty"
+                                        @checked(isset($jatuh['humpty_dumpty']['faktor_lingkungan']) && $jatuh['humpty_dumpty']['faktor_lingkungan'] == 3)>
+                                    <label class="custom-control-label" for="humpty_ling_3">Pasien menggunakan alat
+                                        bantu / Bayi diletakkan dalam tempat tidur bayi/perabot rumah</label>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="custom-control custom-radio">
+                                    <input type="radio" id="humpty_ling_2"
+                                        name="resiko_jatuh_anak[humpty_dumpty][faktor_lingkungan]"
+                                        value="Pasien diletakkan di tempat tidur" data-skor="2"
+                                        class="custom-control-input humpty" @checked(isset($jatuh['humpty_dumpty']['faktor_lingkungan']) && $jatuh['humpty_dumpty']['faktor_lingkungan'] == 2)>
+                                    <label class="custom-control-label" for="humpty_ling_2">Pasien diletakkan di
+                                        tempat tidur</label>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="custom-control custom-radio">
+                                    <input type="radio" id="humpty_ling_1"
+                                        name="resiko_jatuh_anak[humpty_dumpty][faktor_lingkungan]"
+                                        value="Area di luar rumah sakit" data-skor="1"
+                                        class="custom-control-input humpty" @checked(isset($jatuh['humpty_dumpty']['faktor_lingkungan']) && $jatuh['humpty_dumpty']['faktor_lingkungan'] == 1)>
+                                    <label class="custom-control-label" for="humpty_ling_1">Area di luar rumah
+                                        sakit</label>
+                                </div>
+                            </td>
+                        </tr>
+                        {{-- Respon terhadap operasi --}}
+                        <tr>
+                            <td>Respons terhadap pembedahan/sedasi/anastesi</td>
+                            <td>
+                                <div class="custom-control custom-radio">
+                                    <label class="custom-control-label">&nbsp;</label>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="custom-control custom-radio">
+                                    <input type="radio" id="humpty_respon_3"
+                                        name="resiko_jatuh_anak[humpty_dumpty][respon_terhadap_operasi]"
+                                        value="Dalam 24 jam" data-skor="3" class="custom-control-input humpty"
+                                        @checked(isset($jatuh['humpty_dumpty']['respon_terhadap_operasi']) &&
+                                                $jatuh['humpty_dumpty']['respon_terhadap_operasi'] == 3)>
+                                    <label class="custom-control-label" for="humpty_respon_3">Dalam 24 jam</label>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="custom-control custom-radio">
+                                    <input type="radio" id="humpty_respon_2"
+                                        name="resiko_jatuh_anak[humpty_dumpty][respon_terhadap_operasi]"
+                                        value="Dalam 48 jam" data-skor="2" class="custom-control-input humpty"
+                                        @checked(isset($jatuh['humpty_dumpty']['respon_terhadap_operasi']) &&
+                                                $jatuh['humpty_dumpty']['respon_terhadap_operasi'] == 2)>
+                                    <label class="custom-control-label" for="humpty_respon_2">Dalam 48 jam</label>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="custom-control custom-radio">
+                                    <input type="radio" id="humpty_respon_1"
+                                        name="resiko_jatuh_anak[humpty_dumpty][respon_terhadap_operasi]"
+                                        value="> 48 jam / Tidak menjalani pembedahan/sedasi/anestesi" data-skor="1"
+                                        class="custom-control-input humpty" @checked(isset($jatuh['humpty_dumpty']['respon_terhadap_operasi']) &&
+                                                $jatuh['humpty_dumpty']['respon_terhadap_operasi'] == 1)>
+                                    <label class="custom-control-label" for="humpty_respon_1">&gt; 48 jam / Tidak
+                                        menjalani pembedahan/sedasi/anestesi</label>
+                                </div>
+                            </td>
+                        </tr>
+                        {{-- Penggunaan medikamentosa --}}
+                        <tr>
+                            <td>Penggunaan medikamentosa</td>
+                            <td>
+                                <div class="custom-control custom-radio">
+                                    <label class="custom-control-label">&nbsp;</label>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="custom-control custom-radio">
+                                    <input type="radio" id="humpty_med_3"
+                                        name="resiko_jatuh_anak[humpty_dumpty][penggunaan_medikamentosa]"
+                                        value="Penggunaan multipel: sedatif, obat hipnosis, barbiturat, fenotiazin, antidepresan, pencahar, diuretik, narkose"
+                                        data-skor="3" class="custom-control-input humpty"
+                                        @checked(isset($jatuh['humpty_dumpty']['penggunaan_medikamentosa']) &&
+                                                $jatuh['humpty_dumpty']['penggunaan_medikamentosa'] == 3)>
+                                    <label class="custom-control-label" for="humpty_med_3">Penggunaan multipel:
+                                        sedatif, obat hipnosis, barbiturat, fenotiazin, antidepresan, pencahar,
+                                        diuretik, narkose</label>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="custom-control custom-radio">
+                                    <input type="radio" id="humpty_med_2"
+                                        name="resiko_jatuh_anak[humpty_dumpty][penggunaan_medikamentosa]"
+                                        value="Penggunaan salah satu: sedatif, obat hipnosis, barbiturat, fenotiazin, antidepresan, pencahar, diuretik, narkose"
+                                        data-skor="2" class="custom-control-input humpty"
+                                        @checked(isset($jatuh['humpty_dumpty']['penggunaan_medikamentosa']) &&
+                                                $jatuh['humpty_dumpty']['penggunaan_medikamentosa'] == 2)>
+                                    <label class="custom-control-label" for="humpty_med_2">Penggunaan salah satu:
+                                        sedatif, obat hipnosis, barbiturat, fenotiazin, antidepresan, pencahar,
+                                        diuretik, narkose</label>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="custom-control custom-radio">
+                                    <input type="radio" id="humpty_med_1"
+                                        name="resiko_jatuh_anak[humpty_dumpty][penggunaan_medikamentosa]"
+                                        value="Penggunaan medikasi lain / Tidak ada medikasi" data-skor="1"
+                                        class="custom-control-input humpty" @checked(isset($jatuh['humpty_dumpty']['penggunaan_medikamentosa']) &&
+                                                $jatuh['humpty_dumpty']['penggunaan_medikamentosa'] == 1)>
+                                    <label class="custom-control-label" for="humpty_med_1">Penggunaan medikasi lain /
+                                        Tidak ada medikasi</label>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>
+                                <div class="form-group">
+                                    <input type="text" name="resiko_jatuh_anak[humpty_dumpty][total_skor]"
+                                        id="skor_humpty"
+                                        class="form-control font-weight-bold text-success text-center"
+                                        style="font-size: 20px; height: 60px;" readonly
+                                        value="{{ $jatuh['humpty_dumpty']['total_skor'] ?? '' }}">
+                                    <label for="skor_humpty" class="control-label">Skor Total</label>
+                                </div>
+                            </th>
+                            <th>
+                                <div class="form-group">
+                                    <input type="text" name="resiko_jatuh_anak[humpty_dumpty][analisis]"
+                                        id="analisis_humpty"
+                                        class="form-control font-weight-bold text-success text-center"
+                                        style="font-size: 20px; height: 60px;" readonly
+                                        value="{{ $jatuh['humpty_dumpty']['analisis'] ?? '' }}">
+                                    <label for="analisis_humpty" class="control-label">Analisis</label>
+                                </div>
+                            </th>
+                            <th colspan="3"></th>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
-</div>
 </div>
