@@ -1362,6 +1362,8 @@ class ERMController extends Controller
 
     public function destroyUploadedDocument(\App\Models\UploadedDocument $document)
     {
+        dd($document);
+
         try {
             // Hapus file dari storage
             if (Storage::disk('public')->exists($document->file_path)) {

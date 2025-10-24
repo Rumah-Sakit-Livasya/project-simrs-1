@@ -10,26 +10,20 @@ use App\Models\SIMRS\Registration;
 use App\Models\SIMRS\TagihanPasien;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-
-DB::beginTransaction();
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Carbon;
 
 class OrderTindakanMedisController extends Controller
 {
     public function getMedicalActions($registrationId)
     {
-        // Validasi input
         if (empty($registrationId)) {
-            return response()->json(
-                [
-                    "success" => false,
-                    "message" =>
-                    "ID pendaftaran tidak boleh kosong. Silakan masukkan ID pendaftaran yang valid.",
-                ],
-                400,
-            ); // 400 Bad Request
+            return response()->json([
+                "success" => false,
+                "message" => "ID pendaftaran tidak boleh kosong. Silakan masukkan ID pendaftaran yang valid.",
+            ], 400);
         }
 
-        // Fetch medical actions from the database
         $actions = OrderTindakanMedis::where("registration_id", $registrationId)
             ->with([
                 "user.employee",
@@ -40,16 +34,11 @@ class OrderTindakanMedisController extends Controller
             ])
             ->get();
 
-        // Jika tidak ada tindakan medis ditemukan
         if ($actions->isEmpty()) {
-            return response()->json(
-                [
-                    "success" => false,
-                    "message" =>
-                    "Tidak ada tindakan medis yang ditemukan untuk ID pendaftaran ini. Pastikan ID pendaftaran yang dimasukkan benar.",
-                ],
-                404,
-            ); // 404 Not Found
+            return response()->json([
+                "success" => false,
+                "message" => "Tidak ada tindakan medis yang ditemukan untuk ID pendaftaran ini.",
+            ], 404);
         }
 
         return response()->json([
@@ -60,17 +49,18 @@ class OrderTindakanMedisController extends Controller
 
     public function store(Request $request)
     {
+        DB::beginTransaction();
         try {
-            // Validasi data
             $validatedData = $request->validate([
-                'tanggal_tindakan' => 'required|date',
+                'tanggal_tindakan' => 'required|date_format:d-m-Y',
                 'user_id' => 'required|exists:users,id',
                 'registration_id' => 'required|exists:registrations,id',
                 'employee_id' => 'nullable|exists:employees,id',
                 'departement_id' => 'required|exists:departements,id',
-                'kelas' => 'required|string',
+                'kelas' => 'required|exists:kelas_rawat,id',
                 'tindakan_medis_id' => 'required|exists:tindakan_medis,id',
                 'qty' => 'required|integer|min:1',
+                'foc' => 'required|string', // FIX: Added 'foc' to validation
             ], [
                 'tanggal_tindakan.required' => 'Tanggal tindakan harus diisi.',
                 'user_id.required' => 'Pengguna harus diisi.',
@@ -80,36 +70,26 @@ class OrderTindakanMedisController extends Controller
                 'qty.required' => 'Jumlah harus diisi dan tidak boleh kurang dari 1.',
             ]);
 
-            if ($request->diskon_dokter) {
-                $validatedData['diskon_dokter'] = true;
-            }
+            // FIX: Convert date from dd-mm-yyyy to yyyy-mm-dd for database
+            $validatedData['tanggal_tindakan'] = Carbon::createFromFormat('d-m-Y', $validatedData['tanggal_tindakan'])->format('Y-m-d');
 
-            $bilingan = Bilingan::firstOrCreate([
-                'registration_id' => $validatedData['registration_id']
-            ], [
-                'status' => 'belum final',
-                'is_paid' => 0,
-            ]);
+            $bilingan = Bilingan::firstOrCreate(
+                ['registration_id' => $validatedData['registration_id']],
+                ['status' => 'belum final', 'is_paid' => 0]
+            );
 
-            // Simpan tindakan medis
             $medicalAction = OrderTindakanMedis::create($validatedData);
 
-            $medicalAction->load([
-                'doctor.employee',      // Untuk mendapatkan nama dokter
-                'user.employee',        // Untuk mendapatkan nama "Entry By"
-                'tindakan_medis',       // Untuk nama tindakan (best practice)
-                'departement'           // Untuk nama poliklinik (best practice)
-            ]);
+            // FIX: Eager load all necessary relationships to return complete data
+            $medicalAction->load(['employee', 'user.employee', 'tindakan_medis', 'departement']);
 
-            $groupPenjaminId = Registration::find($validatedData['registration_id'])->penjamin->group_penjamin->id;
-            $kelasId = Registration::find($validatedData['registration_id'])->kelas_rawat;
-            if (!$kelasId) {
-                $kelasId = 1; // Default to 1 if kelas_id is not found
-            } else {
-                $kelasId = $kelasId->id;
-            }
+            $registration = Registration::with('penjamin.group_penjamin', 'kelas_rawat')->find($validatedData['registration_id']);
+            $groupPenjaminId = $registration->penjamin->group_penjamin->id;
+            $kelasId = $registration->kelas_rawat->id ?? 1;
 
-            // Simpan tagihan pasien
+            $totalTarif = $medicalAction->tindakan_medis->getTotalTarif($groupPenjaminId, $kelasId);
+            $wajibBayar = $validatedData['qty'] * $totalTarif - ($request->diskon ?? 0);
+
             $tagihanPasien = TagihanPasien::create([
                 'user_id' => $validatedData['user_id'],
                 'bilingan_id' => $bilingan->id,
@@ -118,113 +98,99 @@ class OrderTindakanMedisController extends Controller
                 'date' => now(),
                 'tagihan' => '[Tindakan Medis] ' . $medicalAction->tindakan_medis->nama_billing,
                 'quantity' => $validatedData['qty'],
-                'nominal_awal' => $medicalAction->tindakan_medis->getTarif($groupPenjaminId, $kelasId)->total,
-                'nominal' => $validatedData['qty'] * $medicalAction->tindakan_medis->getTotalTarif($groupPenjaminId, $kelasId),
-                'tipe_diskon' => $request->tipe_diskon ?? null,
-                'disc' => $request->disc ?? null,
-                'diskon' => $request->diskon ?? null,
-                'jamin' => $request->jamin ?? null,
-                'jaminan' => $request->jaminan ?? null,
-                'wajib_bayar' => ($validatedData['qty'] * $medicalAction->tindakan_medis->getTotalTarif($groupPenjaminId, $kelasId)) - ($request->diskon ?? 0),
+                'nominal_awal' => $totalTarif,
+                'nominal' => $validatedData['qty'] * $totalTarif,
+                'tipe_diskon' => $request->tipe_diskon,
+                'disc' => $request->disc,
+                'diskon' => $request->diskon,
+                'jamin' => $request->jamin,
+                'jaminan' => $request->jaminan,
+                'wajib_bayar' => $wajibBayar,
             ]);
 
-            // Simpan relasi bilingan-tagihan pasien
             BilinganTagihanPasien::create([
                 'tagihan_pasien_id' => $tagihanPasien->id,
                 'bilingan_id' => $bilingan->id,
             ]);
 
-            if ($request->bilingan_ids) {
-                foreach ($request->bilingan_ids as $bilinganId) {
-                    BilinganTagihanPasien::create([
-                        'tagihan_pasien_id' => $tagihanPasien->id,
-                        'bilingan_id' => $bilinganId,
-                    ]);
-                }
-            }
-
-            // Jika semua berhasil, commit transaksi
             DB::commit();
 
             return response()->json([
                 'success' => true,
-                'data' => [
-                    'no' => $medicalAction->no,
-                    'tanggal_tindakan' => $medicalAction->tanggal_tindakan,
-                    'doctor' => $medicalAction->doctor,
-                    'tindakan_medis' => $medicalAction->tindakan_medis,
-                    'kelas' => $medicalAction->kelas,
-                    'departement' => $medicalAction->departement,
-                    'qty' => $medicalAction->qty,
-                    'user' => $medicalAction->user,
-                    'foc' => $medicalAction->foc,
-                    'id' => $medicalAction->id,
-                ],
-                'message' => 'Tindakan medis berhasil disimpan!'
+                // FIX: Return the full medicalAction object with its relations
+                'data' => $medicalAction,
+                'message' => 'Tindakan medis berhasil disimpan!',
             ], 201);
-        } catch (\Exception $e) {
-            // Jika ada error, rollback semua perubahan ke database
+        } catch (\Illuminate\Validation\ValidationException $e) {
             DB::rollBack();
-
             return response()->json([
-                'success' => false,
-                'message' => 'Gagal menyimpan tindakan medis. Error: ' . $e->getMessage(),
+                "success" => false,
+                "message" => "Data tidak valid.",
+                "errors" => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error("Gagal menyimpan tindakan medis: " . $e->getMessage());
+            return response()->json([
+                "success" => false,
+                "message" => "Gagal menyimpan tindakan medis. Error: " . $e->getMessage(),
             ], 500);
         }
     }
 
     public function destroy($id)
     {
+        Log::info("Mencoba menghapus OrderTindakanMedis ID: {$id}");
         $action = OrderTindakanMedis::find($id);
 
         if (!$action) {
-            return response()->json(
-                [
-                    "success" => false,
-                    "message" =>
-                    "Tindakan medis tidak ditemukan. Pastikan ID yang dimasukkan benar.",
-                ],
-                404,
-            );
-            try {
-                $action->delete();
-                return response()->json([
-                    "success" => true,
-                    "message" => "Tindakan medis berhasil dihapus.",
-                ]);
-            } catch (\Exception $e) {
-                \Log::error(
-                    "Error menghapus tindakan medis: " . $e->getMessage(),
-                );
-
-                return response()->json(
-                    [
-                        "success" => false,
-                        "message" =>
-                        "Terjadi kesalahan saat menghapus tindakan medis. Silakan coba lagi nanti.",
-                    ],
-                    500,
-                );
-            }
+            Log::warning("OrderTindakanMedis ID: {$id} tidak ditemukan.");
+            return response()->json([
+                "success" => false,
+                "message" => "Tindakan medis tidak ditemukan.",
+            ], 404);
         }
-    }
 
-    private function calculateNominal($medicalAction)
-    {
-        // Implement your logic to calculate nominal here
-        return $medicalAction->qty * 100; // Example calculation
-    }
+        DB::beginTransaction();
+        Log::info("Transaksi dimulai untuk menghapus OrderTindakanMedis ID: {$id}");
 
-    private function calculateDiskon($medicalAction)
-    {
-        // Implement your logic to calculate discount here
-        return $medicalAction->qty * 10; // Example calculation
-    }
+        try {
+            // This logic finds the specific patient bill associated with this medical action.
+            // It links them by matching multiple fields since a direct foreign key might not exist.
+            // This is a critical step to ensure the correct bill is removed.
+            $relatedTagihan = TagihanPasien::where('registration_id', $action->registration_id)
+                ->where('tindakan_medis_id', $action->tindakan_medis_id)
+                ->where('quantity', $action->qty)
+                ->where('user_id', $action->user_id)
+                ->latest() // Gets the most recent one in case of duplicates
+                ->first();
 
-    private function calculateWajibBayar($medicalAction)
-    {
-        // Implement your logic to calculate wajib bayar here
-        return $this->calculateNominal($medicalAction) -
-            $this->calculateDiskon($medicalAction); // Example calculation
+            if ($relatedTagihan) {
+                Log::info("TagihanPasien ID: {$relatedTagihan->id} ditemukan, akan dihapus.");
+                BilinganTagihanPasien::where('tagihan_pasien_id', $relatedTagihan->id)->delete();
+                $relatedTagihan->delete();
+                Log::info("TagihanPasien ID: {$relatedTagihan->id} dan relasi pivot berhasil dihapus.");
+            } else {
+                Log::warning("Tidak ada TagihanPasien terkait yang ditemukan untuk OrderTindakanMedis ID: {$id}.");
+            }
+
+            $action->delete();
+            Log::info("OrderTindakanMedis ID: {$id} berhasil dihapus (soft delete).");
+
+            DB::commit();
+            Log::info("Transaksi untuk menghapus OrderTindakanMedis ID: {$id} berhasil di-commit.");
+
+            return response()->json([
+                "success" => true,
+                "message" => "Tindakan medis dan tagihan terkait berhasil dihapus.",
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error("TRANSAKSI GAGAL! Rollback dieksekusi untuk OrderTindakanMedis ID: {$id}. Error: " . $e->getMessage());
+            return response()->json([
+                "success" => false,
+                "message" => "Terjadi kesalahan pada server saat menghapus data.",
+            ], 500);
+        }
     }
 }

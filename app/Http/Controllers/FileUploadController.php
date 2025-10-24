@@ -184,6 +184,7 @@ class FileUploadController extends Controller
 
     public function destroy($id)
     {
+        dd($id);
         try {
             $document = UploadFile::find($id);
 
