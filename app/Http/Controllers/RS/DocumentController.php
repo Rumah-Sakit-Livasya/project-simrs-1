@@ -139,7 +139,7 @@ class DocumentController extends Controller
         if ($request->hasFile('file')) {
 
             $file = $request->file('file');
-            $filePath = Storage::disk('public')->putFile('project_documents', $file);
+            $filePath = $file->store('project_documents', 'private');
             dd($filePath);
 
             try {
