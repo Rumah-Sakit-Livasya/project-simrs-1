@@ -108,7 +108,6 @@ class DocumentController extends Controller
      */
     public function update(Request $request, Document $document): JsonResponse
     {
-        dd($request->file());
 
         $rules = [
             'title' => 'required|string|max:255',
@@ -137,6 +136,7 @@ class DocumentController extends Controller
 
         $validated = $request->validate($rules, $messages);
 
+        dd($request->file('file'));
         if ($request->hasFile('file')) {
 
             $file = $request->file('file');
