@@ -10,78 +10,91 @@
             </h1>
         </div>
         <div class="row">
-            <div class="col-xl-4">
-                <div id="panel-form" class="panel">
-                    <div class="panel-hdr">
-                        <h2>Form Tarif</h2>
-                    </div>
-                    <div class="panel-container show">
-                        <div class="panel-content">
-                            <form id="form-tarif" autocomplete="off">
-                                @csrf
-                                <input type="hidden" name="id" id="form-id">
-                                <input type="hidden" name="doctor_id" id="doctor_id" value="{{ $doctor->id }}">
-
-                                <div class="form-group">
-                                    <label for="kelas_rawat_id">Kelas Rawat</label>
-                                    <select class="form-control" id="kelas_rawat_id" name="kelas_rawat_id"
-                                        required></select>
-                                </div>
-                                <div class="form-group">
-                                    <label for="share_rs">Share RS</label>
-                                    <div class="input-group">
-                                        <div class="input-group-prepend"><span class="input-group-text">Rp</span></div>
-                                        <input type="number" class="form-control" id="share_rs" name="share_rs" required>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label for="share_dr">Share Dokter</label>
-                                    <div class="input-group">
-                                        <div class="input-group-prepend"><span class="input-group-text">Rp</span></div>
-                                        <input type="number" class="form-control" id="share_dr" name="share_dr" required>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label for="prasarana">Prasarana</label>
-                                    <div class="input-group">
-                                        <div class="input-group-prepend"><span class="input-group-text">Rp</span></div>
-                                        <input type="number" class="form-control" id="prasarana" name="prasarana" required>
-                                    </div>
-                                </div>
-                                <hr>
-                                <div class="d-flex justify-content-end">
-                                    <button type="button" class="btn btn-secondary mr-2" id="btn-batal">Batal</button>
-                                    <button type="submit" class="btn btn-primary" id="btn-save">Simpan</button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-xl-8">
+            <div class="col-xl-12">
                 <div id="panel-1" class="panel">
-                    <div class="panel-hdr">
-                        <h2>Daftar Tarif {{ $doctor->employee->fullname }}</h2>
-                    </div>
-                    <div class="panel-container show">
-                        <div class="panel-content">
-                            <table id="dt-tarif-dokter" class="table table-bordered table-hover table-striped w-100">
-                                <thead class="bg-primary-600">
-                                    <tr>
-                                        <th>No</th>
-                                        <th>Kelas Rawat</th>
-                                        <th>Share RS</th>
-                                        <th>Share Dokter</th>
-                                        <th>Prasarana</th>
-                                        <th>Total</th>
-                                        <th>Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                </tbody>
-                            </table>
+                    <form id="form-tarif-matrix">
+                        @csrf
+                        <input type="hidden" name="doctor_id" value="{{ $doctor->id }}">
+
+                        <div class="panel-hdr d-flex justify-content-between align-items-center">
+                            <h2 class="mb-0">Matriks Tarif per Kelas dan Grup Penjamin</h2>
+                            <div class="panel-toolbar">
+                                <div class="d-flex align-items-center">
+                                    <label class="form-label mr-2 mb-0" for="copy-from-doctor">Salin Tarif Dari:</label>
+                                    <select id="copy-from-doctor" class="form-control form-control-sm"
+                                        style="width: 250px;">
+                                        <option></option>
+                                        @foreach ($sourceDoctors as $sourceDoctor)
+                                            <option value="{{ $sourceDoctor->id }}">{{ $sourceDoctor->employee->fullname }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
                         </div>
-                    </div>
+                        <div class="panel-container show">
+                            <div class="panel-content">
+                                <div class="table-responsive">
+                                    <table id="tariff-matrix-table" class="table table-bordered table-hover w-100">
+                                        <thead class="bg-primary-600">
+                                            <tr>
+                                                <th rowspan="2" class="align-middle text-center">Kelas Perawatan</th>
+                                                @foreach ($groupPenjamins as $group)
+                                                    <th colspan="3" class="text-center">{{ $group->name }}</th>
+                                                @endforeach
+                                            </tr>
+                                            <tr>
+                                                @foreach ($groupPenjamins as $group)
+                                                    <th class="text-center">Share RS (Rp)</th>
+                                                    <th class="text-center">Share DR (Rp)</th>
+                                                    <th class="text-center">Prasarana (Rp)</th>
+                                                @endforeach
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach ($kelasRawat as $kelas)
+                                                <tr>
+                                                    <td class="fw-500">{{ $kelas->kelas }}</td>
+                                                    @foreach ($groupPenjamins as $group)
+                                                        @php
+                                                            $key = $kelas->id . '_' . $group->id;
+                                                            $tariff = $existingTariffs->get($key);
+                                                        @endphp
+                                                        <td>
+                                                            <input type="number" class="form-control form-control-sm"
+                                                                name="tariffs[{{ $key }}][share_rs]"
+                                                                value="{{ $tariff->share_rs ?? '' }}" placeholder="0">
+                                                            <input type="hidden"
+                                                                name="tariffs[{{ $key }}][kelas_rawat_id]"
+                                                                value="{{ $kelas->id }}">
+                                                            <input type="hidden"
+                                                                name="tariffs[{{ $key }}][group_penjamin_id]"
+                                                                value="{{ $group->id }}">
+                                                        </td>
+                                                        <td>
+                                                            <input type="number" class="form-control form-control-sm"
+                                                                name="tariffs[{{ $key }}][share_dr]"
+                                                                value="{{ $tariff->share_dr ?? '' }}" placeholder="0">
+                                                        </td>
+                                                        <td>
+                                                            <input type="number" class="form-control form-control-sm"
+                                                                name="tariffs[{{ $key }}][prasarana]"
+                                                                value="{{ $tariff->prasarana ?? '' }}" placeholder="0">
+                                                        </td>
+                                                    @endforeach
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div
+                                class="panel-content border-faded border-left-0 border-right-0 border-bottom-0 d-flex justify-content-end">
+                                <button type="submit" class="btn btn-primary" id="btn-save-matrix">Simpan Semua
+                                    Perubahan</button>
+                            </div>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -89,9 +102,7 @@
 @endsection
 
 @section('plugin')
-    <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
     <script src="/js/formplugins/select2/select2.bundle.js"></script>
-
     <script>
         $(document).ready(function() {
             $.ajaxSetup({
@@ -101,120 +112,91 @@
             });
 
             // Inisialisasi Select2
-            $('#kelas_rawat_id').select2({
-                width: '100%',
-                placeholder: 'Pilih Kelas Rawat',
-                data: [{
-                        id: '',
-                        text: ''
-                    }, // Placeholder option
-                    @foreach ($kelasRawat as $kelas)
-                        {
-                            id: '{{ $kelas->id }}',
-                            text: '{{ $kelas->kelas }}'
-                        },
-                    @endforeach
-                ]
+            $('#copy-from-doctor').select2({
+                placeholder: 'Pilih dokter untuk menyalin tarif...',
+                width: 'style',
+                allowClear: true
             });
 
-            // Inisialisasi DataTables
-            var table = $('#dt-tarif-dokter').DataTable({
-                processing: true,
-                serverSide: true,
-                ajax: "{{ route('get.tarif.by.doctor', $doctor->id) }}",
-                columns: [{
-                        data: 'DT_RowIndex',
-                        name: 'DT_RowIndex',
-                        orderable: false,
-                        searchable: false
-                    },
-                    {
-                        data: 'kelas_rawat_name',
-                        name: 'kelas_rawat.kelas'
-                    },
-                    {
-                        data: 'share_rs',
-                        name: 'share_rs'
-                    },
-                    {
-                        data: 'share_dr',
-                        name: 'share_dr'
-                    },
-                    {
-                        data: 'prasarana',
-                        name: 'prasarana'
-                    },
-                    {
-                        data: 'total',
-                        name: 'total'
-                    },
-                    {
-                        data: 'action',
-                        name: 'action',
-                        orderable: false,
-                        searchable: false
-                    },
-                ]
+            // Handler copy tarif dari dokter lain
+            $('#copy-from-doctor').on('change', function() {
+                const sourceDoctorId = $(this).val();
+
+                if (!sourceDoctorId) {
+                    return;
+                }
+
+                Swal.fire({
+                    title: 'Salin Tarif?',
+                    text: "Ini akan menimpa semua tarif yang ada di form dengan tarif dari dokter yang dipilih. Anda masih harus menyimpannya secara manual.",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Ya, Salin!',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: "{{ url('simrs/tarif-visite-dokter/get-tariffs-json') }}/" +
+                                sourceDoctorId,
+                            type: "GET",
+                            dataType: 'json',
+                            success: function(tariffs) {
+                                // Bersihkan input
+                                $('#tariff-matrix-table tbody input[type="number"]')
+                                    .val('');
+                                tariffs.forEach(function(tariff) {
+                                    const key = tariff.kelas_rawat_id + '_' +
+                                        tariff.group_penjamin_id;
+                                    $(`input[name="tariffs[${key}][share_rs]"]`)
+                                        .val(tariff.share_rs);
+                                    $(`input[name="tariffs[${key}][share_dr]"]`)
+                                        .val(tariff.share_dr);
+                                    $(`input[name="tariffs[${key}][prasarana]"]`)
+                                        .val(tariff.prasarana);
+                                });
+                                showSuccessAlert(
+                                    'Tarif berhasil disalin. Jangan lupa untuk menyimpan perubahan.'
+                                    );
+                                $('#copy-from-doctor').val(null).trigger('change');
+                            },
+                            error: function() {
+                                showErrorAlert(
+                                    'Gagal mengambil data tarif dari dokter yang dipilih.'
+                                    );
+                                $('#copy-from-doctor').val(null).trigger('change');
+                            }
+                        });
+                    } else {
+                        $('#copy-from-doctor').val(null).trigger('change');
+                    }
+                });
             });
 
-            function resetForm() {
-                $('#form-tarif').trigger("reset");
-                $('#form-id').val('');
-                $('#kelas_rawat_id').val(null).trigger('change');
-                $('#panel-form .panel-hdr h2').html("Form Tarif");
-                $('#btn-save').html("Simpan");
-            }
-
-            $('#btn-batal').click(resetForm);
-
-            // Tombol Edit
-            $('body').on('click', '#editBtn', function() {
-                var id = $(this).data('id');
-                $.get("{{ url('simrs/tarif-visite-dokter') }}/" + id + "/edit", function(data) {
-                    $('#panel-form .panel-hdr h2').html("Edit Tarif");
-                    $('#btn-save').html("Update");
-                    $('#form-id').val(data.id);
-                    $('#kelas_rawat_id').val(data.kelas_rawat_id).trigger('change');
-                    $('#share_rs').val(data.share_rs);
-                    $('#share_dr').val(data.share_dr);
-                    $('#prasarana').val(data.prasarana);
-                })
-            });
-
-            // Tombol Simpan/Update
-            $('#form-tarif').submit(function(e) {
+            $('#form-tarif-matrix').submit(function(e) {
                 e.preventDefault();
+                $('#btn-save-matrix').html('Menyimpan...').prop('disabled', true);
+
                 $.ajax({
                     type: 'POST',
                     url: "{{ route('tarif-visite-dokter.store') }}",
                     data: $(this).serialize(),
                     success: function(data) {
                         showSuccessAlert(data.message);
-                        resetForm();
-                        table.draw();
-                    },
-                    error: function(data) {
-                        showErrorAlertNoRefresh('Terjadi kesalahan saat menyimpan data');
-                    }
-                });
-            });
-
-            // Tombol Hapus
-            $('body').on('click', '#deleteBtn', function() {
-                var id = $(this).data('id');
-                showDeleteConfirmation(function() {
-                    $.ajax({
-                        type: "DELETE",
-                        url: "{{ url('master/tarif-visite-dokter') }}/" + id,
-                        success: function(data) {
-                            showSuccessAlert(data.message);
-                            table.draw();
-                        },
-                        error: function(data) {
-                            showErrorAlertNoRefresh(
-                                'Terjadi kesalahan saat menghapus data');
+                        if (window.opener && !window.opener.closed) {
+                            try {
+                                window.opener.onTariffUpdated();
+                            } catch (e) {}
                         }
-                    });
+                    },
+                    error: function(xhr) {
+                        const errorMsg = xhr.responseJSON?.message ||
+                            'Terjadi kesalahan saat menyimpan data';
+                        showErrorAlertNoRefresh(errorMsg);
+                    },
+                    complete: function() {
+                        $('#btn-save-matrix').html('Simpan Semua Perubahan').prop('disabled',
+                            false);
+                    }
                 });
             });
         });

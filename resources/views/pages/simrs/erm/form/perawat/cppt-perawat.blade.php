@@ -66,8 +66,8 @@
                                                 <div class="col-md-6">
                                                     <div class="card mt-3">
                                                         <div class="card-header text-white"
-                                                            style="background-color: #007bff;">
-                                                            <span>Subjective</span>
+                                                            style="background-color: rgba(0, 123, 255, .2);">
+                                                            <span @style('color: rgba(0, 123, 255, 1);')>Subjective</span>
                                                         </div>
                                                         <div class="card-body p-0">
                                                             <textarea class="form-control border-0 rounded-0" id="subjective" name="subjective" rows="8"
@@ -115,8 +115,8 @@
                                                 <div class="col-md-6">
                                                     <div class="card mt-3">
                                                         <div class="card-header text-white"
-                                                            style="background-color: #28a745;">
-                                                            <span>Objective</span>
+                                                            style="background-color: rgba(40, 167, 69, .2);">
+                                                            <span @style('color: rgba(40, 167, 69, 1);')>Objective</span>
                                                         </div>
                                                         <div class="card-body p-0">
                                                             <textarea class="form-control border-0 rounded-0" id="objective" name="objective" rows="8">{{ 'Tanda-tanda Vital:' .
@@ -176,8 +176,8 @@
                                                 <div class="col-md-6">
                                                     <div class="card mt-3">
                                                         <div class="card-header text-white d-flex justify-content-between"
-                                                            style="background-color: #dc3545;">
-                                                            <span>Assessment</span>
+                                                            style="background-color: rgba(220, 53, 69, .2);">
+                                                            <span @style('color: rgba(220, 53, 69, 1);')>Assessment</span>
                                                             <span id="diag_perawat"
                                                                 class="badge badge-warning pointer">Diagnosa
                                                                 Keperawatan</span>
@@ -202,8 +202,8 @@
                                                 <div class="col-md-6">
                                                     <div class="card mt-3">
                                                         <div class="card-header text-white d-flex justify-content-between"
-                                                            style="background-color: #ffc107;">
-                                                            <span>Planning</span>
+                                                            style="background-color: rgba(255, 193, 7, .2);">
+                                                            <span @style('color: rgba(255, 193, 7, 1);')>Planning</span>
                                                             <span id="intervensi_perawat"
                                                                 class="badge badge-dark pointer">Intervensi</span>
                                                         </div>
@@ -221,8 +221,8 @@ Terapi / Tindakan :
                                                 <div class="col-md-6">
                                                     <div class="card mt-3">
                                                         <div class="card-header text-white"
-                                                            style="background-color: #6c757d;">
-                                                            Implementasi
+                                                            style="background-color: rgba(108, 117, 125, .2);">
+                                                            <span @style('color: rgba(108, 117, 125, 1);')>Implementasi</span>
                                                         </div>
                                                         <div class="card-body p-0">
                                                             <textarea class="form-control border-0 rounded-0" id="implementasi" name="implementasi" rows="8"
@@ -235,8 +235,8 @@ Terapi / Tindakan :
                                                 <div class="col-md-6">
                                                     <div class="card mt-3">
                                                         <div class="card-header text-white"
-                                                            style="background-color: #17a2b8;">
-                                                            Evaluasi/Revaluasi
+                                                            style="background-color: rgba(23, 162, 184, .2);">
+                                                            <span @style('color: rgba(23, 162, 184, 1);')>Evaluasi/Revaluasi</span>
                                                         </div>
                                                         <div class="card-body p-0">
                                                             <textarea class="form-control border-0 rounded-0" id="evaluasi" name="evaluasi" rows="8"
@@ -251,8 +251,8 @@ Terapi / Tindakan :
                                                 <div class="col-md-6">
                                                     <div class="card mt-3">
                                                         <div class="card-header text-white"
-                                                            style="background-color: #6610f2;">
-                                                            Instruksi
+                                                            style="background-color: rgba(102, 16, 242, .2);">
+                                                            <span @style('color: rgba(102, 16, 242, 1);')>Instruksi</span>
                                                         </div>
                                                         <div class="card-body p-0">
                                                             <textarea class="form-control border-0 rounded-0" id="instruksi" name="instruksi" rows="8"

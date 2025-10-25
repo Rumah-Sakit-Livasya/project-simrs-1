@@ -351,6 +351,9 @@
                         href="{{ route($path . '.catatan-medis', ['registration' => $registration->registration_number, 'menu' => 'pemakaian_alat']) }}">Pemakaian
                         Alat</a>
                     <a class="dropdown-item"
+                        href="{{ route($path . '.catatan-medis', ['registration' => $registration->registration_number, 'menu' => 'visite_dokter']) }}">Visite
+                        Dokter</a>
+                    <a class="dropdown-item"
                         href="{{ route($path . '.catatan-medis', ['registration' => $registration->registration_number, 'menu' => 'patologi_klinik']) }}">Patologi
                         Klinik</a>
                     <a class="dropdown-item"

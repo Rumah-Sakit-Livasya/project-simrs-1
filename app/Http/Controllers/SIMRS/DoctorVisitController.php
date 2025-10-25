@@ -15,6 +15,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Yajra\DataTables\Facades\DataTables;
 
 class DoctorVisitController extends Controller
@@ -22,8 +24,14 @@ class DoctorVisitController extends Controller
     /**
      * Mengambil data visite untuk ditampilkan di Server-Side DataTables.
      */
-    public function getData(Registration $registration)
+    public function getData(Request $request, $registrationId)
     {
+        try {
+            $registration = Registration::findOrFail($registrationId);
+        } catch (ModelNotFoundException $e) {
+            throw new NotFoundHttpException('Registrasi tidak ditemukan.');
+        }
+
         $query = DoctorVisit::where('registration_id', $registration->id)
             ->with(['doctor.employee', 'kelas_rawat', 'user.employee'])
             ->select('doctor_visits.*'); // Penting untuk DataTables
@@ -68,8 +76,14 @@ class DoctorVisitController extends Controller
     /**
      * Menyimpan data visite baru dan membuat tagihan otomatis.
      */
-    public function store(Request $request, Registration $registration)
+    public function store(Request $request, $registrationId)
     {
+        try {
+            $registration = Registration::findOrFail($registrationId);
+        } catch (ModelNotFoundException $e) {
+            throw new NotFoundHttpException('Registrasi tidak ditemukan.');
+        }
+
         $request->validate([
             'doctor_id' => 'required|exists:doctors,id',
             'visit_date' => 'required|date',
@@ -144,8 +158,20 @@ class DoctorVisitController extends Controller
     /**
      * Menghapus data visite dan tagihan terkait.
      */
-    public function destroy(Registration $registration, DoctorVisit $visit)
+    public function destroy(Request $request, $registrationId, $visitId)
     {
+        try {
+            $registration = Registration::findOrFail($registrationId);
+        } catch (ModelNotFoundException $e) {
+            throw new NotFoundHttpException('Registrasi tidak ditemukan.');
+        }
+
+        try {
+            $visit = DoctorVisit::findOrFail($visitId);
+        } catch (ModelNotFoundException $e) {
+            throw new NotFoundHttpException('Visite dokter tidak ditemukan.');
+        }
+
         if ($visit->registration_id !== $registration->id) {
             return response()->json(['message' => 'Akses tidak valid.'], 403);
         }

@@ -22,6 +22,7 @@ use App\Models\SIMRS\AssesmentKeperawatanGadar;
 use App\Models\SIMRS\CPPT\CPPT;
 use App\Models\SIMRS\Departement;
 use App\Models\SIMRS\Doctor;
+use App\Models\SIMRS\DoctorVisit;
 use App\Models\SIMRS\EWSAnak;
 use App\Models\SIMRS\EWSDewasa;
 use App\Models\SIMRS\EWSObstetri;
@@ -1730,6 +1731,15 @@ class ERMController extends Controller
                     ->get();
 
                 return view('pages.simrs.erm.form.layanan.pemakaian-alat', compact('registration', 'registrations', 'menu', 'departements', 'jadwal_dokter', 'list_peralatan', 'alat_medis_yang_dipakai', 'doctors', 'path'));
+
+            case 'visite_dokter':
+                $visite = DoctorVisit::where('registration_id', $registration->id)->get();
+                $doctors = Doctor::with('employee')
+                    ->whereHas('employee')
+                    ->orderBy(Employee::select('fullname')->whereColumn('employees.id', 'doctors.employee_id'))
+                    ->get();
+
+                return view('pages.simrs.erm.form.layanan.visite-dokter', compact('registration', 'registrations', 'menu', 'departements', 'jadwal_dokter', 'visite', 'doctors', 'path'));
 
             case 'patologi_klinik':
                 $patient = $registration->patient;
