@@ -137,14 +137,17 @@ class DocumentController extends Controller
         $validated = $request->validate($rules, $messages);
 
         if ($request->hasFile('file')) {
-            // Hapus file lama bila ada
+            // Delete old file if exists
             if ($document->file_path) {
-                Storage::disk('private')->delete($document->file_path);
+                $oldFilePath = storage_path('app/public/' . $document->file_path);
+                if (file_exists($oldFilePath)) {
+                    @unlink($oldFilePath);
+                }
             }
-
             $file = $request->file('file');
-            $fileName = $file->getClientOriginalName();
-            $filePath = $file->storeAs('uploads', $fileName, 'public');
+            $fileName = time() . '_' . $file->getClientOriginalName();
+            $file->storeAs('uploads', $fileName, 'public');
+            $filePath = 'uploads/' . $fileName;
             $fileSize = $file->getSize();
             dd([
                 'filePath' => $filePath,
