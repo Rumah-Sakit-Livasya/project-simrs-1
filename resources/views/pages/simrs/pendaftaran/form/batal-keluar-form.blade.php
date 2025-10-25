@@ -10,7 +10,7 @@
             <form action="{{ route('batal.keluar', $registration->id) }}" method="POST" autocomplete="off"
                 novalidate="">
                 @csrf
-                <input type="hidden" name="user_id" value="{{ $registration->user->id }}">
+                <input type="hidden" name="user_id" value="{{ $registration->user->id ?? '' }}">
                 <div class="modal-body">
                     <div class="form-group">
                         <div class="row">
@@ -40,7 +40,7 @@
                             </div>
                             <div class="col-xl text-right">
                                 <input type="text" class="form-control" id="email" name="email"
-                                    value="{{ $registration->user->email }}" readonly>
+                                    value="{{ $registration->user->email ?? '   ' }}" readonly>
                             </div>
                         </div>
                     </div>
