@@ -143,8 +143,8 @@ class DocumentController extends Controller
             }
 
             $file = $request->file('file');
-            $filePath = $file->store('uploads', ['disk' => 'private']);
             $fileName = $file->getClientOriginalName();
+            $filePath = $file->storeAs('project_documents', $fileName, 'public');;
             $fileSize = $file->getSize();
             dd([
                 'filePath' => $filePath,
