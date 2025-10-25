@@ -29,9 +29,9 @@ class DocumentController extends Controller
             return DataTables::of($data)
                 ->addIndexColumn()
                 ->addColumn('action', function ($row) {
-                    $viewBtn = '<button class="btn btn-info btn-sm mr-1 view-btn" data-id="' . $row->id . '">Detail</button>';
-                    $editBtn = '<button class="btn btn-primary btn-sm mr-1 edit-btn" data-id="' . $row->id . '">Edit</button>';
-                    $deleteBtn = '<button class="btn btn-danger btn-sm delete-btn" data-id="' . $row->id . '">Hapus</button>';
+                    $viewBtn = '<button class="btn btn-info btn-sm mr-1 view-btn" data-id="' . $row->id . '" title="Detail"><i class="fal fa-eye"></i></button>';
+                    $editBtn = '<button class="btn btn-primary btn-sm mr-1 edit-btn" data-id="' . $row->id . '" title="Edit"><i class="fal fa-edit"></i></button>';
+                    $deleteBtn = '<button class="btn btn-danger btn-sm delete-btn" data-id="' . $row->id . '" title="Hapus"><i class="fal fa-trash-alt"></i></button>';
                     return $viewBtn . $editBtn . $deleteBtn;
                 })
                 ->addColumn('type_name', function ($row) {
