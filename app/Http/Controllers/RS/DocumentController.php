@@ -149,11 +149,6 @@ class DocumentController extends Controller
             $file->storeAs('project_documents', $fileName, 'public');
             $filePath = 'project_documents/' . $fileName;
             $fileSize = $file->getSize();
-            dd([
-                'filePath' => $filePath,
-                'fileName' => $fileName,
-                'fileSize' => $fileSize,
-            ]);
 
             try {
                 DB::transaction(function () use ($document, $validated, $filePath, $fileName, $fileSize) {
