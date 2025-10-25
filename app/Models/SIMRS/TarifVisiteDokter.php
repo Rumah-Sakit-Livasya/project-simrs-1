@@ -50,4 +50,12 @@ class TarifVisiteDokter extends Model
     {
         return $this->belongsTo(User::class, 'created_by');
     }
+
+    /**
+     * [BARU] Definisikan relasi ke GroupPenjamin.
+     */
+    public function group_penjamin()
+    {
+        return $this->belongsTo(GroupPenjamin::class);
+    }
 }

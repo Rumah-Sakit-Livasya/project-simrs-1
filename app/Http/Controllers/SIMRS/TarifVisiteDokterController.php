@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\SIMRS;
 
 use App\Http\Controllers\Controller;
+use App\Models\Employee;
 use App\Models\SIMRS\Doctor;
+use App\Models\SIMRS\GroupPenjamin;
 use App\Models\SIMRS\KelasRawat;
 use App\Models\SIMRS\TarifVisiteDokter;
 use Illuminate\Http\Request;
@@ -14,128 +16,118 @@ class TarifVisiteDokterController extends Controller
 {
     public function index(Request $request)
     {
+        // [UBAH TOTAL] Logika untuk menampilkan daftar dokter
         if ($request->ajax()) {
-            $data = TarifVisiteDokter::with(['doctor.employee', 'kelas_rawat'])->latest()->get();
+            // Ambil semua employee yang memiliki flag is_doctor = 1
+            // Pastikan relasi 'doctor' ada untuk mendapatkan ID dokter
+            $data = Employee::where('is_doctor', 1)->with(['doctor', 'organization', 'jobPosition'])->latest()->get();
+
             return DataTables::of($data)
                 ->addIndexColumn()
-                ->addColumn('doctor_name', function ($row) {
-                    return $row->doctor->employee->fullname ?? 'N/A';
+                ->addColumn('organization_name', function ($row) {
+                    return $row->organization->name ?? 'N/A';
                 })
-                ->addColumn('kelas_rawat_name', function ($row) {
-                    return $row->kelas_rawat->name ?? 'N/A';
-                })
-                ->editColumn('share_rs', function ($row) {
-                    return 'Rp ' . number_format($row->share_rs, 0, ',', '.');
-                })
-                ->editColumn('share_dr', function ($row) {
-                    return 'Rp ' . number_format($row->share_dr, 0, ',', '.');
-                })
-                ->editColumn('prasarana', function ($row) {
-                    return 'Rp ' . number_format($row->prasarana, 0, ',', '.');
-                })
-                ->editColumn('total', function ($row) {
-                    return 'Rp ' . number_format($row->total, 0, ',', '.');
+                ->addColumn('job_position_name', function ($row) {
+                    return $row->jobPosition->name ?? 'N/A';
                 })
                 ->addColumn('action', function ($row) {
-                    $btn = '<button type="button" class="btn btn-warning btn-sm btn-icon waves-effect waves-themed" data-id="' . $row->id . '" id="editBtn"><i class="fal fa-edit"></i></button>';
-                    $btn .= ' <button type="button" class="btn btn-danger btn-sm btn-icon waves-effect waves-themed" data-id="' . $row->id . '" id="deleteBtn"><i class="fal fa-trash-alt"></i></button>';
-                    return $btn;
+                    // Tombol akan mengarah ke halaman set-tarif-popup
+                    // Kita butuh doctor_id, bukan employee_id, untuk halaman popup
+                    if ($row->doctor) {
+                        $doctorId = $row->doctor->id;
+                        $btn = '<button type="button" class="btn btn-primary btn-sm waves-effect waves-themed set-tarif-btn" data-doctor-id="' . $doctorId . '">
+                                    <i class="fal fa-cogs"></i> Set Tarif per Kelas
+                                </button>';
+                        return $btn;
+                    }
+                    return '<span class="badge badge-warning">Data Dokter tidak ditemukan</span>';
                 })
                 ->rawColumns(['action'])
                 ->make(true);
         }
 
-        $doctors = Doctor::with('employee')->whereHas('employee')->get();
-        $kelasRawat = KelasRawat::all();
-
-        return view('pages.simrs.tarif-visite-dokter.index', compact('doctors', 'kelasRawat'));
+        // View tidak lagi memerlukan data $doctors atau $kelasRawat
+        return view('pages.simrs.tarif-visite-dokter.index');
     }
 
+    /**
+     * Menyimpan array tarif untuk dokter dan berbagai kombinasi kelas rawat & group penjamin.
+     */
     public function store(Request $request)
     {
         $request->validate([
             'doctor_id' => 'required|exists:doctors,id',
-            'kelas_rawat_id' => 'required|exists:kelas_rawat,id',
-            'share_rs' => 'required|numeric',
-            'share_dr' => 'required|numeric',
-            'prasarana' => 'required|numeric',
+            'tariffs' => 'required|array',
+            'tariffs.*.kelas_rawat_id' => 'required|exists:kelas_rawat,id',
+            'tariffs.*.group_penjamin_id' => 'required|exists:group_penjamin,id',
+            'tariffs.*.share_rs' => 'nullable|numeric|min:0',
+            'tariffs.*.share_dr' => 'nullable|numeric|min:0',
+            'tariffs.*.prasarana' => 'nullable|numeric|min:0',
         ]);
 
         try {
             DB::beginTransaction();
-            TarifVisiteDokter::updateOrCreate(
-                ['id' => $request->id],
-                [
-                    'doctor_id' => $request->doctor_id,
-                    'kelas_rawat_id' => $request->kelas_rawat_id,
-                    'share_rs' => $request->share_rs,
-                    'share_dr' => $request->share_dr,
-                    'prasarana' => $request->prasarana,
-                ]
-            );
+            $doctorId = $request->doctor_id;
+
+            foreach ($request->tariffs as $tariffData) {
+                // Proses baris hanya jika minimal salah satu entri ada
+                if (
+                    isset($tariffData['share_rs']) ||
+                    isset($tariffData['share_dr']) ||
+                    isset($tariffData['prasarana'])
+                ) {
+                    TarifVisiteDokter::updateOrCreate(
+                        [
+                            'doctor_id' => $doctorId,
+                            'kelas_rawat_id' => $tariffData['kelas_rawat_id'],
+                            'group_penjamin_id' => $tariffData['group_penjamin_id'],
+                        ],
+                        [
+                            'share_rs' => $tariffData['share_rs'] ?? 0,
+                            'share_dr' => $tariffData['share_dr'] ?? 0,
+                            'prasarana' => $tariffData['prasarana'] ?? 0,
+                        ]
+                    );
+                }
+            }
+
             DB::commit();
-            return response()->json(['message' => 'Data berhasil disimpan'], 200);
+            return response()->json(['message' => 'Tarif berhasil disimpan'], 200);
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json(['message' => 'Gagal menyimpan data: ' . $e->getMessage()], 500);
         }
     }
 
-    public function edit($id)
-    {
-        $data = TarifVisiteDokter::find($id);
-        if (!$data) {
-            return response()->json(['message' => 'Data tidak ditemukan'], 404);
-        }
-        return response()->json($data);
-    }
-
-    public function destroy($id)
-    {
-        try {
-            $data = TarifVisiteDokter::findOrFail($id);
-            $data->delete();
-            return response()->json(['message' => 'Data berhasil dihapus'], 200);
-        } catch (\Exception $e) {
-            return response()->json(['message' => 'Gagal menghapus data: ' . $e->getMessage()], 500);
-        }
-    }
-
     /**
-     * Menampilkan halaman popup untuk setting tarif dokter spesifik.
+     * Menampilkan halaman popup untuk setting tarif dokter dalam bentuk matriks.
      */
     public function setTariffForDoctor(Doctor $doctor)
     {
-        $kelasRawat = KelasRawat::all();
-        $doctor->load('employee'); // Eager load relasi employee untuk mendapatkan nama
-        return view('pages.simrs.tarif-visite-dokter.set-tarif-popup', compact('doctor', 'kelasRawat'));
+        $kelasRawat = KelasRawat::orderBy('kelas')->get();
+        $groupPenjamins = GroupPenjamin::get();
+        $doctor->load('employee');
+
+        // [BARU] Ambil daftar dokter lain (yang bukan dokter saat ini) yang sudah memiliki tarif
+        $sourceDoctors = Doctor::whereHas('tarif_visite') // Hanya dokter yang punya relasi ke tarif
+            ->where('id', '!=', $doctor->id)      // Kecualikan dokter yang sedang diedit
+            ->with('employee')
+            ->get();
+
+        $existingTariffs = TarifVisiteDokter::where('doctor_id', $doctor->id)
+            ->get()
+            ->keyBy(function ($item) {
+                return $item->kelas_rawat_id . '_' . $item->group_penjamin_id;
+            });
+
+        // [UBAH] Kirim $sourceDoctors ke view
+        return view('pages.simrs.tarif-visite-dokter.set-tarif-popup', compact('doctor', 'kelasRawat', 'groupPenjamins', 'existingTariffs', 'sourceDoctors'));
     }
 
-    /**
-     * Menyediakan data tarif untuk DataTables di halaman popup.
-     */
-    public function getTariffByDoctor(Request $request, Doctor $doctor)
+    // [BARU] Endpoint API untuk mengambil data tarif dokter dalam format JSON
+    public function getTariffsByDoctorAsJson(Doctor $doctor)
     {
-        if ($request->ajax()) {
-            $data = TarifVisiteDokter::where('doctor_id', $doctor->id)->with('kelas_rawat')->latest()->get();
-
-            return DataTables::of($data)
-                ->addIndexColumn()
-                ->addColumn('kelas_rawat_name', function ($row) {
-                    return $row->kelas_rawat->kelas ?? 'N/A';
-                })
-                ->editColumn('share_rs', fn($row) => 'Rp ' . number_format($row->share_rs, 0, ',', '.'))
-                ->editColumn('share_dr', fn($row) => 'Rp ' . number_format($row->share_dr, 0, ',', '.'))
-                ->editColumn('prasarana', fn($row) => 'Rp ' . number_format($row->prasarana, 0, ',', '.'))
-                ->editColumn('total', fn($row) => 'Rp ' . number_format($row->total, 0, ',', '.'))
-                ->addColumn('action', function ($row) {
-                    $btn = '<button type="button" class="btn btn-warning btn-sm btn-icon waves-effect waves-themed" data-id="' . $row->id . '" id="editBtn"><i class="fal fa-edit"></i></button>';
-                    $btn .= ' <button type="button" class="btn btn-danger btn-sm btn-icon waves-effect waves-themed" data-id="' . $row->id . '" id="deleteBtn"><i class="fal fa-trash-alt"></i></button>';
-                    return $btn;
-                })
-                ->rawColumns(['action'])
-                ->make(true);
-        }
-        abort(404);
+        $tariffs = TarifVisiteDokter::where('doctor_id', $doctor->id)->get();
+        return response()->json($tariffs);
     }
 }

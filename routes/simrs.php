@@ -1467,6 +1467,8 @@ Route::group(['middleware' => ['auth']], function () {
         Route::get('set-tarif-visite/{doctor}', [TarifVisiteDokterController::class, 'setTariffForDoctor'])->name('set.tarif.dokter');
         // Route API untuk mengambil data tarif per dokter untuk DataTables
         Route::get('get-tarif-by-doctor/{doctor}', [TarifVisiteDokterController::class, 'getTariffByDoctor'])->name('get.tarif.by.doctor');
+        Route::get('tarif-visite-dokter/get-tariffs-json/{doctor}', [TarifVisiteDokterController::class, 'getTariffsByDoctorAsJson'])->name('tarif-visite-dokter.get-tariffs-json');
+
 
         // Route::prefix('procurement')->group(function () {
         //     Route::prefix('purchase-request')->group(function () {
