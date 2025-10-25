@@ -108,19 +108,32 @@ class DocumentController extends Controller
      */
     public function update(Request $request, Document $document): JsonResponse
     {
-        $request->validate([
+        $rules = [
             'title' => 'required|string|max:255',
-            'document_number' => [
-                'required',
-                'string',
-                Rule::unique('documents')->ignore($document->id),
-            ],
             'document_type_id' => 'required|exists:document_types,id',
             'status' => 'required|in:Diajukan,Diterima,Direview,Revisi,Disetujui,Dibalas',
             'file' => 'nullable|file|mimes:pdf,jpg,jpeg,png,dwg,xls,xlsx,doc,docx|max:10240',
             'person_in_charge_id' => 'nullable|exists:users,id',
             'description' => 'nullable|string',
-        ]);
+        ];
+
+        // Beri validasi unique ONLY jika user mengirim/mengubah document_number DAN isinya berbeda dari milik dokumen saat ini
+        if (
+            $request->has('document_number') &&
+            $request->input('document_number') !== $document->document_number
+        ) {
+            $rules['document_number'] = [
+                'required',
+                'string',
+                Rule::unique('documents')->ignore($document->id),
+            ];
+        }
+
+        $messages = [
+            'document_number.unique' => 'Nomor dokumen sudah digunakan.',
+        ];
+
+        $validated = $request->validate($rules, $messages);
 
         if ($request->hasFile('file')) {
 
@@ -128,16 +141,16 @@ class DocumentController extends Controller
             $filePath = $file->store('project_documents', 'public');
 
             try {
-                DB::transaction(function () use ($request, $document, $filePath, $file) {
+                DB::transaction(function () use ($request, $document, $filePath, $file, $validated) {
                     $document->update(['is_latest' => false]);
 
                     Document::create([
-                        'title' => $request->title,
-                        'document_number' => $request->document_number,
-                        'description' => $request->description,
-                        'document_type_id' => $request->document_type_id,
-                        'status' => $request->status,
-                        'person_in_charge_id' => $request->person_in_charge_id,
+                        'title' => $validated['title'],
+                        'document_number' => $validated['document_number'] ?? $document->document_number,
+                        'description' => $validated['description'] ?? null,
+                        'document_type_id' => $validated['document_type_id'],
+                        'status' => $validated['status'],
+                        'person_in_charge_id' => $validated['person_in_charge_id'] ?? null,
                         'file_path' => $filePath,
                         'file_name' => $file->getClientOriginalName(),
                         'file_size' => $file->getSize(),
@@ -153,14 +166,23 @@ class DocumentController extends Controller
 
             return response()->json(['success' => 'Revisi dokumen berhasil diupload.']);
         } else {
-            $document->update($request->only([
+            // Ambil field yang mau diupdate
+            $fieldsToUpdate = [
                 'title',
-                'document_number',
                 'document_type_id',
                 'status',
                 'person_in_charge_id',
                 'description'
-            ]));
+            ];
+            // Hanya update document_number jika dikirim dan berubah
+            if (
+                $request->has('document_number') &&
+                $request->input('document_number') !== $document->document_number
+            ) {
+                $fieldsToUpdate[] = 'document_number';
+            }
+
+            $document->update($request->only($fieldsToUpdate));
 
             return response()->json(['success' => 'Data dokumen berhasil diperbarui.']);
         }
