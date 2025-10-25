@@ -137,13 +137,23 @@ class DocumentController extends Controller
         $validated = $request->validate($rules, $messages);
 
         if ($request->hasFile('file')) {
+            // Hapus file lama bila ada
+            if ($document->file_path) {
+                Storage::disk('private')->delete($document->file_path);
+            }
 
             $file = $request->file('file');
-            $filePath = $file->store('project_documents', ['disk' => 'private', 'visibility' => 'private']);
-            dd($filePath);
+            $filePath = $file->store('project_documents', ['disk' => 'private']);
+            $fileName = $file->getClientOriginalName();
+            $fileSize = $file->getSize();
+            dd([
+                'filePath' => $filePath,
+                'fileName' => $fileName,
+                'fileSize' => $fileSize,
+            ]);
 
             try {
-                DB::transaction(function () use ($request, $document, $filePath, $file, $validated) {
+                DB::transaction(function () use ($document, $validated, $filePath, $fileName, $fileSize) {
                     $document->update(['is_latest' => false]);
 
                     Document::create([
@@ -154,8 +164,8 @@ class DocumentController extends Controller
                         'status' => $validated['status'],
                         'person_in_charge_id' => $validated['person_in_charge_id'] ?? null,
                         'file_path' => $filePath,
-                        'file_name' => $file->getClientOriginalName(),
-                        'file_size' => $file->getSize(),
+                        'file_name' => $fileName,
+                        'file_size' => $fileSize,
                         'uploader_id' => Auth::id(),
                         'parent_id' => $document->parent_id ?? $document->id,
                         'version' => $document->version + 1,
