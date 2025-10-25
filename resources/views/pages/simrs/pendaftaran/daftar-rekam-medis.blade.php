@@ -1,9 +1,18 @@
 @extends('inc.layout')
 @section('title', 'Daftar Rekam Medis')
 @section('content')
+
+    <style>
+        .form-control.datepicker {
+            width: 100% !important;
+        }
+    </style>
     <main id="js-page-content" role="main" class="page-content">
+        {{-- =================================================================
+        // PANEL FILTER PENCARIAN (BAGIAN YANG DIPERBARUI)
+        // ================================================================= --}}
         <div class="row justify-content-center">
-            <div class="col-xl-8">
+            <div class="col-xl-10">
                 <div id="panel-1" class="panel">
                     <div class="panel-hdr">
                         <h2>
@@ -12,151 +21,106 @@
                     </div>
                     <div class="panel-container show">
                         <div class="panel-content">
-
                             <form action="/daftar-rekam-medis" method="get">
                                 @csrf
-                                <div class="row justify-content-center">
-                                    <div class="col-xl-4">
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-xl-4" style="text-align: right">
-                                                    <label for="medical_record_number">No. RM</label>
-                                                </div>
-                                                <div class="col-xl">
-                                                    <input type="text" value="{{ request('medical_record_number') }}"
-                                                        style="border: 0; border-bottom: 1.9px solid #eaeaea; margin-top: -.5rem; border-radius: 0"
-                                                        class="form-control" id="medical_record_number"
-                                                        name="medical_record_number" onkeyup="formatAngka(this)">
-                                                    @error('medical_record_number')
-                                                        <div class="invalid-feedback">{{ $message }}</div>
-                                                    @enderror
-                                                </div>
-                                            </div>
-                                        </div>
+                                <div class="row">
+                                    {{-- No. RM --}}
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label" for="medical_record_number">No. RM</label>
+                                        <input type="text" value="{{ request('medical_record_number') }}"
+                                            class="form-control" id="medical_record_number" name="medical_record_number"
+                                            placeholder="Contoh: 12-34-56" onkeyup="formatAngka(this)">
+                                        @error('medical_record_number')
+                                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                                        @enderror
                                     </div>
-                                    <div class="col-xl-4">
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-xl-5" style="text-align: right">
-                                                    <label class="form-label text-end" for="telp">
-                                                        Penjamin
-                                                    </label>
-                                                </div>
-                                                <div class="col-xl">
-                                                    <select class="form-control w-100 select2" id="penjamin_id"
-                                                        style="border: 0; border-bottom: 1.9px solid #eaeaea; margin-top: -.5rem; border-radius: 0"
-                                                        name="penjamin_id">
-                                                        <option value=""></option>
-                                                        @foreach ($penjamins as $penjamin)
-                                                            <option value="{{ $penjamin->id }}">{{ $penjamin->name }}
-                                                            </option>
-                                                        @endforeach
-                                                    </select>
-                                                    @error('penjamin_id')
-                                                        <div class="invalid-feedback">{{ $message }}</div>
-                                                    @enderror
-                                                </div>
-                                            </div>
-                                        </div>
+
+                                    {{-- Nama --}}
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label" for="name">Nama</label>
+                                        <input type="text" value="{{ request('name') }}" class="form-control"
+                                            id="name" name="name" placeholder="Masukkan nama pasien">
+                                        @error('name')
+                                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+
+                                    {{-- Tanggal Lahir --}}
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label" for="date_of_birth">Tanggal Lahir</label>
+                                        <input type="text" value="{{ request('date_of_birth') }}"
+                                            class="form-control datepicker" id="date_of_birth" name="date_of_birth"
+                                            placeholder="YYYY-MM-DD" autocomplete="off">
+                                        @error('date_of_birth')
+                                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                                        @enderror
                                     </div>
                                 </div>
-                                <div class="row justify-content-center mt-4">
-                                    <div class="col-xl-4">
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-xl-4" style="text-align: right">
-                                                    <label for="name">Nama</label>
-                                                </div>
-                                                <div class="col-xl">
-                                                    <input type="text" value="{{ request('name') }}"
-                                                        style="border: 0; border-bottom: 1.9px solid #eaeaea; margin-top: -.5rem; border-radius: 0"
-                                                        class="form-control" id="name" name="name">
-                                                    @error('name')
-                                                        <div class="invalid-feedback">{{ $message }}</div>
-                                                    @enderror
-                                                </div>
-                                            </div>
-                                        </div>
+
+                                <div class="row">
+                                    {{-- Penjamin --}}
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label" for="penjamin_id">Penjamin</label>
+                                        <select class="form-control w-100 select2" id="penjamin_id" name="penjamin_id">
+                                            <option value="">Pilih Penjamin</option>
+                                            @foreach ($penjamins as $penjamin)
+                                                <option value="{{ $penjamin->id }}"
+                                                    {{ request('penjamin_id') == $penjamin->id ? 'selected' : '' }}>
+                                                    {{ $penjamin->name }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        @error('penjamin_id')
+                                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                                        @enderror
                                     </div>
-                                    <div class="col-xl-4">
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-xl-5" style="text-align: right">
-                                                    <label class="form-label text-end" for="mobile_phone_number">
-                                                        No. HP
-                                                    </label>
-                                                </div>
-                                                <div class="col-xl">
-                                                    <input type="text" value="{{ request('mobile_phone_number') }}"
-                                                        style="border: 0; border-bottom: 1.9px solid #eaeaea; margin-top: -.5rem; border-radius: 0"
-                                                        class="form-control" id="mobile_phone_number"
-                                                        name="mobile_phone_number">
-                                                    @error('mobile_phone_number')
-                                                        <div class="invalid-feedback">{{ $message }}</div>
-                                                    @enderror
-                                                </div>
-                                            </div>
-                                        </div>
+
+                                    {{-- No. HP --}}
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label" for="mobile_phone_number">No. HP</label>
+                                        <input type="text" value="{{ request('mobile_phone_number') }}"
+                                            class="form-control" id="mobile_phone_number" name="mobile_phone_number"
+                                            placeholder="Masukkan nomor HP">
+                                        @error('mobile_phone_number')
+                                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                                        @enderror
                                     </div>
-                                </div>
-                                <div class="row justify-content-center mt-4">
-                                    <div class="col-xl-4">
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-xl-4" style="text-align: right">
-                                                    <label for="date_of_birth">Tanggal Lahir</label>
-                                                </div>
-                                                <div class="col-xl">
-                                                    <input type="text" value="{{ request('date_of_birth') }}"
-                                                        style="border: 0; border-bottom: 1.9px solid #eaeaea; margin-top: -.5rem; border-radius: 0"
-                                                        class="form-control" id="date_of_birth" name="date_of_birth">
-                                                    @error('date_of_birth')
-                                                        <div class="invalid-feedback">{{ $message }}</div>
-                                                    @enderror
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-xl-4">
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-xl-5" style="text-align: right">
-                                                    <label class="form-label text-end" for="address">
-                                                        Alamat
-                                                    </label>
-                                                </div>
-                                                <div class="col-xl">
-                                                    <input type="text" value="{{ request('address') }}"
-                                                        style="border: 0; border-bottom: 1.9px solid #eaeaea; margin-top: -.5rem; border-radius: 0"
-                                                        class="form-control" id="address" name="address">
-                                                    @error('address')
-                                                        <div class="invalid-feedback">{{ $message }}</div>
-                                                    @enderror
-                                                </div>
-                                            </div>
-                                        </div>
+
+                                    {{-- Alamat --}}
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label" for="address">Alamat</label>
+                                        <input type="text" value="{{ request('address') }}" class="form-control"
+                                            id="address" name="address" placeholder="Masukkan alamat">
+                                        @error('address')
+                                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                                        @enderror
                                     </div>
                                 </div>
-                                <div class="row justify-content-end mt-4">
-                                    <div class="col-xl-5">
+
+                                {{-- Tombol Aksi --}}
+                                <div class="row justify-content-end mt-3">
+                                    <div class="col-auto">
                                         <a href="{{ route('pendaftaran.pasien.pendaftaran_pasien_baru') }}"
-                                            class="btn btn-outline-primary waves-effect waves-themed">
-                                            <span class="fal fa-plus-circle"></span>
+                                            class="btn btn-primary waves-effect waves-themed">
+                                            <span class="fal fa-plus-circle mr-1"></span>
                                             Tambah Pasien
                                         </a>
-                                        <button type="submit" class="btn btn-outline-primary waves-effect waves-themed">
-                                            <span class="fal fa-search"></span>
+                                        <button type="submit" class="btn btn-primary waves-effect waves-themed">
+                                            <span class="fal fa-search mr-1"></span>
                                             Cari
                                         </button>
                                     </div>
                                 </div>
                             </form>
-
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+        {{-- =================================================================
+        // AKHIR DARI BAGIAN YANG DIPERBARUI
+        // ================================================================= --}}
+
 
         <div class="row">
             <div class="col-xl-12">
@@ -343,25 +307,25 @@
     <script src="/js/datagrid/datatables/datatables.export.js"></script>
     {{-- Select 2 --}}
     <script src="/js/formplugins/select2/select2.bundle.js"></script>
+    {{-- Datepicker --}}
+    <script src="/js/formplugins/bootstrap-datepicker/bootstrap-datepicker.js"></script>
     <script>
         $(document).ready(function() {
 
-            // Select 2
-            $(function() {
-                $('.select2').select2({
-                    dropdownCssClass: "move-up"
-                });
-                $(".select2").on("select2:open", function() {
-                    // Mengambil elemen kotak pencarian
-                    var searchField = $(".select2-search__field");
+            // Inisialisasi Select 2
+            $('.select2').select2({
+                dropdownCssClass: "move-up"
+            });
 
-                    // Mengubah urutan elemen untuk memindahkannya ke atas
-                    searchField.insertBefore(searchField.prev());
-                });
+            // Inisialisasi Datepicker
+            $('.datepicker').datepicker({
+                format: 'yyyy-mm-dd',
+                autoclose: true,
+                todayHighlight: true
             });
 
             $('#loading-spinner').show();
-            // initialize datatable
+            // Inisialisasi datatable
             $('#dt-basic-example').dataTable({
                 "drawCallback": function(settings) {
                     // Menyembunyikan preloader setelah data berhasil dimuat
@@ -408,7 +372,7 @@
         });
 
 
-        // Input RM
+        // Fungsi format input No. RM
         function formatAngka(input) {
             var value = input.value.replace(/\D/g, '');
             var formattedValue = '';

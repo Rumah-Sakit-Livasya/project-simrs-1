@@ -463,13 +463,13 @@
                                                                     </button>
                                                                 </div>
                                                                 <div class="modal-body">
-                                                                    <ul>
+                                                                    {{-- <ul>
                                                                         @foreach ($employees->where('organization_id', $organizationId)->sortBy(function ($employee) {
-            return $employee->jobPosition->name == 'Penanggung Jawab' ? 0 : 1;
-        }) as $employee)
+        return $employee->jobPosition->name == 'Penanggung Jawab' ? 0 : 1;
+    }) as $employee)
                                                                             <li>{{ $employee->fullname }}</li>
                                                                         @endforeach
-                                                                    </ul>
+                                                                    </ul> --}}
                                                                 </div>
                                                                 <div class="modal-footer">
                                                                     <button type="button" class="btn btn-secondary"
