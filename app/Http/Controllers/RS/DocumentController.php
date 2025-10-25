@@ -136,11 +136,11 @@ class DocumentController extends Controller
 
         $validated = $request->validate($rules, $messages);
 
-        dd($request->file('file'));
         if ($request->hasFile('file')) {
 
             $file = $request->file('file');
             $filePath = $file->store('project_documents', 'public');
+            dd($filePath);
 
             try {
                 DB::transaction(function () use ($request, $document, $filePath, $file, $validated) {
