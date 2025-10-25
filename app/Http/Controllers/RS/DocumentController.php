@@ -108,7 +108,7 @@ class DocumentController extends Controller
      */
     public function update(Request $request, Document $document): JsonResponse
     {
-        dd($request->all());
+        dd($request->file());
 
         $rules = [
             'title' => 'required|string|max:255',
