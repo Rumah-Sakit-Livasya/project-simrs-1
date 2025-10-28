@@ -96,49 +96,6 @@
                 </form>
             </div>
         @endif
-        {{-- <div class="d-flex align-items-center mr-4">
-            @if ($appType == 'simrs')
-                <form action="{{ route('set-app') }}" method="POST">
-                    @csrf
-                    <input type="hidden" name="app_type" value="hr">
-                    <button class="btn btn-sm btn-primary" onclick="this.closest('form').submit()">
-                        <i class="fas fa-users mr-2"></i> SMART HR
-                    </button>
-                </form>
-            @elseif ($appType == 'inventory')
-                <form action="{{ route('set-app') }}" method="POST">
-                    @csrf
-                    <input type="hidden" name="app_type" value="library">
-                    <button class="btn btn-sm btn-primary" onclick="this.closest('form').submit()">
-                        <i class="fas fa-book mr-2"></i> Library
-                    </button>
-                </form>
-            @elseif ($appType == 'library')
-                <form action="{{ route('set-app') }}" method="POST">
-                    @csrf
-                    <input type="hidden" name="app_type" value="finance">
-                    <button class="btn btn-sm btn-primary" onclick="this.closest('form').submit()">
-                        <i class="fas fa-coins mr-2"></i> Finance
-                    </button>
-                </form>
-            @elseif ($appType == 'finance')
-                <form action="{{ route('set-app') }}" method="POST">
-                    @csrf
-                    <input type="hidden" name="app_type" value="quality">
-                    <button class="btn btn-sm btn-primary" onclick="this.closest('form').submit()">
-                        <i class="fas fa-chart-line mr-2"></i> Quality
-                    </button>
-                </form>
-            @else
-                <form action="{{ route('set-app') }}" method="POST">
-                    @csrf
-                    <input type="hidden" name="app_type" value="simrs">
-                    <button class="btn btn-sm btn-primary" onclick="this.closest('form').submit()">
-                        <i class="fas fa-notes-medical mr-2"></i> SIMRS
-                    </button>
-                </form>
-            @endif
-        </div> --}}
 
         <!-- app settings -->
         @if ($settings_app == 'Y')
@@ -337,39 +294,58 @@
         @else
         @endif --}}
 
+        {{-- ========== NOTIFICATION APP BARU ========== --}}
         <!-- app notification -->
         @isset($getNotify)
-            @if (
-                ($notification_app == 'Y' && $getNotify['day_off_count_child'] > 0) ||
-                    ($notification_app == 'Y' && $getNotify['day_off_count_parent'] > 0) ||
-                    ($notification_app == 'Y' && $getNotify['attendance_count_parent'] > 0) ||
-                    ($notification_app == 'Y' && $getNotify['attendance_count_child'] > 0))
+            {{-- Hitung total notifikasi --}}
+            @php
+                $totalNotifications =
+                    ($getNotify['day_off_count_child'] ?? 0) +
+                    ($getNotify['day_off_count_parent'] ?? 0) +
+                    ($getNotify['attendance_count_parent'] ?? 0) +
+                    ($getNotify['attendance_count_child'] ?? 0) +
+                    ($getNotify['material_approval_count'] ?? 0);
+            @endphp
+
+            @if ($notification_app == 'Y' && $totalNotifications > 0)
                 <div>
                     <a href="#" class="header-icon" data-toggle="dropdown"
-                        title="You got {{ $getNotify['day_off_count_child'] + $getNotify['day_off_count_parent'] + $getNotify['attendance_count_child'] + $getNotify['attendance_count_parent'] }} notifications">
+                        title="You got {{ $totalNotifications }} notifications">
                         <i class="fal fa-bell"></i>
                         <span class="badge badge-icon">
-                            {{ $getNotify['day_off_count_child'] + $getNotify['day_off_count_parent'] + $getNotify['attendance_count_child'] + $getNotify['attendance_count_parent'] }}
+                            {{ $totalNotifications }}
                         </span>
                     </a>
                     <div class="dropdown-menu dropdown-menu-animated dropdown-xl">
                         <div
                             class="dropdown-header bg-trans-gradient d-flex justify-content-center align-items-center rounded-top mb-2">
                             <h4 class="m-0 text-center color-white">
-                                {{ $getNotify['day_off_count_child'] + $getNotify['day_off_count_parent'] + $getNotify['attendance_count_child'] + $getNotify['attendance_count_parent'] }}
-                                Pengajuan Baru
+                                {{ $totalNotifications }} Pengajuan Baru
                                 <small class="mb-0 opacity-80">Meminta untuk disetujui</small>
                             </h4>
                         </div>
                         <ul class="nav nav-tabs nav-tabs-clean d-flex justify-content-center" role="tablist">
-                            <li class="nav-item">
-                                <a class="nav-link px-4 fs-md js-waves-on fw-500" data-toggle="tab"
-                                    href="#tab-dayoff-requests" data-i18n="drpdwn.messages">Libur / Cuti</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link px-4 fs-md js-waves-on fw-500" data-toggle="tab"
-                                    href="#tab-attendance-requests" data-i18n="drpdwn.feeds">Waktu Absen</a>
-                            </li>
+                            {{-- Tab untuk Day Off --}}
+                            @if (($getNotify['day_off_count_child'] ?? 0) + ($getNotify['day_off_count_parent'] ?? 0) > 0)
+                                <li class="nav-item">
+                                    <a class="nav-link px-4 fs-md js-waves-on fw-500" data-toggle="tab"
+                                        href="#tab-dayoff-requests">Libur / Cuti</a>
+                                </li>
+                            @endif
+                            {{-- Tab untuk Attendance --}}
+                            @if (($getNotify['attendance_count_child'] ?? 0) + ($getNotify['attendance_count_parent'] ?? 0) > 0)
+                                <li class="nav-item">
+                                    <a class="nav-link px-4 fs-md js-waves-on fw-500" data-toggle="tab"
+                                        href="#tab-attendance-requests">Waktu Absen</a>
+                                </li>
+                            @endif
+                            {{-- Tab baru Material Approval --}}
+                            @if (($getNotify['material_approval_count'] ?? 0) > 0)
+                                <li class="nav-item">
+                                    <a class="nav-link px-4 fs-md js-waves-on fw-500" data-toggle="tab"
+                                        href="#tab-material-requests">Material</a>
+                                </li>
+                            @endif
                         </ul>
                         <div class="tab-content tab-notification">
                             <div class="tab-pane active p-3 text-center">
@@ -385,7 +361,7 @@
                             <div class="tab-pane" id="tab-dayoff-requests" role="tabpanel">
                                 <div class="custom-scroll h-100">
                                     <ul class="notification">
-                                        @foreach ($getNotify['day_off_notify'] as $row)
+                                        @foreach ($getNotify['day_off_notify'] ?? [] as $row)
                                             @if (
                                                 $row->approved_line_child == auth()->user()->employee->id &&
                                                     isset($row->approved_line_parent) &&
@@ -394,7 +370,7 @@
                                                     <a href="{{ route('day-off-requests.get', $row->id) }}"
                                                         class="d-flex align-items-center">
                                                         <span class="status mr-2">
-                                                            @if ($row->employee->foto != null && Storage::exists('employee/profile/' . auth()->user()->employee->foto))
+                                                            @if ($row->employee->foto != null && Storage::exists('employee/profile/' . $row->employee->foto))
                                                                 <span class="profile-image rounded-circle d-block"
                                                                     style="background-image:url('{{ asset('storage/employee/profile/' . $row->employee->foto) }}'); background-size: cover; margin-top: -6px"></span>
                                                             @else
@@ -424,7 +400,7 @@
                                                     <a href="{{ route('day-off-requests.get', $row->id) }}"
                                                         class="d-flex align-items-center">
                                                         <span class="status mr-2">
-                                                            @if ($row->employee->foto != null && Storage::exists('employee/profile/' . auth()->user()->employee->foto))
+                                                            @if ($row->employee->foto != null && Storage::exists('employee/profile/' . $row->employee->foto))
                                                                 <span class="profile-image rounded-circle d-block"
                                                                     style="background-image:url('{{ asset('storage/employee/profile/' . $row->employee->foto) }}'); background-size: cover; margin-top: -6px"></span>
                                                             @else
@@ -451,7 +427,7 @@
                                                     <a href="{{ route('day-off-requests.get', $row->id) }}"
                                                         class="d-flex align-items-center">
                                                         <span class="status mr-2">
-                                                            @if ($row->employee->foto != null && Storage::exists('employee/profile/' . auth()->user()->employee->foto))
+                                                            @if ($row->employee->foto != null && Storage::exists('employee/profile/' . $row->employee->foto))
                                                                 <span class="profile-image rounded-circle d-block"
                                                                     style="background-image:url('{{ asset('storage/employee/profile/' . $row->employee->foto) }}'); background-size: cover; margin-top: -6px"></span>
                                                             @else
@@ -480,7 +456,7 @@
                             <div class="tab-pane" id="tab-attendance-requests" role="tabpanel">
                                 <div class="custom-scroll h-100">
                                     <ul class="notification">
-                                        @foreach ($getNotify['attendance_notify'] as $row)
+                                        @foreach ($getNotify['attendance_notify'] ?? [] as $row)
                                             @if (
                                                 $row->approved_line_child == auth()->user()->employee->id &&
                                                     isset($row->approved_line_parent) &&
@@ -489,7 +465,7 @@
                                                     <a href="{{ route('attendance-requests.get', $row->id) }}"
                                                         class="d-flex align-items-center">
                                                         <span class="status mr-2">
-                                                            @if ($row->employee->foto != null && Storage::exists('employee/profile/' . auth()->user()->employee->foto))
+                                                            @if ($row->employee->foto != null && Storage::exists('employee/profile/' . $row->employee->foto))
                                                                 <span class="profile-image rounded-circle d-block"
                                                                     style="background-image:url('{{ asset('storage/employee/profile/' . $row->employee->foto) }}'); background-size: cover; margin-top: -6px"></span>
                                                             @else
@@ -520,7 +496,7 @@
                                                     <a href="{{ route('attendance-requests.get', $row->id) }}"
                                                         class="d-flex align-items-center">
                                                         <span class="status mr-2">
-                                                            @if ($row->employee->foto != null && Storage::exists('employee/profile/' . auth()->user()->employee->foto))
+                                                            @if ($row->employee->foto != null && Storage::exists('employee/profile/' . $row->employee->foto))
                                                                 <span class="profile-image rounded-circle d-block"
                                                                     style="background-image:url('{{ asset('storage/employee/profile/' . $row->employee->foto) }}'); background-size: cover; margin-top: -6px"></span>
                                                             @else
@@ -548,7 +524,7 @@
                                                     <a href="{{ route('attendance-requests.get', $row->id) }}"
                                                         class="d-flex align-items-center">
                                                         <span class="status mr-2">
-                                                            @if ($row->employee->foto != null && Storage::exists('employee/profile/' . auth()->user()->employee->foto))
+                                                            @if ($row->employee->foto != null && Storage::exists('employee/profile/' . $row->employee->foto))
                                                                 <span class="profile-image rounded-circle d-block"
                                                                     style="background-image:url('{{ asset('storage/employee/profile/' . $row->employee->foto) }}'); background-size: cover; margin-top: -6px"></span>
                                                             @else
@@ -573,6 +549,45 @@
                                     </ul>
                                 </div>
                             </div>
+                            {{-- ===== TAB BARU UNTUK MATERIAL APPROVAL ===== --}}
+                            @if (($getNotify['material_approval_count'] ?? 0) > 0)
+                                <div class="tab-pane" id="tab-material-requests" role="tabpanel">
+                                    <div class="custom-scroll h-100">
+                                        <ul class="notification">
+                                            @foreach ($getNotify['material_approval_notify'] ?? [] as $row)
+                                                <li class="unread">
+                                                    <a href="{{ route('material-approvals.review', $row->id) }}"
+                                                        class="d-flex align-items-center">
+                                                        <span class="status mr-2">
+                                                            @if (($row->submitter->employee->foto ?? null) && Storage::exists('employee/profile/' . $row->submitter->employee->foto))
+                                                                <span class="profile-image rounded-circle d-block"
+                                                                    style="background-image:url('{{ asset('storage/employee/profile/' . $row->submitter->employee->foto) }}'); background-size: cover; margin-top: -6px"></span>
+                                                            @else
+                                                                <span class="profile-image rounded-circle d-block"
+                                                                    style="background-image:url('{{ asset('img/demo/avatars/avatar-c.png') }}'); background-size: cover; margin-top: -6px"></span>
+                                                            @endif
+                                                        </span>
+                                                        <span class="d-flex flex-column flex-1 ml-1">
+                                                            <span class="name">
+                                                                {{ $row->material_name }} ({{ $row->brand }})
+                                                                <span
+                                                                    class="badge badge-info fw-n position-absolute pos-top pos-right mt-1">Material</span>
+                                                            </span>
+                                                            <span class="msg-a fs-sm">Diajukan oleh:
+                                                                {{ $row->submitter->name }}</span>
+                                                            <span
+                                                                class="msg-b fs-xs">{{ Str::limit($row->technical_specifications, 50) }}</span>
+                                                            <span
+                                                                class="fs-nano text-muted mt-1">{{ $row->created_at->diffForHumans() }}</span>
+                                                        </span>
+                                                    </a>
+                                                </li>
+                                            @endforeach
+                                        </ul>
+                                    </div>
+                                </div>
+                            @endif
+                            {{-- ===== END MATERIAL TAB ===== --}}
                         </div>
                         <div
                             class="py-2 px-3 bg-faded d-block rounded-bottom text-right border-faded border-bottom-0 border-right-0 border-left-0">
@@ -581,8 +596,25 @@
                     </div>
                 </div>
             @else
+                {{-- Jika tidak ada notifikasi sama sekali, tampilkan ikon bell biasa --}}
+                <div>
+                    <a href="#" class="header-icon" data-toggle="dropdown" title="You have no new notifications">
+                        <i class="fal fa-bell"></i>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-animated dropdown-xl">
+                        <div
+                            class="dropdown-header bg-trans-gradient d-flex justify-content-center align-items-center rounded-top mb-2">
+                            <h4 class="m-0 text-center color-white">
+                                Tidak Ada Notifikasi
+                                <small class="mb-0 opacity-80">Semua sudah selesai</small>
+                            </h4>
+                        </div>
+                    </div>
+                </div>
             @endif
         @endisset
+        {{-- ========== END NOTIFICATION APP BARU ========== --}}
+
         <!-- app user menu -->
         <div class="d-flex align-items-center">
             <a href="javascript:void(0)" data-toggle="dropdown" title="{{ auth()->user()->email }}"

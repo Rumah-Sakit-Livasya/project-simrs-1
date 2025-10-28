@@ -1488,11 +1488,7 @@ Route::group(['middleware' => ['auth']], function () {
         //         Route::get('non-farmasi', [PurchaseOrderController::class, 'nonFarmasi'])->name('procurement.purchase-order.non-farmasi');
         //     });
 
-        //     Route::prefix('approval-po')->group(function () {
-        //         Route::get('farmasi', [ApprovalPOController::class, 'farmasi'])->name('procurement.approval-po.farmasi');
-        //         Route::get('non-farmasi', [ApprovalPOController::class, 'nonFarmasi'])->name('procurement.approval-po.non-farmasi');
-        //         Route::get('ceo', [ApprovalPOController::class, 'ceo'])->name('procurement.approval-po.ceo');
-        //     });
+        //     Route::pref
 
         //     Route::prefix('pengajuan-cash-advance')->group(function () {
         //         Route::get('/', [ApprovalPOController::class, 'pengajuanCashAdvance'])->name('procurement.pengajuan-cash-advance');

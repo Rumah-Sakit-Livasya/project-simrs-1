@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use App\Models\RS\ProjectBuildItem;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Auditable;
 use OwenIt\Auditing\Contracts\Auditable as AuditableContract;
@@ -88,5 +90,10 @@ class WarehouseBarangNonFarmasi extends Model implements AuditableContract
             })
             ->unique('id') // Optional: avoid duplicates
             ->values();
+    }
+
+    public function projectDetails(): HasOne
+    {
+        return $this->hasOne(ProjectBuildItem::class, 'barang_nf_id');
     }
 }
