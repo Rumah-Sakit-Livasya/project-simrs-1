@@ -51,36 +51,70 @@ use App\Models\TimeScheduleEmployee;
 class DashboardController extends Controller
 {
 
+    /**
+     * Get all pending notifications for the logged-in user.
+     */
     public function getNotify()
     {
-        $day_off_notify = DayOffRequest::where('approved_line_child', auth()->user()->employee->id)->orWhere('approved_line_parent', auth()->user()->employee->id)->latest()->get();
-        $attendance_notify = AttendanceRequest::where('approved_line_child', auth()->user()->employee->id)->orWhere('approved_line_parent', auth()->user()->employee->id)->latest()->get();
-        $day_off_count_child = DayOffRequest::where('approved_line_child', auth()->user()->employee->id)
-            ->where(function ($query) {
-                $query->where('is_approved', 'Pending')
-                    ->orWhere('is_approved', 'Verifikasi');
-            })
-            ->count();
-        $day_off_count_child -= DayOffRequest::where('approved_line_child', auth()->user()->employee->id)
-            ->where(function ($query) {
-                $query->where('is_approved', 'Verifikasi')
-                    ->whereNotNull('approved_line_parent');
-            })
-            ->count();
-        $day_off_count_parent = DayOffRequest::where('approved_line_parent', auth()->user()->employee->id)->where('is_approved', 'Verifikasi')->count();
-        $attendance_count_child = AttendanceRequest::where('approved_line_child', auth()->user()->employee->id)
-            ->where(function ($query) {
-                $query->where('is_approved', 'Pending')
-                    ->orWhere('is_approved', 'Verifikasi');
-            })->count();
+        $user = auth()->user();
+        $employeeId = $user->employee->id;
 
-        $attendance_count_child -= AttendanceRequest::where('approved_line_child', auth()->user()->employee->id)
+        // === Existing notifications ===
+        $day_off_notify = DayOffRequest::where('approved_line_child', $employeeId)
+            ->orWhere('approved_line_parent', $employeeId)
+            ->latest()
+            ->get();
+
+        $attendance_notify = AttendanceRequest::where('approved_line_child', $employeeId)
+            ->orWhere('approved_line_parent', $employeeId)
+            ->latest()
+            ->get();
+
+        $day_off_count_child = DayOffRequest::where('approved_line_child', $employeeId)
+            ->where(function ($query) {
+                $query->where('is_approved', 'Pending')
+                    ->orWhere('is_approved', 'Verifikasi');
+            })
+            ->count();
+
+        $day_off_count_child -= DayOffRequest::where('approved_line_child', $employeeId)
             ->where(function ($query) {
                 $query->where('is_approved', 'Verifikasi')
                     ->whereNotNull('approved_line_parent');
             })
             ->count();
-        $attendance_count_parent = AttendanceRequest::where('approved_line_parent', auth()->user()->employee->id)->where('is_approved', 'Verifikasi')->count();
+
+        $day_off_count_parent = DayOffRequest::where('approved_line_parent', $employeeId)
+            ->where('is_approved', 'Verifikasi')
+            ->count();
+
+        $attendance_count_child = AttendanceRequest::where('approved_line_child', $employeeId)
+            ->where(function ($query) {
+                $query->where('is_approved', 'Pending')
+                    ->orWhere('is_approved', 'Verifikasi');
+            })
+            ->count();
+
+        $attendance_count_child -= AttendanceRequest::where('approved_line_child', $employeeId)
+            ->where(function ($query) {
+                $query->where('is_approved', 'Verifikasi')
+                    ->whereNotNull('approved_line_parent');
+            })
+            ->count();
+
+        $attendance_count_parent = AttendanceRequest::where('approved_line_parent', $employeeId)
+            ->where('is_approved', 'Verifikasi')
+            ->count();
+
+        // === New logic for Material Approval notifications ===
+        // Notifikasi muncul jika user saat ini adalah reviewer DAN statusnya masih Submitted
+        $material_approval_notify = \App\Models\RS\MaterialApproval::with('submitter')
+            ->where('reviewed_by', $user->id)
+            ->where('status', 'Submitted')
+            ->latest()
+            ->get();
+
+        $material_approval_count = $material_approval_notify->count();
 
         return [
             'day_off_notify' => $day_off_notify,
@@ -89,6 +123,9 @@ class DashboardController extends Controller
             'day_off_count_parent' => $day_off_count_parent,
             'attendance_count_parent' => $attendance_count_parent,
             'attendance_count_child' => $attendance_count_child,
+            // material approval notifications
+            'material_approval_notify' => $material_approval_notify,
+            'material_approval_count' => $material_approval_count,
         ];
     }
 

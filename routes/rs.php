@@ -2,6 +2,9 @@
 
 use App\Http\Controllers\RS\DocumentController;
 use App\Http\Controllers\RS\DocumentTypeController;
+use App\Http\Controllers\RS\InspectionLogController;
+use App\Http\Controllers\RS\MaterialApprovalController;
+use App\Http\Controllers\RS\ProjectBuildItemController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -23,4 +26,15 @@ Route::middleware(['auth'])->group(function () {
 
     // Rute khusus untuk preview di popup window
     Route::get('documents/{document}/preview', [DocumentController::class, 'preview'])->name('documents.preview');
+
+    Route::resource('material-approvals', MaterialApprovalController::class);
+    // NEW ROUTE for the review page
+    Route::get('material-approvals/{materialApproval}/review', [MaterialApprovalController::class, 'review'])->name('material-approvals.review');
+
+    // NEW ROUTE to handle the approval/rejection action
+    Route::post('material-approvals/{materialApproval}/process-review', [MaterialApprovalController::class, 'processReview'])->name('material-approvals.processReview');
+
+    Route::resource('inspection-logs', InspectionLogController::class);
+
+    Route::get('project-build-items', [ProjectBuildItemController::class, 'index'])->name('project-build-items.index');
 });
