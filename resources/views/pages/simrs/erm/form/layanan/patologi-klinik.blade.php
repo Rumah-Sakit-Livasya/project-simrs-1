@@ -158,6 +158,63 @@
                 $('#panel-laboratorium-form').hide();
                 $('#panel-laboratorium-list').show();
             });
+
+            $('#dt-lab-orders tbody').on('click', '.delete-btn', function() {
+                var orderId = $(this).data('id');
+                var row = $(this).closest('tr'); // Ambil elemen <tr> dari baris yang akan dihapus
+
+                // Tampilkan konfirmasi menggunakan SweetAlert
+                Swal.fire({
+                    title: 'Apakah Anda yakin?',
+                    text: "Order ini akan dihapus secara permanen!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Ya, hapus!',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Jika user mengonfirmasi, kirim request AJAX
+                        $.ajax({
+                            url: `/simrs/laboratorium/order/${orderId}`, // Sesuaikan dengan URL route Anda
+                            type: 'DELETE',
+                            headers: {
+                                // Kirim CSRF token untuk keamanan
+                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                            },
+                            success: function(response) {
+                                if (response.success) {
+                                    // Hapus baris dari DataTable
+                                    table.row(row).remove().draw();
+
+                                    // Tampilkan notifikasi sukses
+                                    Swal.fire(
+                                        'Dihapus!',
+                                        response.message,
+                                        'success'
+                                    );
+                                } else {
+                                    // Tampilkan notifikasi error dari server
+                                    Swal.fire(
+                                        'Gagal!',
+                                        response.message,
+                                        'error'
+                                    );
+                                }
+                            },
+                            error: function(xhr, status, error) {
+                                // Tangani error AJAX (misal: server down, 404, dll)
+                                Swal.fire(
+                                    'Error!',
+                                    'Tidak dapat menghubungi server. Coba lagi nanti.',
+                                    'error'
+                                );
+                            }
+                        });
+                    }
+                });
+            });
         });
     </script>
     <script>

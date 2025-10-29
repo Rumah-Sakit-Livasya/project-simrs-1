@@ -34,6 +34,28 @@
                                         <td>{{ $material->material_name }}</td>
                                     </tr>
                                     <tr>
+                                        <td><strong>Kuantitas (Bisa Direvisi)</strong></td>
+                                        <td>
+                                            <div class="d-flex">
+                                                <input type="number" name="quantity"
+                                                    class="form-control form-control-sm mr-2" style="width: 120px;"
+                                                    value="{{ $material->quantity }}">
+                                                <select class="form-control form-control-sm select2" name="satuan_id"
+                                                    style="width: 150px;">
+                                                    <option value="">-- Pilih Satuan --</option>
+                                                    @foreach ($satuans as $satuan)
+                                                        <option value="{{ $satuan->id }}"
+                                                            {{ $material->satuan_id == $satuan->id ? 'selected' : '' }}>
+                                                            {{ $satuan->nama }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <small class="form-text text-muted">Anda bisa mengubah kuantitas dan satuan jika
+                                                menyetujui material ini.</small>
+                                        </td>
+                                    </tr>
+                                    <tr>
                                         <td><strong>Merek / Tipe</strong></td>
                                         <td>{{ $material->brand ?? '-' }} / {{ $material->type_or_model ?? '-' }}</td>
                                     </tr>
@@ -114,10 +136,17 @@
     <script src="/js/formplugins/select2/select2.bundle.js"></script>
     <script>
         $(document).ready(function() {
-            // Init Select2
-            $('#status').select2({
-                width: '100%'
-            });
+            // Inisialisasi Select2 hanya jika elemen ada
+            if ($('#status').length) {
+                $('#status').select2({
+                    width: '100%'
+                });
+            }
+            if ($('#satuan_id').length) {
+                $('#satuan_id').select2({
+                    width: '100%'
+                });
+            }
 
             // Handle form submission
             $('#reviewForm').on('submit', function(e) {

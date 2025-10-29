@@ -5,6 +5,7 @@ use App\Http\Controllers\RS\DocumentTypeController;
 use App\Http\Controllers\RS\InspectionLogController;
 use App\Http\Controllers\RS\MaterialApprovalController;
 use App\Http\Controllers\RS\ProjectBuildItemController;
+use App\Http\Controllers\RS\StockManagementController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -36,5 +37,16 @@ Route::middleware(['auth'])->group(function () {
 
     Route::resource('inspection-logs', InspectionLogController::class);
 
-    Route::get('project-build-items', [ProjectBuildItemController::class, 'index'])->name('project-build-items.index');
+    // Route::get('project-build-items', [ProjectBuildItemController::class, 'index'])->name('project-build-items.index');
+
+    Route::resource('project-build-items', ProjectBuildItemController::class);
+
+    Route::get('stock-management', [StockManagementController::class, 'index'])->name('stock-management.index');
+
+    // Rute baru untuk detail stok per gudang
+    Route::get('stock-management/{projectBuildItem}/details', [StockManagementController::class, 'getStockDetails'])->name('stock-management.details');
+
+    Route::get('stock-management/{projectBuildItem}/card', [StockManagementController::class, 'showStockCard'])->name('stock-management.card');
+
+    Route::post('stock-management/manual-stock-in', [StockManagementController::class, 'manualStockIn'])->name('stock-management.manualStockIn');
 });

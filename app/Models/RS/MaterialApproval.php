@@ -14,6 +14,7 @@ class MaterialApproval extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
+        'project_build_item_id', // <-- TAMBAHKAN INI
         'document_id',
         'material_name',
         'brand',

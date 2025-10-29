@@ -75,11 +75,15 @@
                                                 <span class="badge badge-secondary">Belum Ditagih</span>
                                             @endif
                                         </td>
-                                        <td class="text-center">
-                                            <a href="#" class="btn btn-xs btn-outline-primary"
-                                                data-toggle="tooltip" title="Cetak Hasil">
+                                        <td class="text-center d-flex justify-content-center gap-1">
+                                            <button type="button" class="btn btn-xs btn-info" data-toggle="tooltip"
+                                                title="Cetak Hasil">
                                                 <i class="fal fa-print"></i>
-                                            </a>
+                                            </button>
+                                            <button type="button" class="btn btn-xs btn-danger delete-btn"
+                                                title="Hapus Order" data-id="{{ $order->id }}">
+                                                <i class="fal fa-trash"></i>
+                                            </button>
                                         </td>
                                     </tr>
                                 @endforeach
