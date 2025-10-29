@@ -287,6 +287,36 @@
     .pointer {
         cursor: pointer;
     }
+
+    /* CSS baru untuk membuat tab notifikasi bisa di-scroll */
+    .notification-tabs-container {
+        display: flex;
+        flex-wrap: nowrap;
+        /* Mencegah tab turun ke baris baru */
+        overflow-x: auto;
+        /* Aktifkan horizontal scroll jika konten melebihi lebar */
+        -webkit-overflow-scrolling: touch;
+        /* Scroll lebih mulus di perangkat mobile */
+        padding-bottom: 5px;
+        /* Beri sedikit ruang agar scrollbar tidak menempel */
+    }
+
+    /* Hilangkan scrollbar default (opsional, untuk estetika) */
+    .notification-tabs-container::-webkit-scrollbar {
+        display: none;
+    }
+
+    .notification-tabs-container {
+        -ms-overflow-style: none;
+        /* IE and Edge */
+        scrollbar-width: none;
+        /* Firefox */
+    }
+
+    /* Pastikan setiap tab tidak menyusut */
+    .notification-tabs-container .nav-item {
+        flex-shrink: 0;
+    }
 </style>
 
 {{-- INI CARA YANG BENAR UNTUK VITE --}}

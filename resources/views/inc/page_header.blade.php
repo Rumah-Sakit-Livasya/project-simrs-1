@@ -324,7 +324,8 @@
                                 <small class="mb-0 opacity-80">Meminta untuk disetujui</small>
                             </h4>
                         </div>
-                        <ul class="nav nav-tabs nav-tabs-clean d-flex justify-content-center" role="tablist">
+                        <ul class="nav nav-tabs nav-tabs-clean d-flex justify-content-start notification-tabs-container"
+                            role="tablist">
                             {{-- Tab untuk Day Off --}}
                             @if (($getNotify['day_off_count_child'] ?? 0) + ($getNotify['day_off_count_parent'] ?? 0) > 0)
                                 <li class="nav-item">

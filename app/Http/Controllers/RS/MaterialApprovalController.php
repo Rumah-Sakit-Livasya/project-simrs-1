@@ -5,6 +5,7 @@ namespace App\Http\Controllers\RS;
 use App\Http\Controllers\Controller;
 use App\Models\RS\Document;
 use App\Models\RS\MaterialApproval;
+use App\Models\RS\ProjectBuildItem;
 use App\Models\User;
 use App\Models\WarehouseSatuanBarang;
 use Illuminate\Http\Request;
@@ -46,19 +47,19 @@ class MaterialApprovalController extends Controller
 
         $users = User::whereHas('employee', fn($q) => $q->where('is_active', true))->get();
         $documents = Document::where('is_latest', true)->orderBy('created_at', 'desc')->get();
-        $satuans = WarehouseSatuanBarang::all(); // <-- AMBIL DATA SATUAN
+        $satuans = WarehouseSatuanBarang::all();
+        $projectBuildItems = ProjectBuildItem::where('is_active', true)->get();
 
-
-        return view('app-type.rs.material_approvals.index', compact('users', 'documents', 'satuans'));
+        return view('app-type.rs.material_approvals.index', compact('users', 'documents', 'satuans', 'projectBuildItems'));
     }
 
     public function store(Request $request): JsonResponse
     {
         $request->validate([
-            'quantity' => 'nullable|numeric|min:0', // <-- VALIDASI BARU
-            'satuan_id' => 'nullable|exists:warehouse_satuan_barang,id', // <-- VALIDASI BARU
+            'project_build_item_id' => 'required|exists:project_build_items,id',
+            'quantity' => 'nullable|numeric|min:0',
+            'satuan_id' => 'nullable|exists:warehouse_satuan_barang,id',
             'document_id' => 'nullable|exists:documents,id',
-            'material_name' => 'required|string|max:255',
             'technical_specifications' => 'required|string',
             'status' => 'required|in:Submitted,Approved,Rejected,Revision Required',
             'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048', // Max 2MB
@@ -71,7 +72,7 @@ class MaterialApprovalController extends Controller
 
         MaterialApproval::create($request->all() + [
             'image_path' => $imagePath,
-            'submitted_by' => Auth::id()
+            'submitted_by' => Auth::id(),
         ]);
 
         return response()->json(['success' => 'Material approval saved successfully.']);
@@ -85,10 +86,10 @@ class MaterialApprovalController extends Controller
     public function update(Request $request, MaterialApproval $materialApproval): JsonResponse
     {
         $request->validate([
-            'quantity' => 'nullable|numeric|min:0', // <-- VALIDASI BARU
-            'satuan_id' => 'nullable|exists:warehouse_satuan_barang,id', // <-- VALIDASI BARU
+            'project_build_item_id' => 'required|exists:project_build_items,id',
+            'quantity' => 'nullable|numeric|min:0',
+            'satuan_id' => 'nullable|exists:warehouse_satuan_barang,id',
             'document_id' => 'nullable|exists:documents,id',
-            'material_name' => 'required|string|max:255',
             'technical_specifications' => 'required|string',
             'status' => 'required|in:Submitted,Approved,Rejected,Revision Required',
             'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
@@ -124,16 +125,19 @@ class MaterialApprovalController extends Controller
     public function review(MaterialApproval $materialApproval)
     {
         // Eager load necessary relationships
-        $materialApproval->load(['submitter.employee', 'document']);
+        $materialApproval->load(['submitter.employee', 'document', 'satuan']);
 
         // Security check: ensure the logged-in user is the designated reviewer
         if (auth()->id() != $materialApproval->reviewed_by) {
             abort(403, 'UNAUTHORIZED ACTION. You are not the designated reviewer for this item.');
         }
 
+        $satuans = WarehouseSatuanBarang::all();
+
         // Pass the data to the new review view
         return view('app-type.rs.material_approvals.review', [
             'material' => $materialApproval,
+            'satuans' => $satuans,
         ]);
     }
 
@@ -150,6 +154,8 @@ class MaterialApprovalController extends Controller
         $validator = Validator::make($request->all(), [
             'status' => 'required|in:Approved,Rejected,Revision Required',
             'remarks' => 'required_if:status,Rejected,Revision Required|nullable|string',
+            'quantity' => 'nullable|numeric|min:0',
+            'satuan_id' => 'nullable|exists:warehouse_satuan_barang,id',
         ]);
 
         if ($validator->fails()) {
@@ -157,14 +163,19 @@ class MaterialApprovalController extends Controller
         }
 
         try {
-            $materialApproval->update([
+            // Data yang akan diupdate
+            $updateData = [
                 'status' => $request->status,
                 'remarks' => $request->remarks,
-                // The reviewer is already set, no need to update it again unless logic changes
-            ]);
+            ];
 
-            // Optional: Send a notification back to the submitter
-            // ... logic to notify $materialApproval->submitter ...
+            // Hanya update quantity dan satuan jika statusnya "Approved"
+            if ($request->status === 'Approved') {
+                $updateData['quantity'] = $request->quantity;
+                $updateData['satuan_id'] = $request->satuan_id;
+            }
+
+            $materialApproval->update($updateData);
 
             return response()->json(['success' => 'Review has been submitted successfully!']);
         } catch (\Exception $e) {

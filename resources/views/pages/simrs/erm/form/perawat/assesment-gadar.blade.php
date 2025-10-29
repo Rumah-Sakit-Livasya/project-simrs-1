@@ -299,13 +299,36 @@
     {{-- SCRIPT SKRINING NYERI --}}
     <script>
         $(document).ready(function() {
-            // Add click event listener to all badges
-            $('.badge').on('click', function() {
-                // Get the value of the clicked badge
-                var badgeValue = $(this).text();
-                // Set the value of the input field with ID 'skor-nyeri'
-                $('#skor-nyeri').val(badgeValue);
+            // 1. Definisikan elemen target
+            var $skorBadges = $('.wong-baker-scale [data-skor]');
+            var $skorInput = $('#skor_nyeri');
+
+            // 2. Buat fungsi klik
+            $skorBadges.on('click', function() {
+                // Ambil $(this) (badge yang diklik)
+                var $clickedBadge = $(this);
+
+                // Ambil nilai dari atribut data-skor
+                var skor = $clickedBadge.data('skor');
+
+                // Set nilai input #skor_nyeri
+                $skorInput.val(skor);
+
+                // (Opsional) Beri tanda visual pada badge yang aktif
+                // Hapus kelas 'skor-aktif' dari semua badge
+                $skorBadges.removeClass('skor-aktif');
+                // Tambahkan kelas 'skor-aktif' hanya ke badge yang diklik
+                $clickedBadge.addClass('skor-aktif');
             });
+
+            // 3. (Opsional) Sinkronkan saat halaman dimuat
+            // Jika input #skor_nyeri sudah punya nilai (misal dari data lama),
+            // tandai badge yang sesuai.
+            var initialSkor = $skorInput.val();
+            if (initialSkor !== '') {
+                // Cari badge yang data-skor-nya sama dengan nilai awal
+                $skorBadges.filter('[data-skor="' + initialSkor + '"]').addClass('skor-aktif');
+            }
         });
     </script>
 
