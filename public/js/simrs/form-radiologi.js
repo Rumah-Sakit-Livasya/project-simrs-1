@@ -226,9 +226,9 @@ jQuery(function ($) {
 
         _submit(event) {
             event.preventDefault();
-            if (!$("#doctor_id").val()) {
-                return this._showErrorAlert("Silakan pilih Dokter Radiologi.");
-            }
+            // if (!$("#doctor_id").val()) {
+            //     return this._showErrorAlert("Silakan pilih Dokter Radiologi.");
+            // }
             if (!$("#diagnosa_awal").val().trim()) {
                 return this._showErrorAlert("Diagnosa klinis wajib diisi.");
             }

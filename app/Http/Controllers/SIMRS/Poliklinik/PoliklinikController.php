@@ -111,7 +111,7 @@ class PoliklinikController extends Controller
                 'nama_pasien' => $registration->patient->name ?? '',
                 'tgl_lahir_pasien' => Carbon::parse($registration->patient->date_of_birth)->format('d-m-Y') ?? '',
                 'umur_pasien' => hitungUmur($registration->patient->date_of_birth) ?? '',
-                'kelamin_pasien' => $registration->patient->gender =='m' ? 'Laki-laki' : 'Perempuan',
+                'kelamin_pasien' => $registration->patient->gender == 'm' ? 'Laki-laki' : 'Perempuan',
                 'alamat_pasien' => $registration->patient->address ?? '',
                 'dpjp' => $registration->doctor->employee->fullname ?? '',
                 'no_hp_pasien' => $registration->patient->mobile_phone_number ?? '',
@@ -134,6 +134,20 @@ class PoliklinikController extends Controller
                     'inputId' => $inputId,
                     'previewId' => $previewId,
                     'initialData' => '', // Kosong karena ini form baru
+                ])->render();
+            }, $formSource);
+
+            $formSource = preg_replace_callback('/\[IMAGE_EDITOR:(.*?)\]/', function ($matches) {
+                $inputName = $matches[1];
+
+                // Tentukan gambar latar belakang default. Pastikan file ini ada di public/images
+                $defaultImage = asset('images/audiogram-background.jpg');
+
+                // Render komponen Blade 'image-editor'
+                return view('s', [
+                    'inputName' => $inputName,
+                    'initialData' => '', // Selalu kosong untuk form baru
+                    'defaultImage' => $defaultImage,
                 ])->render();
             }, $formSource);
 
@@ -238,7 +252,7 @@ class PoliklinikController extends Controller
             $registration = $pengkajian->registration;
 
             // =========================================================================
-            // 3. [BARU & PENTING] Ganti Placeholder Data Registrasi & Pasien
+            // 3. Ganti Placeholder Data Registrasi & Pasien
             // =========================================================================
             $data = [
                 'no_rm' => $registration->patient->medical_record_number ?? '',
@@ -252,7 +266,7 @@ class PoliklinikController extends Controller
                 'tgl_sekarang' => $pengkajian->created_at->format('d-m-Y') ?? '',
             ];
 
-            // [DIPERBAIKI] Ganti placeholder dengan regex agar lebih fleksibel
+            // Ganti placeholder dengan regex agar lebih fleksibel
             foreach ($data as $key => $value) {
                 $formSource = preg_replace('/\{\{\{?' . preg_quote($key) . '\}?\}\}/', htmlspecialchars($value), $formSource);
             }
@@ -265,76 +279,80 @@ class PoliklinikController extends Controller
             $formValues = (array) $formValues;
 
             // =========================================================================
-            // 5. Proses Tanda Tangan (Signature Pad)
+            // 5. Proses Tanda Tangan (Signature Pad) - LOGIKA ASLI TETAP SAMA
             // =========================================================================
-            $signaturePadInitializers = [];
+            $signaturePadInitializers = []; // Variabel ini mungkin tidak digunakan jika Anda menggunakan popup, tapi biarkan saja.
             $formSource = preg_replace_callback('/\[SIGNATURE_PAD:(.*?)\]/', function ($matches) use ($formValues, $isEditMode) {
                 $inputName = $matches[1];
                 $initialData = $formValues[$inputName] ?? '';
 
-                // --- LOGIKA BARU: Tentukan output berdasarkan isEditMode ---
-
                 // JIKA DALAM MODE LIHAT (READ-ONLY)
                 if (! $isEditMode) {
                     if (! empty($initialData)) {
-                        // Kembalikan tag <img> dengan styling yang benar untuk menjaga rasio aspek.
-                        // Dibungkus dalam div agar alignment-nya konsisten.
                         return '
-                            <div class="signature-view-wrapper text-center">
-                                <div style="position: relative; width: 250px; height: 125px; margin: 0 auto; border-bottom: 1px solid #333;">
-                                    <img src="' . htmlspecialchars($initialData) . '"
-                                         alt="Tanda Tangan"
-                                         style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain;">
-                                </div>
+                        <div class="signature-view-wrapper text-center">
+                            <div style="position: relative; width: 250px; height: 125px; margin: 0 auto; border-bottom: 1px solid #333;">
+                                <img src="' . htmlspecialchars($initialData) . '"
+                                     alt="Tanda Tangan"
+                                     style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain;">
                             </div>
-                        ';
-                    } else {
-                        // Kembalikan placeholder jika tidak ada tanda tangan
-                        return '
-                            <div class="signature-view-wrapper text-center">
-                                <div style="width: 250px; height: 80px; border-bottom: 1px solid #333; text-align: center; padding-top: 30px; color: #999; margin: 0 auto;">
-                                    <em>(Tidak ada tanda tangan)</em>
-                                </div>
-                            </div>
-                        ';
-                    }
-                }
-
-                // JIKA DALAM MODE EDIT
-                else {
-                    $inputId = 'signature-input-' . $inputName;
-                    $previewId = 'signature-preview-' . $inputName;
-
-                    $imgDisplay = ! empty($initialData) ? 'block' : 'none';
-                    $placeholderDisplay = empty($initialData) ? 'block' : 'none';
-
-                    // Kembalikan HTML untuk trigger popup
-                    return '
-                        <div class="signature-wrapper text-center">
-                            <div class="signature-preview-container border rounded mb-2" style="min-height: 120px; display: flex; align-items: center; justify-content: center; position: relative;">
-                                <img id="' . $previewId . '"
-                                     src="' . htmlspecialchars($initialData) . '"
-                                     alt="Pratinjau Tanda Tangan"
-                                     style="max-width: 100%; height: auto; display: ' . $imgDisplay . ';">
-
-                                <span class="text-muted placeholder-text" style="display: ' . $placeholderDisplay . ';">Belum ada tanda tangan</span>
-                            </div>
-
-                            <button type="button" class="btn btn-outline-primary btn-sm open-signature-popup"
-                                    data-input-target="' . $inputId . '"
-                                    data-preview-target="' . $previewId . '">
-                                <i class="fas fa-pen-alt"></i> Bubuhkan Tanda Tangan
-                            </button>
-
-                            <input type="hidden" name="' . $inputName . '" id="' . $inputId . '" value="' . htmlspecialchars($initialData) . '">
                         </div>
                     ';
+                    } else {
+                        return '
+                        <div class="signature-view-wrapper text-center">
+                            <div style="width: 250px; height: 80px; border-bottom: 1px solid #333; text-align: center; padding-top: 30px; color: #999; margin: 0 auto;">
+                                <em>(Tidak ada tanda tangan)</em>
+                            </div>
+                        </div>
+                    ';
+                    }
+                }
+                // JIKA DALAM MODE EDIT
+                else {
+                    // Menggunakan komponen Blade untuk trigger popup
+                    return view('components.signature-popup-trigger', [
+                        'inputName' => $inputName,
+                        'initialData' => $initialData,
+                    ])->render();
                 }
             }, $formSource);
 
             // =========================================================================
-            // 6. Isi Ulang Nilai Form (Rehidrasi)
+            // 5B. [LOGIKA BARU DITAMBAHKAN DI SINI] Proses Image Editor
             // =========================================================================
+            $formSource = preg_replace_callback('/\[IMAGE_EDITOR:(.*?)\]/', function ($matches) use ($formValues, $isEditMode) {
+                $inputName = $matches[1];
+                $initialData = $formValues[$inputName] ?? ''; // base64 data gambar yang tersimpan
+                $defaultImage = asset('images/audiogram-background.jpg'); // Pastikan path ini benar
+
+                // JIKA DALAM MODE LIHAT (READ-ONLY)
+                if (! $isEditMode) {
+                    if (! empty($initialData)) {
+                        // Tampilkan sebagai gambar statis
+                        return '<img src="' . htmlspecialchars($initialData) . '" alt="Gambar ' . e($inputName) . '" style="width: 100%; height: auto; border: 1px solid #ddd; border-radius: .25rem;">';
+                    } else {
+                        // Tampilkan placeholder jika tidak ada gambar
+                        return '<div style="width: 100%; min-height: 450px; border: 1px dashed #ccc; display: flex; align-items: center; justify-content: center; background-color: #f8f9fa; border-radius: .25rem;"><em class="text-muted">(Tidak ada gambar yang tersimpan)</em></div>';
+                    }
+                }
+                // JIKA DALAM MODE EDIT
+                else {
+                    // Render komponen Blade 'image-editor' dengan data yang sudah ada
+                    return view('components.image-editor', [
+                        'inputName' => $inputName,
+                        'initialData' => $initialData,
+                        'defaultImage' => $defaultImage,
+                    ])->render();
+                }
+            }, $formSource);
+
+            // =========================================================================
+            // 6. Isi Ulang Nilai Form (Rehidrasi) - LOGIKA ASLI TETAP SAMA
+            // =========================================================================
+            // Simpan hasil proses ke variabel global sementara untuk diakses di callback berikutnya
+            $GLOBALS['formSource'] = $formSource;
+
             $formSource = preg_replace_callback('/<(input|textarea|select)([^>]*)name=["\']([^"\']+)["\']([^>]*)>/i', function ($matches) use ($formValues, $isEditMode) {
                 $tag = strtolower($matches[1]);
                 $beforeName = $matches[2];
@@ -345,10 +363,10 @@ class PoliklinikController extends Controller
                 $cleanName = str_replace('[]', '', $name);
                 $value = $formValues[$cleanName] ?? null;
 
-                // --- Jika dalam mode LIHAT, ubah semua elemen menjadi teks biasa ---
                 if (! $isEditMode) {
-                    // Jika tidak ada data, tampilkan strip
                     if ($value === null || $value === '') {
+                        // Untuk tag 'select', kita tidak ingin menampilkan '-', biarkan kosong
+                        if ($tag === 'select') return '';
                         return '<span class="text-muted">-</span>';
                     }
 
@@ -356,43 +374,66 @@ class PoliklinikController extends Controller
                     preg_match('/type=["\']([^"\']+)["\']/i', $originalTag, $typeAttr);
                     $type = strtolower($typeAttr[1] ?? 'text');
 
-                    // Untuk checkbox, tampilkan hanya jika dicentang
                     if ($type === 'checkbox') {
                         $valAttr = [];
                         preg_match('/value=["\']([^"\']+)["\']/i', $originalTag, $valAttr);
                         $tagValue = $valAttr[1] ?? 'on';
-
                         $isChecked = is_array($value) ? in_array($tagValue, $value) : ($value == $tagValue);
 
-                        // Kita cari labelnya
-                        $labelRegex = '/<label[^>]*for=["\']' . preg_quote($matches[0], '/') . '[^>]*>(.*?)<\/label>/is';
-                        $labelForId = [];
-                        preg_match('/id=["\']([^"\']+)["\']/i', $originalTag, $labelForId);
-                        if (! empty($labelForId)) {
-                            $labelRegex = '/<label[^>]*for=["\']' . $labelForId[1] . '["\'][^>]*>(.*?)<\/label>/is';
-                            preg_match($labelRegex, $GLOBALS['formSource'] ?? '', $labelMatch);
+                        if ($isChecked) {
+                            // Coba cari label yang berasosiasi dengan checkbox ini
+                            $labelForId = [];
+                            preg_match('/id=["\']([^"\']+)["\']/i', $originalTag, $labelForId);
+                            $labelText = $tagValue; // Fallback ke value
+                            if (!empty($labelForId[1])) {
+                                $labelRegex = '/<label[^>]*for=["\']' . preg_quote($labelForId[1], '/') . '["\'][^>]*>(.*?)<\/label>/is';
+                                if (preg_match($labelRegex, $GLOBALS['formSource'], $labelMatch)) {
+                                    $labelText = strip_tags($labelMatch[1]);
+                                }
+                            }
+                            return '<p class="form-control-plaintext mb-0">☑ ' . htmlspecialchars($labelText) . '</p>';
                         }
-
-                        $labelText = $labelMatch[1] ?? 'Setuju';
-
-                        return $isChecked ? '<p class="form-control-plaintext mb-0">☑ ' . strip_tags($labelText) . '</p>' : '';
+                        return ''; // Jangan tampilkan apa-apa jika tidak di-check
                     }
 
-                    // Untuk radio, tampilkan labelnya jika terpilih
                     if ($type === 'radio') {
-                        // Implementasi jika diperlukan, mirip checkbox
+                        $valAttr = [];
+                        preg_match('/value=["\']([^"\']+)["\']/i', $originalTag, $valAttr);
+                        $tagValue = $valAttr[1] ?? 'on';
+                        if ($value == $tagValue) {
+                            // Coba cari labelnya
+                            $labelForId = [];
+                            preg_match('/id=["\']([^"\']+)["\']/i', $originalTag, $labelForId);
+                            $labelText = $tagValue;
+                            if (!empty($labelForId[1])) {
+                                $labelRegex = '/<label[^>]*for=["\']' . preg_quote($labelForId[1], '/') . '["\'][^>]*>(.*?)<\/label>/is';
+                                if (preg_match($labelRegex, $GLOBALS['formSource'], $labelMatch)) {
+                                    $labelText = strip_tags($labelMatch[1]);
+                                }
+                            }
+                            return '<p class="form-control-plaintext mb-0">◉ ' . htmlspecialchars($labelText) . '</p>';
+                        }
+                        return '';
                     }
 
-                    // Untuk elemen lain, tampilkan sebagai teks biasa
-                    $displayValue = is_array($value) ? implode(', ', $value) : $value;
+                    if ($tag === 'select') {
+                        // Cari teks dari option yang terpilih
+                        $optionRegex = '/<option[^>]*value=["\']' . preg_quote($value, '/') . '["\'][^>]*>(.*?)<\/option>/is';
+                        if (preg_match($optionRegex, $originalTag, $optionMatch)) {
+                            return htmlspecialchars(strip_tags($optionMatch[1]));
+                        }
+                        return htmlspecialchars($value);
+                    }
 
-                    return nl2br(htmlspecialchars($displayValue));
+                    $displayValue = is_array($value) ? implode(', ', $value) : $value;
+                    return '<p class="form-control-plaintext">' . nl2br(htmlspecialchars($displayValue)) . '</p>';
                 }
 
-                // --- Jika dalam mode EDIT, isi atributnya (Kode ini sudah benar) ---
+                // --- Jika dalam mode EDIT, isi atributnya ---
                 if ($tag === 'textarea') {
                     return '<textarea' . $beforeName . "name='$name'" . $afterName . '>' . htmlspecialchars($value ?? '') . '</textarea>';
                 }
+
                 if ($tag === 'input') {
                     if (preg_match('/type=["\'](checkbox|radio)["\']/i', $originalTag)) {
                         $valAttr = [];
@@ -410,32 +451,35 @@ class PoliklinikController extends Controller
                 return $originalTag;
             }, $formSource);
 
-            // Simpan hasil proses ke variabel global sementara untuk diakses di callback berikutnya
-            $GLOBALS['formSource'] = $formSource;
 
             // [DISEMPURNAKAN] Isi ulang untuk <select>
             if ($isEditMode) {
-                $formSource = preg_replace_callback('/<option([^>]*)value=(["\'])(.*?)\2([^>]*)>/i', function ($matches) use ($formValues) {
-                    $optionValue = $matches[3];
-                    foreach ($formValues as $key => $savedValue) {
-                        if ($savedValue == $optionValue) {
-                            return '<option' . $matches[1] . 'value="' . $optionValue . '"' . $matches[4] . ' selected>';
-                        }
-                    }
+                $formSource = preg_replace_callback('/<select([^>]*)name=["\']([^"\']+)["\'](.*?)<\/select>/is', function ($matches) use ($formValues) {
+                    $selectTag = $matches[0];
+                    $selectName = $matches[2];
+                    $selectedValue = $formValues[$selectName] ?? null;
 
-                    return $matches[0];
+                    if ($selectedValue !== null) {
+                        $selectTag = preg_replace_callback('/<option([^>]*)value=(["\'])(.*?)\2([^>]*)>/i', function ($optionMatches) use ($selectedValue) {
+                            $optionValue = $optionMatches[3];
+                            if ($optionValue == $selectedValue) {
+                                return '<option' . $optionMatches[1] . 'value="' . $optionValue . '"' . $optionMatches[4] . ' selected>';
+                            }
+                            return $optionMatches[0];
+                        }, $selectTag);
+                    }
+                    return $selectTag;
                 }, $formSource);
             } else {
-                // Jika mode lihat, hapus tag select dan option, karena valuenya sudah ditampilkan
                 $formSource = preg_replace('/<\/?select[^>]*>/i', '', $formSource);
                 $formSource = preg_replace('/<\/?option[^>]*>/i', '', $formSource);
             }
 
+
             // Hapus variabel global
             unset($GLOBALS['formSource']);
-
             // =========================================================================
-            // 7. Render View
+            // 7. Render View - LOGIKA ASLI TETAP SAMA
             // =========================================================================
             return view('pages.simrs.poliklinik.pengkajian_lanjutan.show', [
                 'pengkajian' => $pengkajian,
