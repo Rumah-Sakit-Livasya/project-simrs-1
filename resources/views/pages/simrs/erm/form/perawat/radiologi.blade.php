@@ -39,104 +39,9 @@
                     </h2>
                 </div>
                 <div>
-                    <div class="row">
-                        <div class="col-xl-12">
-                            <div id="panel-1" class="panel">
-                                <div class="panel-container show">
-                                    <div class="panel-content">
-                                        <!-- datatable start -->
-                                        <table id="dt-basic-example"
-                                            class="table table-bordered table-hover table-striped w-100">
-                                            <thead class="bg-primary-600">
-                                                <tr>
-                                                    <th>#</th>
-                                                    <th>Detail</th>
-                                                    <th>Tanggal</th>
-                                                    <th>No. Registrasi</th>
-                                                    <th>No. Order</th>
-                                                    <th>Poly / Ruang</th>
-                                                    <th>Penjamin</th>
-                                                    <th>Dokter</th>
-                                                    <th>Status Isi Hasil</th>
-                                                    <th>Status Billed</th>
-                                                    <th>Action</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                @foreach ($radiologiOrders as $order)
-                                                    <tr>
-                                                        <td>{{ $loop->iteration }}</td>
-                                                        <td>
-                                                            <button type="button" class="btn btn-sm btn-primary"
-                                                                data-bs-placement="top" data-bs-toggle="popover"
-                                                                data-bs-title="Detail Order Radiologi" data-bs-html="true"
-                                                                data-bs-content-id="popover-content-{{ $order->id }}">
-                                                                <i class="fas fa-list text-light"
-                                                                    style="transform: scale(1.8)"></i>
-                                                            </button>
-                                                            <div class="display-none"
-                                                                id="popover-content-{{ $order->id }}">
-                                                                @include(
-                                                                    'pages.simrs.pendaftaran.partials.detail-order-radiologi',
-                                                                    ['order' => $order]
-                                                                )
-                                                            </div>
-                                                        </td>
-                                                        <td>
-                                                            {{ $order->order_date }}
-                                                        </td>
-                                                        <td>
-                                                            {{ $order->registration->id }}
-                                                        </td>
-                                                        <td>
-                                                            {{ $order->no_order }}
-                                                        </td>
-                                                        <td>
-                                                            {{ $order->registration->poliklinik }}
-                                                        </td>
-                                                        <td>
-                                                            {{ $order->registration->patient->penjamin->name ?? '-' }}
-                                                        </td>
-                                                        <td>
-                                                            {{ $order->doctor->employee->fullname }}
-                                                        </td>
-                                                        <td>
-                                                            {{ $order->status_isi_hasil == 1 ? 'Finished' : 'Ongoing' }}
-                                                        </td>
-                                                        <td>
-                                                            {{ $order->status_billed == 1 ? 'Billed' : 'Not Billed' }}
-                                                        </td>
-                                                        <td> - </td>
-                                                    </tr>
-                                                @endforeach
-                                            </tbody>
-                                            <tfoot>
-                                                <tr>
-                                                    <th>#</th>
-                                                    <th>Detail</th>
-                                                    <th>Tanggal</th>
-                                                    <th>No. Registrasi</th>
-                                                    <th>No. Order</th>
-                                                    <th>Poly / Ruang</th>
-                                                    <th>Penjamin</th>
-                                                    <th>Dokter</th>
-                                                    <th>Status Isi Hasil</th>
-                                                    <th>Status Billed</th>
-                                                    <th>Action</th>
-                                                </tr>
-                                            </tfoot>
-                                        </table>
-                                        <!-- datatable end -->
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
+                    @include('pages.simrs.radiologi.partials.list-order-datatable')
                 </div>
                 @include('pages.simrs.pendaftaran.partials.order-radiologi')
-
-
             </div>
         </div>
     @endif
@@ -154,6 +59,61 @@
     @yield('script-radiologi')
 
     <script>
+        $(document).ready(function() {
+            // Event listener untuk tombol delete
+            $('#dt-basic-example tbody').on('click', '.delete-btn', function() {
+                var orderId = $(this).data('id');
+                var row = $(this).closest('tr'); // Ambil elemen <tr> dari baris yang akan dihapus
+
+                // Tampilkan konfirmasi menggunakan SweetAlert
+                Swal.fire({
+                    title: 'Apakah Anda yakin?',
+                    text: "Order ini akan dihapus secara permanen!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Ya, hapus!',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Jika user mengonfirmasi, kirim request AJAX
+                        $.ajax({
+                            url: `/simrs/radiologi/order/${orderId}`,
+                            type: 'DELETE',
+                            headers: {
+                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                            },
+                            success: function(response) {
+                                // Hanya tampilkan pesan sweetalert2 berdasarkan response
+                                if (response.success) {
+                                    Swal.fire(
+                                        'Sukses',
+                                        'Order Radiologi dan tagihan terkait berhasil dihapus.',
+                                        'success'
+                                    );
+                                } else {
+                                    Swal.fire(
+                                        'Gagal!',
+                                        response.message ||
+                                        'Gagal menghapus Order Radiologi.',
+                                        'error'
+                                    );
+                                }
+                            },
+                            error: function(xhr, status, error) {
+                                Swal.fire(
+                                    'Error!',
+                                    'Tidak dapat menghubungi server. Coba lagi nanti.',
+                                    'error'
+                                );
+                            }
+                        });
+                    }
+                });
+            });
+        });
+
         let listPopoverRadiologi = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'))
         listPopoverRadiologi.map((el) => {
             let opts = {

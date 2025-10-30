@@ -1842,17 +1842,17 @@ class ERMController extends Controller
                 $patient = $registration->patient;
                 $groupPenjaminId = GroupPenjamin::where('id', $registration->penjamin->group_penjamin_id)->first()->id;
 
-                $radiologiOrders = [];
+                $orders = [];
                 OrderRadiologi::where('registration_id', $registration->id)
                     ->get()
-                    ->each(function ($order) use (&$radiologiOrders) {
-                        $radiologiOrders[$order->id] = $order;
+                    ->each(function ($order) use (&$orders) {
+                        $orders[$order->id] = $order;
                     });
                 $radiology_categories = KategoriRadiologi::all();
                 $radiology_tarifs = TarifParameterRadiologi::all();
                 $kelas_rawats = KelasRawat::all();
 
-                return view('pages.simrs.erm.form.perawat.radiologi', compact('kelas_rawats', 'groupPenjaminId', 'patient', 'radiology_categories', 'radiology_tarifs', 'radiologiOrders', 'radiologyDoctors', 'pengkajian', 'registration', 'registrations', 'menu', 'departements', 'jadwal_dokter', 'path'));
+                return view('pages.simrs.erm.form.perawat.radiologi', compact('kelas_rawats', 'groupPenjaminId', 'patient', 'radiology_categories', 'radiology_tarifs', 'orders', 'radiologyDoctors', 'pengkajian', 'registration', 'registrations', 'menu', 'departements', 'jadwal_dokter', 'path'));
 
             case 'infusion_monitor':
                 return view('pages.simrs.erm.form.perawat.infusion-monitor', compact('registration', 'registrations', 'menu', 'departements', 'jadwal_dokter', 'path'));
