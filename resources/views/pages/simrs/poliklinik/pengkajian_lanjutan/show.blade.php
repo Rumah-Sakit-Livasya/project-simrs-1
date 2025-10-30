@@ -150,6 +150,7 @@
     {{-- Plugin hanya dibutuhkan dalam mode edit --}}
     @if ($isEditMode)
         <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/painterro@1.2.78/build/painterro.min.js"></script>
         <script type="text/javascript">
             // FUNGSI GLOBAL UNTUK DIPANGGIL OLEH POPUP
             window.updateSignature = function(inputTargetId, previewTargetId, dataUrl) {
