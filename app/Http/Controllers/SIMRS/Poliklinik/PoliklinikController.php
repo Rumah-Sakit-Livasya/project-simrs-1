@@ -115,6 +115,7 @@ class PoliklinikController extends Controller
                 'alamat_pasien' => $registration->patient->address ?? '',
                 'dpjp' => $registration->doctor->employee->fullname ?? '',
                 'no_hp_pasien' => $registration->patient->mobile_phone_number ?? '',
+                'nik_pasien' => $registration->patient->id_card ?? '',
                 'tgl_sekarang' => Carbon::now()->format('d-m-Y') ?? '',
                 'pegawai' => auth()->user()?->employee?->fullname ?? '',
             ];
@@ -266,6 +267,7 @@ class PoliklinikController extends Controller
                 'alamat_pasien' => $registration->patient->address ?? '',
                 'dpjp' => $registration->doctor->employee->fullname ?? '',
                 'no_hp_pasien' => $registration->patient->mobile_phone_number ?? '',
+                'nik_pasien' => $registration->patient->id_card ?? '',
                 'tgl_sekarang' => $pengkajian->created_at->format('d-m-Y') ?? '',
                 'pegawai' => auth()->user()?->employee?->fullname ?? '',
             ];
