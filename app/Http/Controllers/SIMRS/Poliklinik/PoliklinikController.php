@@ -264,6 +264,7 @@ class PoliklinikController extends Controller
                 'dpjp' => $registration->doctor->employee->fullname ?? '',
                 'no_hp_pasien' => $registration->patient->mobile_phone_number ?? '',
                 'tgl_sekarang' => $pengkajian->created_at->format('d-m-Y') ?? '',
+                'pegawai' => auth()->user()?->employee?->fullname ?? '',
             ];
 
             // Ganti placeholder dengan regex agar lebih fleksibel
