@@ -1,4 +1,8 @@
 @extends('inc.layout-no-side') {{-- Sesuaikan dengan layout Anda --}}
+@section('extended-css')
+    {{-- [BARU] Tambahkan CSS untuk Flatpickr di sini --}}
+    <link rel="stylesheet" href="/css/flatpickr.min.css">
+@endsection
 @section('content')
     <form id="create-new-form" method="POST">
         @csrf
@@ -30,6 +34,7 @@
     <script src="/js/formplugins/select2/select2.bundle.js"></script>
     <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
     <script src="/js/datagrid/datatables/datatables.export.js"></script>
+    <script src="/js/flatpickr.js"></script>
 
     <script type="text/javascript">
         // FUNGSI GLOBAL UNTUK DIPANGGIL OLEH POPUP
@@ -49,6 +54,35 @@
 
     <script script type="text/javascript">
         $(document).ready(function() {
+
+            // Inisialisasi Flatpickr pada semua input dengan kelas .datetimepicker
+            // Inisialisasi Flatpickr untuk input tanggal & waktu dengan bahasa Indonesia
+            flatpickr(".datetimepicker", {
+                enableTime: true, // Aktifkan pemilihan waktu
+                dateFormat: "d-m-Y H:i", // Format tampilan input (misal: 20-10-2025 14:30)
+                time_24hr: true, // Format waktu 24 jam
+                altInput: true, // Tampilkan format yang lebih mudah dibaca
+                altFormat: "j F Y, H:i", // Format ramah pengguna (misal: 20 Oktober 2025, 14:30)
+                locale: "id", // Bahasa Indonesia
+            });
+
+            // Untuk input tanggal saja (.datepicker) dengan bahasa Indonesia
+            flatpickr(".datepicker", {
+                dateFormat: "d-m-Y",
+                altInput: true,
+                altFormat: "j F Y",
+                locale: "id",
+            });
+
+            // Untuk input waktu saja (.timepicker) dengan bahasa Indonesia
+            flatpickr(".timepicker", {
+                enableTime: true,
+                noCalendar: true, // Hanya tampilkan waktu tanpa tanggal
+                dateFormat: "H:i",
+                time_24hr: true,
+                locale: "id",
+            });
+
             $('.datepicker').datepicker({
                 format: 'yyyy-mm-dd',
                 autoclose: true,
