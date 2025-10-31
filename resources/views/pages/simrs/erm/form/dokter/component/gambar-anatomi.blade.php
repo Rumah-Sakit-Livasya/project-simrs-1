@@ -1,6 +1,6 @@
 @php
     $isKlinikBedah =
-        isset($registration->department) && Str::of($registration->department->name)->lower()->contains('bedah');
+        isset($registration->departement) && Str::of($registration->departement->name)->lower()->contains('bedah');
 @endphp
 <h4 class="{{ !$isKlinikBedah ? 'd-none' : '' }} text-primary mt-4 font-weight-bold">
     V. LOKALISASI (GAMBAR ANATOMI)
