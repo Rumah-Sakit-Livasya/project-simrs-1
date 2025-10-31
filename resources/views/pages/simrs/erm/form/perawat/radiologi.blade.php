@@ -85,28 +85,39 @@
                                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                             },
                             success: function(response) {
-                                // Hanya tampilkan pesan sweetalert2 berdasarkan response
                                 if (response.success) {
-                                    Swal.fire(
-                                        'Sukses',
-                                        'Order Radiologi dan tagihan terkait berhasil dihapus.',
-                                        'success'
-                                    );
+                                    Swal.fire({
+                                        title: 'Sukses',
+                                        text: 'Order Radiologi dan tagihan terkait berhasil dihapus.',
+                                        icon: 'success',
+                                        timer: 1500,
+                                        showConfirmButton: false,
+                                    }).then(() => {
+                                        location.reload();
+                                    });
                                 } else {
-                                    Swal.fire(
-                                        'Gagal!',
-                                        response.message ||
-                                        'Gagal menghapus Order Radiologi.',
-                                        'error'
-                                    );
+                                    Swal.fire({
+                                        title: 'Gagal!',
+                                        text: response.message ||
+                                            'Gagal menghapus Order Radiologi.',
+                                        icon: 'error',
+                                        timer: 1500,
+                                        showConfirmButton: false,
+                                    }).then(() => {
+                                        location.reload();
+                                    });
                                 }
                             },
                             error: function(xhr, status, error) {
-                                Swal.fire(
-                                    'Error!',
-                                    'Tidak dapat menghubungi server. Coba lagi nanti.',
-                                    'error'
-                                );
+                                Swal.fire({
+                                    title: 'Error!',
+                                    text: 'Tidak dapat menghubungi server. Coba lagi nanti.',
+                                    icon: 'error',
+                                    timer: 1500,
+                                    showConfirmButton: false,
+                                }).then(() => {
+                                    location.reload();
+                                });
                             }
                         });
                     }
