@@ -200,6 +200,7 @@
             type="text" name="pengkajian_khusus_neonatus[intranatal][dibantu_oleh]" class="form-control"
             value="{{ $pengkajianKhusus['intranatal']['dibantu_oleh'] ?? '' }}"></div>
 </div>
+
 @include('pages.simrs.erm.form.perawat.component.skor-apgar', [
     'data' => $pengkajianKhusus['intranatal']['apgar'] ?? [],
 ])

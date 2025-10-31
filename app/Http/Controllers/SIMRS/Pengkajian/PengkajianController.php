@@ -309,29 +309,28 @@ class PengkajianController extends Controller
 
         DB::beginTransaction();
         try {
-            // Lakukan penghapusan data.
-            // Jika Anda menggunakan SoftDeletes pada model, ini akan mengisi kolom 'deleted_at'.
-            // Jika tidak, ini akan menghapus permanen dari database.
             $pengkajianLanjutan->delete();
-
-            // Commit transaksi jika berhasil.
             DB::commit();
-
-            // Berikan respons sukses.
             return response()->json([
-                'message' => 'Data pengkajian berhasil dihapus.'
+                'swal' => [
+                    'icon' => 'success',
+                    'title' => 'Berhasil',
+                    'text' => 'Data pengkajian berhasil dihapus.',
+                    'showConfirmButton' => false,
+                    'timer' => 2000
+                ]
             ], 200);
         } catch (Exception $e) {
-            // Rollback transaksi jika terjadi error.
             DB::rollBack();
-
-            // Catat error untuk debugging.
             Log::error('Gagal menghapus Pengkajian Lanjutan ID ' . $pengkajianLanjutan->id . ': ' . $e->getMessage());
-
-            // Berikan respons error ke frontend.
             return response()->json([
-                'error' => 'Gagal Menghapus',
-                'message' => 'Terjadi kesalahan saat mencoba menghapus data. Silakan coba lagi.'
+                'swal' => [
+                    'icon' => 'error',
+                    'title' => 'Gagal',
+                    'text' => 'Terjadi kesalahan saat mencoba menghapus data. Silakan coba lagi.',
+                    'showConfirmButton' => false,
+                    'timer' => 2000
+                ]
             ], 500);
         }
     }
