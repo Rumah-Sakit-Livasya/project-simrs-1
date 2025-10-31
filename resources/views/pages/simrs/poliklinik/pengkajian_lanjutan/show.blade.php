@@ -167,6 +167,7 @@
             };
 
             $(document).ready(function() {
+
                 // Event listener untuk membuka popup tanda tangan
                 $('body').on('click', '.open-signature-popup', function() {
                     const inputTarget = $(this).data('input-target');
