@@ -188,11 +188,13 @@ class PoliklinikController extends Controller
      */
     public function editFilledForm(PengkajianLanjutan $pengkajianLanjutan)
     {
+
         // Aturan Bisnis: Jangan izinkan edit jika form sudah difinalisasi.
         if ($pengkajianLanjutan->is_final) {
             // Redirect kembali ke halaman sebelumnya dengan pesan error.
             return back()->with('error', 'Form yang sudah difinalisasi tidak dapat diubah lagi.');
         }
+        dd($pengkajianLanjutan);
 
         // Panggil helper method dengan flag isEditMode = true
         return $this->prepareAndShowForm($pengkajianLanjutan, true);

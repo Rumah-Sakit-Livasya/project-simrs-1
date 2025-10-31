@@ -20,6 +20,7 @@
                 @include('pages.simrs.erm.form.perawat.component.asesmen-neonatus-info-masuk', [
                     'data' => $data,
                 ])
+
                 @include('pages.simrs.erm.form.perawat.component.asesmen-neonatus-riwayat', [
                     'data' => $data,
                 ])

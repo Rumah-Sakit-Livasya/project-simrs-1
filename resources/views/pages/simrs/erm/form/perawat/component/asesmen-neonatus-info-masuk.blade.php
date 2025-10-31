@@ -13,7 +13,7 @@
         </div>
     </div>
 </div>
-<div class="form-group">
+<div class="form-group mt-3">
     <label class="font-weight-bold">Cara Masuk Ruangan</label>
     <div class="d-flex flex-wrap">
         @foreach (['Poliklinik', 'UGD', 'Dokter Pribadi'] as $cara)
