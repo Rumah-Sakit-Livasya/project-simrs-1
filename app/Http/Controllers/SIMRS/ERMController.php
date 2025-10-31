@@ -1543,7 +1543,14 @@ class ERMController extends Controller
                 }
 
                 $perawat = Employee::whereHas('organization', function ($query) {
-                    $query->where('name', 'Rawat Jalan');
+                    $query->whereIn('name', [
+                        'Rawat Jalan',
+                        'Rawat Inap',
+                        'Perinatologi',
+                        'VK & PONEK',
+                        'IGD',
+                        'OK',
+                    ]);
                 })->get();
                 $pengkajian = CPPT::firstWhere('registration_id', $registration->id);
                 // dd($data);
@@ -2055,7 +2062,14 @@ class ERMController extends Controller
                 }
 
                 $perawat = Employee::whereHas('organization', function ($query) {
-                    $query->where('name', 'Rawat Jalan');
+                    $query->whereIn('name', [
+                        'Rawat Jalan',
+                        'Rawat Inap',
+                        'Perinatologi',
+                        'VK & PONEK',
+                        'IGD',
+                        'OK',
+                    ]);
                 })->get();
                 $pengkajian = CPPT::firstWhere('registration_id', $registration->id);
                 // dd($data);
