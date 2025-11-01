@@ -69,5 +69,6 @@
 @endsection
 
 @push('scripts')
+    @include('pages.simrs.erm.partials.action-js.asesmen-neonatus-js')
     @include('pages.simrs.erm.form.dokter.component.js.neonatus-js')
 @endpush
