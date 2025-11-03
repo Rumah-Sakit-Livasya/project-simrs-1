@@ -14,6 +14,8 @@ use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\ChecklistHarianCategoryController;
 use App\Http\Controllers\ChecklistHarianController;
 use App\Http\Controllers\DailyWasteInputController;
+use App\Http\Controllers\EducationalBackgroundController;
+use App\Http\Controllers\EmployeeDashboardController;
 use App\Http\Controllers\EmployeePageController;
 use App\Http\Controllers\InternalVehiclePageController;
 use App\Http\Controllers\KunjunganPageController;
@@ -27,6 +29,8 @@ use App\Http\Controllers\PayrollController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectInternalController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\SipController;
+use App\Http\Controllers\StrController;
 use App\Http\Controllers\SurveiKebersihanKamarController;
 use App\Http\Controllers\SwitchUserController;
 use App\Http\Controllers\TeamController;
@@ -149,6 +153,36 @@ Route::middleware([LastSeenUser::class])->group(function () {
             Route::get('/team/search', [TeamController::class, 'search'])->name('team.search');
             Route::get('/export', [EmployeeController::class, 'export'])->name('employees.export');
             Route::get('/{employee}/edit', [EmployeePageController::class, 'edit'])->name('employees.edit');
+            // Route untuk Background Pendidikan
+            Route::resource('educational-background', EducationalBackgroundController::class)->except(['show', 'create']);
+            Route::get('educational-background/template', [EducationalBackgroundController::class, 'downloadTemplate'])->name('educational-background.template');
+            Route::post('educational-background/import', [EducationalBackgroundController::class, 'import'])->name('educational-background.import');
+
+            // Route untuk SIP
+            Route::prefix('sip')->name('sip.')->group(function () {
+                Route::get('data', [SipController::class, 'data'])->name('data');
+                Route::get('export', [SipController::class, 'export'])->name('export');
+                Route::get('template', [SipController::class, 'downloadTemplate'])->name('template');
+                Route::post('import', [SipController::class, 'import'])->name('import');
+            });
+            Route::resource('sip', SipController::class)->except(['show', 'create']);
+
+            // Route untuk STR
+            Route::prefix('str')->name('str.')->group(function () {
+                Route::get('data', [StrController::class, 'data'])->name('data');
+                Route::get('export', [StrController::class, 'export'])->name('export');
+                Route::get('template', [StrController::class, 'downloadTemplate'])->name('template');
+                Route::post('import', [StrController::class, 'import'])->name('import');
+            });
+            Route::resource('str', StrController::class)->except(['show', 'create']);
+
+            // Route untuk Dashboard
+            Route::get('/dashboard', [EmployeeDashboardController::class, 'index'])->name('dashboard'); // Asumsi dashboard sebagai halaman utama
+            Route::prefix('dashboard')->name('dashboard.')->group(function () {
+                Route::get('stats', [EmployeeDashboardController::class, 'stats'])->name('stats');
+                Route::get('sip-notifications', [EmployeeDashboardController::class, 'sipNotifications'])->name('sip-notifications');
+                Route::get('str-notifications', [EmployeeDashboardController::class, 'strNotifications'])->name('str-notifications');
+            });
         });
         /* END PEGAWAI ----------------------------------------------------------------------------*/
 

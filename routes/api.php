@@ -57,6 +57,7 @@ use App\Http\Controllers\API\VehicleServiceController;
 use App\Http\Controllers\API\WorkshopVendorController;
 use App\Http\Controllers\Api\WasteTransportController;
 use App\Http\Controllers\Api\WebhookController;
+use App\Http\Controllers\EducationalBackgroundController;
 use App\Http\Controllers\LaporanInternalController;
 use App\Http\Controllers\WhatsappController;
 
@@ -293,6 +294,9 @@ Route::middleware(['web', 'auth'])->prefix('dashboard')->group(function () {
         Route::put('/update/{id}', [BankEmployeeController::class, 'update']);
         Route::get('/get/{id}', [BankEmployeeController::class, 'getBankEmployee']);
         Route::get('/delete/{id}', [BankEmployeeController::class, 'destroy']);
+    });
+    Route::prefix('employees')->group(function () {
+        Route::get('educational-background', [EducationalBackgroundController::class, 'data'])->name('educational-background.data');
     });
     Route::prefix('structures')->group(function () {
         Route::post('/store', [StructureController::class, 'store']);

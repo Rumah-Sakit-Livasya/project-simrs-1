@@ -7,6 +7,7 @@ use App\Models\SIMRS\Doctor;
 use App\Models\SIMRS\Registration;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Employee extends Model
 {
@@ -154,5 +155,21 @@ class Employee extends Model
     public function documents()
     {
         return $this->hasMany(UploadFile::class);
+    }
+
+    public function educationalBackground()
+    {
+        return $this->hasOne(EducationalBackground::class);
+    }
+
+    // TAMBAHKAN RELASI INI:
+    public function sips(): HasOne
+    {
+        return $this->hasOne(Sip::class);
+    }
+
+    public function strs(): HasOne
+    {
+        return $this->hasOne(Str::class);
     }
 }
