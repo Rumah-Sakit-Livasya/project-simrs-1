@@ -182,6 +182,9 @@ Route::middleware([LastSeenUser::class])->group(function () {
                 Route::get('stats', [EmployeeDashboardController::class, 'stats'])->name('stats');
                 Route::get('sip-notifications', [EmployeeDashboardController::class, 'sipNotifications'])->name('sip-notifications');
                 Route::get('str-notifications', [EmployeeDashboardController::class, 'strNotifications'])->name('str-notifications');
+                // TAMBAHKAN DUA ROUTE INI
+                Route::get('contract-notifications', [EmployeeDashboardController::class, 'contractNotifications'])->name('contract-notifications');
+                Route::get('birthday-notifications', [EmployeeDashboardController::class, 'birthdayNotifications'])->name('birthday-notifications');
             });
         });
         /* END PEGAWAI ----------------------------------------------------------------------------*/
