@@ -137,30 +137,6 @@
         </div>
 
         <div class="row">
-            <!-- Tabel STR -->
-            <div class="col-xl-12">
-                <div id="panel-str" class="panel">
-                    <div class="panel-hdr">
-                        <h2><i class="fal fa-id-card-alt mr-2"></i> Notifikasi <span class="fw-300"><i>Surat Tanda
-                                    Registrasi (STR)</i></span></h2>
-                    </div>
-                    <div class="panel-container show">
-                        <div class="panel-content">
-                            <table id="dt-str" class="table table-bordered table-hover table-striped w-100">
-                                <thead class="bg-primary-600">
-                                    <tr>
-                                        <th>Nama Pegawai</th>
-                                        <th>Nomor STR</th>
-                                        <th>Masa Berlaku</th>
-                                        <th>Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
             <!-- Tabel SIP -->
             <div class="col-xl-12">
                 <div id="panel-sip" class="panel">
@@ -175,6 +151,31 @@
                                     <tr>
                                         <th>Nama Pegawai</th>
                                         <th>Nomor SIP</th>
+                                        <th>Masa Berlaku</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabel STR -->
+            <div class="col-xl-12">
+                <div id="panel-str" class="panel">
+                    <div class="panel-hdr">
+                        <h2><i class="fal fa-id-card-alt mr-2"></i> Notifikasi <span class="fw-300"><i>Surat Tanda
+                                    Registrasi (STR)</i></span></h2>
+                    </div>
+                    <div class="panel-container show">
+                        <div class="panel-content">
+                            <table id="dt-str" class="table table-bordered table-hover table-striped w-100">
+                                <thead class="bg-primary-600">
+                                    <tr>
+                                        <th>Nama Pegawai</th>
+                                        <th>Nomor STR</th>
                                         <th>Masa Berlaku</th>
                                         <th>Status</th>
                                     </tr>
