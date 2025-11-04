@@ -186,6 +186,11 @@ Route::middleware([LastSeenUser::class])->group(function () {
                 Route::get('contract-notifications', [EmployeeDashboardController::class, 'contractNotifications'])->name('contract-notifications');
                 Route::get('birthday-notifications', [EmployeeDashboardController::class, 'birthdayNotifications'])->name('birthday-notifications');
             });
+
+            // Route untuk aksi perpanjangan kontrak
+            Route::post('/{id}/extend-contract', [EmployeeController::class, 'extendContract'])->name('employees.extend-contract');
+            // Ganti route deactivate yang lama
+            Route::post('/{id}/deactivate', [EmployeeController::class, 'nonAktifPegawai'])->name('employees.deactivate');
         });
         /* END PEGAWAI ----------------------------------------------------------------------------*/
 

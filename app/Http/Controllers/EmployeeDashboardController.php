@@ -138,14 +138,19 @@ class EmployeeDashboardController extends Controller
             ->select([
                 'id',
                 'fullname',
-                'end_status_date as contract_end_date'
+                'end_status_date',
+                \DB::raw("CASE
+                    WHEN LEFT(mobile_phone, 2) = '08'
+                        THEN CONCAT('62', SUBSTRING(mobile_phone, 2))
+                    ELSE mobile_phone
+                END AS mobile_phone")
             ])
             ->orderBy('end_status_date', 'desc');
 
-
         return DataTables::of($query)
+            ->addColumn('contract_end_date', fn($row) => $row->end_status_date)
             ->addColumn('status_kontrak', function ($row) use ($today) {
-                $endDate = Carbon::parse($row->contract_end_date);
+                $endDate = Carbon::parse($row->end_status_date);
                 if ($endDate < $today) {
                     $daysRemaining = $endDate->diffInDays($today);
                     return '<span class="badge badge-danger">Berakhir ' . $daysRemaining . ' hari lalu</span>';
