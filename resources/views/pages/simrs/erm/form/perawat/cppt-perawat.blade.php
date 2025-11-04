@@ -51,17 +51,11 @@
                                                         name="perawat_id" id="perawat_id">
                                                         <option value=""></option>
                                                         @foreach ($perawat as $item)
-                                                            @if ($item->user)
-                                                                <option value="{{ $item->user->id }}"
-                                                                    {{ auth()->user()->id == $item->user->id ? 'selected' : '' }}>
-                                                                    {{ $item->fullname }}
-                                                                </option>
-                                                            @else
-                                                                <option value="">{{ $item->fullname }} (User tidak
-                                                                    ditemukan)</option>
-                                                            @endif
+                                                            <option value="{{ $item->user->id }}"
+                                                                {{ auth()->user()->id == $item->user->id ? 'selected' : '' }}>
+                                                                {{ $item->fullname }}
+                                                            </option>
                                                         @endforeach
-
                                                     </select>
                                                 </div>
                                             </div>
@@ -71,32 +65,13 @@
                                                 <!-- Subjective -->
                                                 <div class="col-md-6">
                                                     <div class="card mt-3">
-                                                        <div class="card-header text-white d-flex justify-content-between align-items-center"
+                                                        <div class="card-header text-white"
                                                             style="background-color: rgba(0, 123, 255, .2);">
-                                                            <span style="color: rgba(0, 123, 255, 1)">Subjective</span>
-                                                            <div>
-                                                                <button type="button" id="btn_subjective_awal"
-                                                                    class="btn btn-sm"
-                                                                    style="background-color: rgba(128, 0, 128, 1); color: white;">Subjective
-                                                                    Awal</button>
-                                                            </div>
+                                                            <span @style('color: rgba(0, 123, 255, 1);')>Subjective</span>
                                                         </div>
                                                         <div class="card-body p-0">
                                                             <textarea class="form-control border-0 rounded-0" id="subjective" name="subjective" rows="8"
-                                                                placeholder="Keluhan Utama">
-@if (isset($registration) && $registration->registration_type === 'rawat-inap')
-Keluhan Utama: {{ $data?->keluhan_utama ?? '' }}
-@else
-Keluhan Utama: {{ $data?->keluhan_utama ?? '' }}
-Skor Nyeri: {{ $data?->skor_nyeri ?? '' }}
-Dokter Pemeriksa: {{ $data?->doctor?->employee?->fullname ?? '' }}
-Tanggal Pemeriksaan: {{ isset($data?->created_at) ? ($data->created_at instanceof \Illuminate\Support\Carbon ? $data->created_at->format('d/m/Y H:i') : (is_string($data->created_at) ? \Illuminate\Support\Carbon::parse($data->created_at)->format('d/m/Y H:i') : '')) : '' }}
-Riwayat Alergi: {{ isset($data) && property_exists($data, 'allergy_medicine') ? (is_array($data->allergy_medicine) ? (count($data->allergy_medicine) > 0 ? implode(', ', $data->allergy_medicine) : 'Tidak ada') : ($data->allergy_medicine ?: 'Tidak ada')) : 'Tidak ada' }}
-Riwayat Penyakit Sekarang: {{ $data?->riwayat_penyakit_sekarang ?? '' }}
-Riwayat Penyakit Dahulu: {{ $data?->riwayat_penyakit_dahulu ?? '' }}
-Riwayat Penyakit Keluarga: {{ $data?->riwayat_penyakit_keluarga ?? '' }}
-@endif
-</textarea>
+                                                                placeholder="Keluhan Utama, Riwayat Penyakit, dll.">{{ $subjectiveText }}</textarea>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -104,65 +79,32 @@ Riwayat Penyakit Keluarga: {{ $data?->riwayat_penyakit_keluarga ?? '' }}
                                                 <!-- Objective -->
                                                 <div class="col-md-6">
                                                     <div class="card mt-3">
-                                                        <div class="card-header text-white d-flex justify-content-between align-items-center"
-                                                            style="background-color: rgba(40, 167, 69, .2);">
-                                                            <span style="color: rgb(1, 49, 12);">Objective</span>
-                                                            <div>
-                                                                <button type="button" id="btn_objective_fisik"
-                                                                    class="btn btn-success btn-sm">Objective
-                                                                    Fisik</button>
-                                                                <button type="button" id="btn_objective_fungsional"
-                                                                    class="btn btn-info btn-sm">Objective
-                                                                    Fungsional</button>
-                                                            </div>
+                                                        <div class="card-header text-white"
+                                                            style="background-color: rgba(253, 57, 149, .2);">
+                                                            <span @style('color: rgba(253, 57, 149, 1);')>Objective</span>
                                                         </div>
                                                         <div class="card-body p-0">
-                                                            <textarea class="form-control border-0 rounded-0" id="objective" name="objective" rows="8">Tanda-tanda Vital:
-Nadi (PR): {{ $data?->pr ?? '' }}
-Respirasi (RR): {{ $data?->rr ?? '' }}
-Tensi (BP): {{ $data?->bp ?? '' }}
-Suhu (T): {{ $data?->temperatur ?? '' }}
-Tinggi Badan: {{ $data?->body_height ?? '' }} cm
-Berat Badan: {{ $data?->body_weight ?? '' }} kg
-SPO2: {{ $data?->sp02 ?? '' }}%
-Skor Nyeri: {{ $data?->skor_nyeri ?? '' }}
-Riwayat Alergi: {{ isset($data?->allergy_medicine) ? (is_array($data->allergy_medicine) ? (count($data->allergy_medicine) > 0 ? implode(', ', $data->allergy_medicine) : 'Tidak ada') : ($data->allergy_medicine ?: 'Tidak ada')) : 'Tidak ada' }}
-
-Pemeriksaan Fisik:
-{{ $data?->diagnosis ?? '' }}
-
-Catatan Tambahan:
-{{ $data?->registration_notes ?? '' }}</textarea>
+                                                            <textarea class="form-control border-0 rounded-0" id="objective" name="objective" rows="8"
+                                                                placeholder="Tanda-tanda Vital, dll.">{{ $objectiveText }}</textarea>
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
 
-                                            <!-- Sisanya tidak ada perubahan -->
                                             <!-- Two Column Layout for Assessment and Planning -->
                                             <div class="row">
                                                 <!-- Assessment -->
                                                 <div class="col-md-6">
                                                     <div class="card mt-3">
                                                         <div class="card-header text-white d-flex justify-content-between"
-                                                            style="background-color: rgba(220, 53, 69,.2 );">
-                                                            <span style="color: rgba(220, 53, 69, 1 );">Assessment</span>
+                                                            style="background-color: rgba(220, 53, 69, .2);">
+                                                            <span @style('color: rgba(220, 53, 69, 1);')>Assessment</span>
                                                             <span id="diag_perawat"
                                                                 class="badge badge-warning pointer">Diagnosa
                                                                 Keperawatan</span>
                                                         </div>
                                                         <div class="card-body p-0">
-                                                            <textarea class="form-control border-0 rounded-0" id="assesment" name="assesment" rows="8">{{ 'Diagnosa Kerja:' .
-                                                                "\n" .
-                                                                ($data?->diagnosis ?? '') .
-                                                                "\n\n" .
-                                                                'Diagnosa Keperawatan:' .
-                                                                "\n" .
-                                                                ($data?->diagnosa_keperawatan ?? '') .
-                                                                "\n\n" .
-                                                                'Analisis Masalah:' .
-                                                                "\n" .
-                                                                ($data?->registration_notes ?? '') }}</textarea>
+                                                            <textarea class="form-control border-0 rounded-0" id="assesment" name="assesment" rows="8">{{ $assessmentText }}</textarea>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -172,14 +114,12 @@ Catatan Tambahan:
                                                     <div class="card mt-3">
                                                         <div class="card-header text-white d-flex justify-content-between"
                                                             style="background-color: rgba(255, 193, 7, .2);">
-                                                            <span style="color : rgba(255, 193, 7, 1);">Planning</span>
+                                                            <span @style('color: rgba(255, 193, 7, 1);')>Planning</span>
                                                             <span id="intervensi_perawat"
                                                                 class="badge badge-dark pointer">Intervensi</span>
                                                         </div>
                                                         <div class="card-body p-0">
-                                                            <textarea class="form-control border-0 rounded-0" id="planning" name="planning" rows="8">
-Terapi / Tindakan :
-                                                            </textarea>
+                                                            <textarea class="form-control border-0 rounded-0" id="planning" name="planning" rows="8">{{ $planningText }}</textarea>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -189,29 +129,27 @@ Terapi / Tindakan :
                                                 <!-- Implementation Section -->
                                                 <div class="col-md-6">
                                                     <div class="card mt-3">
-                                                        <div class="card-header text-white d-flex justify-content-between"
-                                                            style="background-color: rgba(108, 117, 125, 0.2);">
-                                                            <span style="color: rgb(31, 32, 33);">Implementasi</span>
+                                                        <div class="card-header text-white"
+                                                            style="background-color: rgba(108, 117, 125, .2);">
+                                                            <span @style('color: rgba(108, 117, 125, 1);')>Implementasi</span>
                                                         </div>
                                                         <div class="card-body p-0">
                                                             <textarea class="form-control border-0 rounded-0" id="implementasi" name="implementasi" rows="8"
-                                                                placeholder="Implementasi">
-                                                            </textarea>
+                                                                placeholder="Implementasi">{{ $implementationText }}</textarea>
                                                         </div>
                                                     </div>
                                                 </div>
+
                                                 <!-- Evaluation Section -->
                                                 <div class="col-md-6">
                                                     <div class="card mt-3">
-                                                        <div class="card-header text-white d-flex justify-content-between"
-                                                            style="background-color: rgba(23, 162, 184, 0.2);">
-                                                            <span
-                                                                style="color: rgba(23, 162, 184, 1);">Evaluasi/Revaluasi</span>
+                                                        <div class="card-header text-white"
+                                                            style="background-color: rgba(23, 162, 184, .2);">
+                                                            <span @style('color: rgba(23, 162, 184, 1);')>Evaluasi/Revaluasi</span>
                                                         </div>
                                                         <div class="card-body p-0">
                                                             <textarea class="form-control border-0 rounded-0" id="evaluasi" name="evaluasi" rows="8"
-                                                                placeholder="Evaluasi">
-                                                            </textarea>
+                                                                placeholder="Evaluasi">{{ $evaluationText }}</textarea>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -220,14 +158,14 @@ Terapi / Tindakan :
                                                 <!-- Instruction Section -->
                                                 <div class="col-md-6">
                                                     <div class="card mt-3">
-                                                        <div class="card-header text-white d-flex justify-content-between"
-                                                            style="background-color: rgba(102, 16, 242, 0.2);">
-                                                            <span style="color: rgb(102, 16, 242);">Instruksi</span>
+                                                        <div class="card-header text-white"
+                                                            style="background-color: rgba(102, 16, 242, .2);">
+                                                            <span @style('color: rgba(102, 16, 242, 1);')>Instruksi</span>
                                                         </div>
                                                         <div class="card-body p-0">
                                                             <textarea class="form-control border-0 rounded-0" id="instruksi" name="instruksi" rows="8"
                                                                 placeholder="Evaluasi">
-                                                            </textarea>
+                                                        </textarea>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -337,81 +275,6 @@ Terapi / Tindakan :
 
     <script>
         $(document).ready(function() {
-            // ======================================================
-            // LOGIKA UNTUK TOMBOL TEMPLATE CPPT
-            // ======================================================
-            const subjectiveAwalTemplate = `Keluhan Utama :
-Riwayat Penyakit Sekarang (RPS) :
-Riwayat Penyakit Dahulu (RPD) :
-Riwayat Penyakit Keluarga :`;
-
-            const objectiveFisikTemplate = `Keadaan Umum :
-Nadi : x/menit
-Respirasi(RR) : x/menit
-Tensi (BP) : mmHg
-Suhu (T) : C
-Berat badan : Kg
-Skor EWS :
-Skor nyeri :
-Saturasi :
-Skor resiko jatuh :
-Primary Survey :
-Airway :
-Breathing :
-Circulation :
-Disability :
-Exposure :`;
-
-            const objectiveFungsionalTemplate = `Kepala :
-Mata :
-Telinga :
-Hidung :
-Mulut:
-Leher:
-Dada :
-Perut :
-Inguinal :
-Genital :
-Extremitas Atas :
-Extremitas Bawah :`;
-
-            // --- Fungsi helper untuk menambahkan teks ke textarea ---
-            function appendToTextarea(textareaId, newText) {
-                const textarea = $(textareaId);
-                const currentVal = textarea.val();
-
-                // Cek jika textarea kosong atau diakhiri dengan baris baru
-                if (currentVal.trim() === '' || currentVal.endsWith('\n')) {
-                    // Langsung tambahkan teks baru
-                    textarea.val(currentVal + newText);
-                } else {
-                    // Tambahkan baris baru dulu, baru teks baru
-                    textarea.val(currentVal + '\n' + newText);
-                }
-            }
-
-            // Event listener untuk tombol 'Subjective Awal'
-            $('#btn_subjective_awal').on('click', function() {
-                // Gunakan fungsi append, jangan replace
-                appendToTextarea('#subjective', subjectiveAwalTemplate);
-            });
-
-            // Event listener untuk tombol 'Objective Fisik'
-            $('#btn_objective_fisik').on('click', function() {
-                // Gunakan fungsi append, jangan replace
-                appendToTextarea('#objective', objectiveFisikTemplate);
-            });
-
-            // Event listener untuk tombol 'Objective Fungsional'
-            $('#btn_objective_fungsional').on('click', function() {
-                // Gunakan fungsi append, jangan replace
-                appendToTextarea('#objective', objectiveFungsionalTemplate);
-            });
-            // ======================================================
-            // AKHIR KODE LOGIKA TEMPLATE
-            // ======================================================
-
-
             function submitFormCPPT(actionType) {
                 const form = $('#cppt-perawat-rajal-form');
                 const registrationNumber = "{{ $registration->registration_number }}";
