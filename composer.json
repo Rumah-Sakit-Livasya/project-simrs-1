@@ -49,7 +49,8 @@
         },
         "files": [
             "app/Helpers/helpers.php",
-            "app/Helpers/RegistrationHelper.php"
+            "app/Helpers/RegistrationHelper.php",
+            "app/Helpers/ErmHelper.php"
         ]
     },
     "scripts": {

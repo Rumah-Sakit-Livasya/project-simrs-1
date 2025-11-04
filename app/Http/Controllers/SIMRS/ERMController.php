@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\SIMRS;
 
+use App\Helpers\ErmHelper;
 use App\Http\Controllers\Controller;
 use App\Models\ChildInitialAssessment;
 use App\Models\DischargePlanning;
@@ -1479,11 +1480,8 @@ class ERMController extends Controller
                 return view('pages.simrs.erm.form.farmasi.pengkajian-resep', compact('registration', 'registrations', 'menu', 'departements', 'jadwal_dokter', 'pengkajian', 'path'));
 
             case 'cppt_perawat':
+                // 1. Ambil data mentah (Logika ini tetap sama)
                 $rawData = null;
-
-                // dd($path);
-
-                // Ambil data sesuai dengan path
                 if ($path === 'igd') {
                     $rawData = Triage::firstWhere('registration_id', $registration->id);
                 } elseif ($path === 'poliklinik') {
@@ -1492,70 +1490,120 @@ class ERMController extends Controller
                     $rawData = InpatientInitialExamination::firstWhere('registration_id', $registration->id);
                 }
 
-                // dd($rawData);
+                // 2. Mapping data mentah ke objek standar menggunakan helper
+                // (Pastikan helper sudah diupdate - lihat di bawah)
+                $data = ErmHelper::mapRawDataToStandardObject($rawData);
 
-                // Generalisasi data ke format yang konsisten
-                $data = null;
-                if ($rawData) {
-                    $data = (object) [];
+                // 3. Ambil data CPPT yang sudah tersimpan
+                $pengkajian = CPPT::firstWhere('registration_id', $registration->id);
 
-                    // Mapping untuk Triage
-                    if ($rawData instanceof \App\Models\SIMRS\Pelayanan\Triage) {
-                        $data->pr = $rawData->pr;
-                        $data->rr = $rawData->rr;
-                        $data->bp = $rawData->bp;
-                        $data->temperatur = $rawData->temperatur;
-                        $data->body_height = $rawData->body_height;
-                        $data->body_weight = $rawData->body_weight;
-                        $data->sp02 = $rawData->sp02;
-                        $data->skor_nyeri = null; // Triage tidak punya skor nyeri
-                        $data->keluhan_utama = null; // Triage tidak punya keluhan utama
-                        $data->diagnosa_keperawatan = null; // Triage tidak punya diagnosa keperawatan
+                // 4. Inisialisasi semua variabel teks
+                $subjectiveText = '';
+                $objectiveText = '';
+                $assessmentText = '';
+                $planningText = '';
+
+                // ====================================================================
+                // PERBAIKAN: Ambil data implementasi & evaluasi dari $pengkajian
+                // ====================================================================
+                $implementationText = $pengkajian?->implementasi ?? '';
+                $evaluationText = $pengkajian?->evaluasi ?? '';
+
+
+                if ($data) {
+                    // --- Membangun Teks SOAP berdasarkan Tipe Registrasi ---
+                    if ($registration->registration_type === 'rawat-inap') {
+                        // Teks untuk Rawat Inap
+                        $subjectiveLines = ['Keluhan Utama: ' . ($data->keluhan_utama ?? '')];
+                        $objectiveLines = [
+                            'Keadaan Umum : ' . ($data->keadaan_umum ?? ''),
+                            'Nadi : ' . ($data->pr ?? '') . ' /menit',
+                            'Respirasi(RR) : ' . ($data->rr ?? '') . ' /menit',
+                            'Tensi (BP) : ' . ($data->bp ?? '') . ' mmHg',
+                            'Suhu (T) : ' . ($data->temperatur ?? '') . ' C',
+                            'Berat badan : ' . ($data->body_weight ?? '') . ' Kg',
+                            'Skor EWS : ' . ($data->skor_ews ?? ''),
+                            'Skor nyeri : ' . ($data->skor_nyeri ?? ''),
+                            'Saturasi : ' . ($data->sp02 ?? ''),
+                            'Skor resiko jatuh : ' . ($data->skor_resiko_jatuh ?? ''),
+                        ];
+                        $assessmentLines = ['Diagnosa Kerja:', ($data->diagnosis ?? '')];
+                        $planningLines = ['Rencana Tindak Lanjut:', ($data->rencana_tindak_lanjut ?? '')];
+                    } else {
+                        // Teks untuk IGD & Poliklinik (default)
+                        $allergyText = 'Tidak ada';
+                        if (!empty($data->allergy_medicine)) {
+                            $allergyText = is_array($data->allergy_medicine) ? implode(', ', $data->allergy_medicine) : $data->allergy_medicine;
+                        }
+                        $inspectionDate = $data->created_at ? \Illuminate\Support\Carbon::parse($data->created_at)->format('d/m/Y H:i') : '';
+
+                        $subjectiveLines = [
+                            'Keluhan Utama: ' . ($data->keluhan_utama ?? ''),
+                            'Skor Nyeri: ' . ($data->skor_nyeri ?? ''),
+                            'Dokter Pemeriksa: ' . ($data->doctor_name ?? ''),
+                            'Tanggal Pemeriksaan: ' . $inspectionDate,
+                            'Riwayat Alergi: ' . $allergyText,
+                            'Riwayat Penyakit Sekarang: ' . ($data->riwayat_penyakit_sekarang ?? ''),
+                            'Riwayat Penyakit Dahulu: ' . ($data->riwayat_penyakit_dahulu ?? ''),
+                            'Riwayat Penyakit Keluarga: ' . ($data->riwayat_penyakit_keluarga ?? ''),
+                        ];
+                        $objectiveLines = [
+                            'TD: ' . ($data->bp ?? '-'),
+                            'HR: ' . ($data->pr ?? '-'),
+                            'RR: ' . ($data->rr ?? '-'),
+                            'Suhu: ' . ($data->temperatur ?? '-'),
+                            'SpO2: ' . ($data->sp02 ?? '-'),
+                            'Tinggi Badan: ' . ($data->body_height ?? '-'),
+                            'Berat Badan: ' . ($data->body_weight ?? '-'),
+                            'Diagnosa Keperawatan: ' . ($data->diagnosa_keperawatan ?? ''),
+                        ];
+                        $assessmentLines = [
+                            'Diagnosa Kerja:',
+                            ($data->diagnosis ?? ''),
+                            "\n",
+                            'Diagnosa Keperawatan:',
+                            ($data->diagnosa_keperawatan ?? ''),
+                            "\n",
+                            'Analisis Masalah:',
+                            ($data->registration_notes ?? ''),
+                        ];
+                        $planningLines = [
+                            'Terapi / Tindakan :',
+                            ($data->therapy_text ?? ''),
+                            "\n",
+                            'Intervensi Keperawatan:',
+                            ($data->intervensi_keperawatan ?? ''),
+                        ];
                     }
-                    // Mapping untuk PengkajianNurseRajal
-                    elseif ($rawData instanceof \App\Models\SIMRS\Pengkajian\PengkajianNurseRajal) {
-                        $data->created_at = $rawData->created_at;
-                        $data->allergy_medicine = $rawData->allergy_medicine;
-                        $data->pr = $rawData->pr;
-                        $data->rr = $rawData->rr;
-                        $data->bp = $rawData->bp;
-                        $data->temperatur = $rawData->temperatur;
-                        $data->body_height = $rawData->body_height;
-                        $data->body_weight = $rawData->body_weight;
-                        $data->sp02 = $rawData->sp02;
-                        $data->skor_nyeri = $rawData->skor_nyeri;
-                        $data->keluhan_utama = $rawData->keluhan_utama;
-                        $data->diagnosa_keperawatan = $rawData->diagnosa_keperawatan;
-                    }
-                    // Mapping untuk InpatientInitialExamination
-                    elseif ($rawData instanceof \App\Models\InpatientInitialExamination) {
-                        $data->pr = $rawData->vital_sign_pr;
-                        $data->rr = $rawData->vital_sign_rr;
-                        $data->bp = $rawData->vital_sign_bp;
-                        $data->temperatur = $rawData->vital_sign_temperature;
-                        $data->body_height = $rawData->anthropometry_height;
-                        $data->body_weight = $rawData->anthropometry_weight;
-                        $data->sp02 = null; // InpatientInitialExamination tidak punya sp02
-                        $data->skor_nyeri = null; // InpatientInitialExamination tidak punya skor nyeri
-                        $data->keluhan_utama = null; // InpatientInitialExamination tidak punya keluhan utama
-                        $data->diagnosa_keperawatan = null; // InpatientInitialExamination tidak punya diagnosa keperawatan
-                    }
+
+                    // Gabungkan array menjadi string
+                    $subjectiveText = implode("\n", $subjectiveLines);
+                    $objectiveText = implode("\n", $objectiveLines);
+                    $assessmentText = implode("\n", $assessmentLines);
+                    $planningText = implode("\n", $planningLines);
                 }
 
                 $perawat = Employee::whereHas('organization', function ($query) {
-                    $query->whereIn('name', [
-                        'Rawat Jalan',
-                        'Rawat Inap',
-                        'Perinatologi',
-                        'VK & PONEK',
-                        'IGD',
-                        'OK',
-                    ]);
+                    $query->whereIn('name', ['Rawat Jalan', 'Rawat Inap', 'Perinatologi', 'VK & PONEK', 'IGD', 'OK']);
                 })->get();
-                $pengkajian = CPPT::firstWhere('registration_id', $registration->id);
-                // dd($data);
 
-                return view('pages.simrs.erm.form.perawat.cppt-perawat', compact('registration', 'registrations', 'pengkajian', 'menu', 'departements', 'jadwal_dokter', 'perawat', 'path', 'data'));
+                return view('pages.simrs.erm.form.perawat.cppt-perawat', compact(
+                    'registration',
+                    'registrations',
+                    'pengkajian',
+                    'menu',
+                    'departements',
+                    'jadwal_dokter',
+                    'perawat',
+                    'path',
+                    'data',
+                    'subjectiveText',
+                    'objectiveText',
+                    'assessmentText',
+                    'planningText',
+                    'implementationText', // Variabel ini sekarang sudah diisi
+                    'evaluationText'      // Variabel ini sekarang sudah diisi
+                ));
 
             case 'cppt_farmasi':
                 $dokter = Employee::where('is_doctor', 1)->get();

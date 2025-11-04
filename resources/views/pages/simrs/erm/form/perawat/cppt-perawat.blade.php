@@ -71,42 +71,7 @@
                                                         </div>
                                                         <div class="card-body p-0">
                                                             <textarea class="form-control border-0 rounded-0" id="subjective" name="subjective" rows="8"
-                                                                placeholder="Keluhan Utama">{{ 'Keluhan Utama: ' .
-                                                                    ($data?->keluhan_utama ?? '') .
-                                                                    "\n" .
-                                                                    'Skor Nyeri: ' .
-                                                                    ($data?->skor_nyeri ?? '') .
-                                                                    "\n" .
-                                                                    'Dokter Pemeriksa: ' .
-                                                                    ($data?->doctor?->employee?->fullname ?? '') .
-                                                                    "\n" .
-                                                                    'Tanggal Pemeriksaan: ' .
-                                                                    (isset($data?->created_at)
-                                                                        ? ($data->created_at instanceof \Illuminate\Support\Carbon
-                                                                            ? $data->created_at->format('d/m/Y H:i')
-                                                                            : (is_string($data->created_at)
-                                                                                ? \Illuminate\Support\Carbon::parse($data->created_at)->format('d/m/Y H:i')
-                                                                                : ''))
-                                                                        : '') .
-                                                                    "\n" .
-                                                                    'Riwayat Alergi: ' .
-                                                                    (isset($data) && property_exists($data, 'allergy_medicine')
-                                                                        ? (is_array($data->allergy_medicine)
-                                                                            ? (count($data->allergy_medicine) > 0
-                                                                                ? implode(', ', $data->allergy_medicine)
-                                                                                : 'Tidak ada')
-                                                                            : ($data->allergy_medicine ?:
-                                                                            'Tidak ada'))
-                                                                        : 'Tidak ada') .
-                                                                    "\n" .
-                                                                    'Riwayat Penyakit Sekarang: ' .
-                                                                    ($data?->riwayat_penyakit_sekarang ?? '') .
-                                                                    "\n" .
-                                                                    'Riwayat Penyakit Dahulu: ' .
-                                                                    ($data?->riwayat_penyakit_dahulu ?? '') .
-                                                                    "\n" .
-                                                                    'Riwayat Penyakit Keluarga: ' .
-                                                                    ($data?->riwayat_penyakit_keluarga ?? '') }}</textarea>
+                                                                placeholder="Keluhan Utama, Riwayat Penyakit, dll.">{{ $subjectiveText }}</textarea>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -115,56 +80,12 @@
                                                 <div class="col-md-6">
                                                     <div class="card mt-3">
                                                         <div class="card-header text-white"
-                                                            style="background-color: rgba(40, 167, 69, .2);">
-                                                            <span @style('color: rgba(40, 167, 69, 1);')>Objective</span>
+                                                            style="background-color: rgba(253, 57, 149, .2);">
+                                                            <span @style('color: rgba(253, 57, 149, 1);')>Objective</span>
                                                         </div>
                                                         <div class="card-body p-0">
-                                                            <textarea class="form-control border-0 rounded-0" id="objective" name="objective" rows="8">{{ 'Tanda-tanda Vital:' .
-                                                                "\n" .
-                                                                'Nadi (PR): ' .
-                                                                ($data?->pr ?? '') .
-                                                                "\n" .
-                                                                'Respirasi (RR): ' .
-                                                                ($data?->rr ?? '') .
-                                                                "\n" .
-                                                                'Tensi (BP): ' .
-                                                                ($data?->bp ?? '') .
-                                                                "\n" .
-                                                                'Suhu (T): ' .
-                                                                ($data?->temperatur ?? '') .
-                                                                "\n" .
-                                                                'Tinggi Badan: ' .
-                                                                ($data?->body_height ?? '') .
-                                                                ' cm' .
-                                                                "\n" .
-                                                                'Berat Badan: ' .
-                                                                ($data?->body_weight ?? '') .
-                                                                ' kg' .
-                                                                "\n" .
-                                                                'SPO2: ' .
-                                                                ($data?->sp02 ?? '') .
-                                                                '%' .
-                                                                "\n" .
-                                                                'Skor Nyeri: ' .
-                                                                ($data?->skor_nyeri ?? '') .
-                                                                "\n" .
-                                                                'Riwayat Alergi: ' .
-                                                                (isset($data?->allergy_medicine)
-                                                                    ? (is_array($data->allergy_medicine)
-                                                                        ? (count($data->allergy_medicine) > 0
-                                                                            ? implode(', ', $data->allergy_medicine)
-                                                                            : 'Tidak ada')
-                                                                        : ($data->allergy_medicine ?:
-                                                                        'Tidak ada'))
-                                                                    : 'Tidak ada') .
-                                                                "\n\n" .
-                                                                'Pemeriksaan Fisik:' .
-                                                                "\n" .
-                                                                ($data?->diagnosis ?? '') .
-                                                                "\n\n" .
-                                                                'Catatan Tambahan:' .
-                                                                "\n" .
-                                                                ($data?->registration_notes ?? '') }}</textarea>
+                                                            <textarea class="form-control border-0 rounded-0" id="objective" name="objective" rows="8"
+                                                                placeholder="Tanda-tanda Vital, dll.">{{ $objectiveText }}</textarea>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -183,17 +104,7 @@
                                                                 Keperawatan</span>
                                                         </div>
                                                         <div class="card-body p-0">
-                                                            <textarea class="form-control border-0 rounded-0" id="assesment" name="assesment" rows="8">{{ 'Diagnosa Kerja:' .
-                                                                "\n" .
-                                                                ($data?->diagnosis ?? '') .
-                                                                "\n\n" .
-                                                                'Diagnosa Keperawatan:' .
-                                                                "\n" .
-                                                                ($data?->diagnosa_keperawatan ?? '') .
-                                                                "\n\n" .
-                                                                'Analisis Masalah:' .
-                                                                "\n" .
-                                                                ($data?->registration_notes ?? '') }}</textarea>
+                                                            <textarea class="form-control border-0 rounded-0" id="assesment" name="assesment" rows="8">{{ $assessmentText }}</textarea>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -208,9 +119,7 @@
                                                                 class="badge badge-dark pointer">Intervensi</span>
                                                         </div>
                                                         <div class="card-body p-0">
-                                                            <textarea class="form-control border-0 rounded-0" id="planning" name="planning" rows="8">
-Terapi / Tindakan :
-                                                        </textarea>
+                                                            <textarea class="form-control border-0 rounded-0" id="planning" name="planning" rows="8">{{ $planningText }}</textarea>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -226,11 +135,11 @@ Terapi / Tindakan :
                                                         </div>
                                                         <div class="card-body p-0">
                                                             <textarea class="form-control border-0 rounded-0" id="implementasi" name="implementasi" rows="8"
-                                                                placeholder="Implementasi">
-                                                        </textarea>
+                                                                placeholder="Implementasi">{{ $implementationText }}</textarea>
                                                         </div>
                                                     </div>
                                                 </div>
+
                                                 <!-- Evaluation Section -->
                                                 <div class="col-md-6">
                                                     <div class="card mt-3">
@@ -240,8 +149,7 @@ Terapi / Tindakan :
                                                         </div>
                                                         <div class="card-body p-0">
                                                             <textarea class="form-control border-0 rounded-0" id="evaluasi" name="evaluasi" rows="8"
-                                                                placeholder="Evaluasi">
-                                                        </textarea>
+                                                                placeholder="Evaluasi">{{ $evaluationText }}</textarea>
                                                         </div>
                                                     </div>
                                                 </div>
