@@ -103,6 +103,7 @@
                                         <th>Nama Pegawai</th>
                                         <th>Tgl. Berakhir</th>
                                         <th>Status</th>
+                                        <th>Aksi</th>
                                     </tr>
                                 </thead>
                                 <tbody></tbody>
@@ -188,6 +189,92 @@
             </div>
         </div>
     </main>
+
+    {{-- ====================================================== --}}
+    {{-- MODAL BARU UNTUK PERPANJANG KONTRAK --}}
+    {{-- ====================================================== --}}
+    <div class="modal fade" id="modal-extend-contract" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Perpanjang Kontrak Pegawai</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true"><i class="fal fa-times"></i></span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="form-extend-contract">
+                        {{-- ID pegawai akan disimpan di sini --}}
+                        <input type="hidden" id="extend_employee_id" name="employee_id">
+
+                        <div class="form-group">
+                            <label class="form-label">Nama Pegawai</label>
+                            <input type="text" id="extend_employee_name" class="form-control" readonly>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Tanggal Akhir Kontrak Saat Ini</label>
+                            <input type="text" id="extend_current_end_date" class="form-control" readonly>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="new_end_date"><strong>Tanggal Akhir Kontrak
+                                    Baru</strong></label>
+                            <input type="date" id="new_end_date" name="new_end_date" class="form-control" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-primary" id="btn-save-extend">
+                        <i class="fal fa-check"></i>
+                        Simpan Perpanjangan
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modal-deactivate" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Nonaktifkan Pegawai</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true"><i class="fal fa-times"></i></span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-warning">
+                        Anda akan menonaktifkan pegawai: <strong id="deactivate_employee_name"></strong>.
+                        Tindakan ini tidak dapat dibatalkan dengan mudah.
+                    </div>
+                    <form id="form-deactivate">
+                        {{-- ID pegawai akan disimpan di sini --}}
+                        <input type="hidden" id="deactivate_employee_id" name="employee_id">
+
+                        <div class="form-group">
+                            <label class="form-label" for="tgl_resign"><strong>Tanggal Resign / Nonaktif</strong></label>
+                            <input type="date" id="tgl_resign" name="tgl_resign" class="form-control" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="keterangan"><strong>Keterangan Nonaktif</strong> (Contoh:
+                                Kontrak Berakhir, Resign, dll)</label>
+                            <textarea id="keterangan" name="keterangan" class="form-control" rows="3" required></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-danger" id="btn-save-deactivate">
+                        <i class="fal fa-user-slash"></i>
+                        Ya, Nonaktifkan Pegawai Ini
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 @section('plugin')
     <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
@@ -249,8 +336,8 @@
                         name: 'fullname'
                     },
                     {
-                        data: 'contract_end_date',
-                        name: 'contract_end_date'
+                        data: 'end_status_date',
+                        name: 'end_status_date'
                     },
                     {
                         data: 'status_kontrak',
@@ -258,11 +345,39 @@
                         orderable: false,
                         searchable: false
                     },
+                    // Kolom Aksi BARU
+                    {
+                        data: null,
+                        orderable: false,
+                        searchable: false,
+                        className: 'text-center',
+                        render: function(data, type, row) {
+                            console.log(row);
+
+                            // Tombol untuk membuka modal perpanjangan & tombol deactivate
+                            return `
+                                <button class="btn btn-primary btn-xs btn-icon btn-extend" title="Perpanjang Kontrak"
+                                    data-id="${row.id}"
+                                    data-name="${row.fullname}"
+                                    data-current-date="${row.end_status_date}">
+                                    <i class="fal fa-calendar-plus"></i>
+                                </button>
+                                <button class="btn btn-danger btn-xs btn-icon btn-deactivate" title="Nonaktifkan Pegawai"
+                                    data-id="${row.id}"
+                                    data-name="${row.fullname}">
+                                    <i class="fal fa-user-times"></i>
+                                </button>
+                                <a href="https://wa.me/${row.mobile_phone ?? ''}" class="btn btn-success btn-xs btn-icon" title="Kontak via WhatsApp" target="_blank">
+                                    <i class="fab fa-whatsapp"></i>
+                                </a>
+                            `;
+                        }
+                    }
                 ],
                 responsive: true,
                 searching: false,
                 lengthChange: false,
-                pageLength: 5 // Tampilkan 5 entri saja
+                pageLength: 5
             });
 
             // Inisialisasi DataTable Ulang Tahun
@@ -358,6 +473,122 @@
                     },
                 ],
                 responsive: true
+            });
+
+            $('#dt-contracts tbody').on('click', '.btn-extend', function() {
+                var employeeId = $(this).data('id');
+                var employeeName = $(this).data('name');
+                var currentDate = $(this).data('current-date');
+
+                // Isi form di modal dengan data dari tombol
+                $('#extend_employee_id').val(employeeId);
+                $('#extend_employee_name').val(employeeName);
+                $('#extend_current_end_date').val(currentDate);
+
+                // Reset input tanggal baru
+                $('#new_end_date').val('');
+
+                // Tampilkan modal
+                $('#modal-extend-contract').modal('show');
+            });
+
+            $('#dt-contracts tbody').on('click', '.btn-deactivate', function() {
+                var employeeId = $(this).data('id');
+                var employeeName = $(this).data('name');
+
+                // Isi form di modal dengan data dari tombol
+                $('#deactivate_employee_id').val(employeeId);
+                $('#deactivate_employee_name').text(employeeName);
+
+                // Reset form input
+                $('#form-deactivate').trigger('reset');
+
+                // Tampilkan modal
+                $('#modal-deactivate').modal('show');
+            });
+
+            // 2. Event listener untuk tombol simpan di modal nonaktif
+            $('#btn-save-deactivate').on('click', function() {
+                var employeeId = $('#deactivate_employee_id').val();
+                var url = `/employees/${employeeId}/deactivate`;
+
+                // Setup CSRF Token jika belum ada di global
+                $.ajaxSetup({
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    }
+                });
+
+                $.ajax({
+                    url: url,
+                    type: 'POST',
+                    data: $('#form-deactivate')
+                        .serialize(), // Kirim semua data dari form (tgl_resign & keterangan)
+                    success: function(response) {
+                        $('#modal-deactivate').modal('hide');
+                        showSuccessAlert(response.success);
+                        // Reload tabel kontrak dan statistik
+                        tableContracts.ajax.reload();
+                        loadStats($('#days-filter').val());
+                    },
+                    error: function(xhr) {
+                        if (xhr.status === 422) { // Error validasi dari backend
+                            var errors = xhr.responseJSON.errors;
+                            var errorMessage = '';
+                            $.each(errors, function(key, value) {
+                                errorMessage += value[0] + '\n';
+                            });
+                            showErrorAlertNoRefresh(errorMessage);
+                        } else {
+                            // Error server lainnya
+                            var errorMsg = xhr.responseJSON && xhr.responseJSON.error ? xhr
+                                .responseJSON.error : 'Gagal menonaktifkan pegawai.';
+                            showErrorAlert(errorMsg);
+                        }
+                    }
+                });
+            });
+
+            // Event listener untuk tombol simpan di modal perpanjangan
+            $('#btn-save-extend').on('click', function() {
+                var employeeId = $('#extend_employee_id').val();
+                var newDate = $('#new_end_date').val();
+                var url =
+                    `/employees/${employeeId}/extend-contract`; // Menggunakan route yang sudah kita buat
+
+                // Setup CSRF Token jika belum ada di global
+                $.ajaxSetup({
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    }
+                });
+
+                $.ajax({
+                    url: url,
+                    type: 'POST',
+                    data: {
+                        new_end_date: newDate
+                    },
+                    success: function(response) {
+                        $('#modal-extend-contract').modal('hide');
+                        showSuccessAlert(response.success);
+                        // Reload tabel kontrak dan statistik
+                        tableContracts.ajax.reload();
+                        loadStats($('#days-filter').val());
+                    },
+                    error: function(xhr) {
+                        if (xhr.status === 422) { // Error validasi
+                            var errors = xhr.responseJSON.errors;
+                            var errorMessage = '';
+                            $.each(errors, function(key, value) {
+                                errorMessage += value[0] + '\n';
+                            });
+                            showErrorAlertNoRefresh(errorMessage);
+                        } else {
+                            showErrorAlert('Gagal memperbarui data. Silakan coba lagi.');
+                        }
+                    }
+                });
             });
 
             // Event listener untuk filter

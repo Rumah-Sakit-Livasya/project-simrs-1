@@ -23,6 +23,7 @@ use App\Models\Salary;
 use App\Models\SIMRS\Doctor;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
@@ -600,40 +601,61 @@ class EmployeeController extends Controller
         return response()->json(['data' => $employees]);
     }
 
+    /**
+     * Menonaktifkan seorang pegawai dengan logging.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function nonAktifPegawai(Request $request, $id)
     {
+        // Validasi input dari request
+        $validator = Validator::make($request->all(), [
+            'keterangan' => 'required|string|max:255',
+            'tgl_resign' => 'required|date',
+        ], [
+            'keterangan.required' => 'Keterangan nonaktif wajib diisi.',
+            'tgl_resign.required' => 'Tanggal resign wajib diisi.',
+            'tgl_resign.date' => 'Format tanggal resign tidak valid.',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        // Gunakan DB Transaction untuk memastikan semua operasi berhasil atau tidak sama sekali
+        DB::beginTransaction();
         try {
-            $resignDate = $request->input('tgl_resign');
-            $validator = Validator::make(request()->all(), [
-                'keterangan' => 'required',
-            ]);
+            // Cari Pegawai
+            $employee = Employee::findOrFail($id);
 
-            if ($validator->fails()) {
-                throw new \Exception("Data keterangan harus diisi!");
-            }
-
-            if ($resignDate) {
-                $employee = Employee::find($id);
-                $employee->update([
-                    'resign_date' => $request->tgl_resign,
-                    'is_active' => 0
-                ]);
-            }
-            $user = User::where('employee_id', $id);
-            $user->update([
+            // Update status dan tanggal resign
+            $employee->update([
+                'resign_date' => $request->tgl_resign,
                 'is_active' => 0
             ]);
 
-            DB::insert('INSERT INTO riwayat_nonaktif_users (employee_id, keterangan, nonaktif_by) VALUES (?, ?, ?)', [
-                $id,
-                $request->keterangan,
-                $request->userLogin, // Pastikan untuk mengenkripsi kata sandi
+            // Nonaktifkan user terkait
+            if ($employee->user) {
+                $employee->user()->update(['is_active' => 0]);
+            }
+
+            // Log riwayat penonaktifan
+            DB::table('riwayat_nonaktif_users')->insert([
+                'employee_id' => $id,
+                'keterangan' => $request->keterangan,
+                'nonaktif_by' => Auth::id(), // Mengambil ID user yang sedang login, ini lebih aman
+                'created_at' => now(),
+                'updated_at' => now(),
             ]);
 
-            // Return data dalam format JSON
-            return response()->json(['message' => 'Pegawai berhasil dinonaktifkan!']);
+            DB::commit(); // Jika semua berhasil, simpan perubahan
+
+            return response()->json(['success' => 'Pegawai ' . $employee->fullname . ' berhasil dinonaktifkan.']);
         } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
+            DB::rollBack(); // Jika ada error, batalkan semua perubahan
+            return response()->json(['error' => 'Gagal menonaktifkan pegawai: ' . $e->getMessage()], 500);
         }
     }
 
@@ -766,5 +788,45 @@ class EmployeeController extends Controller
         // Method ini akan me-render view yang diminta
         // dan mengirimkan data pegawai yang bersangkutan
         return view('pages.simrs.erm.partials.signature-pad', compact('employee'));
+    }
+
+    /**
+     * Memperpanjang kontrak pegawai dengan memperbarui end_status_date.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function extendContract(Request $request, $id)
+    {
+        // Validasi input
+        $validator = Validator::make($request->all(), [
+            'new_end_date' => 'required|date|after:today',
+        ], [
+            'new_end_date.required' => 'Tanggal akhir kontrak baru wajib diisi.',
+            'new_end_date.date' => 'Format tanggal tidak valid.',
+            'new_end_date.after' => 'Tanggal akhir kontrak harus setelah hari ini.',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        try {
+            $employee = Employee::findOrFail($id);
+
+            // Pastikan pegawai masih berstatus kontrak
+            if ($employee->employment_status !== 'Kontrak') {
+                return response()->json(['error' => 'Hanya pegawai dengan status Kontrak yang bisa diperpanjang.'], 400);
+            }
+
+            // Update tanggal akhir kontrak
+            $employee->end_status_date = $request->new_end_date;
+            $employee->save();
+
+            return response()->json(['success' => 'Kontrak untuk ' . $employee->fullname . ' berhasil diperpanjang.']);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Gagal memperpanjang kontrak. Terjadi kesalahan server.'], 500);
+        }
     }
 }
