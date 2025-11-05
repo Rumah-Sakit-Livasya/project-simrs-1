@@ -415,15 +415,32 @@ class OrderLaboratoriumController extends Controller
         $validator = Validator::make($request->all(), [
             'order_id' => 'required|integer|exists:order_laboratorium,id',
             'diagnosa_klinis' => 'nullable|string|max:255',
-            'inspection_date' => 'nullable|date',
-            'result_datetime' => 'nullable|date',
+            'inspection_date' => 'required|date',
+            'result_datetime' => 'required|date',
+        ], [
+            'inspection_date.required'    => 'Tanggal pemeriksaan harus diisi.',
+            'inspection_date.date'        => 'Tanggal pemeriksaan tidak valid.',
+            'result_datetime.required'    => 'Tanggal hasil pemeriksaan harus diisi.',
+            'result_datetime.date'        => 'Tanggal hasil pemeriksaan tidak valid.',
         ]);
 
         if ($validator->fails()) {
+            $errorMessages = $validator->errors()->all();
+
             if ($request->ajax()) {
-                return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
+                return response()->json([
+                    'success' => false,
+                    'errors' => $validator->errors(),
+                    'message' => implode(" ", $errorMessages),
+                ], 422);
             }
-            return redirect()->back()->withErrors($validator)->withInput();
+
+            // Kirim pesan error validasi ke pesan flash (supaya tampil di notifikasi error di halaman sebelumnya)
+            return redirect()
+                ->back()
+                ->withErrors($validator)
+                ->with('error', implode(" ", $errorMessages))
+                ->withInput();
         }
 
         $validatedData = $validator->validated();
