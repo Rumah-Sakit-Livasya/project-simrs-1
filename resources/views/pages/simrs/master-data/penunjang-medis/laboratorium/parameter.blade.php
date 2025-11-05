@@ -207,17 +207,17 @@
             });
 
             $('.btn-edit').click(function() {
-                console.log('clicked');
+                var kategoriId = $(this).attr('data-id');
+
                 $('#modal-edit-parameter-laboratorium').modal('show');
-                kategoriId = $(this).attr('data-id');
                 $('#modal-edit-parameter-laboratorium form').attr('data-id', kategoriId);
+                $('#btn-simpan-edit').attr('data-id', kategoriId);
 
                 $.ajax({
                     url: '/api/simrs/master-data/penunjang-medis/laboratorium/parameter/' +
                         kategoriId,
                     type: 'GET',
                     success: function(response) {
-                        console.log(response);
 
                         $('#modal-edit-parameter-laboratorium #grup_parameter_laboratorium_id')
                             .val(response.grup_parameter_laboratorium_id)
@@ -254,6 +254,11 @@
                         $('#modal-edit-parameter-laboratorium input[name="kode"]')
                             .val(response.kode);
 
+                        // Tambahan: Set nilai select Tipe Isi Hasil (tipe_hasil)
+                        $('#modal-edit-parameter-laboratorium select[name="tipe_hasil"]')
+                            .val(response.tipe_hasil)
+                            .trigger('change');
+
                         const subParameters = [];
                         for (let i = 0; i < response.sub_parameters.length; i++) {
                             subParameters.push(
@@ -268,7 +273,7 @@
                     },
                     error: function(xhr, status, error) {
                         $('#modal-edit-parameter-laboratorium').modal('hide');
-                        showErrorAlert('Terjadi kesalahan: ' + error);
+                        showErrorAlertNoRefresh('Terjadi kesalahan: ' + error);
                     }
                 });
 
@@ -296,7 +301,7 @@
                             }, 1000);
                         },
                         error: function(xhr, status, error) {
-                            showErrorAlert('Terjadi kesalahan: ' + error);
+                            showErrorAlertNoRefresh('Terjadi kesalahan: ' + error);
                         }
                     });
                 } else {
@@ -304,47 +309,48 @@
                 }
             });
 
-            $('#update-form').on('submit', function(e) {
-                e.preventDefault(); // Mencegah form submit secara default
+            $('#btn-simpan-edit').on('click', function(e) {
+                e.preventDefault();
 
-                var formData = $(this).serialize();
-                parameterId = $(this).attr('data-id');
+                // Ambil parameterId dari hidden input atau dari elemen tombolnya (lebih aman dari tombol edit)
+                const parameterId = $(this).attr('data-id');
+                const $form = $('#update-form');
+                const formData = $form.serialize();
+
                 $.ajax({
                     url: '/api/simrs/master-data/penunjang-medis/laboratorium/parameter/' +
-                        parameterId +
-                        '/update',
+                        parameterId + '/update',
                     type: 'PATCH',
                     data: formData,
-                    beforeSend: function() {
-                        $('#update-form').find('.ikon-edit').hide();
-                        $('#update-form').find('.spinner-text').removeClass(
-                            'd-none');
+                    beforeSend: function(xhr) {
+                        xhr.setRequestHeader('X-CSRF-TOKEN', $('meta[name="csrf-token"]').attr(
+                            'content'));
+                        $form.find('.ikon-edit').hide();
+                        $form.find('.spinner-text').removeClass('d-none');
+                        $('#btn-simpan-edit').prop('disabled', true);
                     },
                     success: function(response) {
                         $('#modal-edit-parameter-laboratorium').modal('hide');
-                        showSuccessAlert(response.message);
+                        showSuccessAlert(response.message ?? 'Data berhasil diupdate!');
 
                         setTimeout(() => {
-                            console.log('Reloading the page now.');
                             window.location.reload();
                         }, 1000);
                     },
                     error: function(xhr, status, error) {
-                        if (xhr.status === 422) {
-                            var errors = xhr.responseJSON.errors;
-                            var errorMessages = '';
-
+                        $('#modal-edit-parameter-laboratorium').modal('hide');
+                        $form.find('.ikon-edit').show();
+                        $form.find('.spinner-text').addClass('d-none');
+                        $('#btn-simpan-edit').prop('disabled', false);
+                        if (xhr.status === 422 && xhr.responseJSON && xhr.responseJSON.errors) {
+                            let errors = xhr.responseJSON.errors;
+                            let errorMessages = '';
                             $.each(errors, function(key, value) {
-                                errorMessages += value +
-                                    '\n';
+                                errorMessages += value + '\n';
                             });
-
-                            $('#modal-edit-parameter-laboratorium').modal('hide');
-                            showErrorAlert('Terjadi kesalahan:\n' +
-                                errorMessages);
+                            showErrorAlertNoRefresh('Terjadi kesalahan:\n' + errorMessages);
                         } else {
-                            $('#modal-edit-parameter-laboratorium').modal('hide');
-                            showErrorAlert('Terjadi kesalahan: ' + error);
+                            showErrorAlertNoRefresh('Terjadi kesalahan: ' + error);
                             console.log(error);
                         }
                     }
@@ -391,11 +397,11 @@
                             });
 
                             $('#modal-tambah-parameter-laboratorium').modal('hide');
-                            showErrorAlert('Terjadi kesalahan:\n' +
+                            showErrorAlertNoRefresh('Terjadi kesalahan:\n' +
                                 errorMessages);
                         } else {
                             $('#modal-tambah-parameter-laboratorium').modal('hide');
-                            showErrorAlert('Terjadi kesalahan: ' + error);
+                            showErrorAlertNoRefresh('Terjadi kesalahan: ' + error);
                             console.log(error);
                         }
                     }

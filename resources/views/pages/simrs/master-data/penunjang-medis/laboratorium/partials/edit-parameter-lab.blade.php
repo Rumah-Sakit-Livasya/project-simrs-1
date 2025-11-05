@@ -134,7 +134,7 @@
                 </div>
                 <div class="modal-footer pt-0">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="submit" data-backdrop="static" data-keyboard="false" id="btn-edit"
+                    <button type="button" data-backdrop="static" data-keyboard="false" id="btn-simpan-edit"
                         class="btn mx-1 btn-edit btn-primary text-white" title="Hapus">
                         <div class="ikon-edit">
                             <span class="fal fa-pencil mr-1"></span>Edit
