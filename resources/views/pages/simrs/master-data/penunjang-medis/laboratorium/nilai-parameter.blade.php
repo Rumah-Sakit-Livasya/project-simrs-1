@@ -178,37 +178,73 @@
                     // Pastikan id_edit ada dan terisi
                     $form.find('#id_edit').val(data.id);
 
-                    $form.find('#min_edit').val(data.min);
-                    $form.find('#max_edit').val(data.max);
-                    $form.find('#hasil_edit').val(data.hasil);
-                    $form.find('#keterangan_edit').val(data.keterangan);
-                    $form.find('#min_kritis_edit').val(data.min_kritis);
-                    $form.find('#max_kritis_edit').val(data.max_kritis);
+                    // Tanggal & User
+                    $form.find('input[name="tanggal"]').val(data.tanggal || '');
+                    $form.find('input[name="user_input"]').val(data.user_input || '');
 
-                    // Konversi umur dari total hari ke tahun, bulan, hari (helper)
-                    var dariUmur = convertDaysToYMD(data.dari_umur);
-                    $form.find('#tahun_1_edit').val(dariUmur.years);
-                    $form.find('#bulan_1_edit').val(dariUmur.months);
-                    $form.find('#hari_1_edit').val(dariUmur.days);
-
-                    var sampaiUmur = convertDaysToYMD(data.sampai_umur);
-                    $form.find('#tahun_2_edit').val(sampaiUmur.years);
-                    $form.find('#bulan_2_edit').val(sampaiUmur.months);
-                    $form.find('#hari_2_edit').val(sampaiUmur.days);
-
-                    // Radio Jenis Kelamin
-                    $form.find(`input[name="jenis_kelamin"][value="${data.jenis_kelamin}"]`).prop(
-                        'checked', true);
-
-                    // Jika ada radio untuk nilai_normal (opsional, pakai jika memang ada)
-                    $form.find(`input[name="nilai_normal"][value="${data.nilai_normal}"]`).prop(
-                        'checked', true);
-
-                    // Select2 Parameter Laboratorium
+                    // Parameter Laboratorium Select2
                     $modal.find('#parameter_laboratorium_id_edit').select2({
                         dropdownParent: $modal,
                         placeholder: 'Pilih Data'
                     }).val(data.parameter_laboratorium_id).trigger('change');
+
+                    // Jenis Kelamin
+                    if (data.jenis_kelamin) {
+                        $form.find(`input[name="jenis_kelamin"][value="${data.jenis_kelamin}"]`)
+                            .prop('checked', true);
+                    }
+
+                    // Dari Umur & Sampai Umur
+                    // Mengambil dari data.dari_umur dan data.sampai_umur yang bertipe 'tahun-bulan-hari' (string)
+                    // Split menjadi [tahun, bulan, hari] (jika null/undefined, default 0)
+                    var dariArr = Array.isArray(data.dari_umur) ?
+                        data.dari_umur.map(Number) :
+                        (typeof data.dari_umur === 'string' && data.dari_umur.match(
+                                /^\d+-\d+-\d+$/) ?
+                            data.dari_umur.split('-').map(Number) : [0, 0, 0]);
+                    var sampaiArr = Array.isArray(data.sampai_umur) ?
+                        data.sampai_umur.map(Number) :
+                        (typeof data.sampai_umur === 'string' && data.sampai_umur.match(
+                                /^\d+-\d+-\d+$/) ?
+                            data.sampai_umur.split('-').map(Number) : [0, 0, 0]);
+
+                    $form.find('#tahun_1_edit').val(typeof data.tahun_1 !== 'undefined' && data
+                        .tahun_1 !== null ? data.tahun_1 : dariArr[0]);
+                    $form.find('#bulan_1_edit').val(typeof data.bulan_1 !== 'undefined' && data
+                        .bulan_1 !== null ? data.bulan_1 : dariArr[1]);
+                    $form.find('#hari_1_edit').val(typeof data.hari_1 !== 'undefined' && data
+                        .hari_1 !== null ? data.hari_1 : dariArr[2]);
+
+                    $form.find('#tahun_2_edit').val(typeof data.tahun_2 !== 'undefined' && data
+                        .tahun_2 !== null ? data.tahun_2 : sampaiArr[0]);
+                    $form.find('#bulan_2_edit').val(typeof data.bulan_2 !== 'undefined' && data
+                        .bulan_2 !== null ? data.bulan_2 : sampaiArr[1]);
+                    $form.find('#hari_2_edit').val(typeof data.hari_2 !== 'undefined' && data
+                        .hari_2 !== null ? data.hari_2 : sampaiArr[2]);
+
+                    // Angka Min, Max, Min Kritis, Max Kritis (bisa null)
+                    $form.find('#min_edit').val(data.min !== null ? data.min : '');
+                    $form.find('#max_edit').val(data.max !== null ? data.max : '');
+                    $form.find('#min_kritis_edit').val(data.min_kritis !== null ? data.min_kritis :
+                        '');
+                    $form.find('#max_kritis_edit').val(data.max_kritis !== null ? data.max_kritis :
+                        '');
+
+                    // Hasil
+                    $form.find('#hasil_edit').val(data.hasil !== null ? data.hasil : '');
+
+                    // Keterangan
+                    $form.find('#keterangan_edit').val(data.keterangan !== null ? data.keterangan :
+                        '');
+
+                    // Nilai Normal: radio (bisa null, pastikan clear jika null)
+                    if (data.nilai_normal !== null && typeof data.nilai_normal !== 'undefined' &&
+                        data.nilai_normal !== '') {
+                        $form.find(`input[name="nilai_normal"][value="${data.nilai_normal}"]`).prop(
+                            'checked', true);
+                    } else {
+                        $form.find(`input[name="nilai_normal"]`).prop('checked', false);
+                    }
 
                     $modal.modal('show');
                 }).fail(function(xhr) {
