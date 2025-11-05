@@ -5,235 +5,305 @@
 {{-- STATUS GENERALIS --}}
 <h4 class="text-primary mt-4 font-weight-bold">III. Status Generalis</h4>
 <div class="row">
-    {{-- Kolom Kiri --}}
+    {{-- ====================================================== --}}
+    {{--                       KOLOM KIRI                       --}}
+    {{-- ====================================================== --}}
     <div class="col-md-6">
-        <div class="mb-3">
-            <h5 class="font-weight-bold text-info">Kepala</h5>
-            <div class="form-group row align-items-center mb-0">
-                <label class="col-md-4 col-form-label">Caput Kepala</label>
+        {{-- Grup Kepala --}}
+        <div class="form-group">
+            <label class="form-label font-weight-bold text-info">Kepala</label>
+            <div class="row align-items-center">
+                <div class="col-md-4"><label class="form-label" for="kepala_caput">Caput Kepala</label></div>
                 <div class="col-md-8">
-                    <div class="form-radio">
-                        <label class="radio-styled radio-info"><input type="radio"
-                                name="data[status_generalis][kepala][caput]" value="Ada"
-                                {{ ($data['status_generalis']['kepala']['caput'] ?? null) == 'Ada' ? 'checked' : '' }}><span>Ada</span></label>
-                        <label class="radio-styled radio-info ml-3"><input type="radio"
-                                name="data[status_generalis][kepala][caput]" value="Tidak Ada"
-                                {{ ($data['status_generalis']['kepala']['caput'] ?? null) == 'Tidak Ada' ? 'checked' : '' }}><span>Tidak
-                                Ada</span></label>
+                    <div class="custom-control custom-radio custom-control-inline">
+                        <input type="radio" id="kepala_caput_ada" name="data[status_generalis][kepala][caput]"
+                            class="custom-control-input" value="Ada"
+                            {{ ($data['status_generalis']['kepala']['caput'] ?? null) == 'Ada' ? 'checked' : '' }}>
+                        <label class="custom-control-label" for="kepala_caput_ada">Ada</label>
+                    </div>
+                    <div class="custom-control custom-radio custom-control-inline">
+                        <input type="radio" id="kepala_caput_tidak" name="data[status_generalis][kepala][caput]"
+                            class="custom-control-input" value="Tidak Ada"
+                            {{ ($data['status_generalis']['kepala']['caput'] ?? null) == 'Tidak Ada' ? 'checked' : '' }}>
+                        <label class="custom-control-label" for="kepala_caput_tidak">Tidak Ada</label>
                     </div>
                 </div>
             </div>
         </div>
         <hr>
-        <div class="mb-3">
-            <h5 class="font-weight-bold text-info">Hidung</h5>
-            <div class="form-group row align-items-center mb-0">
-                <label class="col-md-4 col-form-label">NCH</label>
+
+        {{-- Grup Hidung --}}
+        <div class="form-group">
+            <label class="form-label font-weight-bold text-info">Hidung</label>
+            <div class="row align-items-center">
+                <div class="col-md-4"><label class="form-label" for="hidung_nch">NCH</label></div>
                 <div class="col-md-8">
-                    <div class="form-radio">
-                        <label class="radio-styled radio-info"><input type="radio"
-                                name="data[status_generalis][hidung][nch]" value="Ada"
-                                {{ ($data['status_generalis']['hidung']['nch'] ?? null) == 'Ada' ? 'checked' : '' }}><span>Ada</span></label>
-                        <label class="radio-styled radio-info ml-3"><input type="radio"
-                                name="data[status_generalis][hidung][nch]" value="Tidak Ada"
-                                {{ ($data['status_generalis']['hidung']['nch'] ?? null) == 'Tidak Ada' ? 'checked' : '' }}><span>Tidak
-                                Ada</span></label>
+                    <div class="custom-control custom-radio custom-control-inline">
+                        <input type="radio" id="hidung_nch_ada" name="data[status_generalis][hidung][nch]"
+                            class="custom-control-input" value="Ada"
+                            {{ ($data['status_generalis']['hidung']['nch'] ?? null) == 'Ada' ? 'checked' : '' }}>
+                        <label class="custom-control-label" for="hidung_nch_ada">Ada</label>
+                    </div>
+                    <div class="custom-control custom-radio custom-control-inline">
+                        <input type="radio" id="hidung_nch_tidak" name="data[status_generalis][hidung][nch]"
+                            class="custom-control-input" value="Tidak Ada"
+                            {{ ($data['status_generalis']['hidung']['nch'] ?? null) == 'Tidak Ada' ? 'checked' : '' }}>
+                        <label class="custom-control-label" for="hidung_nch_tidak">Tidak Ada</label>
                     </div>
                 </div>
             </div>
         </div>
         <hr>
-        <div class="mb-3">
-            <h5 class="font-weight-bold text-info">Mata</h5>
-            <div class="form-group row align-items-center mb-0">
-                <div class="col-md-12">
-                    <div class="form-radio d-flex align-items-center">
-                        <label class="radio-styled radio-info mb-0"><input type="radio"
-                                name="data[status_generalis][mata][kondisi]" value="Normal"
-                                {{ ($data['status_generalis']['mata']['kondisi'] ?? null) == 'Normal' ? 'checked' : '' }}><span>Normal</span></label>
-                        <label class="radio-styled radio-info ml-3 mb-0"><input type="radio"
-                                name="data[status_generalis][mata][kondisi]" value="Abnormal"
-                                {{ ($data['status_generalis']['mata']['kondisi'] ?? null) == 'Abnormal' ? 'checked' : '' }}><span>Abnormal</span></label>
-                        <input name="data[status_generalis][mata][keterangan]" placeholder="Keterangan..."
-                            type="text" class="form-control form-control-sm ml-2" style="width: 150px;"
-                            value="{{ $data['status_generalis']['mata']['keterangan'] ?? '' }}">
-                    </div>
+
+        {{-- Grup Mata --}}
+        <div class="form-group">
+            <label class="form-label font-weight-bold text-info">Mata</label>
+            <div class="d-flex align-items-center">
+                <div class="custom-control custom-radio custom-control-inline">
+                    <input type="radio" id="mata_normal" name="data[status_generalis][mata][kondisi]"
+                        class="custom-control-input" value="Normal"
+                        {{ ($data['status_generalis']['mata']['kondisi'] ?? null) == 'Normal' ? 'checked' : '' }}>
+                    <label class="custom-control-label" for="mata_normal">Normal</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                    <input type="radio" id="mata_abnormal" name="data[status_generalis][mata][kondisi]"
+                        class="custom-control-input" value="Abnormal"
+                        {{ ($data['status_generalis']['mata']['kondisi'] ?? null) == 'Abnormal' ? 'checked' : '' }}>
+                    <label class="custom-control-label" for="mata_abnormal">Abnormal</label>
+                </div>
+                <input name="data[status_generalis][mata][keterangan]" placeholder="Keterangan..." type="text"
+                    class="form-control form-control-sm flex-1 ml-2"
+                    value="{{ $data['status_generalis']['mata']['keterangan'] ?? '' }}">
+            </div>
+        </div>
+        <hr>
+
+        {{-- Grup Mulut --}}
+        <div class="form-group">
+            <label class="form-label font-weight-bold text-info">Mulut</label>
+            <div>
+                <div class="custom-control custom-radio custom-control-inline">
+                    <input type="radio" id="mulut_bersih" name="data[status_generalis][mulut][kondisi]"
+                        class="custom-control-input" value="Bersih"
+                        {{ ($data['status_generalis']['mulut']['kondisi'] ?? null) == 'Bersih' ? 'checked' : '' }}>
+                    <label class="custom-control-label" for="mulut_bersih">Bersih</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                    <input type="radio" id="mulut_tidak_bersih" name="data[status_generalis][mulut][kondisi]"
+                        class="custom-control-input" value="Tidak Bersih"
+                        {{ ($data['status_generalis']['mulut']['kondisi'] ?? null) == 'Tidak Bersih' ? 'checked' : '' }}>
+                    <label class="custom-control-label" for="mulut_tidak_bersih">Tidak Bersih</label>
                 </div>
             </div>
         </div>
         <hr>
-        <div class="mb-3">
-            <h5 class="font-weight-bold text-info">Mulut</h5>
-            <div class="form-group row align-items-center mb-0">
-                <div class="col-md-12">
-                    <div class="form-radio">
-                        <label class="radio-styled radio-info"><input type="radio"
-                                name="data[status_generalis][mulut][kondisi]" value="Bersih"
-                                {{ ($data['status_generalis']['mulut']['kondisi'] ?? null) == 'Bersih' ? 'checked' : '' }}><span>Bersih</span></label>
-                        <label class="radio-styled radio-info ml-3"><input type="radio"
-                                name="data[status_generalis][mulut][kondisi]" value="Tidak Bersih"
-                                {{ ($data['status_generalis']['mulut']['kondisi'] ?? null) == 'Tidak Bersih' ? 'checked' : '' }}><span>Tidak
-                                Bersih</span></label>
-                    </div>
+
+        {{-- Grup Leher --}}
+        <div class="form-group">
+            <label class="form-label font-weight-bold text-info">Leher</label>
+            <div class="d-flex align-items-center">
+                <div class="custom-control custom-radio custom-control-inline">
+                    <input type="radio" id="leher_normal" name="data[status_generalis][leher][kondisi]"
+                        class="custom-control-input" value="Normal"
+                        {{ ($data['status_generalis']['leher']['kondisi'] ?? null) == 'Normal' ? 'checked' : '' }}>
+                    <label class="custom-control-label" for="leher_normal">Normal</label>
                 </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                    <input type="radio" id="leher_abnormal" name="data[status_generalis][leher][kondisi]"
+                        class="custom-control-input" value="Abnormal"
+                        {{ ($data['status_generalis']['leher']['kondisi'] ?? null) == 'Abnormal' ? 'checked' : '' }}>
+                    <label class="custom-control-label" for="leher_abnormal">Abnormal</label>
+                </div>
+                <input name="data[status_generalis][leher][keterangan]" placeholder="Keterangan..." type="text"
+                    class="form-control form-control-sm flex-1 ml-2"
+                    value="{{ $data['status_generalis']['leher']['keterangan'] ?? '' }}">
             </div>
         </div>
         <hr>
-        <div class="mb-3">
-            <h5 class="font-weight-bold text-info">Leher</h5>
-            <div class="form-group row align-items-center mb-0">
-                <div class="col-md-12">
-                    <div class="form-radio d-flex align-items-center">
-                        <label class="radio-styled radio-info mb-0"><input type="radio"
-                                name="data[status_generalis][leher][kondisi]" value="Normal"
-                                {{ ($data['status_generalis']['leher']['kondisi'] ?? null) == 'Normal' ? 'checked' : '' }}><span>Normal</span></label>
-                        <label class="radio-styled radio-info ml-3 mb-0"><input type="radio"
-                                name="data[status_generalis][leher][kondisi]" value="Abnormal"
-                                {{ ($data['status_generalis']['leher']['kondisi'] ?? null) == 'Abnormal' ? 'checked' : '' }}><span>Abnormal</span></label>
-                        <input name="data[status_generalis][leher][keterangan]" placeholder="Keterangan..."
-                            type="text" class="form-control form-control-sm ml-2" style="width: 150px;"
-                            value="{{ $data['status_generalis']['leher']['keterangan'] ?? '' }}">
-                    </div>
-                </div>
-            </div>
-        </div>
-        <hr>
-        <div class="mb-3">
-            <h5 class="font-weight-bold text-info">Dada</h5>
-            <div class="form-group row align-items-center mb-2">
-                <label class="col-md-4 col-form-label">Retraksi</label>
+
+        {{-- Grup Dada --}}
+        <div class="form-group">
+            <label class="form-label font-weight-bold text-info">Dada</label>
+            <div class="row align-items-center mb-2">
+                <div class="col-md-4"><label class="form-label" for="dada_retraksi">Retraksi</label></div>
                 <div class="col-md-8">
-                    <div class="form-radio">
-                        <label class="radio-styled radio-info"><input type="radio"
-                                name="data[status_generalis][dada][retraksi]" value="Ada"
-                                {{ ($data['status_generalis']['dada']['retraksi'] ?? null) == 'Ada' ? 'checked' : '' }}><span>Ada</span></label>
-                        <label class="radio-styled radio-info ml-3"><input type="radio"
-                                name="data[status_generalis][dada][retraksi]" value="Tidak Ada"
-                                {{ ($data['status_generalis']['dada']['retraksi'] ?? null) == 'Tidak Ada' ? 'checked' : '' }}><span>Tidak
-                                Ada</span></label>
+                    <div class="custom-control custom-radio custom-control-inline">
+                        <input type="radio" id="dada_retraksi_ada" name="data[status_generalis][dada][retraksi]"
+                            class="custom-control-input" value="Ada"
+                            {{ ($data['status_generalis']['dada']['retraksi'] ?? null) == 'Ada' ? 'checked' : '' }}>
+                        <label class="custom-control-label" for="dada_retraksi_ada">Ada</label>
+                    </div>
+                    <div class="custom-control custom-radio custom-control-inline">
+                        <input type="radio" id="dada_retraksi_tidak" name="data[status_generalis][dada][retraksi]"
+                            class="custom-control-input" value="Tidak Ada"
+                            {{ ($data['status_generalis']['dada']['retraksi'] ?? null) == 'Tidak Ada' ? 'checked' : '' }}>
+                        <label class="custom-control-label" for="dada_retraksi_tidak">Tidak Ada</label>
                     </div>
                 </div>
             </div>
-            <div class="form-group row align-items-center mb-0">
-                <label class="col-md-4 col-form-label">Simetris</label>
+            <div class="row align-items-center">
+                <div class="col-md-4"><label class="form-label" for="dada_simetris">Simetris</label></div>
                 <div class="col-md-8">
-                    <div class="form-radio">
-                        <label class="radio-styled radio-info"><input type="radio"
-                                name="data[status_generalis][dada][simetris]" value="Ya"
-                                {{ ($data['status_generalis']['dada']['simetris'] ?? null) == 'Ya' ? 'checked' : '' }}><span>Ya</span></label>
-                        <label class="radio-styled radio-info ml-3"><input type="radio"
-                                name="data[status_generalis][dada][simetris]" value="Tidak"
-                                {{ ($data['status_generalis']['dada']['simetris'] ?? null) == 'Tidak' ? 'checked' : '' }}><span>Tidak</span></label>
+                    <div class="custom-control custom-radio custom-control-inline">
+                        <input type="radio" id="dada_simetris_ya" name="data[status_generalis][dada][simetris]"
+                            class="custom-control-input" value="Ya"
+                            {{ ($data['status_generalis']['dada']['simetris'] ?? null) == 'Ya' ? 'checked' : '' }}>
+                        <label class="custom-control-label" for="dada_simetris_ya">Ya</label>
+                    </div>
+                    <div class="custom-control custom-radio custom-control-inline">
+                        <input type="radio" id="dada_simetris_tidak" name="data[status_generalis][dada][simetris]"
+                            class="custom-control-input" value="Tidak"
+                            {{ ($data['status_generalis']['dada']['simetris'] ?? null) == 'Tidak' ? 'checked' : '' }}>
+                        <label class="custom-control-label" for="dada_simetris_tidak">Tidak</label>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    {{-- Kolom Kanan --}}
+
+    {{-- ====================================================== --}}
+    {{--                       KOLOM KANAN                      --}}
+    {{-- ====================================================== --}}
     <div class="col-md-6">
-        <div class="mb-3">
-            <h5 class="font-weight-bold text-info">Perut</h5>
-            <div class="form-group row align-items-center mb-0">
-                <label class="col-md-4 col-form-label">Supel</label>
+        {{-- Grup Perut --}}
+        <div class="form-group">
+            <label class="form-label font-weight-bold text-info">Perut</label>
+            <div class="row align-items-center">
+                <div class="col-md-4"><label class="form-label" for="perut_supel">Supel</label></div>
                 <div class="col-md-8">
-                    <div class="form-radio">
-                        <label class="radio-styled radio-info"><input type="radio"
-                                name="data[status_generalis][perut][supel]" value="Ya"
-                                {{ ($data['status_generalis']['perut']['supel'] ?? null) == 'Ya' ? 'checked' : '' }}><span>Ya</span></label>
-                        <label class="radio-styled radio-info ml-3"><input type="radio"
-                                name="data[status_generalis][perut][supel]" value="Tidak"
-                                {{ ($data['status_generalis']['perut']['supel'] ?? null) == 'Tidak' ? 'checked' : '' }}><span>Tidak</span></label>
+                    <div class="custom-control custom-radio custom-control-inline">
+                        <input type="radio" id="perut_supel_ya" name="data[status_generalis][perut][supel]"
+                            class="custom-control-input" value="Ya"
+                            {{ ($data['status_generalis']['perut']['supel'] ?? null) == 'Ya' ? 'checked' : '' }}>
+                        <label class="custom-control-label" for="perut_supel_ya">Ya</label>
+                    </div>
+                    <div class="custom-control custom-radio custom-control-inline">
+                        <input type="radio" id="perut_supel_tidak" name="data[status_generalis][perut][supel]"
+                            class="custom-control-input" value="Tidak"
+                            {{ ($data['status_generalis']['perut']['supel'] ?? null) == 'Tidak' ? 'checked' : '' }}>
+                        <label class="custom-control-label" for="perut_supel_tidak">Tidak</label>
                     </div>
                 </div>
             </div>
         </div>
         <hr>
-        <div class="mb-3">
-            <h5 class="font-weight-bold text-info">Ekstremitas</h5>
-            <p class="font-weight-bold mb-1">Atas</p>
-            <div class="form-group row align-items-center mb-2">
-                <label class="col-md-4 col-form-label">Sianosis</label>
+
+        {{-- Grup Ekstremitas --}}
+        <div class="form-group">
+            <label class="form-label font-weight-bold text-info">Ekstremitas</label>
+            {{-- Atas --}}
+            <div class="row align-items-center mb-2">
+                <div class="col-md-4"><label class="form-label mb-0">Atas: Sianosis</label></div>
                 <div class="col-md-8">
-                    <div class="form-radio d-flex align-items-center">
-                        <label class="radio-styled radio-info mb-0"><input type="radio"
-                                name="data[status_generalis][ekstremitas][atas][sianosis]" value="Ya"
-                                {{ ($data['status_generalis']['ekstremitas']['atas']['sianosis'] ?? null) == 'Ya' ? 'checked' : '' }}><span>Ya</span></label>
+                    <div class="d-flex align-items-center">
+                        <div class="custom-control custom-radio custom-control-inline">
+                            <input type="radio" id="ekstremitas_atas_ya"
+                                name="data[status_generalis][ekstremitas][atas][sianosis]"
+                                class="custom-control-input" value="Ya"
+                                {{ ($data['status_generalis']['ekstremitas']['atas']['sianosis'] ?? null) == 'Ya' ? 'checked' : '' }}>
+                            <label class="custom-control-label" for="ekstremitas_atas_ya">Ya</label>
+                        </div>
+                        <div class="custom-control custom-radio custom-control-inline">
+                            <input type="radio" id="ekstremitas_atas_tidak"
+                                name="data[status_generalis][ekstremitas][atas][sianosis]"
+                                class="custom-control-input" value="Tidak"
+                                {{ ($data['status_generalis']['ekstremitas']['atas']['sianosis'] ?? null) == 'Tidak' ? 'checked' : '' }}>
+                            <label class="custom-control-label" for="ekstremitas_atas_tidak">Tidak</label>
+                        </div>
                         <input name="data[status_generalis][ekstremitas][atas][keterangan]" placeholder="Lokasi..."
-                            type="text" class="form-control form-control-sm ml-2" style="width: 150px;"
+                            type="text" class="form-control form-control-sm flex-1 ml-2"
                             value="{{ $data['status_generalis']['ekstremitas']['atas']['keterangan'] ?? '' }}">
-                        <label class="radio-styled radio-info ml-3 mb-0"><input type="radio"
-                                name="data[status_generalis][ekstremitas][atas][sianosis]" value="Tidak"
-                                {{ ($data['status_generalis']['ekstremitas']['atas']['sianosis'] ?? null) == 'Tidak' ? 'checked' : '' }}><span>Tidak</span></label>
                     </div>
                 </div>
             </div>
-            <p class="font-weight-bold mb-1 mt-3">Bawah</p>
-            <div class="form-group row align-items-center mb-2">
-                <label class="col-md-4 col-form-label">Sianosis</label>
+            {{-- Bawah --}}
+            <div class="row align-items-center mb-2">
+                <div class="col-md-4"><label class="form-label mb-0">Bawah: Sianosis</label></div>
                 <div class="col-md-8">
-                    <div class="form-radio d-flex align-items-center">
-                        <label class="radio-styled radio-info mb-0"><input type="radio"
-                                name="data[status_generalis][ekstremitas][bawah][sianosis]" value="Ya"
-                                {{ ($data['status_generalis']['ekstremitas']['bawah']['sianosis'] ?? null) == 'Ya' ? 'checked' : '' }}><span>Ya</span></label>
+                    <div class="d-flex align-items-center">
+                        <div class="custom-control custom-radio custom-control-inline">
+                            <input type="radio" id="ekstremitas_bawah_ya"
+                                name="data[status_generalis][ekstremitas][bawah][sianosis]"
+                                class="custom-control-input" value="Ya"
+                                {{ ($data['status_generalis']['ekstremitas']['bawah']['sianosis'] ?? null) == 'Ya' ? 'checked' : '' }}>
+                            <label class="custom-control-label" for="ekstremitas_bawah_ya">Ya</label>
+                        </div>
+                        <div class="custom-control custom-radio custom-control-inline">
+                            <input type="radio" id="ekstremitas_bawah_tidak"
+                                name="data[status_generalis][ekstremitas][bawah][sianosis]"
+                                class="custom-control-input" value="Tidak"
+                                {{ ($data['status_generalis']['ekstremitas']['bawah']['sianosis'] ?? null) == 'Tidak' ? 'checked' : '' }}>
+                            <label class="custom-control-label" for="ekstremitas_bawah_tidak">Tidak</label>
+                        </div>
                         <input name="data[status_generalis][ekstremitas][bawah][keterangan]" placeholder="Lokasi..."
-                            type="text" class="form-control form-control-sm ml-2" style="width: 150px;"
+                            type="text" class="form-control form-control-sm flex-1 ml-2"
                             value="{{ $data['status_generalis']['ekstremitas']['bawah']['keterangan'] ?? '' }}">
-                        <label class="radio-styled radio-info ml-3 mb-0"><input type="radio"
-                                name="data[status_generalis][ekstremitas][bawah][sianosis]" value="Tidak"
-                                {{ ($data['status_generalis']['ekstremitas']['bawah']['sianosis'] ?? null) == 'Tidak' ? 'checked' : '' }}><span>Tidak</span></label>
                     </div>
                 </div>
             </div>
-            <p class="font-weight-bold mb-1 mt-3">Lainnya</p>
-            <div class="form-group row align-items-center mb-0">
-                <label class="col-md-4 col-form-label">Gerak</label>
+            {{-- Lainnya --}}
+            <div class="row align-items-center">
+                <div class="col-md-4"><label class="form-label" for="ekstremitas_gerak">Lainnya: Gerak</label></div>
                 <div class="col-md-8">
-                    <div class="form-radio">
-                        <label class="radio-styled radio-info"><input type="radio"
-                                name="data[status_generalis][ekstremitas][gerak]" value="Aktif"
-                                {{ ($data['status_generalis']['ekstremitas']['gerak'] ?? null) == 'Aktif' ? 'checked' : '' }}><span>Aktif</span></label>
-                        <label class="radio-styled radio-info ml-3"><input type="radio"
-                                name="data[status_generalis][ekstremitas][gerak]" value="Tidak Aktif"
-                                {{ ($data['status_generalis']['ekstremitas']['gerak'] ?? null) == 'Tidak Aktif' ? 'checked' : '' }}><span>Tidak
-                                Aktif</span></label>
+                    <div class="custom-control custom-radio custom-control-inline">
+                        <input type="radio" id="ekstremitas_gerak_aktif"
+                            name="data[status_generalis][ekstremitas][gerak]" class="custom-control-input"
+                            value="Aktif"
+                            {{ ($data['status_generalis']['ekstremitas']['gerak'] ?? null) == 'Aktif' ? 'checked' : '' }}>
+                        <label class="custom-control-label" for="ekstremitas_gerak_aktif">Aktif</label>
+                    </div>
+                    <div class="custom-control custom-radio custom-control-inline">
+                        <input type="radio" id="ekstremitas_gerak_tidak"
+                            name="data[status_generalis][ekstremitas][gerak]" class="custom-control-input"
+                            value="Tidak Aktif"
+                            {{ ($data['status_generalis']['ekstremitas']['gerak'] ?? null) == 'Tidak Aktif' ? 'checked' : '' }}>
+                        <label class="custom-control-label" for="ekstremitas_gerak_tidak">Tidak Aktif</label>
                     </div>
                 </div>
             </div>
         </div>
         <hr>
-        <div class="mb-3">
-            <h5 class="font-weight-bold text-info">Kelainan Kongenital</h5>
-            <div class="form-group row align-items-center mb-0">
-                <div class="col-md-12">
-                    <div class="form-radio d-flex align-items-center">
-                        <label class="radio-styled radio-info mb-0"><input type="radio"
-                                name="data[status_generalis][kelainan_kongenital][status]" value="Ada"
-                                {{ ($data['status_generalis']['kelainan_kongenital']['status'] ?? null) == 'Ada' ? 'checked' : '' }}><span>Ada</span></label>
-                        <input name="data[status_generalis][kelainan_kongenital][keterangan]"
-                            placeholder="Sebutkan..." type="text" class="form-control form-control-sm ml-2"
-                            style="width: 150px;"
-                            value="{{ $data['status_generalis']['kelainan_kongenital']['keterangan'] ?? '' }}">
-                        <label class="radio-styled radio-info ml-3 mb-0"><input type="radio"
-                                name="data[status_generalis][kelainan_kongenital][status]" value="Tidak"
-                                {{ ($data['status_generalis']['kelainan_kongenital']['status'] ?? null) == 'Tidak' ? 'checked' : '' }}><span>Tidak</span></label>
-                    </div>
+
+        {{-- Grup Kelainan Kongenital --}}
+        <div class="form-group">
+            <label class="form-label font-weight-bold text-info">Kelainan Kongenital</label>
+            <div class="d-flex align-items-center">
+                <div class="custom-control custom-radio custom-control-inline">
+                    <input type="radio" id="kelainan_ada"
+                        name="data[status_generalis][kelainan_kongenital][status]" class="custom-control-input"
+                        value="Ada"
+                        {{ ($data['status_generalis']['kelainan_kongenital']['status'] ?? null) == 'Ada' ? 'checked' : '' }}>
+                    <label class="custom-control-label" for="kelainan_ada">Ada</label>
                 </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                    <input type="radio" id="kelainan_tidak"
+                        name="data[status_generalis][kelainan_kongenital][status]" class="custom-control-input"
+                        value="Tidak"
+                        {{ ($data['status_generalis']['kelainan_kongenital']['status'] ?? null) == 'Tidak' ? 'checked' : '' }}>
+                    <label class="custom-control-label" for="kelainan_tidak">Tidak</label>
+                </div>
+                <input name="data[status_generalis][kelainan_kongenital][keterangan]" placeholder="Sebutkan..."
+                    type="text" class="form-control form-control-sm flex-1 ml-2"
+                    value="{{ $data['status_generalis']['kelainan_kongenital']['keterangan'] ?? '' }}">
             </div>
         </div>
         <hr>
-        <div class="mb-3">
-            <h5 class="font-weight-bold text-info">Anus</h5>
-            <div class="form-group row align-items-center mb-0">
-                <div class="col-md-12">
-                    <div class="form-radio">
-                        <label class="radio-styled radio-info"><input type="radio"
-                                name="data[status_generalis][anus][status]" value="Ada"
-                                {{ ($data['status_generalis']['anus']['status'] ?? null) == 'Ada' ? 'checked' : '' }}><span>Ada</span></label>
-                        <label class="radio-styled radio-info ml-3"><input type="radio"
-                                name="data[status_generalis][anus][status]" value="Tidak Ada"
-                                {{ ($data['status_generalis']['anus']['status'] ?? null) == 'Tidak Ada' ? 'checked' : '' }}><span>Tidak
-                                Ada</span></label>
-                    </div>
+
+        {{-- Grup Anus --}}
+        <div class="form-group">
+            <label class="form-label font-weight-bold text-info">Anus</label>
+            <div>
+                <div class="custom-control custom-radio custom-control-inline">
+                    <input type="radio" id="anus_ada" name="data[status_generalis][anus][status]"
+                        class="custom-control-input" value="Ada"
+                        {{ ($data['status_generalis']['anus']['status'] ?? null) == 'Ada' ? 'checked' : '' }}>
+                    <label class="custom-control-label" for="anus_ada">Ada</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                    <input type="radio" id="anus_tidak" name="data[status_generalis][anus][status]"
+                        class="custom-control-input" value="Tidak Ada"
+                        {{ ($data['status_generalis']['anus']['status'] ?? null) == 'Tidak Ada' ? 'checked' : '' }}>
+                    <label class="custom-control-label" for="anus_tidak">Tidak Ada</label>
                 </div>
             </div>
         </div>

@@ -49,12 +49,46 @@
             @endif
         </td>
 
-        {{-- All other columns (Hasil, Satuan, Nilai Normal, Keterangan, etc.) --}}
-        {{-- This logic is exactly the same as before, just using the $parameterOrder variable --}}
+        {{-- Hasil (Result) Column --}}
         <td class="p-2 td-hasil" data-tipe-hasil="{{ $tipe_hasil }}"
             data-nilai-normal="{{ $nilai_normal_parameter->nilai_normal ?? '' }}"
             data-min="{{ $nilai_normal_parameter->min ?? '' }}" data-max="{{ $nilai_normal_parameter->max ?? '' }}">
-            {{-- Your input rendering logic here --}}
+            @if ($tipe_hasil == 'Angka')
+                <input type="number" step="any" class="form-control form-control-sm hasil-input"
+                    name="hasil_{{ $parameterOrder->id }}"
+                    value="{{ old('hasil_' . $parameterOrder->id, $parameterOrder->hasil) }}" autocomplete="off">
+            @elseif ($tipe_hasil == 'Negatif/Positif')
+                <select class="form-control form-control-sm hasil-input" name="hasil_{{ $parameterOrder->id }}">
+                    <option value="">Pilih</option>
+                    <option value="Negatif" @if (old('hasil_' . $parameterOrder->id, $parameterOrder->hasil) == 'Negatif') selected @endif>Negatif</option>
+                    <option value="Positif" @if (old('hasil_' . $parameterOrder->id, $parameterOrder->hasil) == 'Positif') selected @endif>Positif</option>
+                </select>
+            @elseif ($tipe_hasil == 'Reaktif/NonReaktif')
+                <select class="form-control form-control-sm hasil-input" name="hasil_{{ $parameterOrder->id }}">
+                    <option value="">Pilih</option>
+                    <option value="Reaktif" @if (old('hasil_' . $parameterOrder->id, $parameterOrder->hasil) == 'Reaktif') selected @endif>Reaktif</option>
+                    <option value="NonReaktif" @if (old('hasil_' . $parameterOrder->id, $parameterOrder->hasil) == 'NonReaktif') selected @endif>NonReaktif</option>
+                </select>
+            @elseif ($tipe_hasil == 'Text')
+                <input type="text" class="form-control form-control-sm hasil-input"
+                    name="hasil_{{ $parameterOrder->id }}"
+                    value="{{ old('hasil_' . $parameterOrder->id, $parameterOrder->hasil) }}" autocomplete="off">
+            @elseif ($tipe_hasil == 'Pilihan')
+                <select class="form-control form-control-sm hasil-input" name="hasil_{{ $parameterOrder->id }}">
+                    <option value="">Pilih</option>
+                    @if ($parameterOrder->parameter_laboratorium->pilihan_hasil)
+                        @foreach (explode(',', $parameterOrder->parameter_laboratorium->pilihan_hasil) as $pilihan)
+                            <option value="{{ trim($pilihan) }}" @if (old('hasil_' . $parameterOrder->id, $parameterOrder->hasil) == trim($pilihan)) selected @endif>
+                                {{ trim($pilihan) }}
+                            </option>
+                        @endforeach
+                    @endif
+                </select>
+            @else
+                <input type="text" class="form-control form-control-sm hasil-input"
+                    name="hasil_{{ $parameterOrder->id }}"
+                    value="{{ old('hasil_' . $parameterOrder->id, $parameterOrder->hasil) }}" autocomplete="off">
+            @endif
         </td>
         <td>{{ $parameterOrder->parameter_laboratorium->satuan }}</td>
         <td>

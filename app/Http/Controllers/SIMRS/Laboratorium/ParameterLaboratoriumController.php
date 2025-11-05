@@ -46,7 +46,17 @@ class ParameterLaboratoriumController extends Controller
     {
         $parameter_laboratorium = ParameterLaboratorium::findOrFail($id);
         $grup_penjamin = GroupPenjamin::all();
-        $kelas_rawat = KelasRawat::select('id', 'kelas')->get();
+
+        $kelas_rawat = KelasRawat::query()
+            ->with(['tarif_parameter_laboratorium' => function ($query) use ($id) {
+                // Eager load relasi tarif, tetapi hanya untuk parameter laboratorium yang relevan
+                // dan grup penjamin default (misal, ID 1)
+                $query->where('parameter_laboratorium_id', $id)
+                    ->where('group_penjamin_id', 1); // Penjamin default saat pertama kali load
+            }])
+            ->select('id', 'kelas', 'urutan')
+            ->orderBy('urutan', 'asc')
+            ->get();
 
         return view('pages.simrs.master-data.penunjang-medis.laboratorium.tarif-parameter-lab', compact('parameter_laboratorium', 'grup_penjamin', 'kelas_rawat'));
     }
@@ -114,7 +124,7 @@ class ParameterLaboratoriumController extends Controller
         $validatedData['is_hasil'] = $request->is_hasil === "on" ? 1 : 0;
         $validatedData['is_order'] = $request->is_order === "on" ? 1 : 0;
 
-      
+
 
         try {
             $parameter_laboratorium = ParameterLaboratorium::find($id);

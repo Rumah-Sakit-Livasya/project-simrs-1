@@ -69,6 +69,11 @@
 @endsection
 
 @push('scripts')
+    <script src="/js/dependency/moment/moment.js"></script>
+    <script src="/js/formplugins/bootstrap-daterangepicker/bootstrap-daterangepicker.js"></script>
+    <script src="/js/formplugins/bootstrap-datepicker/bootstrap-datepicker.js"></script>
+
+
     @include('pages.simrs.erm.partials.action-js.asesmen-neonatus-js')
     @include('pages.simrs.erm.form.dokter.component.js.neonatus-js')
 @endpush

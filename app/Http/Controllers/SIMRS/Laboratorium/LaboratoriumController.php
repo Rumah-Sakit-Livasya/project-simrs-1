@@ -495,14 +495,24 @@ class LaboratoriumController extends Controller
 
     public function import(Request $request)
     {
-        $request->validate(['file' => 'required|mimes:xls,xlsx,csv']);
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls'
+        ]);
 
-        try {
-            Excel::import(new LaboratoriumTarifImport, $request->file('file'));
-            return back()->with('success', 'Tarif laboratorium berhasil diimpor!');
-        } catch (\Exception $e) {
-            return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        $import = new LaboratoriumTarifImport();
+        Excel::import($import, $request->file('file'));
+
+        // Cek apakah ada kegagalan yang terkumpul
+        if (!empty($import->failures)) {
+            $errorMessages = [];
+            foreach ($import->failures as $failure) {
+                $errorMessages[] = "Baris " . $failure->row() . ": " . implode(", ", $failure->errors());
+            }
+            // Redirect kembali dengan pesan error yang spesifik
+            return redirect()->back()->with('error', "Terjadi beberapa kesalahan saat import:<br>" . implode("<br>", $errorMessages));
         }
+
+        return redirect()->back()->with('success', 'Data tarif laboratorium berhasil diimpor!');
     }
 
     public function destroy($id)

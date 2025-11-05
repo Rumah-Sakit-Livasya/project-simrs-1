@@ -49,6 +49,9 @@
 {{-- Boxicons --}}
 <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
 <link href='https://cdn.jsdelivr.net/npm/@mdi/font@7.2.96/css/materialdesignicons.min.css' rel='stylesheet'>
+{{-- Tambahkan atau pastikan ini ada, ini untuk jQuery UI --}}
+<link rel="stylesheet" media="screen, print" href="/css/jquery-ui.css">
+
 
 {{-- Sweetalert2 --}}
 <script src="/js/sweetalert2.min.js"></script>

@@ -1,5 +1,5 @@
-@extends('inc.layout')
-@section('title', 'Parameter Radiologi')
+@extends('inc.layout-no-side')
+@section('title', 'Parameter Laboratorium')
 @section('extended-css')
     <style>
         div.table-responsive>div.dataTables_wrapper>div.row>div[class^="col-"]:last-child {
@@ -41,6 +41,7 @@
                                         <i id="loading-spinner" class="fas fa-spinner fa-spin"></i>
                                         <thead class="bg-primary-600">
                                             <tr>
+                                                <th>No</th>
                                                 <th>Nama Kelas</th>
                                                 <th>Share Dr</th>
                                                 <th>Share Rs</th>
@@ -52,15 +53,11 @@
                                         <tbody>
                                             @foreach ($kelas_rawat as $row)
                                                 @php
-                                                    $tarif = $row->tarif_parameter_laboratorium
-                                                        ->where('group_penjamin_id', 1)
-                                                        ->where(
-                                                            'parameter_laboratorium_id',
-                                                            $parameter_laboratorium->id,
-                                                        )
-                                                        ->first();
+                                                    // Relasi sudah di-load, kita hanya perlu mengambil item pertama
+                                                    $tarif = $row->tarif_parameter_laboratorium->first();
                                                 @endphp
                                                 <tr>
+                                                    <td>{{ $loop->iteration }}</td>
                                                     <td>{{ $row->kelas }}</td>
                                                     <td>
                                                         <input type="text" name="share_dr[{{ $row->id }}]"
@@ -76,8 +73,7 @@
                                                     </td>
                                                     <td>
                                                         <input type="text" name="bhp[{{ $row->id }}]"
-                                                            value="{{ $tarif->bhp ?? 0 }}"
-                                                            data-id="{{ $row->id }}"
+                                                            value="{{ $tarif->bhp ?? 0 }}" data-id="{{ $row->id }}"
                                                             class="form-control rounded-0 border-top-0 border-left-0 border-right-0 p-0 mr-2 tarif-bhp">
                                                     </td>
                                                     <td>
@@ -88,8 +84,8 @@
                                                     </td>
                                                     <td>
                                                         <input type="text" name="total[{{ $row->id }}]"
-                                                            value="{{ $tarif->total ?? 0 }}"
-                                                            data-id="{{ $row->id }}" readonly
+                                                            value="{{ $tarif->total ?? 0 }}" data-id="{{ $row->id }}"
+                                                            readonly
                                                             class="form-control rounded-0 border-top-0 border-left-0 border-right-0 p-0 mr-2 tarif-total">
                                                     </td>
                                                 </tr>
