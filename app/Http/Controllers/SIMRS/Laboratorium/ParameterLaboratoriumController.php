@@ -124,8 +124,6 @@ class ParameterLaboratoriumController extends Controller
         $validatedData['is_hasil'] = $request->is_hasil === "on" ? 1 : 0;
         $validatedData['is_order'] = $request->is_order === "on" ? 1 : 0;
 
-
-
         try {
             $parameter_laboratorium = ParameterLaboratorium::find($id);
             if ($request->has('sub_parameter')) { // update relations between main and sub parameters
