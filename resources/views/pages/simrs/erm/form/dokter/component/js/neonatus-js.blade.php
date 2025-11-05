@@ -104,17 +104,31 @@
 
         // Inisialisasi plugin jika belum ada di template utama
         $('.datepicker').datepicker({
-            format: 'dd-mm-yyyy',
+            todayHighlight: true,
+            orientation: "bottom left",
+            format: 'yyyy-mm-dd', // Format yang disimpan adalah YYYY-MM-DD
             autoclose: true
         });
         // Pastikan plugin datetimepicker sudah dimuat sebelum inisialisasi
-        if ($.fn.datetimepicker) {
-            $(".timepicker").datetimepicker({
-                format: "HH:mm",
-                ignoreReadonly: true
-            });
-        } else {
-            console.warn('Datetimepicker plugin is not loaded.');
-        }
+        $('.timepicker').daterangepicker({
+            // --- Opsi Inti ---
+            singleDatePicker: true, // Wajib: hanya pilih satu titik waktu
+            timePicker: true, // Wajib: aktifkan pilihan waktu
+            timePicker24Hour: true, // Wajib: gunakan format 24 jam (00-23)
+            timePickerSeconds: false, // Opsional: nonaktifkan pilihan detik
+            autoUpdateInput: true, // Wajib: otomatis update nilai di input field
+
+            // --- Opsi Tampilan & Format ---
+            locale: {
+                format: 'HH:mm', // Format yang akan ditampilkan dan disimpan di input
+                cancelLabel: 'Batal',
+                applyLabel: 'Pilih'
+            }
+        }).on('show.daterangepicker', function(ev, picker) {
+            // Trik untuk menyembunyikan kalender dan hanya fokus pada jam
+            // Ini membuat UI-nya terlihat seperti timepicker murni
+            picker.container.find('.calendar-table').hide();
+        });
+
     });
 </script>

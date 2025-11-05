@@ -5,28 +5,32 @@
 {{-- REKONSILIASI OBAT & KRITERIA PULANG --}}
 <h4 class="text-primary mt-4 font-weight-bold">VI. Rencana Pemulangan Pasien</h4>
 <div class="row">
-    <div class="col-md-12">
+    {{-- Rekonsiliasi Obat --}}
+    <div class="col-md-12 mb-3">
         <div class="form-group">
-            <label class="control-label d-block">Sudah dilakukan rekonsiliasi terhadap obat yang sedang digunakan saat
-                ini:</label>
-            <div class="form-radio mt-2">
-                <label class="radio-styled radio-info">
-                    <input value="Ya" name="data[rekonsiliasi_obat]" type="radio"
-                        {{ ($data['rekonsiliasi_obat'] ?? null) == 'Ya' ? 'checked' : '' }}>
-                    <span>Ya</span>
-                </label>
-                <label class="radio-styled radio-info ml-3">
-                    <input value="Tidak" name="data[rekonsiliasi_obat]" type="radio"
+            <label class="form-label">Sudah dilakukan rekonsiliasi terhadap obat yang sedang digunakan saat ini:</label>
+            <div class="frame-wrap">
+                <div class="custom-control custom-radio custom-control-inline">
+                    <input type="radio" id="rekonsiliasi_ya" name="data[rekonsiliasi_obat]" class="custom-control-input"
+                        value="Ya" {{ ($data['rekonsiliasi_obat'] ?? null) == 'Ya' ? 'checked' : '' }}>
+                    <label class="custom-control-label" for="rekonsiliasi_ya">Ya</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                    <input type="radio" id="rekonsiliasi_tidak" name="data[rekonsiliasi_obat]"
+                        class="custom-control-input" value="Tidak"
                         {{ ($data['rekonsiliasi_obat'] ?? null) == 'Tidak' ? 'checked' : '' }}>
-                    <span>Tidak</span>
-                </label>
+                    <label class="custom-control-label" for="rekonsiliasi_tidak">Tidak</label>
+                </div>
             </div>
         </div>
     </div>
-    <div class="col-md-12 mt-3">
+
+    {{-- Kriteria Pulang --}}
+    <div class="col-md-12 mb-3">
         <div class="form-group">
-            <textarea class="form-control" id="kriteria_pulang" name="data[kriteria_pulang]" rows="3">{{ $data['kriteria_pulang'] ?? '' }}</textarea>
-            <label for="kriteria_pulang" class="control-label">Kriteria Pulang</label>
+            <label class="form-label" for="kriteria_pulang">Kriteria Pulang</label>
+            <textarea class="form-control" id="kriteria_pulang" name="data[kriteria_pulang]" rows="3"
+                placeholder="Jelaskan kriteria klinis pasien diperbolehkan pulang...">{{ $data['kriteria_pulang'] ?? '' }}</textarea>
         </div>
     </div>
 </div>
