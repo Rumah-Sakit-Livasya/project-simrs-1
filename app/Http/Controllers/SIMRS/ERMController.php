@@ -1709,8 +1709,13 @@ class ERMController extends Controller
                 $assessmentNotFilled = is_null($assesment);
 
                 // Kirim $assesmentError ke view (pastikan juga compact atau with-nya sesuai di bawah)
+                $tindakanMedis = $registration->order_tindakan_medis
+                    ? $registration->order_tindakan_medis->map(function ($order) {
+                        return $order->tindakan_medis ? $order->tindakan_medis->nama_tindakan : null;
+                    })->filter()->values()
+                    : collect();
 
-                return view('pages.simrs.erm.form.dokter.resume_medis', compact('registration', 'registrations', 'pengkajian', 'assesment', 'diagnosa_utama', 'diagnosa_tambahan', 'keluhan_utama', 'terapi_tindakan', 'menu', 'departements', 'jadwal_dokter', 'dokter', 'path',        'assessmentNotFilled'));
+                return view('pages.simrs.erm.form.dokter.resume_medis', compact('registration', 'registrations', 'pengkajian', 'assesment', 'diagnosa_utama', 'diagnosa_tambahan', 'keluhan_utama', 'terapi_tindakan', 'menu', 'departements', 'jadwal_dokter', 'dokter', 'path',        'assessmentNotFilled', 'tindakanMedis'));
 
             case 'rekonsiliasi_obat':
                 $dokter = Employee::where('is_doctor', 1)->get();

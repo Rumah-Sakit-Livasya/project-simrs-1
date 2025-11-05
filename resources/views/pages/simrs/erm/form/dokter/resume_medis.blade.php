@@ -230,6 +230,11 @@ Pemeriksaan Penunjang: {{ $assesment->pemeriksaan_penunjang ?? '' }}
                                                         <textarea class="form-control" id="tindakan_utama" name="tindakan_utama" rows="4">
 @if (empty($pengkajian?->tindakan_utama) && !empty($terapi_tindakan))
 {{ $terapi_tindakan }}
+@if (!empty($tindakanMedis) && $tindakanMedis instanceof \Illuminate\Support\Collection && $tindakanMedis->isNotEmpty())
+@foreach ($tindakanMedis as $tindakan)
+- {{ $tindakan }}
+@endforeach
+@endif
 @else
 {{ $pengkajian?->tindakan_utama ?? '' }}
 @endif
