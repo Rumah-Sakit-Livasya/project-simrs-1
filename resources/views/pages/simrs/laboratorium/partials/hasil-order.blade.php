@@ -1248,10 +1248,14 @@
                 <ul style="line-height:1.5em">
                     <li><span>Tgl Order</span>: {{ $order->order_date }}</li>
                     <li><span>Dokter Perujuk</span>: {{ $order->registration->doctor->employee->fullname }}</li>
-                    <li><span>Poly/Ruang</span>: {{ $order->registration->poliklinik }}</li>
+                    <li><span>Poly/Ruang</span>: {{ $order->registration->departement->name }}</li>
                     <li><span>Dokter Penanggung Jawab</span>: {{ $order->doctor->employee->fullname }}</li>
-                    <li><span>Tanggal / jam Sampel</span>: {{ $order->inspection_date }}</li>
-                    <li><span>Tanggal / jam Hasil</span>: {{ $order->result_date }}</li>
+                    <li><span>Tanggal / jam Sampel</span>:
+                        {{ $order->inspection_date ? \Carbon\Carbon::parse($order->inspection_date)->format('d-m-Y H:i') : '' }}
+                    </li>
+                    <li><span>Tanggal / jam Hasil</span>:
+                        {{ $order->result_datetime ? \Carbon\Carbon::parse($order->result_datetime)->format('d-m-Y H:i') : '' }}
+                    </li>
                     <li><span>Analis</span>: {{ $order->diagnosa_klinis }}</li>
                 </ul>
             </div>
@@ -1281,8 +1285,13 @@
                     {{-- <li><span>Dokter Perujuk</span>: {{ $order->registration_otc->doctor->employee->fullname }}</li> --}}
                     <li><span>Poly/Ruang</span>: {{ $order->registration_otc->poly_ruang }}</li>
                     <li><span>Dokter Penanggung Jawab</span>: {{ $order->doctor->employee->fullname }}</li>
-                    <li><span>Tanggal / jam Sampel</span>: {{ $order->inspection_date }}</li>
-                    <li><span>Tanggal / jam Hasil</span>: {{ $order->result_date }}</li>
+                    <li>
+                        <span>Tanggal / Jam Sampel</span>:
+                        {{ $order->inspection_date ? \Carbon\Carbon::parse($order->inspection_date)->format('d-m-Y H:i') : '' }}
+                    </li>
+                    <li><span>Tanggal / jam Hasil</span>:
+                        {{ $order->result_datetime ? \Carbon\Carbon::parse($order->result_datetime)->format('d-m-Y H:i') : '' }}
+                    </li>
                     <li><span>Analis</span>: {{ $order->diagnosa_klinis }}</li>
                 </ul>
             </div>
