@@ -99,6 +99,7 @@ use App\Http\Controllers\SIMRS\Procurement\PurchaseRequestController as Procurem
 use App\Http\Controllers\SIMRS\Procurement\SetupController;
 use App\Http\Controllers\SIMRS\Radiologi\RadiologiController;
 use App\Http\Controllers\SIMRS\RegistrationController;
+use App\Http\Controllers\SIMRS\Report\LaporanPoliklinikController;
 use App\Http\Controllers\SIMRS\RoomController;
 use App\Http\Controllers\SIMRS\Setup\BiayaAdministrasiRawatInapController;
 use App\Http\Controllers\SIMRS\Setup\BiayaMateraiController;
@@ -1671,6 +1672,11 @@ Route::group(['middleware' => ['auth']], function () {
 
         Route::prefix('pasien')->name('pasien.')->group(function () {
             Route::get('/{pasien}/dashboard', [PatientDashboardController::class, 'index'])->name('dashboard');
+        });
+
+        Route::prefix('laporan')->name('laporan.')->group(function () {
+            Route::get('poliklinik', [LaporanPoliklinikController::class, 'index'])->name('poliklinik.index');
+            Route::post('poliklinik/show', [LaporanPoliklinikController::class, 'show'])->name('poliklinik.show');
         });
     });
 });

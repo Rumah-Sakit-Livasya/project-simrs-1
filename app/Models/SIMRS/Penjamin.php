@@ -9,11 +9,11 @@ use Illuminate\Support\Str;
 
 class Penjamin extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
 
     protected $guarded = ['id'];
     protected $appends = ['is_bpjs'];
-    
+
     // protected $table = 'penjamin';
 
     public function patient()
