@@ -581,15 +581,39 @@
         }
 
         @media print {
-
             #functions {
-                display: none;
+                display: none !important;
+            }
+
+            @page {
+                size: 1.57in 2.36in;
+                margin: 0;
+            }
+
+            #blok {
+                margin-left: -2rem !important;
+            }
+
+            body {
+                /* Orientasi Portrait ke Bawah (default) */
+                width: 1.57in;
+                height: 2.36in;
+                overflow: hidden;
+                position: absolute;
+                top: 0;
+                left: 0;
+                transform: rotate(90deg);
+            }
+
+            @page {
+                /* Portrait: Lebar lebih kecil dari tinggi */
+                size: 1.57in 2.36in;
+                margin: 0;
             }
 
             #preview {
                 margin-top: 20px;
             }
-
         }
     </style>
     <style type="text/css" media="all" id="less:testing-include-styles-print">
@@ -1232,68 +1256,59 @@
             @if ($order->registration)
                 <tbody>
                     <tr>
-                        <td style="width:35%"><span class="head_label">Nama Pasien</span></td>
-                        <td style="width:65%"><span class="head_anak">: <b>{{ $order->registration->patient->name }}
+                        <td style="width:30%"><span class="head_label">No RM</span></td>
+                        <td style="width:70%"><span class="head_anak">:
+                                <b>{{ $order->registration->patient->medical_record_number }}</b></span></td>
+                    </tr>
+                    <tr>
+                        <td style="width:30%"><span class="head_label">Nama Pasien</span></td>
+                        <td style="width:70%"><span class="head_anak">: <b>{{ $order->registration->patient->name }}
                                     ({{ substr($order->registration->patient->gender, 0, 1) }})</b></span></td>
                     </tr>
                     <tr>
-                        <td><span class="head_label">No RM</span></td>
-                        <td><span class="head_anak">:
-                                <b>{{ $order->registration->patient->medical_record_number }}</b></span></td>
-                    </tr>
-
-                    <tr>
                         <td><span class="head_label">Tanggal Lahir</span></td>
                         <td><span class="head_anak">:
-                                <b>{{ \Carbon\Carbon::parse($order->registration->patient->date_of_birth)->format('d M Y') }}</b></span>
+                                <b>{{ \Carbon\Carbon::parse($order->registration->patient->date_of_birth)->translatedFormat('d F Y') }}</b></span>
                         </td>
                     </tr>
-
                     <tr>
-                        <td><span class="head_label">Tgl Periksa / Jam</span></td>
-                        @if ($order->inspection_date)
-                            <td><span class="head_anak">:
-                                    {{ $order->inspection_date ? \Carbon\Carbon::parse($order->inspection_date)->format('d M Y') : '-' }}
-                                    /
-                                    {{ $order->inspection_date ? \Carbon\Carbon::parse($order->inspection_date)->format('H:i') : '-' }}</span>
-                            </td>
-                        @else
-                            <td><span class="head_anak">: -</span></td>
-                        @endif
+                        <td><span class="head_label">Alamat</span></td>
+                        <td><span class="head_anak">:
+                                <b>{{ $order->registration->patient->address ?? '-' }}</b></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><span class="head_label">No. Telpon</span></td>
+                        <td><span class="head_anak">:
+                                <b>{{ $order->registration->patient->mobile_phone_number ?? '-' }}</b></span>
+                        </td>
                     </tr>
                 </tbody>
             @else
                 {{-- otc --}}
                 <tbody>
                     <tr>
-                        <td style="width:35%"><span class="head_label">Nama Pasien</span></td>
-                        <td style="width:65%"><span class="head_anak">: <b>{{ $order->registration_otc->nama_pasien }}
+                        <td style="width:30%"><span class="head_label">Nama Pasien</span></td>
+                        <td style="width:70%"><span class="head_anak">: <b>{{ $order->registration_otc->nama_pasien }}
                                     ({{ substr($order->registration_otc->jenis_kelamin, 0, 1) }})</b></span></td>
                     </tr>
-                    <tr>
-                        <td><span class="head_label">No RM</span></td>
-                        <td><span class="head_anak">:
-                                <b>OTC</b></span></td>
-                    </tr>
-
                     <tr>
                         <td><span class="head_label">Tanggal Lahir</span></td>
                         <td><span class="head_anak">:
                                 <b>{{ \Carbon\Carbon::parse($order->registration_otc->date_of_birth)->format('d M Y') }}</b></span>
                         </td>
                     </tr>
-
                     <tr>
-                        <td><span class="head_label">Tgl Periksa / Jam</span></td>
-                        @if ($order->inspection_date)
-                            <td><span class="head_anak">:
-                                    {{ $order->inspection_date ? \Carbon\Carbon::parse($order->inspection_date)->format('d M Y') : '-' }}
-                                    /
-                                    {{ $order->inspection_date ? \Carbon\Carbon::parse($order->inspection_date)->format('H:i') : '-' }}</span>
-                            </td>
-                        @else
-                            <td><span class="head_anak">: -</span></td>
-                        @endif
+                        <td><span class="head_label">Alamat</span></td>
+                        <td><span class="head_anak">:
+                                <b>{{ $order->registration_otc->alamat ?? '-' }}</b></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><span class="head_label">No. Telpon</span></td>
+                        <td><span class="head_anak">:
+                                <b>{{ $order->registration_otc->no_telpon ?? '-' }}</b></span>
+                        </td>
                     </tr>
                 </tbody>
             @endif
