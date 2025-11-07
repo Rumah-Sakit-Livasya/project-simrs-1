@@ -1,3 +1,4 @@
+{{-- @dd($registration) --}}
 @extends('pages.simrs.erm.index')
 @section('erm')
     @if (isset($registration) || $registration != null)
@@ -25,7 +26,7 @@
                                 <label for="jam_masuk" class="control-label text-primary">Pukul Pasien
                                     Datang</label>
                                 <input type="time" name="jam_masuk" class="form-control"
-                                    value="{{ $pengkajian?->jam_masuk ?? '' }}">
+                                    value="{{ $pengkajian?->jam_masuk ?? \Carbon\Carbon::parse($registration->registration_date)->format('H:i') }}">
                             </div>
                         </div>
                         <div class="col-md-4">
@@ -33,7 +34,7 @@
                                 <label for="jam_dilayani" class="control-label text-primary">Pukul Pasien
                                     Periksa</label>
                                 <input type="time" name="jam_dilayani" class="form-control"
-                                    value="{{ $pengkajian?->jam_dilayani ?? '' }}">
+                                    value="{{ $pengkajian?->jam_dilayani ?? now()->format('H:i') }}">
                             </div>
                         </div>
                     </div>

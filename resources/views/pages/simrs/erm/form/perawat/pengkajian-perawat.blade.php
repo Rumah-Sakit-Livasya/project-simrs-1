@@ -20,7 +20,7 @@
                         <div class="col-md-3">
                             <label for="jam_masuk" class="form-label text-primary">Jam Masuk</label>
                             <input type="time" name="jam_masuk" class="form-control" id="jam_masuk"
-                                value="{{ $pengkajian?->jam_masuk ?? '' }}">
+                                value="{{ $pengkajian?->jam_masuk ?? \Carbon\Carbon::parse($registration->registration_date)->format('H:i') }}">
                         </div>
                         <div class="col-md-3">
                             <label for="tgl_dilayani" class="form-label text-primary">Tanggal Dilayani</label>
@@ -30,7 +30,7 @@
                         <div class="col-md-3">
                             <label for="jam_dilayani" class="form-label text-primary">Jam Dilayani</label>
                             <input type="time" name="jam_dilayani" class="form-control" id="jam_dilayani"
-                                value="{{ $pengkajian?->jam_dilayani ?? '' }}">
+                                value="{{ $pengkajian?->jam_dilayani ?? now()->format('H:i') }}">
                         </div>
                         <div class="col-md-12">
                             <label for="keluhan_utama" class="form-label text-primary">Keluhan Utama <span
