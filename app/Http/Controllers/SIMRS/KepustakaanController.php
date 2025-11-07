@@ -219,6 +219,7 @@ class KepustakaanController extends Controller
         ];
 
         $validatedData = $request->validate($rules, $messages);
+        $validatedData['organization_id'] = $organizationId;
 
         $organization = Organization::find($organizationId);
         if ($request->hasFile('file')) {
