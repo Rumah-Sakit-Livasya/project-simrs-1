@@ -184,6 +184,7 @@ class KepustakaanController extends Controller
 
     public function store(Request $request)
     {
+        $organizationId = $request->organization_id ?? (auth()->user()?->employee?->organization_id ?? null);
         // Atur aturan validasi dasar
         $rules = [
             'type' => 'required',
@@ -219,7 +220,7 @@ class KepustakaanController extends Controller
 
         $validatedData = $request->validate($rules, $messages);
 
-        $organization = Organization::find($request->organization_id);
+        $organization = Organization::find($organizationId);
         if ($request->hasFile('file')) {
             $file = $request->file('file');
             $fileName = Carbon::now()->timestamp . '_' . \Str::slug($request->name) . '.' . $file->getClientOriginalExtension();
