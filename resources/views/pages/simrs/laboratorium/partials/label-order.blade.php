@@ -1257,7 +1257,8 @@
                 <tbody>
                     <tr>
                         <td style="width:30%"><span class="head_label">No RM</span></td>
-                        <td style="width:70%"><span class="head_anak">:
+                        <td style="width:70i2
+                        %"><span class="head_anak">:
                                 <b>{{ $order->registration->patient->medical_record_number }}</b></span></td>
                     </tr>
                     <tr>

@@ -1,55 +1,49 @@
 @extends('inc.layout')
 @section('title', 'Simulasi Harga Laboratorium')
 
+{{-- CSS Kustom disamakan dengan halaman Order --}}
 @section('extended-css')
-    {{-- CSS Kustom untuk Halaman Ini --}}
     <style>
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
-        }
-
-        .card-tindakan {
-            /* Mengganti .card agar tidak bentrok dengan class Bootstrap */
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            padding: 15px;
-            border: 1px solid #e1e1e1;
-        }
-
-        .card-tindakan h3 {
-            color: white;
-            padding: 10px 15px;
-            margin: -15px -15px 10px -15px;
-            border-top-left-radius: 8px;
-            border-top-right-radius: 8px;
-            font-size: 1rem;
-            font-weight: 500;
-        }
-
-        .item {
+        .test-item {
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            padding: 8px 0;
-            border-bottom: 1px solid #eee;
+            justify-content: space-between;
+            padding: 0.75rem 1.25rem;
+            border-bottom: 1px solid #dee2e6;
         }
 
-        .item:last-child {
+        .test-item:last-child {
             border-bottom: none;
         }
 
-        .item .form-check-label {
-            /* Memastikan label bisa di-klik */
-            cursor: pointer;
+        .test-item .test-price {
+            min-width: 100px;
+            text-align: right;
+            color: #28a745;
+            font-weight: 500;
         }
 
-        .parameter_laboratorium_number {
-            width: 70px;
-            /* Sedikit lebih lebar untuk kenyamanan */
-            text-align: center;
+        /* == CSS untuk Quantity Stepper (Tombol +/-) == */
+        .quantity-stepper {
+            width: 120px;
+            margin-left: 15px;
+            flex-shrink: 0;
+        }
+
+        .quantity-stepper .quantity-input {
+            -moz-appearance: textfield;
+            appearance: textfield;
+            background-color: #fff !important;
+        }
+
+        .quantity-stepper .quantity-input::-webkit-outer-spin-button,
+        .quantity-stepper .quantity-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .quantity-stepper .btn-quantity-stepper {
+            width: 32px;
         }
     </style>
 @endsection
@@ -119,7 +113,7 @@
                 <div class="panel-content">
                     {{-- Tampilan Total Harga --}}
                     <div class="alert alert-info text-center fs-xxl fw-700 p-3 mb-4" role="alert">
-                        <i class="fas fa-calculator mr-2"></i> Total Biaya: <span id="laboratorium-total">Rp 0,00</span>
+                        <i class="fas fa-calculator mr-2"></i> Total Biaya: <span id="laboratorium-total">Rp 0</span>
                     </div>
 
                     {{-- Form Pencarian --}}
@@ -130,35 +124,56 @@
                     </div>
                     <hr>
 
-                    {{-- Grid Tindakan --}}
-                    <div class="grid">
-                        @foreach ($laboratorium_categories as $category)
-                            <div class="card-tindakan">
-                                <h3 class="bg-primary-600">{{ $category->nama_kategori }}</h3>
-                                @foreach ($category->parameter_laboratorium as $parameter)
-                                    @if ($parameter->is_order)
-                                        <div class="item parameter_laboratorium">
-                                            <div class="d-flex align-items-center">
-                                                <div class="custom-control custom-checkbox">
+                    {{-- Grid Tindakan (Struktur Baru) --}}
+                    <div class="row" id="laboratorium-grid-container">
+                        {{-- Iterasi berdasarkan GRUP PARAMETER --}}
+                        @foreach ($groupedParameters as $groupName => $parameters)
+                            {{-- Menggunakan layout 2 kolom seperti halaman Order --}}
+                            <div class="col-md-6 category-column">
+                                <div class="card border mb-4">
+                                    <div class="card-header bg-primary-50">
+                                        <h6 class="card-title text-white mb-0">{{ $groupName }}</h6>
+                                    </div>
+                                    <div class="card-body p-0" style="max-height: 350px; overflow-y: auto;">
+                                        @forelse ($parameters as $parameter)
+                                            <div class="test-item parameter_laboratorium">
+                                                <div class="custom-control custom-checkbox flex-grow-1">
                                                     <input type="checkbox"
                                                         class="custom-control-input parameter_laboratorium_checkbox"
                                                         value="{{ $parameter->id }}"
                                                         id="parameter_laboratorium_{{ $parameter->id }}">
                                                     <label class="custom-control-label"
-                                                        for="parameter_laboratorium_{{ $parameter->id }}">
-                                                        {{ $parameter->parameter }}
-                                                        (<span class="text-info fw-500"
-                                                            id="harga_parameter_laboratorium_{{ $parameter->id }}">Rp
-                                                            0,00</span>)
-                                                    </label>
+                                                        for="parameter_laboratorium_{{ $parameter->id }}">{{ $parameter->parameter }}</label>
+                                                </div>
+                                                <div class="test-price"
+                                                    id="harga_parameter_laboratorium_{{ $parameter->id }}">
+                                                    {{-- Harga akan diisi oleh JS --}}
+                                                </div>
+                                                <div class="input-group quantity-stepper">
+                                                    <div class="input-group-prepend">
+                                                        <button class="btn btn-primary btn-sm btn-quantity-stepper"
+                                                            type="button" data-action="decrement">
+                                                            <i class="fal fa-minus"></i>
+                                                        </button>
+                                                    </div>
+                                                    <input type="number" value="1" min="1"
+                                                        class="form-control form-control-sm text-center quantity-input parameter_laboratorium_number"
+                                                        id="jumlah_{{ $parameter->id }}" readonly>
+                                                    <div class="input-group-append">
+                                                        <button class="btn btn-primary btn-sm btn-quantity-stepper"
+                                                            type="button" data-action="increment">
+                                                            <i class="fal fa-plus"></i>
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             </div>
-                                            <input type="number" value="1" min="1"
-                                                class="form-control form-control-sm parameter_laboratorium_number"
-                                                id="jumlah_{{ $parameter->id }}">
-                                        </div>
-                                    @endif
-                                @endforeach
+                                        @empty
+                                            <div class="p-3 text-muted text-center">
+                                                Tidak ada parameter dalam grup ini.
+                                            </div>
+                                        @endforelse
+                                    </div>
+                                </div>
                             </div>
                         @endforeach
                     </div>
@@ -174,12 +189,37 @@
         $(document).ready(function() {
             // Inisialisasi Select2
             $('.select2').select2();
-        });
 
-        // Menyediakan data dari PHP (Blade) ke JavaScript
-        window._kategoriLaboratorium = @json($laboratorium_categories);
-        window._tarifLaboratorium = @json($tarifs);
+            // Menyediakan data tarif dari PHP (Blade) ke JavaScript
+            window._tarifLaboratorium = @json($tarifs);
+
+            $('#laboratorium-grid-container').on('click', '.btn-quantity-stepper', function() {
+                const button = $(this);
+                const action = button.data('action'); // 'increment' or 'decrement'
+
+                // Cari input number yang berada dalam satu grup dengan tombol yang diklik
+                const input = button.closest('.quantity-stepper').find('.quantity-input');
+                let currentValue = parseInt(input.val());
+
+                if (action === 'increment') {
+                    currentValue++;
+                } else if (action === 'decrement') {
+                    // Jangan biarkan kuantitas kurang dari 1
+                    if (currentValue > 1) {
+                        currentValue--;
+                    }
+                }
+
+                // Update nilai input
+                input.val(currentValue);
+
+                // PENTING: Memicu event 'change' pada checkbox terkait
+                // Ini akan memberitahu script kalkulasi harga bahwa ada perubahan
+                // dan total harga harus dihitung ulang.
+                input.closest('.test-item').find('.parameter_laboratorium_checkbox').trigger('change');
+            });
+        });
     </script>
-    {{-- Skrip ini diasumsikan sudah diubah menjadi jQuery seperti respons sebelumnya --}}
+    {{-- Pastikan file JS ini sudah disesuaikan dengan struktur baru --}}
     <script src="{{ asset('js/simrs/simulasi-harga-laboratorium.js') }}?v={{ time() }}"></script>
 @endsection

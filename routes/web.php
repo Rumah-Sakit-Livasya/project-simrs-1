@@ -177,7 +177,7 @@ Route::middleware([LastSeenUser::class])->group(function () {
             Route::resource('str', StrController::class)->except(['show', 'create']);
 
             // Route untuk Dashboard
-            Route::get('/dashboard', [EmployeeDashboardController::class, 'index'])->name('dashboard'); // Asumsi dashboard sebagai halaman utama
+            Route::get('/dashboard', [EmployeeDashboardController::class, 'index'])->name('employee.dashboard'); // Asumsi dashboard sebagai halaman utama
             Route::prefix('dashboard')->name('dashboard.')->group(function () {
                 Route::get('stats', [EmployeeDashboardController::class, 'stats'])->name('stats');
                 Route::get('sip-notifications', [EmployeeDashboardController::class, 'sipNotifications'])->name('sip-notifications');
