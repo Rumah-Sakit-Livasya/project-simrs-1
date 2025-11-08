@@ -139,7 +139,8 @@
                                                     <input type="hidden" name="satuan_id[{{ $loop->index }}]"
                                                         value="{{ $item->satuan_id }}">
                                                     <td class="text-center">
-                                                        <input type="text" name="poi_id[{{ $key }}]" value="{{ $item->poi_id }}">
+                                                        <input type="text" name="poi_id[{{ $key }}]"
+                                                            value="{{ $item->poi_id }}">
                                                         <a class="btn btn-danger btn-xs delete-btn"
                                                             data-key-cache="{{ $item->barang_id }}/{{ $item->satuan_id }}">
                                                             <i class="fal fa-times"></i>
@@ -174,7 +175,8 @@
 
                                 <div
                                     class="panel-content border-faded border-left-0 border-right-0 border-bottom-0 d-flex flex-row align-items-center mt-3">
-                                    <button type="button" class="btn btn-secondary" onclick="window.close()">Batal</button>
+                                    <button type="button" class="btn btn-secondary"
+                                        onclick="window.close()">Batal</button>
                                     <div class="ml-auto">
                                         <button type="button" id="order-submit-draft" class="btn btn-primary">
                                             <span class="btn-text">Simpan Draft</span>

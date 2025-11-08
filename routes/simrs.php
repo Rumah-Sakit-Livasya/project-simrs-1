@@ -1553,7 +1553,7 @@ Route::group(['middleware' => ['auth']], function () {
         //     Route::get('transaksi-non-pasien', [KasirController::class, 'index'])->name('laboratorium.list-order');
         //     Route::get('setoran-kasir', [KasirController::class, 'index'])->name('laboratorium.list-order');
         //     Route::prefix('reports')->group(function() {
-        //     Route::get('penerimaan-kasir', [KasirController::class, 'parametrPemeriksaan'])->name('laboratorium.parameter-pemeriksaan');
+        // Route::get('penerimaan-kasir', [KasirController::class, 'parametrPemeriksaan'])->name('laboratorium.parameter-pemeriksaan');
         //     Route::get('rekap-penerimaan-kasir', [KasirController::class, 'pasienPerPemeriksaan'])->name('laboratorium.psdirn-per-permintaan');
         //     Route::get('laboratorium', [KasirController::class, 'parametrPemeriksaan'])->name('laboratorium.parameter-pemeriksaan');
         //     });
