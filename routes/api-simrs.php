@@ -561,6 +561,9 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
 
     Route::prefix('layanan')->group(function () {
         Route::prefix('rawat-jalan')->group(function () {
+            Route::get('/{registration}/pemakaian-alat-data', [LayananController::class, 'getDataPemakaianAlat'])->name('layanan.rajal.pemakaian_alat.data');
+            // Pastikan route untuk destroy juga benar
+            Route::delete('/pemakaian-alat/{order}', [LayananController::class, 'destroyPemakaianAlat'])->name('layanan.rajal.pemakaian_alat.destroy');
             Route::prefix('pemakaian_alat')->group(function () {
                 Route::post('/store', [LayananController::class, 'storePemakaianAlat'])->name('layanan.rajal.pemakaian_alat.store');
                 Route::delete('/{id}', [LayananController::class, 'destroyPemakaianAlat'])->name('layanan.rajal.pemakaian_alat.destroy');

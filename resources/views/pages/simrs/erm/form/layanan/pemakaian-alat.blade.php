@@ -14,7 +14,7 @@
                 <div class="row">
                     <div class="col-md-12">
                         <div class="table-responsive">
-                            <table id="dt-basic-example" class="table table-bordered table-hover table-striped w-100">
+                            <table id="dt-pemakaian-alat" class="table table-bordered table-hover table-striped w-100">
                                 <thead class="bg-primary-600">
                                     <tr>
                                         <th>No</th>
@@ -28,38 +28,19 @@
                                         <th>Aksi</th>
                                     </tr>
                                 </thead>
+                                {{-- KOSONGKAN TBODY INI. DataTables akan mengisinya. --}}
                                 <tbody>
-                                    @foreach ($alat_medis_yang_dipakai as $item)
-                                        <tr>
-                                            <td>{{ $loop->iteration }}</td>
-                                            <td>{{ tgl($item->tanggal_order) }}</td>
-                                            <td>{{ $item?->doctor?->employee?->fullname }}</td>
-                                            <td>{{ $item?->alat?->nama }}</td>
-                                            <td>{{ $item?->qty }}</td>
-                                            <td>{{ $item?->kelas }}</td>
-                                            <td>{{ $item?->lokasi }}</td>
-                                            <td>{{ $item?->entry_by }}</td>
-                                            <td>
-                                                <button class="btn btn-danger btn-sm delete-action"
-                                                    data-id="{{ $item->id }}">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    @endforeach
                                 </tbody>
-                                <tfoot>
-                                    <tr>
-                                        <th colspan="9" class="text-center">
-                                            <button type="button" class="btn btn-outline-primary waves-effect waves-themed"
-                                                id="btn-tambah-tindakan" data-toggle="modal"
-                                                data-id="{{ $registration->id }}" data-target="#modal-tambah-alat">
-                                                <span class="fal fa-plus-circle"></span>
-                                                Tambah Alat
-                                            </button>
-                                        </th>
-                                    </tr>
-                                </tfoot>
+                                <tr>
+                                    <th colspan="9" class="text-center">
+                                        <button type="button" class="btn btn-outline-primary waves-effect waves-themed"
+                                            id="btn-tambah-tindakan" data-toggle="modal" data-id="{{ $registration->id }}"
+                                            data-target="#modal-tambah-alat">
+                                            <span class="fal fa-plus-circle"></span>
+                                            Tambah Alat
+                                        </button>
+                                    </th>
+                                </tr>
                             </table>
                         </div>
                     </div>
@@ -91,7 +72,8 @@
                             <div class="row mb-3">
                                 <label for="doctor" class="col-sm-3 col-form-label">Dokter</label>
                                 <div class="col-sm-9">
-                                    <select class="form-select select2-dropdown" id="doctor" style="width: 100%;">
+                                    <select class="form-select select2-dropdown" id="doctor-pemakaian-alat"
+                                        style="width: 100%;">
                                         @foreach ($doctors as $doctor)
                                             @if ($doctor->id == $registration->doctor_id)
                                                 <option value="{{ $doctor->id }}" selected>
@@ -171,11 +153,10 @@
     @endif
 @endsection
 @section('plugin-erm')
+    {{-- HANYA PANGGIL PLUGIN DAN INCLUDE FILE JS. TIDAK ADA LOGIKA JS DI SINI. --}}
     <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
-    <script script src="/js/formplugins/select2/select2.bundle.js"></script>
+    <script src="/js/formplugins/select2/select2.bundle.js"></script>
     <script src="/js/formplugins/bootstrap-datepicker/bootstrap-datepicker.js"></script>
-
-    @include('pages.simrs.poliklinik.partials.action-js.pemakaian_alat')
     <script>
         $(document).ready(function() {
             $('body').addClass('layout-composed');
@@ -205,4 +186,6 @@
             });
         });
     </script>
+    {{-- Cukup include satu file ini yang sudah berisi semua logika --}}
+    @include('pages.simrs.poliklinik.partials.action-js.pemakaian_alat')
 @endsection
