@@ -180,4 +180,84 @@ class IGDController extends Controller
 
         return view('pages.simrs.igd.partials.print-report', compact('pasien', 'from', 'to', 'penjaminId', 'dokterId', 'dokterName', 'penjaminName'));
     }
+
+    /**
+     * Menampilkan form filter dan hasil laporan rekap IGD per dokter.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\View\View
+     */
+    public function rekapPerDokter(Request $request)
+    {
+        // Ambil data untuk filter dropdown
+        // Mengambil dokter yang departemennya adalah UGD
+        $doctors = Doctor::whereHas('department_from_doctors', function ($query) {
+            $query->where('name', 'UGD');
+        })->with('employee')->get();
+
+        $penjamins = Penjamin::orderBy('nama_perusahaan')->get();
+
+        $results = [];
+        $hasData = false;
+
+        // Cek jika ada request untuk menampilkan data (form disubmit)
+        if ($request->has('start_date') && $request->has('end_date')) {
+            $request->validate([
+                'start_date' => 'required|date_format:d-m-Y',
+                'end_date' => 'required|date_format:d-m-Y|after_or_equal:start_date',
+            ]);
+
+            $startDate = Carbon::createFromFormat('d-m-Y', $request->start_date)->startOfDay();
+            $endDate = Carbon::createFromFormat('d-m-Y', $request->end_date)->endOfDay();
+            $doctorId = $request->doctor_id;
+            $penjaminId = $request->penjamin_id;
+
+            // Query utama untuk mengambil data dokter
+            $doctorQuery = Doctor::with('employee')
+                ->whereHas('department_from_doctors', fn($q) => $q->where('name', 'UGD'));
+
+            if ($doctorId) {
+                $doctorQuery->where('id', $doctorId);
+            }
+
+            // Ambil dokter yang relevan
+            $doctorsForReport = $doctorQuery->get();
+
+            // Lakukan iterasi untuk setiap dokter untuk menghitung agregat
+            $results = $doctorsForReport->map(function ($doctor) use ($startDate, $endDate, $penjaminId) {
+                // Query registrasi untuk dokter ini dalam rentang waktu yang dipilih
+                $registrations = Registration::where('doctor_id', $doctor->id)
+                    ->where('registration_type', 'igd')
+                    ->whereBetween('registration_date', [$startDate, $endDate])
+                    ->when($penjaminId, fn($q) => $q->where('penjamin_id', $penjaminId));
+
+                $registrationIds = $registrations->pluck('id');
+                $total_registrasi = $registrationIds->count();
+
+                // Hanya proses dokter yang memiliki registrasi
+                if ($total_registrasi > 0) {
+                    // Hitung jumlah resep
+                    // $total_resep = Resep::whereIn('registration_id', $registrationIds)->count();
+
+                    // // Hitung jumlah resep yang dibatalkan (asumsi status 'batal')
+                    // $total_resep_batal = Resep::whereIn('registration_id', $registrationIds)
+                    //     ->where('status', 'batal')
+                    //     ->count();
+
+                    return (object) [
+                        'doctor_name' => $doctor->employee->fullname,
+                        'total_registrasi' => $total_registrasi,
+                        // 'total_resep' => $total_resep,
+                        // 'total_resep_batal' => $total_resep_batal,
+                    ];
+                }
+
+                return null;
+            })->filter(); // Hapus nilai null dari koleksi
+
+            $hasData = $results->isNotEmpty();
+        }
+
+        return view('pages.simrs.igd.report-rekap-per-dokter', compact('doctors', 'penjamins', 'results', 'hasData'));
+    }
 }
