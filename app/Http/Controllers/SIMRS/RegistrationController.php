@@ -810,7 +810,7 @@ class RegistrationController extends Controller
                 'doctor.employee:id,fullname',
                 'order_parameter_laboratorium.parameter_laboratorium'
             ])
-            ->orderBy('order_date', 'desc')
+            ->orderBy('id', 'desc')
             ->get();
 
         // Only load peralatan that are used in this registration
