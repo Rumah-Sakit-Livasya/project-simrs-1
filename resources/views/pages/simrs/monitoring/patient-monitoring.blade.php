@@ -5,15 +5,15 @@
 @section('extended-css')
     <style>
         /* --------------------
-                                                               General Styles
-                                                            -------------------- */
+                                                                   General Styles
+                                                                -------------------- */
         body {
             font-size: 0.9rem;
         }
 
         /* --------------------
-                                                               Filter Section
-                                                            -------------------- */
+                                                                   Filter Section
+                                                                -------------------- */
         .filter-section {
             background: #ffffff;
             border: 1px solid #e3e6f0;
@@ -29,8 +29,8 @@
         }
 
         /* --------------------
-                                                               Statistic Cards
-                                                            -------------------- */
+                                                                   Statistic Cards
+                                                                -------------------- */
         .stat-card {
             border-radius: 0.5rem;
             transition: all 0.3s;
@@ -54,8 +54,8 @@
         }
 
         /* --------------------
-                                                               Monitoring Table
-                                                            -------------------- */
+                                                                   Monitoring Table
+                                                                -------------------- */
         #monitoring-table {
             border-collapse: separate;
             border-spacing: 0 0.5rem;
@@ -117,8 +117,8 @@
         }
 
         /* --------------------
-                                                               Modal
-                                                            -------------------- */
+                                                                   Modal
+                                                                -------------------- */
         #detailModal .modal-content {
             border-radius: 0.75rem;
             overflow: hidden;
