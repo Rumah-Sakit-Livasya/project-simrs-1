@@ -107,7 +107,7 @@
                 </div>
             </li>
         </ul>
-    @elseif($path === 'poliklinik')
+    @elseif($path === 'poliklinik' || $path === 'dokter')
         <ul class="nav nav-tabs action-erm" role="tablist">
             <li class="nav-item mr-2">
                 <a class="btn btn-outline-primary" id="toggle-pasien" data-action="toggle"
@@ -115,20 +115,22 @@
                     <i class="ni ni-menu"></i>
                 </a>
             </li>
-            <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button"
-                    aria-haspopup="true" aria-expanded="false">Perawat</a>
-                <div class="dropdown-menu">
-                    <a class="dropdown-item"
-                        href="{{ route($path . '.daftar-pasien', ['registration' => $registration->registration_number, 'menu' => 'pengkajian_perawat']) }}"
-                        role="tab">Pengkajian</a>
-                    <a class="dropdown-item"
-                        href="{{ route($path . '.daftar-pasien', ['registration' => $registration->registration_number, 'menu' => 'cppt_perawat']) }}">CPPT</a>
-                    <a class="dropdown-item"
-                        href="{{ route($path . '.daftar-pasien', ['registration' => $registration->registration_number, 'menu' => 'transfer_pasien_perawat']) }}">Transfer
-                        Pasien Antar Ruangan</a>
-                </div>
-            </li>
+            @if ($path !== 'dokter')
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button"
+                        aria-haspopup="true" aria-expanded="false">Perawat</a>
+                    <div class="dropdown-menu">
+                        <a class="dropdown-item"
+                            href="{{ route($path . '.daftar-pasien', ['registration' => $registration->registration_number, 'menu' => 'pengkajian_perawat']) }}"
+                            role="tab">Pengkajian</a>
+                        <a class="dropdown-item"
+                            href="{{ route($path . '.daftar-pasien', ['registration' => $registration->registration_number, 'menu' => 'cppt_perawat']) }}">CPPT</a>
+                        <a class="dropdown-item"
+                            href="{{ route($path . '.daftar-pasien', ['registration' => $registration->registration_number, 'menu' => 'transfer_pasien_perawat']) }}">Transfer
+                            Pasien Antar Ruangan</a>
+                    </div>
+                </li>
+            @endif
             <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button"
                     aria-haspopup="true" aria-expanded="false">Dokter</a>
@@ -158,20 +160,22 @@
                         href="{{ route($path . '.daftar-pasien', ['registration' => $registration->registration_number, 'menu' => 'pengkajian_gizi']) }}">Pengkajian</a>
                 </div>
             </li>
-            <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button"
-                    aria-haspopup="true" aria-expanded="false">Farmasi Klinis</a>
-                <div class="dropdown-menu">
-                    <a class="dropdown-item"
-                        href="{{ route($path . '.daftar-pasien', ['registration' => $registration->registration_number, 'menu' => 'cppt_farmasi']) }}">CPPT</a>
-                    <a class="dropdown-item"
-                        href="{{ route($path . '.daftar-pasien', ['registration' => $registration->registration_number, 'menu' => 'pengkajian_resep']) }}">Pengkajian
-                        Resep</a>
-                    <a class="dropdown-item"
-                        href="{{ route($path . '.daftar-pasien', ['registration' => $registration->registration_number, 'menu' => 'rekonsiliasi_obat']) }}">Form
-                        Rekonsiliasi Obat</a>
-                </div>
-            </li>
+            @if ($path !== 'dokter')
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button"
+                        aria-haspopup="true" aria-expanded="false">Farmasi Klinis</a>
+                    <div class="dropdown-menu">
+                        <a class="dropdown-item"
+                            href="{{ route($path . '.daftar-pasien', ['registration' => $registration->registration_number, 'menu' => 'cppt_farmasi']) }}">CPPT</a>
+                        <a class="dropdown-item"
+                            href="{{ route($path . '.daftar-pasien', ['registration' => $registration->registration_number, 'menu' => 'pengkajian_resep']) }}">Pengkajian
+                            Resep</a>
+                        <a class="dropdown-item"
+                            href="{{ route($path . '.daftar-pasien', ['registration' => $registration->registration_number, 'menu' => 'rekonsiliasi_obat']) }}">Form
+                            Rekonsiliasi Obat</a>
+                    </div>
+                </li>
+            @endif
             <li class="nav-item">
                 <a class="nav-link"
                     href="{{ route($path . '.daftar-pasien', ['registration' => $registration->registration_number, 'menu' => 'pengkajian_lanjutan']) }}">Pengkajian

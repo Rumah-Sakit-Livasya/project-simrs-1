@@ -295,10 +295,12 @@
                         emptyTable: "Tidak ada data yang tersedia"
                     },
                     autoWidth: false,
-                    responsive: true,
-                    pagingType: "simple",
-                    lengthMenu: [5, 10, 25, 50],
-                    pageLength: 5,
+                    responsive: false,
+                    paginate: false,
+                    info: false,
+                    // pagingType: "simple",
+                    // lengthMenu: [5, 10, 25, 50],
+                    // pageLength: 5,
                 });
 
                 // 1. Event handler untuk AUTO-FORMAT RUPIAH saat mengetik

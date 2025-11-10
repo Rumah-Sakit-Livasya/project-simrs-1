@@ -63,10 +63,10 @@
                                                                             class="select2 form-control @error('doctor_id') is-invalid @enderror"
                                                                             name="doctor_id" id="cppt_doctor_id">
                                                                             <option value=""></option>
-                                                                            @foreach ($jadwal_dokter as $jadwal)
-                                                                                <option value="{{ $jadwal->doctor_id }}"
-                                                                                    @if ($registration->doctor_id == $jadwal->doctor_id) selected @endif>
-                                                                                    {{ $jadwal->doctor->employee->fullname }}
+                                                                            @foreach ($doctors as $doctor)
+                                                                                <option value="{{ $doctor->id }}"
+                                                                                    @if ($registration->doctor_id == $doctor->id) selected @endif>
+                                                                                    {{ $doctor->employee->fullname }}
                                                                                 </option>
                                                                             @endforeach
                                                                         </select>
@@ -84,9 +84,9 @@
                                                                             class="select2 form-control @error('doctor_id') is-invalid @enderror"
                                                                             name="konsulkan_ke" id="konsulkan_ke">
                                                                             <option value=""></option>
-                                                                            @foreach ($jadwal_dokter as $jadwal)
-                                                                                <option value="{{ $jadwal->doctor_id }}">
-                                                                                    {{ $jadwal->doctor->employee->fullname }}
+                                                                            @foreach ($dokter as $employee)
+                                                                                <option value="{{ $employee->doctor->id }}">
+                                                                                    {{ $employee->fullname }}
                                                                                 </option>
                                                                             @endforeach
                                                                         </select>
@@ -106,6 +106,21 @@
                                                             <h6 class="card-title mb-0">
                                                                 <i class="mdi mdi-clipboard-text mr-2"></i>SOAP Assessment
                                                             </h6>
+                                                            <div class="form-group mx-3 mb-0" style="width: 250px;">
+                                                                <select class="select2 form-control"
+                                                                    id="soap-template-selector">
+                                                                    <option value="">Pilih Template SOAP...</option>
+                                                                    @foreach ($soapTemplates as $template)
+                                                                        <option value="{{ $template->id }}"
+                                                                            data-subjective="{{ $template->subjective }}"
+                                                                            data-objective="{{ $template->objective }}"
+                                                                            data-assesment="{{ $template->assesment }}"
+                                                                            data-planning="{{ $template->planning }}">
+                                                                            {{ $template->template_name }}
+                                                                        </option>
+                                                                    @endforeach
+                                                                </select>
+                                                            </div>
                                                         </div>
                                                         <div class="card-body">
                                                             <div class="row">
@@ -826,6 +841,68 @@ Diagnosa Banding: {{ $assesment?->diagnosa_banding ?? '' }}</textarea>
             $('.slide-backdrop').on('click', function() {
                 $('#js-slide-left').removeClass('slide-on-mobile-left-show');
                 $(this).removeClass('show');
+            });
+
+            $('#soap-template-selector').select2({
+                placeholder: 'Pilih Template SOAP',
+                width: '100%'
+            });
+
+            // Fungsi untuk menerapkan template ke textarea
+            function applyTemplate(selectedOption) {
+                // Ambil data dari atribut data-*, berikan fallback string kosong jika null
+                var subjectiveTpl = selectedOption.data('subjective') || '';
+                var objectiveTpl = selectedOption.data('objective') || '';
+                var assesmentTpl = selectedOption.data('assesment') || '';
+                var planningTpl = selectedOption.data('planning') || '';
+
+                // Ganti (replace) teks di textarea
+                $('#subjective').val(subjectiveTpl);
+                $('#objective').val(objectiveTpl);
+                $('#assesment').val(assesmentTpl);
+                $('#planning').val(planningTpl);
+
+                // Reset dropdown setelah dipilih agar bisa dipilih lagi
+                $('#soap-template-selector').val('').trigger('change.select2');
+            }
+
+            $('#soap-template-selector').on('change', function() {
+                var selectedOption = $(this).find('option:selected');
+
+                if (selectedOption.val() === "") {
+                    return; // Jangan lakukan apa-apa jika pilihan kosong
+                }
+
+                // Cek apakah ada konten di salah satu textarea SOAP
+                var hasContent = $('#subjective').val().trim() !== '' ||
+                    $('#objective').val().trim() !== '' ||
+                    $('#assesment').val().trim() !== '' ||
+                    $('#planning').val().trim() !== '';
+
+                if (hasContent) {
+                    // Jika ada konten, tampilkan konfirmasi
+                    Swal.fire({
+                        title: 'Konfirmasi',
+                        text: "Ini akan mengganti semua teks yang ada di kolom SOAP. Lanjutkan?",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'Ya, Ganti!',
+                        cancelButtonText: 'Batal'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            // Jika user setuju, terapkan template
+                            applyTemplate(selectedOption);
+                        } else {
+                            // Jika user batal, reset dropdown
+                            $(this).val('').trigger('change.select2');
+                        }
+                    });
+                } else {
+                    // Jika tidak ada konten, langsung terapkan template
+                    applyTemplate(selectedOption);
+                }
             });
         });
     </script>

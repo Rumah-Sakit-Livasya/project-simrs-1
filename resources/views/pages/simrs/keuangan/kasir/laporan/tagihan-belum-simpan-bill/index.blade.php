@@ -12,10 +12,10 @@
         }
 
         /*
-                                                                ====================================================================
-                                                                CSS BARU UNTUK DETAILS CONTROL (Disamakan dengan Pertanggung Jawaban)
-                                                                ====================================================================
-                                                            */
+                                                                    ====================================================================
+                                                                    CSS BARU UNTUK DETAILS CONTROL (Disamakan dengan Pertanggung Jawaban)
+                                                                    ====================================================================
+                                                                */
         .details-control {
             cursor: pointer;
             text-align: center;
@@ -263,24 +263,39 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @forelse($hasilLaporan as $item)
+                                        @php
+                                            $items = $hasilLaporan ?? [];
+                                            // Support: $hasilLaporan can be null, array, or Collection
+                                            if (is_null($items)) {
+                                                $items = [];
+                                            } elseif (
+                                                !is_array($items) &&
+                                                !($items instanceof \Illuminate\Support\Collection)
+                                            ) {
+                                                $items = [];
+                                            }
+                                        @endphp
+
+                                        @forelse($items as $item)
                                             <tr>
                                                 <td>{{ $loop->iteration }}</td>
-                                                <td>{{ \Carbon\Carbon::parse($item->tgl_registrasi)->format('d M Y') }}
+                                                <td>
+                                                    {{ $item->tgl_registrasi ? \Carbon\Carbon::parse($item->tgl_registrasi)->format('d M Y') : '-' }}
                                                 </td>
-                                                <td>{{ $item->no_registrasi }}</td>
-                                                <td>{{ $item->no_rm }}</td>
-                                                <td>{{ $item->nama_pasien }}</td>
-                                                <td>{{ $item->ruangan }}</td>
-                                                <td>{{ $item->tagihan }}</td>
-                                                <td>{{ $item->penjamin }}</td>
-                                                <td class="text-end">{{ number_format($item->nominal, 2, ',', '.') }}
+                                                <td>{{ $item->no_registrasi ?? '-' }}</td>
+                                                <td>{{ $item->no_rm ?? '-' }}</td>
+                                                <td>{{ $item->nama_pasien ?? '-' }}</td>
+                                                <td>{{ $item->ruangan ?? '-' }}</td>
+                                                <td>{{ $item->tagihan ?? '-' }}</td>
+                                                <td>{{ $item->penjamin ?? '-' }}</td>
+                                                <td class="text-end">
+                                                    {{ isset($item->nominal) ? number_format($item->nominal, 2, ',', '.') : '0,00' }}
                                                 </td>
                                             </tr>
                                         @empty
                                             <tr>
-                                                <td colspan="9" class="text-center text-muted">Tidak ada data
-                                                    ditemukan.</td>
+                                                <td colspan="9" class="text-center text-muted">Tidak ada data ditemukan.
+                                                </td>
                                             </tr>
                                         @endforelse
                                     </tbody>

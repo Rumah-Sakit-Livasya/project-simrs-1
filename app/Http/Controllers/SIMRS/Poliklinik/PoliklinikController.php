@@ -89,7 +89,7 @@ class PoliklinikController extends Controller
                 'message' => 'Data retrieved successfully',
                 'html' => $html,
             ], 200);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to retrieve data',
@@ -100,27 +100,27 @@ class PoliklinikController extends Controller
 
     public function showForm(Request $request, $registrationId, $encryptedID)
     {
-        // try {
-        $id = base64_decode($encryptedID);
-        $formTemplateModel = FormTemplate::find($id);
-        $registration = Registration::find($registrationId);
-        $formSource = $formTemplateModel->form_source;
-        $ruangan =  $registration->patient->bed?->room->ruangan . ' - ' . $registration->patient->bed?->nama_tt;
+        try {
+            $id = base64_decode($encryptedID);
+            $formTemplateModel = FormTemplate::find($id);
+            $registration = Registration::find($registrationId);
+            $formSource = $formTemplateModel->form_source;
+            $ruangan =  $registration->patient->bed?->room->ruangan . ' - ' . $registration->patient->bed?->nama_tt;
 
-        $data = [
-            'no_rm' => $registration->patient->medical_record_number ?? '',
-            'nama_pasien' => $registration->patient->name ?? '',
-            'tgl_lahir_pasien' => Carbon::parse($registration->patient->date_of_birth)->format('d-m-Y') ?? '',
-            'umur_pasien' => hitungUmur($registration->patient->date_of_birth) ?? '',
-            'kelamin_pasien' => $registration->patient->gender == 'm' ? 'Laki-laki' : 'Perempuan',
-            'alamat_pasien' => $registration->patient->address ?? '',
-            'dpjp' => $registration->doctor->employee->fullname ?? '',
-            'no_hp_pasien' => $registration->patient->mobile_phone_number ?? '',
-            'nik_pasien' => $registration->patient->id_card ?? '',
-            'tgl_sekarang' => Carbon::now()->format('d-m-Y') ?? '',
-            'pegawai' => auth()->user()?->employee?->fullname ?? '',
-            'ruangan' => $ruangan ?? 'Belum Masuk Ruangan',
-        ];
+            $data = [
+                'no_rm' => $registration->patient->medical_record_number ?? '',
+                'nama_pasien' => $registration->patient->name ?? '',
+                'tgl_lahir_pasien' => Carbon::parse($registration->patient->date_of_birth)->format('d-m-Y') ?? '',
+                'umur_pasien' => hitungUmur($registration->patient->date_of_birth) ?? '',
+                'kelamin_pasien' => $registration->patient->gender == 'm' ? 'Laki-laki' : 'Perempuan',
+                'alamat_pasien' => $registration->patient->address ?? '',
+                'dpjp' => $registration->doctor->employee->fullname ?? '',
+                'no_hp_pasien' => $registration->patient->mobile_phone_number ?? '',
+                'nik_pasien' => $registration->patient->id_card ?? '',
+                'tgl_sekarang' => Carbon::now()->format('d-m-Y') ?? '',
+                'pegawai' => auth()->user()?->employee?->fullname ?? '',
+                'ruangan' => $ruangan ?? 'Belum Masuk Ruangan',
+            ];
 
             // [DIPERBAIKI] Ganti placeholder dengan regex agar lebih fleksibel
             foreach ($data as $key => $value) {
@@ -128,18 +128,18 @@ class PoliklinikController extends Controller
                 $formSource = preg_replace('/\{\{\{?' . preg_quote($key) . '\}?\}\}/', htmlspecialchars($value), $formSource);
             }
 
-            // Ganti placeholder tanda tangan, pastikan variabel pada komponen diisi lengkap
+            // Ubah logika penggantian placeholder tanda tangan
             $formSource = preg_replace_callback('/\[SIGNATURE_PAD:(.*?)\]/', function ($matches) {
                 $inputName = $matches[1];
-                $inputId   = 'signature-input-' . $inputName;
+                $inputId = 'signature-input-' . $inputName;
                 $previewId = 'signature-preview-' . $inputName;
 
                 return view('components.signature-popup-trigger', [
-                    'inputName'   => $inputName,
-                    'inputId'     => $inputId,
-                    'previewId'   => $previewId,
-                    'initialData' => '',
-                    'isEditMode'  => true,
+                    'inputName' => $inputName,
+                    'inputId' => $inputId,
+                    'previewId' => $previewId,
+                    'initialData' => '', // Kosong karena ini form baru
+
                 ])->render();
             }, $formSource);
 
@@ -150,7 +150,8 @@ class PoliklinikController extends Controller
                 $defaultImage = asset('images/audiogram-background.jpg');
 
                 // Render komponen Blade 'image-editor'
-                return view('components.image-editor', [
+
+                return view('s', [
                     'inputName' => $inputName,
                     'initialData' => '', // Selalu kosong untuk form baru
                     'defaultImage' => $defaultImage,
@@ -164,49 +165,9 @@ class PoliklinikController extends Controller
             ]);
         } catch (\Exception $e) {
             Log::error('Gagal menampilkan form: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
-            abort(404, 'Data template form atau registrasi tidak ditemukan.');
         }
-
-        // Ubah logika penggantian placeholder tanda tangan
-        $formSource = preg_replace_callback('/\[SIGNATURE_PAD:(.*?)\]/', function ($matches) {
-            $inputName = $matches[1];
-            $inputId = 'signature-input-' . $inputName;
-            $previewId = 'signature-preview-' . $inputName;
-
-            return view('components.signature-popup-trigger', [
-                'inputName' => $inputName,
-                'inputId' => $inputId,
-                'previewId' => $previewId,
-                'initialData' => '', // Kosong karena ini form baru
-            ])->render();
-        }, $formSource);
-
-        $formSource = preg_replace_callback('/\[IMAGE_EDITOR:(.*?)\]/', function ($matches) {
-            $inputName = $matches[1];
-
-            // Tentukan gambar latar belakang default. Pastikan file ini ada di public/images
-            $defaultImage = asset('images/audiogram-background.jpg');
-
-            // Render komponen Blade 'image-editor'
-            return view('s', [
-                'inputName' => $inputName,
-                'initialData' => '', // Selalu kosong untuk form baru
-                'defaultImage' => $defaultImage,
-            ])->render();
-        }, $formSource);
-
-        return view('pages.simrs.poliklinik.pengkajian_lanjutan.show_form', [
-            'formTemplate' => $formSource,
-            'formTemplateId' => $id,
-            'registrationId' => $registrationId,
-        ]);
-        // } catch (Exception $e) {
-        //     Log::error('Gagal menampilkan form: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
-        //     abort(404, 'Data template form atau registrasi tidak ditemukan.');
-        // }
     }
 
-    // ==========================================================
     // METHOD BARU UNTUK MELIHAT DAN MENGEDIT FORM YANG SUDAH DIISI
     // ==========================================================
 
@@ -280,7 +241,7 @@ class PoliklinikController extends Controller
     //             'formValues'    => $formValues,
     //             'isEditMode'    => $isEditMode,
     //         ]);
-    //     } catch (\Exception $e) {
+    //     } catch (Exception $e) {
     //         // Tangani error jika terjadi masalah
     //         \Illuminate\Support\Facades\Log::error('Gagal memuat form pengkajian lanjutan: ' . $e->getMessage());
     //         abort(500, 'Terjadi kesalahan saat memuat data form. Silakan coba lagi nanti.');
@@ -289,37 +250,254 @@ class PoliklinikController extends Controller
 
     private function prepareAndShowForm(PengkajianLanjutan $pengkajian, bool $isEditMode): \Illuminate\View\View
     {
-        // try {
-        // 1. Eager Load relasi untuk performa.
-        $pengkajian->load(['form_template', 'registration.patient', 'registration.doctor.employee', 'creator', 'editor']);
+        try {
+            // 1. Eager Load relasi untuk performa.
+            $pengkajian->load(['form_template', 'registration.patient', 'registration.doctor.employee', 'creator', 'editor']);
 
-        // 2. Ambil `form_source` HTML dari template.
-        $formSource = $pengkajian->form_template->form_source;
-        $registration = $pengkajian->registration;
+            // 2. Ambil `form_source` HTML dari template.
+            $formSource = $pengkajian->form_template->form_source;
+            $registration = $pengkajian->registration;
 
-        // =========================================================================
-        // 3. Ganti Placeholder Data Registrasi & Pasien
-        // =========================================================================
-        $data = [
-            'no_rm' => $registration->patient->medical_record_number ?? '',
-            'nama_pasien' => $registration->patient->name ?? '',
-            'tgl_lahir_pasien' => Carbon::parse($registration->patient->date_of_birth)->format('d-m-Y') ?? '',
-            'umur_pasien' => hitungUmur($registration->patient->date_of_birth) ?? '',
-            'kelamin_pasien' => $registration->patient->gender ?? '',
-            'alamat_pasien' => $registration->patient->address ?? '',
-            'dpjp' => $registration->doctor->employee->fullname ?? '',
-            'no_hp_pasien' => $registration->patient->mobile_phone_number ?? '',
-            'nik_pasien' => $registration->patient->id_card ?? '',
-            'tgl_sekarang' => $pengkajian->created_at->format('d-m-Y') ?? '',
-            'pegawai' => auth()->user()?->employee?->fullname ?? '',
-            'jam_sekarang' => Carbon::now()->format('H:i'),
-            'tgl_masuk_pasien' => \Illuminate\Support\Carbon::parse($registration->registration_date)->format('d-m-Y') ?? '',
-            'nama_departemen' => $registration->departement->name ?? '',
-        ];
+            // =========================================================================
+            // 3. Ganti Placeholder Data Registrasi & Pasien
+            // =========================================================================
+            $data = [
+                'no_rm' => $registration->patient->medical_record_number ?? '',
+                'nama_pasien' => $registration->patient->name ?? '',
+                'tgl_lahir_pasien' => Carbon::parse($registration->patient->date_of_birth)->format('d-m-Y') ?? '',
+                'umur_pasien' => hitungUmur($registration->patient->date_of_birth) ?? '',
+                'kelamin_pasien' => $registration->patient->gender ?? '',
+                'alamat_pasien' => $registration->patient->address ?? '',
+                'dpjp' => $registration->doctor->employee->fullname ?? '',
+                'no_hp_pasien' => $registration->patient->mobile_phone_number ?? '',
+                'nik_pasien' => $registration->patient->id_card ?? '',
+                'tgl_sekarang' => $pengkajian->created_at->format('d-m-Y') ?? '',
+                'pegawai' => auth()->user()?->employee?->fullname ?? '',
+                'jam_sekarang' => Carbon::now()->format('H:i'),
+                'tgl_masuk_pasien' => \Illuminate\Support\Carbon::parse($registration->registration_date)->format('d-m-Y') ?? '',
+                'nama_departemen' => $registration->departement->name ?? '',
+            ];
 
-        // Ganti placeholder dengan regex agar lebih fleksibel
-        foreach ($data as $key => $value) {
-            $formSource = preg_replace('/\{\{\{?' . preg_quote($key) . '\}?\}\}/', htmlspecialchars($value), $formSource);
+
+            // Ganti placeholder dengan regex agar lebih fleksibel
+            foreach ($data as $key => $value) {
+                $formSource = preg_replace('/\{\{\{?' . preg_quote($key) . '\}?\}\}/', htmlspecialchars($value), $formSource);
+            }
+
+            // 4. Ambil nilai yang tersimpan dan pastikan formatnya adalah array.
+            $formValues = $pengkajian->form_values ?? [];
+            if (is_string($formValues)) {
+                $formValues = json_decode($formValues, true) ?? [];
+            }
+            $formValues = (array) $formValues;
+
+            // =========================================================================
+            // 5. Proses Tanda Tangan (Signature Pad) - LOGIKA ASLI TETAP SAMA
+            // =========================================================================
+            $signaturePadInitializers = []; // Variabel ini mungkin tidak digunakan jika Anda menggunakan popup, tapi biarkan saja.
+            $formSource = preg_replace_callback('/\[SIGNATURE_PAD:(.*?)\]/', function ($matches) use ($formValues, $isEditMode) {
+                $inputName = $matches[1];
+                $initialData = $formValues[$inputName] ?? '';
+
+                // JIKA DALAM MODE LIHAT (READ-ONLY)
+                if (! $isEditMode) {
+                    if (! empty($initialData)) {
+                        return '
+                        <div class="signature-view-wrapper text-center">
+                            <div style="position: relative; width: 250px; height: 125px; margin: 0 auto; border-bottom: 1px solid #333;">
+                                <img src="' . htmlspecialchars($initialData) . '"
+                                     alt="Tanda Tangan"
+                                     style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain;">
+                            </div>
+                        </div>
+                    ';
+                    } else {
+                        return '
+                        <div class="signature-view-wrapper text-center">
+                            <div style="width: 250px; height: 80px; border-bottom: 1px solid #333; text-align: center; padding-top: 30px; color: #999; margin: 0 auto;">
+                                <em>(Tidak ada tanda tangan)</em>
+                            </div>
+                        </div>
+                    ';
+                    }
+                }
+                // JIKA DALAM MODE EDIT
+                else {
+                }
+            }, $formSource);
+
+            // =========================================================================
+            // 5B. [LOGIKA BARU DITAMBAHKAN DI SINI] Proses Image Editor
+            // =========================================================================
+            $formSource = preg_replace_callback('/\[IMAGE_EDITOR:(.*?)\]/', function ($matches) use ($formValues, $isEditMode) {
+                $inputName = $matches[1];
+                $initialData = $formValues[$inputName] ?? ''; // base64 data gambar yang tersimpan
+                $defaultImage = asset('images/audiogram-background.jpg'); // Pastikan path ini benar
+
+                // JIKA DALAM MODE LIHAT (READ-ONLY)
+                if (! $isEditMode) {
+                    if (! empty($initialData)) {
+                        // Tampilkan sebagai gambar statis
+                        return '<img src="' . htmlspecialchars($initialData) . '" alt="Gambar ' . e($inputName) . '" style="width: 100%; height: auto; border: 1px solid #ddd; border-radius: .25rem;">';
+                    } else {
+                        // Tampilkan placeholder jika tidak ada gambar
+                        return '<div style="width: 100%; min-height: 450px; border: 1px dashed #ccc; display: flex; align-items: center; justify-content: center; background-color: #f8f9fa; border-radius: .25rem;"><em class="text-muted">(Tidak ada gambar yang tersimpan)</em></div>';
+                    }
+                }
+                // JIKA DALAM MODE EDIT
+                else {
+                    // Render komponen Blade 'image-editor' dengan data yang sudah ada
+                    return view('components.image-editor', [
+                        'inputName' => $inputName,
+                        'initialData' => $initialData,
+                        'defaultImage' => $defaultImage,
+                    ])->render();
+                }
+            }, $formSource);
+
+            // =========================================================================
+            // 6. Isi Ulang Nilai Form (Rehidrasi) - LOGIKA ASLI TETAP SAMA
+            // =========================================================================
+            // Simpan hasil proses ke variabel global sementara untuk diakses di callback berikutnya
+            $GLOBALS['formSource'] = $formSource;
+
+            $formSource = preg_replace_callback('/<(input|textarea|select)([^>]*)name=["\']([^"\']+)["\']([^>]*)>/i', function ($matches) use ($formValues, $isEditMode) {
+                $tag = strtolower($matches[1]);
+                $beforeName = $matches[2];
+                $name = $matches[3];
+                $afterName = $matches[4];
+                $originalTag = "<$tag" . $beforeName . "name='$name'" . $afterName . '>';
+
+                $cleanName = str_replace('[]', '', $name);
+                $value = $formValues[$cleanName] ?? null;
+
+                if (! $isEditMode) {
+                    if ($value === null || $value === '') {
+                        // Untuk tag 'select', kita tidak ingin menampilkan '-', biarkan kosong
+                        if ($tag === 'select') return '';
+                        return '<span class="text-muted">-</span>';
+                    }
+
+                    $typeAttr = [];
+                    preg_match('/type=["\']([^"\']+)["\']/i', $originalTag, $typeAttr);
+                    $type = strtolower($typeAttr[1] ?? 'text');
+
+                    if ($type === 'checkbox') {
+                        $valAttr = [];
+                        preg_match('/value=["\']([^"\']+)["\']/i', $originalTag, $valAttr);
+                        $tagValue = $valAttr[1] ?? 'on';
+                        $isChecked = is_array($value) ? in_array($tagValue, $value) : ($value == $tagValue);
+
+                        if ($isChecked) {
+                            // Coba cari label yang berasosiasi dengan checkbox ini
+                            $labelForId = [];
+                            preg_match('/id=["\']([^"\']+)["\']/i', $originalTag, $labelForId);
+                            $labelText = $tagValue; // Fallback ke value
+                            if (!empty($labelForId[1])) {
+                                $labelRegex = '/<label[^>]*for=["\']' . preg_quote($labelForId[1], '/') . '["\'][^>]*>(.*?)<\/label>/is';
+                                if (preg_match($labelRegex, $GLOBALS['formSource'], $labelMatch)) {
+                                    $labelText = strip_tags($labelMatch[1]);
+                                }
+                            }
+                            return '<p class="form-control-plaintext mb-0">☑ ' . htmlspecialchars($labelText) . '</p>';
+                        }
+                        return ''; // Jangan tampilkan apa-apa jika tidak di-check
+                    }
+
+                    if ($type === 'radio') {
+                        $valAttr = [];
+                        preg_match('/value=["\']([^"\']+)["\']/i', $originalTag, $valAttr);
+                        $tagValue = $valAttr[1] ?? 'on';
+                        if ($value == $tagValue) {
+                            // Coba cari labelnya
+                            $labelForId = [];
+                            preg_match('/id=["\']([^"\']+)["\']/i', $originalTag, $labelForId);
+                            $labelText = $tagValue;
+                            if (!empty($labelForId[1])) {
+                                $labelRegex = '/<label[^>]*for=["\']' . preg_quote($labelForId[1], '/') . '["\'][^>]*>(.*?)<\/label>/is';
+                                if (preg_match($labelRegex, $GLOBALS['formSource'], $labelMatch)) {
+                                    $labelText = strip_tags($labelMatch[1]);
+                                }
+                            }
+                            return '<p class="form-control-plaintext mb-0">◉ ' . htmlspecialchars($labelText) . '</p>';
+                        }
+                        return '';
+                    }
+
+                    if ($tag === 'select') {
+                        // Cari teks dari option yang terpilih
+                        $optionRegex = '/<option[^>]*value=["\']' . preg_quote($value, '/') . '["\'][^>]*>(.*?)<\/option>/is';
+                        if (preg_match($optionRegex, $originalTag, $optionMatch)) {
+                            return htmlspecialchars(strip_tags($optionMatch[1]));
+                        }
+                        return htmlspecialchars($value);
+                    }
+
+                    $displayValue = is_array($value) ? implode(', ', $value) : $value;
+                    return '<p class="form-control-plaintext">' . nl2br(htmlspecialchars($displayValue)) . '</p>';
+                }
+
+                // --- Jika dalam mode EDIT, isi atributnya ---
+                if ($tag === 'textarea') {
+                    return '<textarea' . $beforeName . "name='$name'" . $afterName . '>' . htmlspecialchars($value ?? '') . '</textarea>';
+                }
+
+                if ($tag === 'input') {
+                    if (preg_match('/type=["\'](checkbox|radio)["\']/i', $originalTag)) {
+                        $valAttr = [];
+                        preg_match('/value=["\']([^"\']+)["\']/i', $originalTag, $valAttr);
+                        $tagValue = $valAttr[1] ?? 'on';
+                        $isChecked = is_array($value) ? in_array($tagValue, $value) : ($value == $tagValue);
+                        if ($isChecked) {
+                            return '<input' . $beforeName . "name='$name'" . $afterName . ' checked>';
+                        }
+                    } else {
+                        return '<input' . $beforeName . "name='$name'" . $afterName . ' value="' . htmlspecialchars($value ?? '') . '">';
+                    }
+                }
+
+                return $originalTag;
+            }, $formSource);
+
+
+            // [DISEMPURNAKAN] Isi ulang untuk <select>
+            if ($isEditMode) {
+                $formSource = preg_replace_callback('/<select([^>]*)name=["\']([^"\']+)["\'](.*?)<\/select>/is', function ($matches) use ($formValues) {
+                    $selectTag = $matches[0];
+                    $selectName = $matches[2];
+                    $selectedValue = $formValues[$selectName] ?? null;
+
+                    if ($selectedValue !== null) {
+                        $selectTag = preg_replace_callback('/<option([^>]*)value=(["\'])(.*?)\2([^>]*)>/i', function ($optionMatches) use ($selectedValue) {
+                            $optionValue = $optionMatches[3];
+                            if ($optionValue == $selectedValue) {
+                                return '<option' . $optionMatches[1] . 'value="' . $optionValue . '"' . $optionMatches[4] . ' selected>';
+                            }
+                            return $optionMatches[0];
+                        }, $selectTag);
+                    }
+                    return $selectTag;
+                }, $formSource);
+            } else {
+                $formSource = preg_replace('/<\/?select[^>]*>/i', '', $formSource);
+                $formSource = preg_replace('/<\/?option[^>]*>/i', '', $formSource);
+            }
+
+
+            // Hapus variabel global
+            unset($GLOBALS['formSource']);
+            // =========================================================================
+            // 7. Render View - LOGIKA ASLI TETAP SAMA
+            // =========================================================================
+            return view('pages.simrs.poliklinik.pengkajian_lanjutan.show', [
+                'pengkajian' => $pengkajian,
+                'processedFormHtml' => $formSource,
+                'isEditMode' => $isEditMode,
+                'signaturePadInitializers' => $signaturePadInitializers,
+            ]);
+        } catch (Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Gagal memuat form pengkajian lanjutan: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            abort(500, 'Terjadi kesalahan saat memuat data form. Silakan coba lagi nanti.');
         }
 
         // 4. Ambil nilai yang tersimpan dan pastikan formatnya adalah array.
@@ -368,7 +546,6 @@ class PoliklinikController extends Controller
                 'inputName'   => $inputName,
                 'inputId'     => $inputId,
                 'previewId'   => $previewId,
-                'initialData' => $initialData,
                 'isEditMode'  => true,
             ])->render();
         }, $formSource);
@@ -584,7 +761,7 @@ class PoliklinikController extends Controller
                 'chartData',
                 'selectedDate'
             ));
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error in rekapPasienPerPoliklinik: ' . $e->getMessage());
 
             if ($request->ajax()) {
@@ -785,7 +962,7 @@ class PoliklinikController extends Controller
                     'date' => $selectedDate->format('d/m/Y'),
                 ],
             ]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error getting patient details: ' . $e->getMessage());
 
             return response()->json([
@@ -819,7 +996,7 @@ class PoliklinikController extends Controller
                 'statistics' => $statistics,
                 'message' => 'Data berhasil diperbarui',
             ]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error refreshing data: ' . $e->getMessage());
 
             return response()->json([
@@ -855,7 +1032,7 @@ class PoliklinikController extends Controller
                     'date' => $selectedDate->format('d/m/Y'),
                 ],
             ]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error exporting data: ' . $e->getMessage());
 
             return response()->json([
@@ -1009,7 +1186,7 @@ class PoliklinikController extends Controller
                 'patients',
                 'searchParams'
             ));
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error in searchMonitoring: ' . $e->getMessage(), [
                 'trace' => $e->getTraceAsString(),
                 'request' => $request->all(),
@@ -1152,7 +1329,7 @@ class PoliklinikController extends Controller
                 'data' => $exportData->toArray(),
                 'filename' => $filename,
             ]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error exporting monitoring data: ' . $e->getMessage());
 
             return response()->json([

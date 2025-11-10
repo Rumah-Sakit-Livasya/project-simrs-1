@@ -5,8 +5,8 @@
     <title>Print Rekap Penerimaan Kasir</title>
     <meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
     {{-- Menggunakan asset() helper Laravel agar path menjadi dinamis dan benar --}}
-    <link rel="stylesheet/less" type="text/css" media="all" href="{{ asset('testing/include/styles/print.css') }}" />
-    <script src="{{ asset('testing/include/js/jquerynless.js') }}" type="text/javascript"></script>
+    <link rel="stylesheet/less" type="text/css" media="all" href="{{ asset('css/print.css') }}" />
+    <script src="{{ asset('js/jquery.js') }}" type="text/javascript"></script>
     <style type="text/css">
         /* Style tambahan bisa diletakkan di sini jika perlu */
         #previews {

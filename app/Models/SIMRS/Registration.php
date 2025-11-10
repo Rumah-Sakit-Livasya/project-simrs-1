@@ -93,9 +93,6 @@ class Registration extends Model
         return $this->belongsTo(Penjamin::class, 'penjamin_id');
     }
 
-
-
-
     public function user()
     {
         return $this->belongsTo(User::class);

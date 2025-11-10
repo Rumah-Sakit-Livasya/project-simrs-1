@@ -1275,8 +1275,18 @@ Route::group(['middleware' => ['auth']], function () {
             Route::get('/daftar-pasien', [DokterController::class, 'index'])
                 ->name('dokter.daftar-pasien');
 
-            Route::get('/template-soap', [DokterController::class, 'templateSOAP'])
-                ->name('dokter.template-soap');
+            // Route::get('/template-soap', [DokterController::class, 'templateSOAP'])
+            //     ->name('dokter.template-soap');
+
+            Route::prefix('template-soap')->name('dokter.template-soap.')->group(function () {
+                Route::get('/', [App\Http\Controllers\SIMRS\Dokter\SoapTemplateController::class, 'index'])->name('index');
+                Route::get('/data', [App\Http\Controllers\SIMRS\Dokter\SoapTemplateController::class, 'data'])->name('data');
+                Route::get('/create', [App\Http\Controllers\SIMRS\Dokter\SoapTemplateController::class, 'create'])->name('create');
+                Route::post('/', [App\Http\Controllers\SIMRS\Dokter\SoapTemplateController::class, 'store'])->name('store');
+                Route::get('/{soapTemplate}/edit', [App\Http\Controllers\SIMRS\Dokter\SoapTemplateController::class, 'edit'])->name('edit');
+                Route::put('/{soapTemplate}', [App\Http\Controllers\SIMRS\Dokter\SoapTemplateController::class, 'update'])->name('update');
+                Route::delete('/{soapTemplate}', [App\Http\Controllers\SIMRS\Dokter\SoapTemplateController::class, 'destroy'])->name('destroy');
+            });
         });
 
         Route::prefix('gizi')->group(function () {
@@ -1700,9 +1710,25 @@ Route::group(['middleware' => ['auth']], function () {
             Route::post('merge', [MergeRMController::class, 'mergeAction'])->name('merge.action');
         });
 
-        Route::prefix('pasien')->name('pasien.')->group(function () {
-            Route::get('/{pasien}/dashboard', [PatientDashboardController::class, 'index'])->name('dashboard');
+        // Main Dashboard
+        Route::prefix('patients')->group(function () {
+            Route::get('/{patient}/dashboard', [PatientDashboardController::class, 'index'])
+                ->name('patients.dashboard');
+
+            // DataTables API Routes
+            Route::get('/{patient}/vitals/data', [PatientDashboardController::class, 'getVitalsData'])
+                ->name('patients.vitals.data');
+
+            Route::get('/{patient}/lab/data', [PatientDashboardController::class, 'getLabData'])
+                ->name('patients.lab.data');
+
+            Route::get('/{patient}/radiology/data', [PatientDashboardController::class, 'getRadiologyData'])
+                ->name('patients.radiology.data');
         });
+
+        // AJAX API Routes
+        Route::get('/api/patients/registration-details/{registration}', [PatientDashboardController::class, 'getRegistrationDetails'])
+            ->name('patients.registration.details');
 
         Route::prefix('laporan')->name('laporan.')->group(function () {
             Route::get('poliklinik', [LaporanPoliklinikController::class, 'index'])->name('poliklinik.index');

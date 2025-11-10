@@ -38,6 +38,7 @@ use App\Http\Controllers\SIMRS\BPJS\WsBPJSController;
 use App\Http\Controllers\SIMRS\CPPT\CPPTController;
 use App\Http\Controllers\SIMRS\DepartementController;
 use App\Http\Controllers\SIMRS\DoctorVisitController;
+use App\Http\Controllers\SIMRS\Dokter\DokterController;
 use App\Http\Controllers\SIMRS\ERMController;
 use App\Http\Controllers\SIMRS\EthnicController;
 use App\Http\Controllers\SIMRS\EWSAnakController;
@@ -577,6 +578,10 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
             Route::match(['get', 'post'], '/', [IGDController::class, 'showLaporan'])->name('igd.laporan.show');
             Route::post('get-data', [IGDController::class, 'getDataLaporan'])->name('igd.laporan.get-data');
         });
+    });
+
+    Route::prefix('dokter')->group(function () {
+        Route::post('/filter-pasien', [DokterController::class, 'filterPasien'])->name('dokter.filter-pasien');
     });
 
     Route::prefix('erm')->group(function () {

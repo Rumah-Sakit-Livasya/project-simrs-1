@@ -1385,6 +1385,11 @@ class ERMController extends Controller
     public static function poliklinikMenu($noRegist, $menu, $departements, $jadwal_dokter, $registration, $registrations, $path)
     {
         Carbon::setLocale('id');
+        $doctor = null;
+        if ($registration && $registration->doctor_id) {
+            $doctors = Doctor::with('employee.user')->find($registration->doctor_id)->get();
+        }
+
         switch ($menu) {
             case 'triage':
                 $pengkajian = Triage::firstWhere('registration_id', $registration->id);
@@ -1640,6 +1645,8 @@ class ERMController extends Controller
                     $showSwal = true;
                 }
 
+                $soapTemplates = \App\Models\SIMRS\Dokter\SoapTemplate::orderBy('template_name')->get();
+
                 return view('pages.simrs.erm.form.dokter.cppt-dokter', compact(
                     'gudangs',
                     'barangs',
@@ -1651,9 +1658,11 @@ class ERMController extends Controller
                     'departements',
                     'jadwal_dokter',
                     'dokter',
+                    'doctors',
                     'path',
                     'assesment',
-                    'showSwal'
+                    'showSwal',
+                    'soapTemplates'
                 ));
 
             case 'resume_medis':
