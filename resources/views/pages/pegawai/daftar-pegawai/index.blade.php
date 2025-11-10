@@ -339,6 +339,37 @@
     <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
 
     <script>
+        $('#birthdate, #join_date, #identity_expire_date').datepicker({
+            format: "yyyy-mm-dd",
+            autoclose: true,
+            todayHighlight: true,
+            orientation: "bottom left"
+        });
+        $('.datepicker').datepicker({
+            format: "yyyy-mm-dd",
+            autoclose: true,
+            todayHighlight: true,
+            orientation: "bottom left"
+        });
+
+        // --- Daterangepicker for MOU ---
+        $('#mou_period').daterangepicker({
+            opens: 'left',
+            locale: {
+                format: 'YYYY-MM-DD',
+                separator: ' s/d ',
+            }
+        }, function(start, end, label) {
+            $('#mou_start_date').val(start.format('YYYY-MM-DD'));
+            $('#mou_end_date').val(end.format('YYYY-MM-DD'));
+        });
+
+        // Optional: old value for MOU_period (server-side rendered Laravel - keep this)
+        @if (old('mou_start_date') && old('mou_end_date'))
+            $('#mou_period').data('daterangepicker').setStartDate('{{ old('mou_start_date') }}');
+            $('#mou_period').data('daterangepicker').setEndDate('{{ old('mou_end_date') }}');
+        @endif
+
         /**
          * Fungsi untuk membuka popup window untuk mengedit data pegawai.
          * @param {number} employeeId - ID dari pegawai yang akan di-edit.

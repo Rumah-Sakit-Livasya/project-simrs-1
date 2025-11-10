@@ -361,10 +361,15 @@ class DashboardController extends Controller
     public function getDataUsers()
     {
         // Eager load roles untuk menghindari N+1 query problem
-        $users = User::with('roles')->where('is_active', 1)->get();
-        $employees = Employee::where('is_active', 1)->get();
+        // Tidak perlu query Employee terpisah jika data sudah ada di relasi User
+        $users = User::with('roles', 'employee')->where('is_active', 1)->get();
+
+        // Ambil employee yang BELUM memiliki user untuk dropdown tambah user
+        $employees = Employee::where('is_active', 1)->whereDoesntHave('user')->get();
+
         $roles = Role::all();
-        $getNotify = $this->getNotify();
+        $getNotify = $this->getNotify(); // Asumsi method ini ada dan diperlukan
+
         return view('pages.master-data.user.index', compact('users', 'roles', 'getNotify', 'employees'));
     }
 

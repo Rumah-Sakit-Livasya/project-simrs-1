@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\HasApiTokens;
 use OwenIt\Auditing\Contracts\Auditable;
 use Spatie\Permission\Contracts\Permission;
@@ -62,6 +63,20 @@ class User extends Authenticatable
         'password',
         'remember_token',
     ];
+
+    /**
+     * Selalu hash password saat di-set (sangat penting untuk keamanan).
+     *
+     * @param  string  $value
+     * @return void
+     */
+    public function setPasswordAttribute($value)
+    {
+        // Hanya hash jika value tidak kosong
+        if (!empty($value)) {
+            $this->attributes['password'] = Hash::make($value);
+        }
+    }
 
     /**
      * Get the attributes that should be cast.

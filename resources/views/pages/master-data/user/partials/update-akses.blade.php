@@ -16,7 +16,8 @@
                     <div class="form-group">
                         <label for="roles">Pilih Role</label>
                         {{-- Tambahkan atribut multiple --}}
-                        <select class="select2 form-control w-100" id="roles" name="roles[]" multiple="multiple">
+                        <select class="select2-akses form-control w-100" id="roles" name="roles[]"
+                            multiple="multiple">
                             @foreach ($roles as $role)
                                 <option value="{{ $role->id }}">
                                     {{ ucfirst($role->name) }}

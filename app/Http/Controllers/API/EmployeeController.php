@@ -6,6 +6,7 @@ use App\Exports\DeductionExport;
 use App\Exports\EmployeeExport;
 use App\Exports\SalaryExport;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreEmployeeRequest;
 use App\Imports\DeductionImport;
 use App\Imports\EmployeeImport;
 use App\Imports\SalaryImport;
@@ -22,9 +23,11 @@ use App\Models\Organization;
 use App\Models\Salary;
 use App\Models\SIMRS\Doctor;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -400,132 +403,51 @@ class EmployeeController extends Controller
         }
     }
 
-    public function store()
+    public function store(StoreEmployeeRequest $request)
     {
-        try {
-            $validator = Validator::make(
-                request()->all(),
-                [
-                    'fullname' => 'required',
-                    'email' => 'required|email|unique:employees,email',
-                    'mobile_phone' => 'required',
-                    'place_of_birth' => 'required',
-                    'birthdate' => 'required',
-                    'gender' => 'required',
-                    'marital_status' => 'required',
-                    'religion' => 'required',
-                    'identity_type' => 'required',
-                    'identity_number' => 'required',
-                    'citizen_id_address' => 'required',
-                    'employee_code' => 'required',
-                    'employment_status' => 'required',
-                    'join_date' => 'required',
-                    'organization_id' => 'required',
-                    'job_position_id' => 'required',
-                    'job_level_id' => 'required',
-                    'approval_line' => 'required',
-                    'basic_salary' => 'required',
-                    'bank_id' => 'nullable',
-                    'account_number' => 'nullable',
-                    'account_holder_name' => 'nullable',
-                    'is_management' => 'nullable',
-                    'no_mou' => 'nullable|string|max:255',
-                    'mou_period' => 'nullable|string|max:255',
-                    'mou_start_date' => 'nullable|date',
-                    'mou_end_date' => 'nullable|date',
-                ],
-                [
-                    'fullname.required' => 'Nama Harus di isi!',
-                    'email.required' => 'Email harus diisi',
-                    'email.unique' => 'Email sudah ada',
-                    'mobile_phone.required' => 'No HP Harus diisi',
-                    'place_of_birth.required' => 'Tempat lahir harus diisi',
-                    'birthdate.required' => 'Tgl Lahir harus diisi',
-                    'gender.required' => 'Jenis kelamin harus diisi',
-                    'marital_status.required' => 'Status menikah harus diisi',
-                    'religion.required' => 'Agama harus diisi',
-                    'identity_type.required' => 'Tipe identitas harus diisi',
-                    'identity_number.required' => 'Nomor identitas harus diisi',
-                    'citizen_id_address.required' => 'Alamat KTP harus diisi',
-                    'employee_code.required' => 'NIP harus diisi',
-                    'employment_status.required' => 'Status pegawai harus diisi',
-                    'join_date.required' => 'Tanggal masuk harus diisi',
-                    'organization_id.required' => 'Organisasi harus diisi',
-                    'job_position_id.required' => 'Jabatan harus diisi',
-                    'job_level_id.required' => 'Job level harus diisi',
-                    'approval_line.required' => 'approval harus diisi',
-                    'basic_salary.required' => 'Gaji pokok harus diisi',
-                    'bank_id.required' => 'Nama bank harus dipilih',
-                    'account_number.required' => 'Nomor rekening harus diisi',
-                    'account_holder_name.required' => 'Nama rekening harus diisi',
-                    'no_mou.required' => 'Nomor MOU harus diisi',
-                    'mou_period.required' => 'Periode MOU harus diisi',
-                    'mou_start_date.required' => 'Tanggal mulai MOU harus diisi',
-                    'mou_end_date.required' => 'Tanggal selesai MOU harus diisi',
-                ]
-            );
+        // Validasi sudah otomatis dijalankan.
+        $validatedData = $request->validated();
 
-            if ($validator->fails()) {
-                return response()->json($validator->errors(), 422);
+        DB::beginTransaction();
+        try {
+            // Input Y-m-d sehingga tidak perlu konversi Carbon lagi.
+            $employeeData = $validatedData;
+            $employeeData['company_id'] = 1;
+            $employeeData['is_management'] = $request->has('is_management') ? 1 : 0;
+
+            $employee = Employee::create($employeeData);
+
+            if (!empty($validatedData['bank_id'])) {
+                BankEmployee::create([
+                    'employee_id' => $employee->id,
+                    'bank_id' => $validatedData['bank_id'],
+                    'account_holder_name' => $validatedData['account_holder_name'] ?? null,
+                    'account_number' => $validatedData['account_number'] ?? null,
+                    'status' => 1,
+                ]);
             }
 
-            $data = $validator->validated();
-            $data['company_id'] = 1;
-
-            // Kunci permasalahan: jika request is_management tidak diisi/set null, berikan default false
-            $isManagement = request()->has('is_management') ? (bool) request()->input('is_management') : false;
-
-            // Store Employee with MOU fields
-            $pegawai = Employee::create([
-                'fullname' => $data['fullname'],
-                'email' => $data['email'],
-                'mobile_phone' => $data['mobile_phone'],
-                'place_of_birth' => $data['place_of_birth'],
-                'birthdate' => $data['birthdate'],
-                'gender' => $data['gender'],
-                'marital_status' => $data['marital_status'],
-                'religion' => $data['religion'],
-                'identity_type' => $data['identity_type'],
-                'identity_number' => $data['identity_number'],
-                'citizen_id_address' => $data['citizen_id_address'],
-                'employee_code' => $data['employee_code'],
-                'employment_status' => $data['employment_status'],
-                'join_date' => $data['join_date'],
-                'organization_id' => $data['organization_id'],
-                'job_position_id' => $data['job_position_id'],
-                'job_level_id' => $data['job_level_id'],
-                'approval_line' => $data['approval_line'],
-                'basic_salary' => $data['basic_salary'],
-                'is_management' => $isManagement,
-                'company_id' => $data['company_id'],
-                'no_mou' => $data['no_mou'] ?? null,
-                'mou_period' => $data['mou_period'] ?? null,
-                'mou_start_date' => $data['mou_start_date'] ?? null,
-                'mou_end_date' => $data['mou_end_date'] ?? null,
-            ]);
-
-            // Store bank data if present
-            BankEmployee::create([
-                'employee_id' => $pegawai->id,
-                'bank_id' => $data['bank_id'] ?? null,
-                'account_holder_name' => $data['account_holder_name'] ?? null,
-                'account_number' => $data['account_number'] ?? null,
-                'status' => 1,
-            ]);
-
             $user = User::create([
-                'employee_id' => $pegawai->id,
-                'name' => $data['fullname'],
-                'email' => $data['email'],
-                'status' => 1,
+                'employee_id' => $employee->id,
+                'name' => $validatedData['fullname'],
+                'email' => $validatedData['email'],
+                'password' => 'password',
+                'is_active' => 1,
             ]);
+
             $user->assignRole('employee');
 
-            return response()->json(['message' => 'Pegawai Berhasil di Tambahkan!']);
+            DB::commit();
+
+            return response()->json(['message' => 'Pegawai dan Akun User berhasil ditambahkan!'], 201);
         } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Gagal saat menyimpan pegawai baru: ' . $e->getMessage());
+
             return response()->json([
-                'error' => $e->getMessage(),
-            ], 404);
+                'error' => 'Terjadi kesalahan pada server. Gagal menyimpan data.',
+                'details' => $e->getMessage()
+            ], 500);
         }
     }
 

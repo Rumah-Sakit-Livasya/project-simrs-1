@@ -112,185 +112,144 @@
     <script src="/js/formplugins/select2/select2.bundle.js"></script>
     <script>
         $(document).ready(function() {
-            let idUser = null;
+            // Setup CSRF token untuk semua request AJAX
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                }
+            });
 
-            // Inisialisasi Select2 untuk modal tambah
-            $('#tambah-user .select2').select2({
+            // Inisialisasi DataTable
+            const table = $('#dt-basic-example').DataTable({
+                responsive: true,
+                // Opsi lainnya...
+            });
+
+            // Inisialisasi Select2
+            $('.select2-create').select2({
                 placeholder: 'Pilih Pegawai',
                 dropdownParent: $('#tambah-user')
             });
-
-            // Inisialisasi Select2 untuk modal ubah akses
-            $('#roles').select2({
+            $('.select2-akses').select2({
                 placeholder: 'Pilih Role',
                 dropdownParent: $('#ubah-akses')
             });
 
+            // --- FUNGSI-FUNGSI BANTUAN ---
 
-            $('.btn-edit').click(function(e) {
-                e.preventDefault();
-                let button = $(this);
-                let id = button.data('id');
-                idUser = id; // Simpan id user untuk form update
-
-                button.find('.ikon-edit').hide();
-                button.find('.spinner-text').removeClass('d-none');
+            // Fungsi AJAX generik untuk menghindari pengulangan kode
+            function performAjaxRequest(url, method, data, successMessage, button) {
+                const originalButtonHtml = button.html();
+                button.prop('disabled', true).html(
+                    '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...'
+                );
 
                 $.ajax({
-                    type: "GET",
-                    url: `/api/dashboard/user/get/${id}`,
-                    dataType: "json",
-                    success: function(data) {
-                        $('#ubah-user').modal('show');
-                        $('#ubah-user #name').val(data.name);
-                        $('#ubah-user #email').val(data.email);
+                    url: url,
+                    type: method,
+                    data: data,
+                    success: function(response) {
+                        showSuccessAlert(successMessage);
+                        $('.modal').modal('hide');
+                        table.ajax
+                            .reload(); // Ganti dengan reload data tabel jika Anda pakai server-side
+                        location.reload(); // Atau reload halaman penuh jika lebih mudah
                     },
                     error: function(xhr) {
-                        showErrorAlertNoRefresh('Gagal memuat data user.');
-                        console.log(xhr.responseText);
+                        const errors = xhr.responseJSON.errors;
+                        let errorMessage = 'Terjadi kesalahan.';
+                        if (errors) {
+                            errorMessage = Object.values(errors).flat().join('<br>');
+                        }
+                        showErrorAlertNoRefresh(errorMessage);
                     }
                 }).always(function() {
-                    button.find('.ikon-edit').show();
-                    button.find('.spinner-text').addClass('d-none');
+                    button.prop('disabled', false).html(originalButtonHtml);
                 });
+            }
+
+
+            // --- EVENT LISTENERS ---
+
+            // Otomatis isi form tambah user saat pegawai dipilih
+            $('#employee_id').on('change', function() {
+                const selectedOption = $(this).find('option:selected');
+                const email = selectedOption.data('email') || '';
+                const name = selectedOption.data('name') || '';
+                $('#create-name').val(name);
+                $('#create-email').val(email);
             });
 
+            // Submit form TAMBAH user
+            $('#store-form').on('submit', function(e) {
+                e.preventDefault();
+                performAjaxRequest(
+                    '/api/dashboard/user/store',
+                    'POST',
+                    $(this).serialize(),
+                    'User berhasil ditambahkan!',
+                    $(this).find('button[type="submit"]')
+                );
+            });
+
+            // Submit form UBAH user
             $('#update-form').on('submit', function(e) {
                 e.preventDefault();
-                let formData = $(this).serialize();
-                let button = $(this).find('button[type="submit"]');
+                const userId = $('#update-user-id').val();
+                performAjaxRequest(
+                    `/api/dashboard/user/update/${userId}`,
+                    'PUT',
+                    $(this).serialize(),
+                    'User berhasil diperbarui!',
+                    $(this).find('button[type="submit"]')
+                );
+            });
 
-                $.ajax({
-                    type: "PUT",
-                    url: '/api/dashboard/user/update/' + idUser,
-                    data: formData,
-                    beforeSend: function() {
-                        button.prop('disabled', true).find('.fal').hide();
-                        button.append(
-                            '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>'
-                            );
-                    },
-                    success: function(response) {
-                        $('#ubah-user').modal('hide');
-                        showSuccessAlert(response.message);
-                        setTimeout(() => location.reload(), 1500);
-                    },
-                    error: function(xhr) {
-                        showErrorAlertNoRefresh('Gagal memperbarui data.');
-                        console.log(xhr.responseText);
-                    }
-                }).always(function() {
-                    button.prop('disabled', false).find('.fal').show();
-                    button.find('.spinner-border').remove();
+            // Submit form UBAH AKSES
+            $('#akses-form').on('submit', function(e) {
+                e.preventDefault();
+                const userId = $(this).data('user-id');
+                performAjaxRequest(
+                    `/api/dashboard/user/update-akses/${userId}`,
+                    'PUT',
+                    $(this).serialize(),
+                    'Akses user berhasil diperbarui!',
+                    $(this).find('button[type="submit"]')
+                );
+            });
+
+
+            // Event Delegation untuk tombol di dalam tabel
+            $('#dt-basic-example tbody').on('click', '.btn-edit', function() {
+                const userId = $(this).data('id');
+                $.get(`/api/dashboard/user/get/${userId}`, function(data) {
+                    $('#update-user-id').val(data.id);
+                    $('#update-name').val(data.name);
+                    $('#update-email').val(data.email);
+                    $('#update-password').val(''); // Kosongkan field password
+                    $('#ubah-user').modal('show');
                 });
             });
 
-            $('.btn-akses').click(function(e) {
-                e.preventDefault();
-                let button = $(this);
-                let roleIds = button.data('role-ids'); // Ambil array role IDs
-                idUser = button.data('user-id'); // Set user id untuk form
-
-                // Set value untuk select2
+            $('#dt-basic-example tbody').on('click', '.btn-akses', function() {
+                const userId = $(this).data('user-id');
+                const roleIds = $(this).data('role-ids');
                 $('#roles').val(roleIds).trigger('change');
-
-                // Tampilkan modal
+                $('#akses-form').data('user-id', userId); // Simpan user ID di form
                 $('#ubah-akses').modal('show');
             });
 
-            $('#akses-form').on('submit', function(e) {
-                e.preventDefault();
-                let formData = $(this).serialize();
-                let button = $(this).find('button[type="submit"]');
-
-                $.ajax({
-                    type: "PUT",
-                    url: '/api/dashboard/user/update-akses/' + idUser,
-                    data: formData,
-                    beforeSend: function() {
-                        button.prop('disabled', true).find('.fal').hide();
-                        button.append(
-                            '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>'
-                            );
-                    },
-                    success: function(response) {
-                        $('#ubah-akses').modal('hide');
-                        showSuccessAlert(response.message);
-                        setTimeout(() => location.reload(), 1500);
-                    },
-                    error: function(xhr) {
-                        showErrorAlertNoRefresh('Gagal memperbarui role.');
-                        console.log(xhr.responseText);
-                    }
-                }).always(function() {
-                    button.prop('disabled', false).find('.fal').show();
-                    button.find('.spinner-border').remove();
-                });
-            });
-
-            $('#store-form').on('submit', function(e) {
-                e.preventDefault();
-                let formData = $(this).serialize();
-                let button = $(this).find('button[type="submit"]');
-
-                $.ajax({
-                    type: "POST",
-                    url: '/api/dashboard/user/store',
-                    data: formData,
-                    beforeSend: function() {
-                        button.prop('disabled', true).find('.fal').hide();
-                        button.append(
-                            '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>'
-                            );
-                    },
-                    success: function(response) {
-                        $('#tambah-user').modal('hide');
-                        showSuccessAlert(response.message);
-                        setTimeout(() => location.reload(), 1500);
-                    },
-                    error: function(xhr) {
-                        showErrorAlertNoRefresh('Gagal menambah user.');
-                        console.log(xhr.responseText);
-                    }
-                }).always(function() {
-                    button.prop('disabled', false).find('.fal').show();
-                    button.find('.spinner-border').remove();
-                });
-            });
-
-            $('.btn-hapus').click(function(e) {
-                e.preventDefault();
-                let button = $(this);
-                let id = button.data('id');
-
+            $('#dt-basic-example tbody').on('click', '.btn-hapus', function() {
+                const userId = $(this).data('id');
+                const button = $(this);
                 showDeleteConfirmation(function() {
-                    $.ajax({
-                        type: "DELETE", // Method DELETE
-                        url: '/api/dashboard/user/delete/' + id,
-                        data: {
-                            _token: "{{ csrf_token() }}" // Kirim token csrf
-                        },
-                        beforeSend: function() {
-                            button.find('.ikon-hapus').hide();
-                            button.find('.spinner-text').removeClass('d-none');
-                        },
-                        success: function(response) {
-                            showSuccessAlert(response.message);
-                            setTimeout(() => location.reload(), 1500);
-                        },
-                        error: function(xhr) {
-                            showErrorAlertNoRefresh('Gagal menghapus user.');
-                            console.log(xhr.responseText);
-                        }
-                    }).always(function() {
-                        button.find('.ikon-hapus').show();
-                        button.find('.spinner-text').addClass('d-none');
-                    });
+                    performAjaxRequest(
+                        `/api/dashboard/user/delete/${userId}`,
+                        'DELETE', {},
+                        'User berhasil dihapus!',
+                        button
+                    );
                 });
-            });
-
-            $('#dt-basic-example').dataTable({
-                responsive: true
             });
 
         });
