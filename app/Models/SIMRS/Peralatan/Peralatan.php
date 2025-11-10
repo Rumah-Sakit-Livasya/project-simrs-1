@@ -12,4 +12,11 @@ class Peralatan extends Model
 
     protected $table = 'peralatan';
     protected $fillable = ['kode', 'nama', 'satuan_pakai', 'is_req_dokter'];
+    /**
+     * Relasi ke tabel tarif peralatan.
+     */
+    public function tarif_peralatan(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(TarifPeralatan::class, 'peralatan_id', 'id');
+    }
 }

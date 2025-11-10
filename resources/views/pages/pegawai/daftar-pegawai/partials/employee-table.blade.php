@@ -4,6 +4,7 @@
         <tr>
             {{-- <th style="white-space: nowrap">Foto</th> --}}
             <th style="white-space: nowrap">No</th>
+            <th style="white-space: nowrap">NIP</th>
             <th style="white-space: nowrap">Nama</th>
             <th style="white-space: nowrap">Perusahaan</th>
             <th style="white-space: nowrap">Unit</th>
@@ -32,6 +33,7 @@
                 <tr>
                     {{-- <td style="white-space: nowrap">{{ $user->template_user->foto }}</td> --}}
                     <td style="white-space: nowrap">{{ $loop->iteration }}</td>
+                    <td style="white-space: nowrap">{{ $employee->employee_code }}</td>
                     <td style="white-space: nowrap">{{ $employee->fullname }}</td>
                     <td style="white-space: nowrap">
                         {{ $employee->company->name ?? '*belum di setting' }}</td>
@@ -128,6 +130,7 @@
                 <tr>
                     {{-- <td style="white-space: nowrap">{{ $user->template_user->foto }}</td> --}}
                     <td style="white-space: nowrap">{{ $loop->iteration }}</td>
+                    <td style="white-space: nowrap">{{ $employee->employee_code }}</td>
                     <td style="white-space: nowrap">{{ $employee->fullname }}</td>
                     <td style="white-space: nowrap">
                         {{ $employee->company->name ?? '*belum di setting' }}</td>
@@ -238,6 +241,7 @@
     <tfoot>
         <tr>
             <th style="white-space: nowrap">No</th>
+            <th style="white-space: nowrap">NIP</th>
             <th style="white-space: nowrap">Nama</th>
             <th style="white-space: nowrap">Perusahaan</th>
             <th style="white-space: nowrap">Unit</th>

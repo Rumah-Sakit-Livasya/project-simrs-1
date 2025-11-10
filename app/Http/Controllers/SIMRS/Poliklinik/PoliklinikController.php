@@ -100,25 +100,27 @@ class PoliklinikController extends Controller
 
     public function showForm(Request $request, $registrationId, $encryptedID)
     {
-        try {
-            $id = base64_decode($encryptedID);
-            $formTemplateModel = FormTemplate::find($id);
-            $registration = Registration::find($registrationId);
-            $formSource = $formTemplateModel->form_source;
+        // try {
+        $id = base64_decode($encryptedID);
+        $formTemplateModel = FormTemplate::find($id);
+        $registration = Registration::find($registrationId);
+        $formSource = $formTemplateModel->form_source;
+        $ruangan =  $registration->patient->bed?->room->ruangan . ' - ' . $registration->patient->bed?->nama_tt;
 
-            $data = [
-                'no_rm' => $registration->patient->medical_record_number ?? '',
-                'nama_pasien' => $registration->patient->name ?? '',
-                'tgl_lahir_pasien' => Carbon::parse($registration->patient->date_of_birth)->format('d-m-Y') ?? '',
-                'umur_pasien' => hitungUmur($registration->patient->date_of_birth) ?? '',
-                'kelamin_pasien' => $registration->patient->gender == 'm' ? 'Laki-laki' : 'Perempuan',
-                'alamat_pasien' => $registration->patient->address ?? '',
-                'dpjp' => $registration->doctor->employee->fullname ?? '',
-                'no_hp_pasien' => $registration->patient->mobile_phone_number ?? '',
-                'nik_pasien' => $registration->patient->id_card ?? '',
-                'tgl_sekarang' => Carbon::now()->format('d-m-Y') ?? '',
-                'pegawai' => auth()->user()?->employee?->fullname ?? '',
-            ];
+        $data = [
+            'no_rm' => $registration->patient->medical_record_number ?? '',
+            'nama_pasien' => $registration->patient->name ?? '',
+            'tgl_lahir_pasien' => Carbon::parse($registration->patient->date_of_birth)->format('d-m-Y') ?? '',
+            'umur_pasien' => hitungUmur($registration->patient->date_of_birth) ?? '',
+            'kelamin_pasien' => $registration->patient->gender == 'm' ? 'Laki-laki' : 'Perempuan',
+            'alamat_pasien' => $registration->patient->address ?? '',
+            'dpjp' => $registration->doctor->employee->fullname ?? '',
+            'no_hp_pasien' => $registration->patient->mobile_phone_number ?? '',
+            'nik_pasien' => $registration->patient->id_card ?? '',
+            'tgl_sekarang' => Carbon::now()->format('d-m-Y') ?? '',
+            'pegawai' => auth()->user()?->employee?->fullname ?? '',
+            'ruangan' => $ruangan ?? 'Belum Masuk Ruangan',
+        ];
 
             // [DIPERBAIKI] Ganti placeholder dengan regex agar lebih fleksibel
             foreach ($data as $key => $value) {
@@ -164,6 +166,44 @@ class PoliklinikController extends Controller
             Log::error('Gagal menampilkan form: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
             abort(404, 'Data template form atau registrasi tidak ditemukan.');
         }
+
+        // Ubah logika penggantian placeholder tanda tangan
+        $formSource = preg_replace_callback('/\[SIGNATURE_PAD:(.*?)\]/', function ($matches) {
+            $inputName = $matches[1];
+            $inputId = 'signature-input-' . $inputName;
+            $previewId = 'signature-preview-' . $inputName;
+
+            return view('components.signature-popup-trigger', [
+                'inputName' => $inputName,
+                'inputId' => $inputId,
+                'previewId' => $previewId,
+                'initialData' => '', // Kosong karena ini form baru
+            ])->render();
+        }, $formSource);
+
+        $formSource = preg_replace_callback('/\[IMAGE_EDITOR:(.*?)\]/', function ($matches) {
+            $inputName = $matches[1];
+
+            // Tentukan gambar latar belakang default. Pastikan file ini ada di public/images
+            $defaultImage = asset('images/audiogram-background.jpg');
+
+            // Render komponen Blade 'image-editor'
+            return view('s', [
+                'inputName' => $inputName,
+                'initialData' => '', // Selalu kosong untuk form baru
+                'defaultImage' => $defaultImage,
+            ])->render();
+        }, $formSource);
+
+        return view('pages.simrs.poliklinik.pengkajian_lanjutan.show_form', [
+            'formTemplate' => $formSource,
+            'formTemplateId' => $id,
+            'registrationId' => $registrationId,
+        ]);
+        // } catch (Exception $e) {
+        //     Log::error('Gagal menampilkan form: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+        //     abort(404, 'Data template form atau registrasi tidak ditemukan.');
+        // }
     }
 
     // ==========================================================

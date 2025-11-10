@@ -751,7 +751,7 @@ class DashboardController extends Controller
 
     public function getDataEmployees()
     {
-        $employees = Employee::where('is_active', 1)->get();
+        $employees = Employee::where('is_active', 1)->orderBy('employee_code', 'asc')->get();
         $employees_non_aktif = Employee::where('is_active', null)->orWhere('is_active', 0)->count();
         $jobLevel = JobLevel::all();
         $organizations = Organization::all();
@@ -761,6 +761,8 @@ class DashboardController extends Controller
         $bank = Bank::all();
         $company = Company::all();
         $getNotify = $this->getNotify();
+
+        // dd($employees->first());
 
         return view('pages.pegawai.daftar-pegawai.index', compact('employees', 'employees_non_aktif', 'jobLevel', 'organizations', 'departements', 'jobPosition', 'locations', 'bank', 'company', 'getNotify'));
     }

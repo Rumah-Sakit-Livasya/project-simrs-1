@@ -288,8 +288,31 @@ class LaboratoriumController extends Controller
 
     public function simulasiHarga()
     {
+        // Ambil semua parameter dilengkapi grup dan hitung banyaknya parameter per grup
+        $allParameters = ParameterLaboratorium::with('grup_parameter_laboratorium')
+            ->where('is_order', true) // Pastikan hanya parameter yang bisa diorder yang tampil
+            ->orderBy('parameter', 'asc')
+            ->get();
+
+        // Hitung jumlah parameter tiap grup
+        $groupedParameters = $allParameters->groupBy('grup_parameter_laboratorium.nama_grup');
+        $groupCounts = $groupedParameters->map->count();
+
+        // Urutkan grup berdasar jumlah parameter terbanyak (desc)
+        $sortedGroupNames = $groupCounts->sortDesc()->keys();
+
+        // List grup-parameter yang sudah diurutkan berdasar jumlah data
+        $finalGroupedData = collect();
+        foreach ($sortedGroupNames as $groupName) {
+            // Tambahkan filter untuk grup yang tidak memiliki nama (null)
+            if (empty($groupName)) continue;
+
+            $parametersInGroup = $groupedParameters->get($groupName, collect());
+            $finalGroupedData->put($groupName, $parametersInGroup);
+        }
+
         return view('pages.simrs.laboratorium.simulasi-harga', [
-            'laboratorium_categories' => KategoriLaboratorium::all(),
+            'groupedParameters' => $finalGroupedData, // Gunakan variabel ini
             'tarifs' => TarifParameterLaboratorium::all(),
             'group_penjamins' => GroupPenjamin::all(),
             'kelas_rawats' => KelasRawat::all()

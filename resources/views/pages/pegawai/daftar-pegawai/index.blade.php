@@ -147,7 +147,7 @@
                                     <i class="fas fa-user text-success" style="font-size: 36pt"></i>
                                     <h3 class="mb-0 ml-2 font-weight-bold text-success" style="bottom: 10px;">Pegawai Aktif
                                     </h3>
-                                </div>
+                                </div>Table
                                 <div class="" id="total_aktif">
                                     <h3 class="mb-0 ml-2 font-weight-bold float-right text-success mr-2"
                                         style="font-size: 28pt">
@@ -916,7 +916,7 @@
                 paging: true,
                 //fixedColumns:   true,
                 fixedColumns: {
-                    leftColumns: 2,
+                    leftColumns: 3,
                     rightColumns: 1
                 },
                 dom: "<'row mb-3'<'col-sm-12 col-md-6 d-flex align-items-center justify-content-start'f><'col-sm-12 col-md-6 d-flex align-items-center justify-content-end'B>>" +
