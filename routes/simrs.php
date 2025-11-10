@@ -60,6 +60,15 @@ use App\Http\Controllers\SIMRS\HargaJual\MarginHargaJualController;
 use App\Http\Controllers\SIMRS\IGD\IGDController;
 use App\Http\Controllers\SIMRS\Insiden\InsidenController;
 use App\Http\Controllers\SIMRS\JadwalDokter\JadwalDokterController;
+use App\Http\Controllers\SIMRS\Kasir\KasirController;
+use App\Http\Controllers\SIMRS\Kasir\PenerimaanKasirController;
+use App\Http\Controllers\SIMRS\Kasir\RekapPenerimaanKasirController;
+use App\Http\Controllers\SIMRS\Kasir\TagihanBelumDisimpanBillController;
+use App\Http\Controllers\SIMRS\Kasir\LaporanSisaDpController;
+use App\Http\Controllers\SIMRS\Kasir\TagihanBelumLunasController;
+use App\Http\Controllers\SIMRS\Kasir\DiscountController;
+use App\Http\Controllers\SIMRS\Kasir\DpPasienController;
+use App\Http\Controllers\SIMRS\Kasir\BiayaLainController;
 use App\Http\Controllers\SIMRS\KategoriRadiologiController;
 use App\Http\Controllers\SIMRS\KelasRawatController;
 use App\Http\Controllers\SIMRS\KepustakaanController;
@@ -69,6 +78,7 @@ use App\Http\Controllers\SIMRS\Laboratorium\LaboratoriumController;
 use App\Http\Controllers\SIMRS\Laboratorium\NilaiNormalLaboratoriumController;
 use App\Http\Controllers\SIMRS\Laboratorium\ParameterLaboratoriumController;
 use App\Http\Controllers\SIMRS\Laboratorium\TipeLaboratoriumController;
+use App\Http\Controllers\SIMRS\Laporan\LaporanKasirController as LaporanLaporanKasirController;
 use App\Http\Controllers\SIMRS\MergeRMController;
 use App\Http\Controllers\SIMRS\Obat\OrderObatController;
 use App\Http\Controllers\SIMRS\Operasi\JenisOperasiController;
@@ -481,6 +491,7 @@ Route::group(['middleware' => ['auth']], function () {
                 // Route baru untuk menampilkan halaman edit
                 Route::get('/form-builder/{id}/edit', [FormBuilderController::class, 'edit'])
                     ->name('master-data.setup.form-builder.edit');
+                Route::get('/form-builder/{id}/print-preview', [FormBuilderController::class, 'getPrintPreview'])->name('master-data.setup.form-builder.print-preview');
 
                 // Ethnicity management
                 Route::prefix('ethnics')->group(function () {
@@ -1547,17 +1558,7 @@ Route::group(['middleware' => ['auth']], function () {
         });
 
 
-        // Route::prefix('kasir')->group(function() {
-        //     Route::get('tagihan-pasien', [KasirController::class, 'index'])->name('laboratorium.list-order');
-        //     Route::get('transaksi-non-pasien', [KasirController::class, 'index'])->name('laboratorium.list-order');
-        //     Route::get('setoran-kasir', [KasirController::class, 'index'])->name('laboratorium.list-order');
-        //     Route::prefix('reports')->group(function() {
-        // Route::get('penerimaan-kasir', [KasirController::class, 'parametrPemeriksaan'])->name('laboratorium.parameter-pemeriksaan');
-        //     Route::get('rekap-penerimaan-kasir', [KasirController::class, 'pasienPerPemeriksaan'])->name('laboratorium.psdirn-per-permintaan');
-        //     Route::get('laboratorium', [KasirController::class, 'parametrPemeriksaan'])->name('laboratorium.parameter-pemeriksaan');
-        //     });
-        //     Route::get('simulasi-harga', [IGDController::class, 'simulasiHarga'])->name('laboratorium.simulasi-harga');
-        // });
+
 
         Route::prefix('kepustakaan')->group(function () {
             Route::get('/list', [KepustakaanController::class, 'index'])->name('kepustakaan.index');
@@ -1594,6 +1595,35 @@ Route::group(['middleware' => ['auth']], function () {
             Route::put('/authorize-and-cancel-bill/{id}', [BilinganController::class, 'authorizeAndCancelBill'])->name('bilingan.authorize-cancel');
 
             Route::post('/tagihan/pasien/merge', [TagihanPasienController::class, 'merge'])->name('tagihan.pasien.merge');
+            Route::prefix('laporan')->name('laporan.')->group(function () {
+                // URL: /simrs/kasir/laporan/penerimaan-kasir
+                Route::get('penerimaan-kasir', [PenerimaanKasirController::class, 'index'])->name('penerimaan-kasir.index');
+                Route::get('penerimaan-kasir/report', [PenerimaanKasirController::class, 'report'])->name('penerimaan-kasir.report');
+
+                Route::get('penerimaan-kasir/export', [LaporanController::class, 'penerimaanKasirExport'])->name('penerimaan-kasir.export');
+                Route::get('rekap-penerimaan-kasir', [RekapPenerimaanKasirController::class, 'index'])->name('rekap-penerimaan-kasir.index');
+                Route::get('rekap-penerimaan-kasir/report', [RekapPenerimaanKasirController::class, 'report'])->name('rekap-penerimaan-kasir.report');
+                Route::get('tagihan-belum-disimpan-bill', [TagihanBelumDisimpanBillController::class, 'index'])->name('tagihan-belum-disimpan-bill.index');
+
+                // URL: /simrs/kasir/laporan/tagihan-belum-lunas
+                Route::get('tagihan-belum-lunas', [TagihanBelumLunasController::class, 'index'])->name('tagihan-belum-lunas.index');
+
+                // URL: /simrs/kasir/laporan/dp-pasien
+                Route::get('dp-pasien', [DpPasienController::class, 'index'])->name('dp-pasien.index');
+                Route::get('dp-pasien/report', [DpPasienController::class, 'report'])->name('dp-pasien.report');
+
+                // URL: /simrs/kasir/laporan/sisa-dp
+                Route::get('sisa-dp', [LaporanSisaDpController::class, 'index'])->name('sisa-dp.index');
+                Route::get('sisa-dp/report', [LaporanSisaDpController::class, 'report'])->name('sisa-dp.report');
+
+                // URL: /simrs/kasir/laporan/biaya-lain-laini
+                Route::get('biaya-lain-lain', [BiayaLainController::class, 'index'])->name('biaya-lain-lain.index');
+                Route::get('biaya-lain-lain/report', [BiayaLainController::class, 'report'])->name('biaya-lain-lain.report');
+
+                // URL: /simrs/kasir/laporan/discount
+                Route::get('discount', [DiscountController::class, 'index'])->name('discount.index');
+                Route::get('discount/report', [DiscountController::class, 'report'])->name('discount.report');
+            });
         });
 
         Route::prefix('operasi')->group(function () {

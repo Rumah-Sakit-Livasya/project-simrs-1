@@ -65,6 +65,7 @@ class FormBuilderController extends Controller
             'form_kategori_id' => 'required',
             'is_active'        => 'required|boolean',
             'form_source'      => 'nullable|string',
+            'print_source' => 'nullable|string',
         ]);
 
         if ($validator->fails()) {
@@ -142,6 +143,7 @@ class FormBuilderController extends Controller
             'nama_form' => 'required|string|max:255',
             'form_kategori_id' => 'required|exists:form_kategori,id',
             'form_source' => 'required|string',
+            'print_source' => 'nullable|string',
             'is_active' => 'required|boolean'
         ]);
 
@@ -177,6 +179,23 @@ class FormBuilderController extends Controller
             return response()->json(['message' => 'Form berhasil dihapus!'], 200);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Gagal menghapus form: ' . $e->getMessage()], 500);
+        }
+    }
+    public function getPrintPreview($id)
+    {
+        try {
+            $formTemplate = FormTemplate::findOrFail($id);
+
+            // Prioritaskan print_source. Jika kosong, gunakan form_source.
+            $content = $formTemplate->print_source ?: $formTemplate->form_source;
+
+            if (empty($content)) {
+                return response()->json(['success' => false, 'message' => 'Konten untuk template ini kosong.'], 404);
+            }
+
+            return response()->json(['success' => true, 'content' => $content]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Template tidak ditemukan.'], 404);
         }
     }
 }
