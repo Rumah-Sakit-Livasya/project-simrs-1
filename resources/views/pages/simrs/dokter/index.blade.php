@@ -249,7 +249,6 @@
             font-size: 0.9em;
         }
     </style>
-
 @endsection
 @section('content')
     <main id="js-page-content" role="main" class="page-content">
@@ -258,16 +257,12 @@
             <!-- left slider panel : must have unique ID-->
 
             {{-- FILTER PASIEN --}}
-            @if ($path === 'dokter')
-                @include('pages.simrs.dokter.partials.filter-pasien')
-            @else
-                @include('pages.simrs.erm.partials.filter-pasien')
-            @endif
+            @include('pages.simrs.dokter.partials.filter-pasien')
 
             <!-- middle content area -->
             <div class="d-flex flex-column flex-grow-1 bg-white">
                 {{-- Menu --}}
-                @include('pages.simrs.erm.partials.menu')
+                @include('pages.simrs.dokter.partials.menu')
 
 
                 {{-- content start --}}
@@ -303,42 +298,6 @@
                 placeholder: 'Pilih Item',
             });
 
-            @if ($path !== 'dokter')
-                function loadDoctors(departementId) {
-                    if (departementId) {
-                        $.ajax({
-                            url: '/api/simrs/erm/get-jadwal-dokter/' + departementId,
-                            type: 'GET',
-                            dataType: 'json',
-                            success: function(data) {
-                                $('#doctor_id').empty();
-                                $('#doctor_id').append('<option value=""></option>');
-                                $.each(data, function(key, value) {
-                                    $('#doctor_id').append('<option value="' + value.doctor_id +
-                                        '">' + value.doctor_name + '</option>');
-                                });
-
-                                // Preselect if available
-                                var selectedDoctorId = $('#doctor_id').data('selected');
-                                if (selectedDoctorId) {
-                                    $('#doctor_id').val(selectedDoctorId).trigger('change');
-                                }
-                            }
-                        });
-                    } else {
-                        $('#doctor_id').empty().append('<option value=""></option>');
-                    }
-                }
-
-                $(window).on('load', function() {
-                    loadDoctors($('#departement_id').val());
-                });
-
-                $('#departement_id').on('change', function() {
-                    loadDoctors($(this).val());
-                });
-            @endif
-
             if (pengkajian) {
                 $('#diagnosa-keperawatan').val(pengkajian.diagnosa_keperawatan).select2();
                 $('#rencana-tindak-lanjut').val(pengkajian.rencana_tindak_lanjut).select2();
@@ -368,16 +327,16 @@
             $('.filter-pasien').on('change', function(e) {
                 e.preventDefault(); // Mencegah form submit langsung
                 console.log('changed')
-                const path = "{{ $path }}";
                 $.ajax({
-                    url: `/api/simrs/erm/filter-pasien/${path}`,
+                    url: `/api/simrs/dokter/filter-pasien/`,
                     type: "POST",
                     data: {
                         _token: "{{ csrf_token() }}", // Tambahkan token CSRF
                         route: window.location.href,
-                        departement_id: $('#filter_pasien #departement_id').val(),
+                        registration_type: $('#filter_pasien #registration_type').val(),
                         doctor_id: $('#filter_pasien #doctor_id').val(),
-                        patient: $('#filter_pasien #nama_pasien').val()
+                        patient: $('#filter_pasien #nama_pasien').val(),
+                        medical_record_number: $('#filter_pasien #medical_record_number').val()
                     },
 
                     dataType: "json",

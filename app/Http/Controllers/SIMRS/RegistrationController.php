@@ -76,7 +76,9 @@ class RegistrationController extends Controller
                     // [HAPUS] Kita tidak lagi mengirim doctor_id, ganti dengan doctor_employee_id
                     // 'dokter_id' => $registration->doctor_id,
 
-                    'departement_id' => $registration->departement_id,
+                    'departement_id' => $registration->registration_type === 'rawat-inap'
+                        ? Departement::where('id', 31)->first()->id
+                        : $registration->departement_id,
                     'kelas_id' => intval($registration->kelas_rawat_id),
 
                     // 'tindakan_medis' => $tindakan_medis // Uncomment jika memang dibutuhkan di frontend

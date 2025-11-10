@@ -13,28 +13,17 @@ class Patient extends Model
 {
     protected $guarded = ['id'];
 
-    // protected $casts = [
-    //     'date_of_birth' => 'date',
-    // ];
-
     use HasFactory, SoftDeletes;
-
-    // public function setDateOfBirthAttribute($value)
-    // {
-    //     $this->attributes['date_of_birth'] = Carbon::createFromFormat('d-m-Y', $value)->format('Y-m-d');
-    // }
 
     public function setDateOfBirthAttribute($value)
     {
-        // Jika nilai yang diberikan SUDAH berupa instance Carbon, langsung gunakan.
         if ($value instanceof \Carbon\Carbon) {
             $this->attributes['date_of_birth'] = $value;
-        }
-        // Jika BUKAN (misalnya string), baru kita parse.
-        else if ($value) { // Pastikan value tidak null/kosong sebelum parsing
+        } else if ($value) {
             $this->attributes['date_of_birth'] = \Carbon\Carbon::parse($value);
         }
     }
+
     public function family()
     {
         return $this->belongsTo(Family::class);
@@ -52,10 +41,9 @@ class Patient extends Model
 
     public function kelurahan()
     {
-        // Argumen kedua ('ward') adalah nama foreign key di tabel 'patients'.
-        // Argumen ketiga ('id') adalah nama primary key di tabel 'kelurahans'.
         return $this->belongsTo(Kelurahan::class, 'ward', 'id');
     }
+
     public function registration()
     {
         return $this->hasMany(Registration::class);
@@ -82,10 +70,10 @@ class Patient extends Model
         return $this->hasManyThrough(
             OrderLaboratorium::class,
             Registration::class,
-            'patient_id',             // Foreign key di model perantara (registrations)
-            'registration_id',        // Foreign key di model tujuan (order_laboratoriums)
-            'id',                     // Local key di model ini (patients)
-            'id'                      // Local key di model perantara (registrations)
+            'patient_id',
+            'registration_id',
+            'id',
+            'id'
         );
     }
 
@@ -96,12 +84,69 @@ class Patient extends Model
     public function orderRadiologi()
     {
         return $this->hasManyThrough(
-            OrderRadiologi::class,    // Model tujuan
-            Registration::class,      // Model perantara
-            'patient_id',             // Foreign key di model perantara (registrations)
-            'registration_id',        // Foreign key di model tujuan (order_radiologis)
-            'id',                     // Local key di model ini (patients)
-            'id'                      // Local key di model perantara (registrations)
+            OrderRadiologi::class,
+            Registration::class,
+            'patient_id',
+            'registration_id',
+            'id',
+            'id'
         );
+    }
+
+    /**
+     * Relasi untuk dokumen pasien
+     */
+    public function documents()
+    {
+        return $this->hasMany(PatientDocument::class);
+    }
+
+    /**
+     * Get active registration
+     */
+    public function activeRegistration()
+    {
+        return $this->hasOne(Registration::class)->where('status', 'aktif')->latest();
+    }
+
+    /**
+     * Get total kunjungan
+     */
+    public function getTotalVisitsAttribute()
+    {
+        return $this->registration()->count();
+    }
+
+    /**
+     * Get umur pasien
+     */
+    public function getAgeAttribute()
+    {
+        if (!$this->date_of_birth) {
+            return null;
+        }
+        return Carbon::parse($this->date_of_birth)->age;
+    }
+
+    /**
+     * Scope untuk pencarian pasien
+     */
+    public function scopeSearch($query, $search)
+    {
+        return $query->where(function ($q) use ($search) {
+            $q->where('name', 'LIKE', "%{$search}%")
+                ->orWhere('medical_record_number', 'LIKE', "%{$search}%")
+                ->orWhere('nik', 'LIKE', "%{$search}%");
+        });
+    }
+
+    /**
+     * Scope untuk pasien aktif (yang memiliki registrasi aktif)
+     */
+    public function scopeActive($query)
+    {
+        return $query->whereHas('registration', function ($q) {
+            $q->where('status', 'aktif');
+        });
     }
 }

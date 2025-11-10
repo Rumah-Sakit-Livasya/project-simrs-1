@@ -500,9 +500,29 @@
                     },
                     error: function(xhr) {
                         let errorMessage = 'Terjadi kesalahan yang tidak diketahui.';
+                        // Handle validation error
                         if (xhr.status === 422) {
-                            errorMessage = Object.values(xhr.responseJSON.errors).flat().join(
-                                '<br>');
+                            // Handle special case: tarif not set for class and insurance
+                            modal.modal('hide');
+                            if (
+                                xhr.responseJSON &&
+                                xhr.responseJSON.swal &&
+                                xhr.responseJSON.swal.show === true &&
+                                xhr.responseJSON.swal.title === 'Tarif Belum Disetting'
+                            ) {
+                                // Show SweetAlert or preferred user feedback for tarif not set
+                                Swal.fire({
+                                    icon: xhr.responseJSON.swal.icon || 'warning',
+                                    title: xhr.responseJSON.swal.title || 'Perhatian',
+                                    text: xhr.responseJSON.swal.text ||
+                                        'Tarif untuk kelas dan penjamin ini belum di setting.',
+                                    showConfirmButton: true,
+                                    confirmButtonText: 'OK',
+                                });
+                                return;
+                            }
+                            errorMessage = Object.values(xhr.responseJSON.errors || {}).flat()
+                                .join('<br>');
                         } else if (xhr.responseJSON && xhr.responseJSON.message) {
                             errorMessage = xhr.responseJSON.message;
                         }
@@ -533,6 +553,8 @@
                     method: 'GET',
                     dataType: 'json',
                     success: function(response) {
+                        console.log(response);
+
                         if (response.success) {
                             const data = response.data;
                             if (data.doctor_employee_id) {

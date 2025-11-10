@@ -338,9 +338,15 @@ Pemeriksaan Penunjang: {{ $assesment->pemeriksaan_penunjang ?? '' }}
                     allowEscapeKey: false // Mencegah user menutup alert dengan tombol Esc
                 }).then((result) => {
                     // Setelah user klik "OK", redirect ke halaman sebelumnya
+                    @php
+                        $menuParam = 'pengkajian_dokter_igd';
+                        if ($path === 'poliklinik' || $path === 'dokter') {
+                            $menuParam = 'asesmen_awal_dokter';
+                        }
+                    @endphp
                     if (result.isConfirmed) {
                         window.location.href =
-                            '{{ url()->current() }}?registration={{ $registration->registration_number }}&menu=pengkajian_dokter_igd';
+                            '{{ url()->current() }}?registration={{ $registration->registration_number }}&menu={{ $menuParam }}';
                     }
                 });
             @endif

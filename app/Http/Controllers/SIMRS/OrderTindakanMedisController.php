@@ -49,6 +49,28 @@ class OrderTindakanMedisController extends Controller
 
     public function store(Request $request)
     {
+        // Ambil instance tindakan medis beserta relasi tarif
+        $registration = Registration::with('penjamin.group_penjamin', 'kelas_rawat')->find($request->registration_id);
+        $tindakanMedis = \App\Models\SIMRS\TindakanMedis::with('tarifTindakanMedis')->findOrFail($request->tindakan_medis_id);
+        $groupPenjaminId = $registration->penjamin->group_penjamin->id;
+        $kelasId = $registration->kelas_rawat->id;
+
+        $tarifTindakan = $tindakanMedis->getTarif($groupPenjaminId, $kelasId);
+        if (!$tarifTindakan) {
+            return response()->json([
+                'success' => false,
+                'swal' => [
+                    'show' => true,
+                    'title' => 'Tarif Belum Disetting',
+                    'text' => 'Tarif untuk kelas dan penjamin ini belum di setting.',
+                    'icon' => 'warning',
+                    'timer' => 2000,
+                    'timerProgressBar' => true,
+                ],
+                'message' => 'Tarif untuk kelas dan penjamin ini belum di setting.',
+            ], 422);
+        }
+
         DB::beginTransaction();
         try {
             $validatedData = $request->validate([
@@ -82,10 +104,6 @@ class OrderTindakanMedisController extends Controller
 
             // FIX: Eager load all necessary relationships to return complete data
             $medicalAction->load(['employee', 'user.employee', 'tindakan_medis', 'departement']);
-
-            $registration = Registration::with('penjamin.group_penjamin', 'kelas_rawat')->find($validatedData['registration_id']);
-            $groupPenjaminId = $registration->penjamin->group_penjamin->id;
-            $kelasId = $registration->kelas_rawat->id ?? 1;
 
             $totalTarif = $medicalAction->tindakan_medis->getTotalTarif($groupPenjaminId, $kelasId);
             $wajibBayar = $validatedData['qty'] * $totalTarif - ($request->diskon ?? 0);

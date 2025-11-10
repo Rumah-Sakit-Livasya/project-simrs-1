@@ -16,12 +16,12 @@
                                     'menu' => 'pengkajian_perawat',
                                     'registration' => $registration->registration_number,
                                 ]),
-                                'rawat-inap' => route('rawat-inap.daftar-pasien', [
+                                'rawat-inap' => route('rawat-inap.catatan-medis', [
                                     'menu' => 'pengkajian_perawat',
                                     'registration' => $registration->registration_number,
                                 ]),
                                 'igd' => route('igd.catatan-medis', [
-                                    'menu' => 'pengkajian_perawat',
+                                    'menu' => 'triage',
                                     'registration' => $registration->registration_number,
                                 ]),
                                 default => '#',
