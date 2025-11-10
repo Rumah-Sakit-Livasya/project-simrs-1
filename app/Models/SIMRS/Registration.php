@@ -244,4 +244,9 @@ class Registration extends Model
     {
         return $this->hasOne(\App\Models\BPJS\BpjsRencanaKontrol::class);
     }
+
+    public function room()
+    {
+        return $this->belongsTo(Room::class, 'room_id', 'id');
+    }
 }

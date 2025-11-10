@@ -51,6 +51,7 @@ use App\Http\Controllers\SIMRS\Depo\StokRequestController;
 use App\Http\Controllers\SIMRS\Depo\UnitCostController as DepoUnitCostController;
 use App\Http\Controllers\SIMRS\Dokter\DokterController;
 use App\Http\Controllers\SIMRS\ERMController;
+use App\Http\Controllers\SIMRS\ReportRanapController;
 use App\Http\Controllers\SIMRS\EthnicController;
 use App\Http\Controllers\SIMRS\Gizi\GiziController;
 use App\Http\Controllers\SIMRS\GrupParameterRadiologiController;
@@ -1089,19 +1090,29 @@ Route::group(['middleware' => ['auth']], function () {
             Route::get('/catatan-medis', [ERMController::class, 'catatanMedis'])
                 ->name('rawat-inap.catatan-medis');
 
-            Route::prefix('/reports')->group(function () {
-                Route::get('rawat-inap', [IGDController::class, 'reprotIGD'])
-                    ->name('rawat-inap.reports');
+            // ====== Laporan Rawat Inap ======
+            Route::get('/laporan', [ReportRanapController::class, 'laporanPasienRanapIndex'])
+                ->name('rawat-inap.laporan.index');
+            Route::get('/laporan/report', [ReportRanapController::class, 'laporanPasienRanapReport'])
+                ->name('rawat-inap.laporan.report');
 
-                Route::get('laporan-per-tanggal', [IGDController::class, 'reportPerTanggal'])
-                    ->name('rawat-inap.reports.per-tanggal');
+            // ====== Laporan Per Tanggal ======
+            Route::get('/laporan-per-tanggal', [ReportRanapController::class, 'laporanPerTanggalIndex'])
+                ->name('rawat-inap.laporan-per-tanggal.index');
+            Route::get('/laporan-per-tanggal/report', [ReportRanapController::class, 'laporanPerTanggalReport'])
+                ->name('rawat-inap.laporan-per-tanggal.report');
 
-                Route::get('transfer', [IGDController::class, 'reportTransfer'])
-                    ->name('rawat-inap.reports.transfer');
+            // ====== Laporan Transfer ======
+            Route::get('/laporan/transfer', [ReportRanapController::class, 'laporanTransferIndex'])
+                ->name('rawat-inap.laporan.transfer.index');
+            Route::get('/laporan/transfer/report', [ReportRanapController::class, 'laporanTransferReport'])
+                ->name('rawat-inap.laporan.transfer.report');
 
-                Route::get('pasien-aktif', [IGDController::class, 'reportPasienAktif'])
-                    ->name('rawat-inap.reports.pasien-aktif');
-            });
+            // ====== Pasien Aktif Rawat Inap ======
+            Route::get('/laporan/pasien-aktif', [ReportRanapController::class, 'laporanPasienAktifIndex'])
+                ->name('rawat-inap.laporan.pasien-aktif.index');
+            Route::get('/laporan/pasien-aktif/report', [ReportRanapController::class, 'laporanPasienAktifReport'])
+                ->name('rawat-inap.laporan.pasien-aktif.report');
         });
 
         Route::prefix('vk')->name('vk.')->group(function () {
