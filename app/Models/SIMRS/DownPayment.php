@@ -18,7 +18,8 @@ class DownPayment extends Model implements AuditableContract
 
     public function bilingan()
     {
-        return $this->belongsTo(Bilingan::class, 'registration_id');
+        // return $this->belongsTo(Bilingan::class, 'registration_id');
+        return $this->belongsTo(Bilingan::class, 'bilingan_id');
     }
     public function user()
     {
