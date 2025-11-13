@@ -6,8 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Employee;
 use App\Models\User;
 use Illuminate\Http\Request;
-// Hapus Hash karena hashing sudah ditangani oleh Model
-// use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
@@ -16,7 +15,6 @@ use Spatie\Permission\Models\Role;
 
 class UserController extends Controller
 {
-    // ... (method getUser dan getByName tidak berubah)
     public function getUser($id)
     {
         try {
@@ -45,28 +43,24 @@ class UserController extends Controller
         }
     }
 
-
     public function store()
     {
         try {
-            // PERUBAHAN DI SINI: Tambahkan validasi untuk password
             $validator = Validator::make(request()->all(), [
                 'name' => 'required',
                 'employee_id' => 'required',
                 'email' => 'required|email|unique:users,email',
-                'password' => 'required|string|min:8', // Wajibkan password saat membuat user baru
             ]);
 
             if ($validator->fails()) {
                 return response()->json($validator->errors(), 422);
             }
 
-            // PERUBAHAN DI SINI: Ambil password dari request
             $user = User::create([
                 'name' => request()->name,
                 'employee_id' => request()->employee_id,
                 'email' => request()->email,
-                'password' => request()->password, // Hashing otomatis oleh Model User
+                'password' => Hash::make('password'), // Tambahkan password default
             ]);
 
             // Assign role default jika ada
@@ -77,6 +71,8 @@ class UserController extends Controller
                 $user->assignRole('employee'); // Role default
             }
 
+
+            //return response
             return response()->json(['message' => 'User Berhasil di Tambahkan!']);
         } catch (\Exception $e) {
             return response()->json([
@@ -90,29 +86,23 @@ class UserController extends Controller
         try {
             $user = User::findOrFail($id);
 
-            // PERUBAHAN DI SINI: Tambahkan validasi untuk password (opsional saat update)
             $validator = Validator::make(request()->all(), [
                 'name' => 'required',
                 'email' => 'required|email|unique:users,email,' . $user->id,
-                'password' => 'nullable|string|min:8', // Password tidak wajib diisi saat update
             ]);
 
             if ($validator->fails()) {
                 return response()->json($validator->errors(), 422);
             }
 
-            $user->name = request()->name;
-            $user->email = request()->email;
-
-            // PERUBAHAN DI SINI: Cek jika ada input password baru
-            if (request()->filled('password')) {
-                $user->password = request()->password; // Hashing otomatis oleh Model User
-            }
-
-            $user->save(); // Simpan semua perubahan
-
-            // Update data employee jika perlu
             $employee = Employee::find($user->employee_id);
+
+            //find company by ID
+            $user->update([
+                'email' => request()->email,
+                'name' => request()->name,
+            ]);
+
             if ($employee) {
                 $employee->update([
                     'email' => request()->email,
@@ -120,6 +110,7 @@ class UserController extends Controller
                 ]);
             }
 
+            //return response
             return response()->json(['message' => 'User Berhasil di Update!']);
         } catch (\Exception $e) {
             return response()->json([
@@ -128,7 +119,12 @@ class UserController extends Controller
         }
     }
 
-    // ... (method updateRole, destroy, storePermissions tidak berubah)
+    /**
+     * Update roles for a specific user.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function updateRole($id)
     {
         try {
