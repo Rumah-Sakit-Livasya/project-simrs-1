@@ -5,6 +5,7 @@ namespace App\Http\Controllers\SIMRS;
 use RealRashid\SweetAlert\Facades\Alert;
 use App\Helpers\MedicalRecordHelper;
 use App\Http\Controllers\Controller;
+use App\Models\Employee;
 use App\Models\SIMRS\Ethnic;
 use App\Models\SIMRS\Family;
 use App\Models\SIMRS\GroupPenjamin;
@@ -482,6 +483,11 @@ class PatientController extends Controller
                 \Carbon\Carbon::parse($lastRanapRegistration['registration_date'])->diffInDays() <= 30; // dalam 30 hari / 1 bulan
         }
 
+        $referringDoctors = Employee::where('is_doctor', true)
+            ->where('is_active', 1)
+            ->orderBy('fullname')
+            ->get();
+
         switch ($registrasi) {
             case 'rawat-jalan':
                 return view('pages.simrs.pendaftaran.form-registrasi', [
@@ -497,7 +503,8 @@ class PatientController extends Controller
                     'title' => "IGD",
                     'case' => 'igd',
                     'patient' => $patient,
-                    'age' => $age
+                    'age' => $age,
+                    'referringDoctors' => $referringDoctors
                 ]);
                 break;
 

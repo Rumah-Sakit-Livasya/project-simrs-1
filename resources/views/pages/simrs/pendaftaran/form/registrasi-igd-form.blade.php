@@ -1,10 +1,20 @@
-{{-- resources/views/pages/simrs/pendaftaran/form/registrasi-igd-form.blade.php (Refactored Version) --}}
-
 @php
+    // Definisikan semua data statis dan dinamis di satu tempat
+    $doctorOptions = $doctors
+        ->mapWithKeys(function ($doctor) {
+            return [$doctor->id => $doctor->employee->fullname];
+        })
+        ->all();
+
+    // Opsi untuk dokter perujuk
+    $referringDoctorOptions = $referringDoctors->pluck('fullname', 'id')->all();
+
+    $penjaminOptions = $penjamins->pluck('nama_perusahaan', 'id')->all();
+
     // Definisikan semua data statis dan dinamis di satu tempat agar mudah dikelola.
     // ->all() mengubah koleksi menjadi array biasa, yang dibutuhkan oleh komponen.
-    $doctorOptions = $doctors->pluck('employee.fullname', 'id')->all();
-    $penjaminOptions = $penjamins->pluck('nama_perusahaan', 'id')->all();
+    // $doctorOptions = $doctors->pluck('employee.fullname', 'id')->all();
+    // $penjaminOptions = $penjamins->pluck('nama_perusahaan', 'id')->all();
 
     $igdTypeOptions = [
         'darurat' => 'Darurat',
@@ -27,6 +37,17 @@
         'dalam rs' => 'Dalam RS',
         'luar rs' => 'Luar RS',
         'rujukan bpjs' => 'Rujukan BPJS',
+    ];
+
+    $tipeRujukanOptions = [
+        'rsu/rsk/rb' => 'RSU/RSK/RB',
+        'puskesmas' => 'PUSKESMAS',
+        'bidan/perawat' => 'BIDAN/PERAWAT',
+        'dokter' => 'DOKTER',
+        'dukun terlatih' => 'DUKUN TERLATIH',
+        'kasus polisi' => 'KASUS POLISI',
+        'klinik' => 'KLINIK',
+        'lain-lain' => 'LAIN-LAIN',
     ];
 @endphp
 
@@ -60,7 +81,7 @@
             </x-form-row>
 
             <x-form-row label="Penjamin" for="penjamin_id">
-                <x-form-select id="penjamin_id" name="penjamin_id" :options="$penjaminOptions" />
+                <x-form-select id="penjamin_iddokter_perujuk_container" name="penjamin_id" :options="$penjaminOptions" />
             </x-form-row>
         </div>
 
@@ -87,6 +108,33 @@
                     @endforeach
                 </div>
             </x-form-row>
+
+            <div id="dokter_perujuk_container" class="d-none my-3">
+                <x-form-row label="Dokter Perujuk" for="referring_doctor_id">
+                    <x-form-select id="referring_doctor_id" name="referring_doctor_id" :options="$referringDoctorOptions"
+                        placeholder="Pilih Dokter Perujuk" />
+                </x-form-row>
+            </div>
+
+            <div class="row d-none my-3" id="luar_dan_rujuk_bpjs_container">
+                <div class="col-12">
+                    <x-form-row label="Tipe Rujuk" for="tipe_rujukan">
+                        <x-form-select id="tipe_rujukan" name="tipe_rujukan" :options="$tipeRujukanOptions" />
+                    </x-form-row>
+                    <x-form-row label="Nama Perujuk" for="nama_perujuk">
+                        <input type="text" class="form-control" id="nama_perujuk" name="nama_perujuk"
+                            value="{{ old('nama_perujuk') }}">
+                    </x-form-row>
+                    <x-form-row label="Telp/HP Perujuk" for="telp_perujuk">
+                        <input type="text" class="form-control" id="telp_perujuk" name="telp_perujuk"
+                            value="{{ old('telp_perujuk') }}">
+                    </x-form-row>
+                    <x-form-row label="Alamat Perujuk" for="alamat_perujuk">
+                        <input type="text" class="form-control" id="alamat_perujuk" name="alamat_perujuk"
+                            value="{{ old('alamat_perujuk') }}">
+                    </x-form-row>
+                </div>
+            </div>
 
             <x-form-row label="Pelayanan *" for="pelayanan">
                 <x-form-select id="pelayanan" name="pelayanan" :options="$pelayananOptions" />

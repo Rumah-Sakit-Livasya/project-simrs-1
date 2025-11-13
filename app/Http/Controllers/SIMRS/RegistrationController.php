@@ -242,6 +242,11 @@ class RegistrationController extends Controller
         // get kelas rawat with name "Rawat Jalan"
         $kelasRawatRajal = KelasRawat::where('kelas', 'like', '%rawat jalan%')->first();
 
+        $referringDoctors = Employee::where('is_doctor', true)
+            ->where('is_active', 1)
+            ->orderBy('fullname')
+            ->get();
+
         // get Dokter
         $doctors = [];
         $dokters = Doctor::with('department_from_doctors', 'employee')->get();
@@ -307,7 +312,8 @@ class RegistrationController extends Controller
                     'penjamins' => $penjamins,
                     'case' => 'igd',
                     'patient' => $patient,
-                    'age' => $age
+                    'age' => $age,
+                    'referringDoctors' => $referringDoctors
                 ]);
                 break;
 

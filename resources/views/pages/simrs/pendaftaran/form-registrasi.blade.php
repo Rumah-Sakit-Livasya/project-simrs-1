@@ -81,20 +81,20 @@
         }
 
         /* .box-menu li {
-                                                                                    padding: 20px 30px;
-                                                                                    margin: 20px;
-                                                                                    width: 200px;
-                                                                                    background: #f2f0f5;
-                                                                                    text-align: center;
-                                                                                    cursor: pointer;
-                                                                                    border: 1px solid #e5e5e5;
-                                                                                    border-radius: 8px;
-                                                                                    display: flex;
-                                                                                    align-items: center;
-                                                                                    justify-content: center;
-                                                                                    flex-direction: column;
-                                                                                    box-shadow: 0 3px 3px 0 rgba(0, 0, 0, 0.33);
-                                                                                } */
+                    padding: 20px 30px;
+                    margin: 20px;
+                    width: 200px;
+                    background: #f2f0f5;
+                    text-align: center;
+                    cursor: pointer;
+                    border: 1px solid #e5e5e5;
+                    border-radius: 8px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    flex-direction: column;
+                    box-shadow: 0 3px 3px 0 rgba(0, 0, 0, 0.33);
+                } */
 
         .box-menu .circle-menu {
             height: 50px;
@@ -622,6 +622,55 @@
                 $('#kelas_rawat_id').select2({
                     dropdownParent: $('#kelas-rawat-form')
                 });
+            });
+
+            // Fungsi untuk mengelola tampilan field rujukan berdasarkan pilihan
+            function handleRujukanChange() {
+                const selectedRujukan = $('input[name="rujukan"]:checked').val();
+
+                // Ambil referensi ke elemen-elemen container dan input-nya
+                const dokterPerujukContainer = $('#dokter_perujuk_container');
+                const luarRsContainer = $('#luar_dan_rujuk_bpjs_container');
+
+                // Ambil referensi ke input di dalam container untuk mengatur atribut 'required'
+                const dokterPerujukInput = $('#dokter_perujuk');
+                const tipeRujukanInput = $('#tipe_rujukan');
+                const namaPerujukInput = $('#nama_perujuk');
+
+                // 1. Sembunyikan semua container terlebih dahulu (reset state)
+                dokterPerujukContainer.addClass('d-none');
+                luarRsContainer.addClass('d-none');
+
+                // 2. Hapus atribut 'required' dari semua input terkait rujukan
+                dokterPerujukInput.prop('required', false);
+                tipeRujukanInput.prop('required', false);
+                namaPerujukInput.prop('required', false);
+
+                // 3. Tampilkan container yang sesuai berdasarkan pilihan
+                if (selectedRujukan === 'dalam rs') {
+                    // Tampilkan container dokter perujuk
+                    dokterPerujukContainer.removeClass('d-none');
+                    // Jadikan inputnya wajib diisi
+                    dokterPerujukInput.prop('required', true);
+
+                } else if (selectedRujukan === 'luar rs' || selectedRujukan === 'rujukan bpjs') {
+                    // Tampilkan container rujukan luar RS / BPJS
+                    luarRsContainer.removeClass('d-none');
+                    // Jadikan inputnya wajib diisi
+                    tipeRujukanInput.prop('required', true);
+                    namaPerujukInput.prop('required', true);
+                }
+                // Jika tidak ada kondisi yang terpenuhi (misal: 'inisiatif pribadi'),
+                // maka kedua container akan tetap tersembunyi.
+            }
+
+            // Panggil fungsi ini saat halaman pertama kali dimuat
+            // untuk menangani nilai default atau nilai lama (old value)
+            handleRujukanChange();
+
+            // Tambahkan event listener untuk setiap kali pilihan radio 'rujukan' berubah
+            $('input[name="rujukan"]').on('change', function() {
+                handleRujukanChange();
             });
 
             // Listener ini akan bekerja untuk SEMUA form yang memiliki id="form-registrasi"
