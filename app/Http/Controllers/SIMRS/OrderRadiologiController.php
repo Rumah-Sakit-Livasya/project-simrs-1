@@ -376,7 +376,7 @@ class OrderRadiologiController extends Controller
             'order_id' => 'required|integer',
             'diagnosa_klinis' => 'required|string',
             'inspection_date' => 'required|date',
-            'pickup_date' => 'required|date',
+            'status_isi_hasil' => 'required|in:0,1',
         ]);
 
         try {
@@ -384,7 +384,7 @@ class OrderRadiologiController extends Controller
             $order->update([
                 'diagnosa_klinis' => $validatedData['diagnosa_klinis'],
                 'inspection_date' => $validatedData['inspection_date'],
-                'pickup_date' => $validatedData['pickup_date'],
+                'status_isi_hasil' => $validatedData['status_isi_hasil'],
             ]);
 
             foreach ($order->order_parameter_radiologi as $parameter) {

@@ -279,24 +279,7 @@
                                             </div>
                                         </div>
 
-                                        <div class="form-group">
-                                            <div class="row align-items-center">
-                                                <div class="col-xl-4 text-right">
-                                                    <label class="form-label" for="pickup_date">
-                                                        Tgl Pengambilan*
-                                                    </label>
-                                                </div>
-                                                <div class="col-xl-8">
-                                                    <input type="date"
-                                                        class="@error('pickup_date') is-invalid @enderror form-control"
-                                                        id="pickup_date" placeholder="Tanggal Lahir" name="pickup_date"
-                                                        value="{{ $order->pickup_date ?? old('pickup_date') }}">
-                                                    @error('pickup_date')
-                                                        <p class="invalid-feedback">{{ $message }}</p>
-                                                    @enderror
-                                                </div>
-                                            </div>
-                                        </div>
+
                                     </div>
                                     &nbsp;
                                     <div class="col-xl-12">
@@ -464,10 +447,15 @@
                                                 </a>
                                             </div>
                                             <div class="col-xl-6 text-right">
-                                                <button type="submit" id="radiologi-submit"
+                                                <button type="submit" name="status_isi_hasil" value="0"
+                                                    class="btn btn-lg btn-warning waves-effect waves-themed mr-2">
+                                                    <span class="fal fa-save mr-1"></span>
+                                                    Simpan Draft
+                                                </button>
+                                                <button type="submit" name="status_isi_hasil" value="1"
                                                     class="btn btn-lg btn-primary waves-effect waves-themed">
                                                     <span class="fal fa-save mr-1"></span>
-                                                    Simpan
+                                                    Simpan Final
                                                 </button>
                                             </div>
                                         </div>

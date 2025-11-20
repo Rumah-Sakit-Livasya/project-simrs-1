@@ -19,15 +19,22 @@ class RadiologiOrderHandler {
     }
 
     /**
-     * Add event listeners
+     * Add event listeners using event delegation
+     * This allows handling clicks on dynamically loaded elements (from DataTables AJAX)
      * @param {string} selector
      * @param {Function} handler
      * @param {string} event
      */
     #addEventListeners(selector, handler, event = "click") {
-        const buttons = document.querySelectorAll(selector);
-        buttons.forEach((button) => {
-            button.addEventListener(event, handler.bind(this));
+        document.addEventListener(event, (e) => {
+            // Check if the clicked element or its parent matches the selector
+            const target = e.target.closest(selector);
+            if (target) {
+                // Create a new event object with the matched target
+                const newEvent = new Event(event);
+                Object.defineProperty(newEvent, 'target', { value: target, enumerable: true });
+                handler.call(this, newEvent);
+            }
         });
     }
 

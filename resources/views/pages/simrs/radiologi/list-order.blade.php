@@ -86,9 +86,80 @@
             $('#loading-spinner').show();
             // initialize datatable
             let table = $('#dt-basic-example').DataTable({
-                "drawCallback": function(settings) {
-                    $('#loading-spinner').hide();
+                processing: true,
+                serverSide: true,
+                ajax: {
+                    url: "{{ route('radiologi.list-order') }}",
+                    data: function(d) {
+                        d.registration_date = $('#datepicker-1').val();
+                        d.medical_record_number = $('#medical_record_number').val();
+                        d.name = $('#name').val();
+                        d.registration_number = $('#registration_number').val();
+                        d.no_order = $('#no_order').val();
+                    },
+                    complete: function() {
+                        $('#loading-spinner').hide();
+                    }
                 },
+                columns: [{
+                        data: 'DT_RowIndex',
+                        name: 'DT_RowIndex',
+                        orderable: false,
+                        searchable: false
+                    },
+                    {
+                        data: 'detail',
+                        name: 'detail',
+                        orderable: false,
+                        searchable: false
+                    },
+                    {
+                        data: 'order_date',
+                        name: 'order_date'
+                    },
+                    {
+                        data: 'medical_record_number',
+                        name: 'registration.patient.medical_record_number'
+                    },
+                    {
+                        data: 'registration_number',
+                        name: 'registration.registration_number'
+                    },
+                    {
+                        data: 'no_order',
+                        name: 'no_order'
+                    },
+                    {
+                        data: 'patient_name',
+                        name: 'registration.patient.name'
+                    },
+                    {
+                        data: 'poly_ruang',
+                        name: 'registration.poliklinik'
+                    },
+                    {
+                        data: 'penjamin',
+                        name: 'registration.patient.penjamin.name'
+                    },
+                    {
+                        data: 'doctor',
+                        name: 'doctor.employee.fullname'
+                    },
+                    {
+                        data: 'status_isi_hasil',
+                        name: 'status_isi_hasil'
+                    },
+                    {
+                        data: 'status_billed',
+                        name: 'status_billed'
+                    },
+                    {
+                        data: 'action',
+                        name: 'action',
+                        orderable: false,
+                        searchable: false
+                    }
+                ],
                 responsive: true,
                 lengthChange: false,
                 dom: "<'row mb-3'<'col-sm-12 col-md-6 d-flex align-items-center justify-content-start'f><'col-sm-12 col-md-6 d-flex align-items-center justify-content-end'lB>>" +
@@ -126,6 +197,79 @@
                     }
                 ]
             });
+
+            // Handle form submission for filtering
+            $('form[action="{{ route('radiologi.list-order') }}"]').on('submit', function(e) {
+                e.preventDefault();
+                table.ajax.reload();
+            });
+
+            // Event listener untuk membuka dan menutup child row detail
+            $('#dt-basic-example tbody').on('click', '.details-control', function() {
+                var tr = $(this).closest('tr');
+                var row = table.row(tr);
+                var icon = $(this);
+                var detailData = JSON.parse(tr.find('[data-details]').attr('data-details'));
+
+                if (row.child.isShown()) {
+                    row.child.hide();
+                    tr.removeClass('details-shown');
+                    icon.removeClass('fa-minus-circle text-danger').addClass('fa-plus-circle text-success');
+                } else {
+                    row.child(format(detailData)).show();
+                    tr.addClass('details-shown');
+                    icon.removeClass('fa-plus-circle text-success').addClass('fa-minus-circle text-danger');
+                }
+            });
+
+            // Fungsi untuk format child row
+            function format(details) {
+                if (!details || details.length === 0) {
+                    return '<div class="p-3 text-center">Tidak ada detail parameter untuk order ini.</div>';
+                }
+                let totalPrice = 0;
+                let table = `<table class="table table-sm table-striped table-bordered child-table">
+                        <thead class="bg-info-50">
+                            <tr>
+                                <th style="width: 30px;">#</th>
+                                <th>Parameter</th>
+                                <th>Harga</th>
+                                <th>Catatan</th>
+                            </tr>
+                        </thead>
+                        <tbody>`;
+                details.forEach((item, index) => {
+                    totalPrice += (parseFloat(item.nominal_rupiah) || 0);
+                    const formattedPrice = new Intl.NumberFormat('id-ID', {
+                        style: 'currency',
+                        currency: 'IDR',
+                        minimumFractionDigits: 2
+                    }).format(item.nominal_rupiah || 0);
+                    const parameterName = item.parameter_radiologi ? item.parameter_radiologi
+                        .parameter : '<i class="text-muted">N/A</i>';
+                    table += `<tr>
+                        <td>${index + 1}</td>
+                        <td>${parameterName}</td>
+                        <td>${formattedPrice}</td>
+                        <td>${item.catatan || ''}</td>
+                      </tr>`;
+                });
+                table += '</tbody>';
+                const formattedTotal = new Intl.NumberFormat('id-ID', {
+                    style: 'currency',
+                    currency: 'IDR',
+                    minimumFractionDigits: 2
+                }).format(totalPrice);
+                table += `<tfoot>
+                    <tr>
+                        <td colspan="2" class="text-right font-weight-bold">Total Biaya</td>
+                        <td class="font-weight-bold">${formattedTotal}</td>
+                        <td></td>
+                    </tr>
+                  </tfoot>`;
+                table += '</table>';
+                return table;
+            }
 
             // ===================== TAMBAHKAN BLOK KODE INI =====================
             // Event listener untuk tombol delete

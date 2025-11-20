@@ -27,60 +27,128 @@ class RadiologiController extends Controller
 {
     public function index(Request $request)
     {
-        $query = OrderRadiologi::query()
-            ->with(['registration', 'registration_otc', 'patient', 'doctor.employee']); // Pastikan relasi yang dibutuhkan ada di with()
+        if ($request->ajax()) {
+            $query = OrderRadiologi::query()
+                ->with(['registration', 'registration_otc', 'patient', 'doctor.employee', 'order_parameter_radiologi.parameter_radiologi']);
 
-        $filters = ['registration_number', 'no_order'];
-        $filterApplied = false;
+            $filters = ['registration_number', 'no_order'];
+            $filterApplied = false;
 
-        // Cek apakah ada filter yang dikirim dari form
-        foreach ($filters as $filter) {
-            if ($request->filled($filter)) {
-                $query->where($filter, 'like', '%' . $request->$filter . '%');
+            foreach ($filters as $filter) {
+                if ($request->filled($filter)) {
+                    $query->where($filter, 'like', '%' . $request->$filter . '%');
+                    $filterApplied = true;
+                }
+            }
+
+            if ($request->filled('medical_record_number')) {
+                $query->whereHas('registration.patient', function ($q) use ($request) {
+                    $q->where('medical_record_number', 'like', '%' . $request->medical_record_number . '%');
+                });
                 $filterApplied = true;
             }
-        }
 
-        if ($request->filled('medical_record_number')) {
-            $query->whereHas('registration.patient', function ($q) use ($request) {
-                $q->where('medical_record_number', 'like', '%' . $request->medical_record_number . '%');
-            });
-            $filterApplied = true;
-        }
-
-        if ($request->filled('name')) {
-            $query->whereHas('registration.patient', function ($q) use ($request) {
-                $q->where('name', 'like', '%' . $request->name . '%');
-            });
-            $filterApplied = true;
-        }
-
-        // Filter berdasarkan rentang tanggal HANYA jika dikirim dari form
-        if ($request->filled('registration_date')) {
-            // Nama parameter di form adalah 'registration_date', bukan 'order_date'
-            $dateRange = explode(' - ', $request->registration_date);
-            if (count($dateRange) === 2) {
-                $startDate = Carbon::createFromFormat('Y-m-d', $dateRange[0])->startOfDay();
-                $endDate = Carbon::createFromFormat('Y-m-d', $dateRange[1])->endOfDay();
-                $query->whereBetween('order_date', [$startDate, $endDate]);
+            if ($request->filled('name')) {
+                $query->whereHas('registration.patient', function ($q) use ($request) {
+                    $q->where('name', 'like', '%' . $request->name . '%');
+                });
+                $filterApplied = true;
             }
-            $filterApplied = true;
+
+            if ($request->filled('registration_date')) {
+                $dateRange = explode(' - ', $request->registration_date);
+                if (count($dateRange) === 2) {
+                    $startDate = Carbon::createFromFormat('Y-m-d', $dateRange[0])->startOfDay();
+                    $endDate = Carbon::createFromFormat('Y-m-d', $dateRange[1])->endOfDay();
+                    $query->whereBetween('order_date', [$startDate, $endDate]);
+                }
+                $filterApplied = true;
+            }
+
+            if (!$filterApplied) {
+                $query->whereDate('order_date', Carbon::today());
+            }
+
+            $query->orderBy('order_date', 'desc');
+
+            return \Yajra\DataTables\Facades\DataTables::of($query)
+                ->addIndexColumn()
+                ->addColumn('detail', function ($order) {
+                    return view('pages.simrs.radiologi.partials.column-detail', compact('order'));
+                })
+                ->editColumn('order_date', function ($order) {
+                    $url = $this->getPatientDetailUrl($order);
+                    return $url ? '<a href="' . $url . '">' . $order->order_date . '</a>' : '<a>' . $order->order_date . '</a>';
+                })
+                ->addColumn('medical_record_number', function ($order) {
+                    $text = $order->tipe_pasien === 'otc' ? 'OTC' : ($order->registration->patient->medical_record_number ?? '-');
+                    $url = $this->getPatientDetailUrl($order);
+                    return $url ? '<a href="' . $url . '">' . $text . '</a>' : '<a>' . $text . '</a>';
+                })
+                ->addColumn('registration_number', function ($order) {
+                    $text = $order->tipe_pasien === 'otc' ? $order->registration_otc->registration_number : ($order->registration->registration_number ?? '-');
+                    $url = $this->getPatientDetailUrl($order);
+                    return $url ? '<a href="' . $url . '">' . $text . '</a>' : '<a>' . $text . '</a>';
+                })
+                ->addColumn('no_order', function ($order) {
+                    $url = $this->getPatientDetailUrl($order);
+                    return $url ? '<a href="' . $url . '">' . $order->no_order . '</a>' : '<a>' . $order->no_order . '</a>';
+                })
+                ->addColumn('patient_name', function ($order) {
+                    $text = $order->tipe_pasien === 'otc' ? $order->registration_otc->nama_pasien : ($order->registration->patient->name ?? '-');
+                    $url = $this->getPatientDetailUrl($order);
+                    return $url ? '<a href="' . $url . '">' . $text . '</a>' : '<a>' . $text . '</a>';
+                })
+                ->addColumn('poly_ruang', function ($order) {
+                    $text = $order->tipe_pasien === 'otc' ? $order->registration_otc->poly_ruang : ($order->registration->poliklinik ?? '-');
+                    $url = $this->getPatientDetailUrl($order);
+                    return $url ? '<a href="' . $url . '">' . $text . '</a>' : '<a>' . $text . '</a>';
+                })
+                ->addColumn('penjamin', function ($order) {
+                    $text = $order->tipe_pasien === 'otc' ? ($order->registration_otc->penjamin->name ?? '-') : ($order->registration->patient->penjamin->name ?? '-');
+                    $url = $this->getPatientDetailUrl($order);
+                    return $url ? '<a href="' . $url . '">' . $text . '</a>' : '<a>' . $text . '</a>';
+                })
+                ->addColumn('doctor', function ($order) {
+                    $text = $order->doctor->employee->fullname ?? '-';
+                    $url = $this->getPatientDetailUrl($order);
+                    return $url ? '<a href="' . $url . '">' . $text . '</a>' : '<a>' . $text . '</a>';
+                })
+                ->editColumn('status_isi_hasil', function ($order) {
+                    $text = $order->status_isi_hasil == 1 ? 'Finished' : 'Ongoing';
+                    $url = $this->getPatientDetailUrl($order);
+                    return $url ? '<a href="' . $url . '">' . $text . '</a>' : '<a>' . $text . '</a>';
+                })
+                ->editColumn('status_billed', function ($order) {
+                    $text = $order->status_billed == 1 ? 'Billed' : 'Not Billed';
+                    $url = $this->getPatientDetailUrl($order);
+                    return $url ? '<a href="' . $url . '">' . $text . '</a>' : '<a>' . $text . '</a>';
+                })
+                ->addColumn('action', function ($order) {
+                    return view('pages.simrs.radiologi.partials.column-action', compact('order'));
+                })
+                ->rawColumns(['detail', 'order_date', 'medical_record_number', 'registration_number', 'no_order', 'patient_name', 'poly_ruang', 'penjamin', 'doctor', 'status_isi_hasil', 'status_billed', 'action'])
+                ->make(true);
         }
 
-        // --- PERUBAHAN UTAMA DI SINI ---
-        // Jika ada filter yang diterapkan, ambil data sesuai filter.
-        // Jika tidak, ambil data untuk hari ini sebagai default.
-        if ($filterApplied) {
-            $orders = $query->orderBy('order_date', 'desc')->get();
-        } else {
-            // Default: Ambil data untuk hari ini
-            $query->whereDate('order_date', Carbon::today());
-            $orders = $query->orderBy('order_date', 'desc')->get();
+        return view('pages.simrs.radiologi.list-order');
+    }
+
+    private function getPatientDetailUrl($order)
+    {
+        if ($order->tipe_pasien === 'otc') {
+            return null;
         }
 
-        return view('pages.simrs.radiologi.list-order', [
-            'orders' => $orders
-        ]);
+        if ($order->registration && $order->registration->patient) {
+            $latestRegistration = $order->registration->patient->orderBy('created_at', 'desc')->first();
+            if ($latestRegistration && $latestRegistration->status === 'aktif') {
+                return route('detail.registrasi.pasien', $latestRegistration->id);
+            }
+            return route('detail.pendaftaran.pasien', $order->registration->patient->id);
+        }
+
+        return null;
     }
 
 

@@ -9,7 +9,7 @@
             <div class="panel-container show">
                 <div class="panel-content">
 
-                    <form action="{{ route('radiologi.list-order') }}" method="get">
+                    <form id="form-filter" action="{{ route('radiologi.list-order') }}" method="get">
                         @csrf
 
                         <div class="row justify-content-center">
